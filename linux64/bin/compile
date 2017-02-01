@@ -1,6 +1,0 @@
-aoc $1.cl 
-cd $1
-sed -i 's/14.0/13.1/g' *system_hw.tcl
-qsys-script --script=system.tcl -Xmx512M -XX:+UseSerialGC --system-file=system.qsys
-qsys-generate --synthesis=VERILOG system.qsys
-quartus_sh --flow compile top -c base

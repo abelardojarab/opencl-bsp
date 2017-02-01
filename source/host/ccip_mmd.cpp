@@ -615,12 +615,7 @@ btInt CCIPMMD::open()
 
    // Save the size
    m_DSMSize = LPBK1_DSM_SIZE;
-    /*printf("Hello!!!!!!!!!!!\n");
-    printf("Hello!!!!!!!!!!!\n");
-    printf("Hello!!!!!!!!!!!\n");
-    
-    printf("Hello!!!!!!!!!!!\n");
-    printf("Hello!!!!!!!!!!!\n");*/
+
    // Repeat for the Input and Output Buffers
    if( ali_errnumOK != m_pVTPService->bufferAllocate(WORKSPACE_SIZE, &m_pWorkspace)){
       m_bIsOK = false;

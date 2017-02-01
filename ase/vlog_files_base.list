@@ -1,0 +1,14 @@
++define+MPF_PLATFORM_BDX
+
++incdir+./mpf_src/hw/rtl/
++incdir+./mpf_src/hw/rtl/cci-if
++incdir+./mpf_src/hw/rtl/cci-mpf-if
++incdir+./mpf_src/hw/rtl/cci-mpf-prims
++incdir+./mpf_src/hw/rtl/cci-mpf-shims
++incdir+./mpf_src/hw/rtl/cci-mpf-shims/cci_mpf_shim_vtp
++incdir+./mpf_src/hw/rtl/cci-mpf-shims/cci_mpf_shim_edge
++incdir+./mpf_src/hw/rtl/cci-mpf-shims/cci_mpf_shim_pwrite
++incdir+./mpf_src/hw/rtl/cci-mpf-shims/cci_mpf_shim_wro
+
+-F ./mpf_src/sim_file_list.txt
+

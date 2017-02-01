@@ -15,24 +15,15 @@ cd temp_simulation
 tar zxvf $2 
 export KDIR=$PWD
 
-
-
-#launch modelsim
-#cd /data/abrant/vtp/aalsdk-5.0.1/ase
-#cp -rf /data/abrant/AAL_5.0.2/aalsdk-5.0.2/ase ./
-#cd ase
-
-
-cp -rf $AOCL_BOARD_PACKAGE_ROOT/ase ./ase
+rm -fr ./ase
+cp -r $ASE_SRC_PATH ./ase
+cp -rf $AOCL_BOARD_PACKAGE_ROOT/ase/* ./ase
 cd ase
 
-
-
-
-
+mkdir dummy_rtl_dir
+touch dummy_rtl_dir/dummy_rtl_file.sv
+python ./scripts/generate_ase_environment.py dummy_rtl_dir
 
 
 bash run_sim.sh
-
-
 

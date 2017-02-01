@@ -2,8 +2,8 @@
 <board_env version="13.0" name="jtag">
   <hardware dir="hardware" default="bdw_fpga_400"></hardware>
   <platform name="linux64">
-    <linkflags>-L%a/linux64/lib -L%b/host/linux64/lib -L/data/abrant/AAL_5.0.2/aalsdk-5.0.2/mybuild/myinstall/lib/ </linkflags>
-    <linklibs> -lalterahalmmd -laltera_qpi_mmd -lrt   -lpthread -lOSAL -lAAS -laalrt
+    <linkflags>-L%a/linux64/lib -L%b/host/linux64/lib -L$AALSDK/lib/ </linkflags>
+    <linklibs> -lalterahalmmd -laltera_qpi_mmd -lrt -lpthread -lOSAL -lAAS -laalrt
  </linklibs>
     <utilbindir>%b/linux64/bin</utilbindir>
   </platform>

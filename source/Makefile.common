@@ -1,6 +1,6 @@
 # define shared variables in this package
 PACKAGE_NAME?= pcie385n
-MMD_LIB_NAME?= nallatech_pcie385n_mmd
+MMD_LIB_NAME?= altera_qpi_mmd
 
 # define OS related commands
 ACL_COMPILER:= gcc
@@ -15,7 +15,7 @@ PS:= /
 PSC:= 
 
 
-TOP_DEST_DIR ?= /data/abrant/acds/p4/acl/regtest/designs_wip/acl_dest/
+TOP_DEST_DIR ?= $(ROOT_PROJECT_PATH)/host
 JUNGO_LICENSE?=
 ifneq ($(JUNGO_LICENSE),)
 CPPFLAGS:= $(CPPFLAGS) -DJUNGO_LICENSE=\"$(JUNGO_LICENSE)\"

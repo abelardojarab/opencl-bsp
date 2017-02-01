@@ -6,7 +6,8 @@ CXXFLAGS = -fPIC -m64
 LINKER = g++
 LINKER_LIBDIRARGS = -L$(TOP_DEST_DIR)/linux64/lib -L$(ALTERAOCLSDKROOT)/host/linux64/lib -L$(AOCL_BOARD_PACKAGE_ROOT)/host/linux64/lib
 LINKER_ARGS = -fPIC
-LINK_LIBS = -lalteracl -lelf -lalterahalmmd -laltera_qpi_mmd   -lpthread -L%a/linux64/lib -L%b/host/linux64/lib -L/data/abrant/acds/p4/acl/regtest/designs_wip/acl_dest/linux64/lib -L/data/abrant/lib -lrt -lltdl -lCCI -lAAS -lOSAL -lpthread  -Wall -I /data/abrant/acds/p4/depot/users/ecustodi/ccie_test_2/sw/include -I/data/abrant/include -DHAVE_CONFIG_H -DTESTB -g -L/data/abrant/ -L/data/abrant/acds/p4/depot/users/ecustodi/ccie_test_2/lib  -L/usr/local/lib  -L/data/abrant/lib -lAAS -lOSAL -lxlrt -laalclp  -lASE -lfapdiag
+LINK_LIBS = -L/usr/local/lib -L$(AALSDK)/lib -Wl,--no-as-needed -lalteracl  -lalterahalmmd -laltera_qpi_mmd -lrt   -lpthread -lOSAL -lAAS -laalrt  -lelf
+
 INCORPORATE_LIBS = 
 PREBUILT_OBJS = 
 
@@ -14,7 +15,7 @@ PERVASIVE_DEPENDENCIES = ../../include/aocl_mmd.h
 
 MT = 
 
-EXEFILE = diagnose 
+EXEFILE = diagnostic
 
 OBJ_EXT = o
 OBJS = $(patsubst %.cpp,%.$(OBJ_EXT),$(wildcard *.cpp))

@@ -1,10 +1,8 @@
-TOP_DEST_DIR ?= ../../host
-MMD_LIB_NAME ?= altera_qpi_mmd
 #---------------------------#
 
 ECHO = @
 CXX = g++ -o 
-CPPFLAGS = -DKERNEL_64BIT -Wall -Wno-unknown-pragmas  -fPIC -fpermissive -DLINUX  -D__USE_XOPEN2K8 -DACL_VERSION=\"v14.1\" -I. -I../../include -I$(ALTERAOCLSDKROOT)/host/include/CL -I../alt_jtaglib/include -I$(ALTERAOCLSDKROOT)/board/s5_ref/source/include/  -I$(AALSDK)/include -I/data/abrant/include
+CPPFLAGS = -DKERNEL_64BIT -Wall -Wno-unknown-pragmas  -fPIC -fpermissive -DLINUX  -D__USE_XOPEN2K8 -DACL_VERSION=\"v14.1\" -I. -I../../include -I$(ALTERAOCLSDKROOT)/host/include/CL -I$(ALTERAOCLSDKROOT)/board/s5_ref/source/include/  -I$(AALSDK)/include -I$(LIB_TDL_PATH)/usr/include -I$(MPF_INSTALL_PATH)/sw/include
 CFLAGS = -fPIC -m64 
 CXXFLAGS = -fPIC -m64 
 
