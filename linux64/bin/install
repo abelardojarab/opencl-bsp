@@ -1,0 +1,7 @@
+#!/bin/sh
+[ -z "$AALSDK" ] && echo "Need to set environment variable AALSDK" && exit 1;
+sudo $AALSDK/mybuild/aalkernel/insdrv spl-jkt 
+export PATH=/test/usr/local/bin:$PATH
+export LD_LIBRARY_PATH=/test/usr/local/lib:$LD_LIBRARY_PATH
+export AAL_REGISTRAR_DATABASE_PATH=/usr/local/share/aalsdk/RegistrarRepository/linux
+AASResourceManager

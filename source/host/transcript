@@ -1,0 +1,19 @@
+# //  ModelSim SE-64 10.4b May 26 2015 Linux 2.6.32-358.el6.x86_64
+# //
+# //  Copyright 1991-2015 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  THIS WORK CONTAINS TRADE SECRET AND PROPRIETARY INFORMATION
+# //  WHICH IS THE PROPERTY OF MENTOR GRAPHICS CORPORATION OR ITS
+# //  LICENSORS AND IS SUBJECT TO LICENSE TERMS.
+# //  THIS DOCUMENT CONTAINS TRADE SECRETS AND COMMERCIAL OR FINANCIAL
+# //  INFORMATION THAT ARE PRIVILEGED, CONFIDENTIAL, AND EXEMPT FROM
+# //  DISCLOSURE UNDER THE FREEDOM OF INFORMATION ACT, 5 U.S.C. SECTION 552.
+# //  FURTHERMORE, THIS INFORMATION IS PROHIBITED FROM DISCLOSURE UNDER
+# //  THE TRADE SECRETS ACT, 18 U.S.C. SECTION 1905.
+# //
+# OpenFile /data/abrant/acds/p4/depot/users/ecustodi/ccie_test_2/vsim.wlf
+view -new wave
+# .main_pane.wave.interior.cs.body.pw.wf
+add wave -position insertpoint vsim:/cci_emulator/cci_std_afu/cci_ext_afu/u0/board/cci_interface/mm_cci_bridge_0/*
+add wave -position insertpoint vsim:/cci_emulator/cci_std_afu/cci_ext_afu/u0/board/cci_interface/mm_cci_bridge_0/cci_requester_inst/*

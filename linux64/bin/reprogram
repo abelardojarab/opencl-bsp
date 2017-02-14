@@ -1,0 +1,38 @@
+#!/bin/sh
+echo $1
+echo $2
+if [[ "$1" != "acl0" ]] ; then
+    echo "Not acl0, exiting without launching vcs"
+    exit 0
+fi
+
+
+
+#uncompress and prepare modelsim files
+cp -rf $2 simulation.tar.gz
+mkdir -p temp_simulation
+cd temp_simulation
+tar zxvf $2 
+export KDIR=$PWD
+
+
+
+#launch modelsim
+#cd /data/abrant/vtp/aalsdk-5.0.1/ase
+#cp -rf /data/abrant/AAL_5.0.2/aalsdk-5.0.2/ase ./
+#cd ase
+
+
+cp -rf $AOCL_BOARD_PACKAGE_ROOT/ase ./ase
+cd ase
+
+
+
+
+
+
+
+bash run_sim.sh
+
+
+

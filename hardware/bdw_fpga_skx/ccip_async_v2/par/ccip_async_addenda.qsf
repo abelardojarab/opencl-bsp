@@ -1,0 +1,6 @@
+set_global_assignment -name SYSTEMVERILOG_FILE ../hw/ccip_async_shim.sv
+set_global_assignment -name QSYS_FILE ../qsys/c2tx_afifo.qsys
+set_global_assignment -name QSYS_FILE ../qsys/c1tx_afifo.qsys
+set_global_assignment -name QSYS_FILE ../qsys/c1rx_afifo.qsys
+set_global_assignment -name QSYS_FILE ../qsys/c0tx_afifo.qsys
+set_global_assignment -name QSYS_FILE ../qsys/c0rx_afifo.qsys

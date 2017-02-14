@@ -1,0 +1,99 @@
+# define shared variables in this package
+PACKAGE_NAME?= pcie385n
+MMD_LIB_NAME?= nallatech_pcie385n_mmd
+
+# define OS related commands
+ACL_COMPILER:= gcc
+MKDIR:= mkdir -p
+CP:= cp -rf
+RM:= rm -rf
+RMDIR:= rm -r
+
+# Path Separator
+PS:= /
+# Pre-Special Character - used for cancel the backslash effect before any special characters (e.x. %) for Windows
+PSC:= 
+
+
+TOP_DEST_DIR ?= /data/abrant/acds/p4/acl/regtest/designs_wip/acl_dest/
+JUNGO_LICENSE?=
+ifneq ($(JUNGO_LICENSE),)
+CPPFLAGS:= $(CPPFLAGS) -DJUNGO_LICENSE=\"$(JUNGO_LICENSE)\"
+endif
+
+TARGET_FOLDERS:= $(patsubst %$(PS),%,$(sort $(dir $(addprefix $(INSTALL_DIR)$(PS),$(TARGET_FILES)) $(SPECIAL_INSTALL_FILE))))
+
+DLLEXPFILE:= $(basename $(DLLFILE)).exp
+DLLPDBFILE:= $(basename $(DLLFILE)).pdb
+
+EXIST_CLEAN_TMP:= $(strip $(EXEFILE) $(DLLFILE) $(DLLLIBFILE) $(DLLEXPFILE) $(DLLPDBFILE) vc90.pdb *.manifest)
+EXIST_CLEAN_OBJ:= $(strip $(wildcard $(addprefix $(INSTALL_DIR)$(PS),$(TARGET_FILES)) $(SPECIAL_INSTALL_FILE) $(OBJ_FILES)))
+EXIST_CLEAN_DIR:= $(strip $(wildcard $(CLEAN_DIR)))
+
+.DEFAULT_GOAL = all
+
+all : subdirs this
+this : $(TARGET_FOLDERS) $(addprefix $(INSTALL_DIR)$(PS),$(TARGET_FILES)) $(SPECIAL_INSTALL_FILE) cleantmp
+
+.PHONY : all this subdirs $(SUB_DIRS) clean cleanthis cleantmp
+
+subdirs : $(SUB_DIRS)
+
+$(SUB_DIRS) :
+	$(MAKE) -C $@ TOP_DEST_DIR=$(TOP_DEST_DIR) $(MAKECMDGOALS)
+
+# create directories
+$(TARGET_FOLDERS) :
+	$(MKDIR) $@
+
+# copy the $(SPECIAL_INSTALL_FILE) to its special install location
+ifneq ($(SPECIAL_INSTALL_FILE),)
+$(dir $(SPECIAL_INSTALL_FILE))$(PSC)% : %
+	$(CP) $< $@
+endif
+
+# copy all $(TARGET_FILES) to the $(INSTALL_DIR)
+$(INSTALL_DIR)$(PS)$(PSC)% : %
+	$(CP) $< $@
+
+
+$(EXEFILE) : $(OBJ_FILES)
+ifeq ($(ACL_COMPILER),gcc)
+	$(LINKER) $(CXXFLAGS) -o $@ $(OBJ_FILES) $(LINKER_LIBDIRARGS) $(LINKER_ARGS) $(INCORPORATE_LIBS) $(LINK_LIBS) $(PREBUILT_OBJS)
+endif
+ifeq ($(ACL_COMPILER),msvc)
+	$(LINKER) $(LINKER_LIBDIRARGS) $(LINKER_ARGS) -MANIFEST -MANIFESTFILE:"$@.intermediate.manifest" -out:$@ $(OBJ_FILES) $(PREBUILT_OBJS) $(INCORPORATE_LIBS) $(LINK_LIBS)
+	$(MT) -nologo -verbose -manifest "$@.intermediate.manifest" -outputresource:"$(EXEFILE);1"
+endif
+
+
+$(DLLFILE) : $(DLLLIBFILE) $(OBJ_FILES)
+ifeq ($(ACL_COMPILER),gcc)
+	gcc -shared -Wl,-soname,$@ -o $@ $(OBJ_FILES) $(INCORPORATE_LIBS) $(PREBUILT_OBJS) $(LINKER_LIBDIRARGS) $(LINKER_ARGS)
+endif
+ifeq ($(ACL_COMPILER),msvc)
+	$(LINKER) $(LINKER_LIBDIRARGS) $(LINKER_ARGS) /DLL $(DLLEXPFILE) -out:$@ -pdb:$(DLLPDBFILE) $(OBJ_FILES) $(PREBUILT_OBJS) $(INCORPORATE_LIBS) $(LINK_LIBS)
+endif
+
+
+$(DLLLIBFILE) : $(OBJ_FILES)
+	lib /nologo /out:$@ /def $(LINKER_LIBDIRARGS) $(OBJ_FILES) $(INCORPORATE_LIBS)
+
+
+$(OBJ_DIR)$(PS)$(PSC)%.$(OBJ_EXT) : %.cpp $(PERVASIVE_DEPENDENCIES) $(wildcard *.h)
+	$(ECHO)$(CXX)$@ -c $(CPPFLAGS) $(CXXFLAGS) $<
+
+clean: subdirs cleanthis
+
+cleanthis :
+ifneq ($(EXIST_CLEAN_OBJ),)
+	$(RM) $(EXIST_CLEAN_OBJ)
+endif
+ifneq ($(EXIST_CLEAN_DIR),)
+	$(RMDIR) $(EXIST_CLEAN_DIR)
+endif
+
+cleantmp:
+ifneq ($(strip $(EXEFILE) $(DLLFILE) $(DLLLIBFILE)),)
+	$(RM) $(EXIST_CLEAN_TMP)
+endif

@@ -1,0 +1,659 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system name="$${FILENAME}">
+ <component
+   name="$${FILENAME}"
+   displayName="$${FILENAME}"
+   version="1.0"
+   description="Generates the kernel clocks for OpenCL"
+   tags="INTERNAL_COMPONENT=false"
+   categories="Arria10 BSP Components" />
+ <parameter name="bonusData"><![CDATA[bonusData 
+{
+   element clk
+   {
+      datum _sortIndex
+      {
+         value = "0";
+         type = "int";
+      }
+   }
+   element counter
+   {
+      datum _sortIndex
+      {
+         value = "6";
+         type = "int";
+      }
+   }
+   element counter.s
+   {
+      datum baseAddress
+      {
+         value = "256";
+         type = "String";
+      }
+   }
+   element ctrl
+   {
+      datum _sortIndex
+      {
+         value = "3";
+         type = "int";
+      }
+   }
+   element kernel_clk
+   {
+      datum _sortIndex
+      {
+         value = "1";
+         type = "int";
+      }
+   }
+   element kernel_clk2x
+   {
+      datum _sortIndex
+      {
+         value = "2";
+         type = "int";
+      }
+   }
+   element kernel_pll
+   {
+      datum _sortIndex
+      {
+         value = "4";
+         type = "int";
+      }
+   }
+   element pll_lock_avs
+   {
+      datum _sortIndex
+      {
+         value = "8";
+         type = "int";
+      }
+   }
+   element pll_lock_avs.s
+   {
+      datum baseAddress
+      {
+         value = "288";
+         type = "String";
+      }
+   }
+   element pll_reconfig
+   {
+      datum _sortIndex
+      {
+         value = "5";
+         type = "int";
+      }
+   }
+   element pll_reconfig.mgmt_avalon_slave
+   {
+      datum baseAddress
+      {
+         value = "2048";
+         type = "String";
+      }
+   }
+   element pll_sw_reset
+   {
+      datum _sortIndex
+      {
+         value = "7";
+         type = "int";
+      }
+   }
+   element pll_sw_reset.s
+   {
+      datum baseAddress
+      {
+         value = "272";
+         type = "String";
+      }
+   }
+   element version_id
+   {
+      datum _sortIndex
+      {
+         value = "9";
+         type = "int";
+      }
+   }
+   element version_id.s
+   {
+      datum baseAddress
+      {
+         value = "0";
+         type = "String";
+      }
+   }
+}
+]]></parameter>
+ <parameter name="clockCrossingAdapter" value="FIFO" />
+ <parameter name="device" value="10AX115S2F45I1SG" />
+ <parameter name="deviceFamily" value="Arria 10" />
+ <parameter name="deviceSpeedGrade" value="2" />
+ <parameter name="fabricMode" value="QSYS" />
+ <parameter name="generateLegacySim" value="false" />
+ <parameter name="generationId" value="0" />
+ <parameter name="globalResetBus" value="false" />
+ <parameter name="hdlLanguage" value="VERILOG" />
+ <parameter name="hideFromIPCatalog" value="false" />
+ <parameter name="lockedInterfaceDefinition" value="" />
+ <parameter name="maxAdditionalLatency" value="1" />
+ <parameter name="projectName" value="top.qpf" />
+ <parameter name="sopcBorderPoints" value="false" />
+ <parameter name="systemHash" value="0" />
+ <parameter name="testBenchDutName" value="" />
+ <parameter name="timeStamp" value="0" />
+ <parameter name="useTestBenchNamingPattern" value="false" />
+ <instanceParameter
+   name="REF_CLK_RATE"
+   displayName="REF_CLK_RATE"
+   type="string"
+   defaultValue="125"
+   legalRanges=""
+   description="This is the frequency of the PLL reference clock in MHz.  You can attain this value from your board manual." />
+ <instanceParameter
+   name="KERNEL_TARGET_CLOCK_RATE"
+   displayName="KERNEL_TARGET_CLOCK_RATE"
+   type="string"
+   defaultValue="400"
+   legalRanges=""
+   description="This is the default constraint applied to the OpenCL kernel in MHz.  Set this value such that even the most trivial kernel will be overconstrained during Quartus compilation." />
+ <instanceScript><![CDATA[# request a specific version of the scripting API
+package require -exact qsys 12.1
+# Set the name of the procedure to manipulate parameters
+set_module_property COMPOSITION_CALLBACK compose
+proc compose {} {
+    set_instance_parameter_value kernel_pll gui_reference_clock_frequency [get_parameter_value REF_CLK_RATE]) ]
+    set_instance_parameter_value kernel_pll gui_output_clock_frequency0 [get_parameter_value KERNEL_TARGET_CLOCK_RATE]) ]
+    set_instance_parameter_value kernel_pll gui_output_clock_frequency1 [expr 2.0 * [get_parameter_value KERNEL_TARGET_CLOCK_RATE] ] ]
+}]]></instanceScript>
+ <interface name="clk" internal="clk.clk_in" type="clock" dir="end" />
+ <interface name="ctrl" internal="ctrl.s0" type="avalon" dir="end" />
+ <interface name="kernel_clk" internal="kernel_clk.clk" type="clock" dir="start" />
+ <interface
+   name="kernel_clk2x"
+   internal="kernel_clk2x.clk"
+   type="clock"
+   dir="start" />
+ <interface
+   name="kernel_pll_locked"
+   internal="pll_lock_avs.lock_export"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="kernel_pll_refclk"
+   internal="kernel_pll.refclk"
+   type="clock"
+   dir="end" />
+ <interface name="reset" internal="clk.clk_in_reset" type="reset" dir="end" />
+ <module name="clk" kind="clock_source" version="16.0" enabled="1">
+  <parameter name="clockFrequency" value="50000000" />
+  <parameter name="clockFrequencyKnown" value="true" />
+  <parameter name="inputClockFrequency" value="0" />
+  <parameter name="resetSynchronousEdges" value="DEASSERT" />
+ </module>
+ <module name="counter" kind="acl_timer" version="10.0" enabled="1">
+  <parameter name="WIDTH" value="32" />
+ </module>
+ <module name="ctrl" kind="altera_avalon_mm_bridge" version="16.0" enabled="1">
+  <parameter name="ADDRESS_UNITS" value="SYMBOLS" />
+  <parameter name="ADDRESS_WIDTH" value="12" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="4" />
+  <parameter name="PIPELINE_COMMAND" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module name="kernel_clk" kind="clock_source" version="16.0" enabled="1">
+  <parameter name="clockFrequency" value="50000000" />
+  <parameter name="clockFrequencyKnown" value="false" />
+  <parameter name="inputClockFrequency" value="50000000" />
+  <parameter name="resetSynchronousEdges" value="NONE" />
+ </module>
+ <module name="kernel_clk2x" kind="clock_source" version="16.0" enabled="1">
+  <parameter name="clockFrequency" value="100000000" />
+  <parameter name="clockFrequencyKnown" value="false" />
+  <parameter name="inputClockFrequency" value="800000000" />
+  <parameter name="resetSynchronousEdges" value="NONE" />
+ </module>
+ <module name="kernel_pll" kind="altera_iopll" version="16.0" enabled="1">
+  <parameter name="gui_active_clk" value="false" />
+  <parameter name="gui_actual_duty_cycle0" value="50.0" />
+  <parameter name="gui_actual_duty_cycle1" value="50.0" />
+  <parameter name="gui_actual_duty_cycle10" value="50.0" />
+  <parameter name="gui_actual_duty_cycle11" value="50.0" />
+  <parameter name="gui_actual_duty_cycle12" value="50.0" />
+  <parameter name="gui_actual_duty_cycle13" value="50.0" />
+  <parameter name="gui_actual_duty_cycle14" value="50.0" />
+  <parameter name="gui_actual_duty_cycle15" value="50.0" />
+  <parameter name="gui_actual_duty_cycle16" value="50.0" />
+  <parameter name="gui_actual_duty_cycle17" value="50.0" />
+  <parameter name="gui_actual_duty_cycle2" value="50.0" />
+  <parameter name="gui_actual_duty_cycle3" value="50.0" />
+  <parameter name="gui_actual_duty_cycle4" value="50.0" />
+  <parameter name="gui_actual_duty_cycle5" value="50.0" />
+  <parameter name="gui_actual_duty_cycle6" value="50.0" />
+  <parameter name="gui_actual_duty_cycle7" value="50.0" />
+  <parameter name="gui_actual_duty_cycle8" value="50.0" />
+  <parameter name="gui_actual_duty_cycle9" value="50.0" />
+  <parameter name="gui_actual_output_clock_frequency0" value="100.0" />
+  <parameter name="gui_actual_output_clock_frequency1" value="426.666667" />
+  <parameter name="gui_actual_output_clock_frequency10" value="100.0" />
+  <parameter name="gui_actual_output_clock_frequency11" value="100.0" />
+  <parameter name="gui_actual_output_clock_frequency12" value="100.0" />
+  <parameter name="gui_actual_output_clock_frequency13" value="100.0" />
+  <parameter name="gui_actual_output_clock_frequency14" value="100.0" />
+  <parameter name="gui_actual_output_clock_frequency15" value="100.0" />
+  <parameter name="gui_actual_output_clock_frequency16" value="100.0" />
+  <parameter name="gui_actual_output_clock_frequency17" value="100.0" />
+  <parameter name="gui_actual_output_clock_frequency2" value="100.0" />
+  <parameter name="gui_actual_output_clock_frequency3" value="100.0" />
+  <parameter name="gui_actual_output_clock_frequency4" value="100.0" />
+  <parameter name="gui_actual_output_clock_frequency5" value="100.0" />
+  <parameter name="gui_actual_output_clock_frequency6" value="100.0" />
+  <parameter name="gui_actual_output_clock_frequency7" value="100.0" />
+  <parameter name="gui_actual_output_clock_frequency8" value="100.0" />
+  <parameter name="gui_actual_output_clock_frequency9" value="100.0" />
+  <parameter name="gui_actual_phase_shift0" value="0.0" />
+  <parameter name="gui_actual_phase_shift1" value="0.0" />
+  <parameter name="gui_actual_phase_shift10" value="0.0" />
+  <parameter name="gui_actual_phase_shift11" value="0.0" />
+  <parameter name="gui_actual_phase_shift12" value="0.0" />
+  <parameter name="gui_actual_phase_shift13" value="0.0" />
+  <parameter name="gui_actual_phase_shift14" value="0.0" />
+  <parameter name="gui_actual_phase_shift15" value="0.0" />
+  <parameter name="gui_actual_phase_shift16" value="0.0" />
+  <parameter name="gui_actual_phase_shift17" value="0.0" />
+  <parameter name="gui_actual_phase_shift2" value="0.0" />
+  <parameter name="gui_actual_phase_shift3" value="0.0" />
+  <parameter name="gui_actual_phase_shift4" value="0.0" />
+  <parameter name="gui_actual_phase_shift5" value="0.0" />
+  <parameter name="gui_actual_phase_shift6" value="0.0" />
+  <parameter name="gui_actual_phase_shift7" value="0.0" />
+  <parameter name="gui_actual_phase_shift8" value="0.0" />
+  <parameter name="gui_actual_phase_shift9" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg0" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg1" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg10" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg11" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg12" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg13" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg14" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg15" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg16" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg17" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg2" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg3" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg4" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg5" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg6" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg7" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg8" value="0.0" />
+  <parameter name="gui_actual_phase_shift_deg9" value="0.0" />
+  <parameter name="gui_cascade_counter0" value="false" />
+  <parameter name="gui_cascade_counter1" value="false" />
+  <parameter name="gui_cascade_counter10" value="false" />
+  <parameter name="gui_cascade_counter11" value="false" />
+  <parameter name="gui_cascade_counter12" value="false" />
+  <parameter name="gui_cascade_counter13" value="false" />
+  <parameter name="gui_cascade_counter14" value="false" />
+  <parameter name="gui_cascade_counter15" value="false" />
+  <parameter name="gui_cascade_counter16" value="false" />
+  <parameter name="gui_cascade_counter17" value="false" />
+  <parameter name="gui_cascade_counter2" value="false" />
+  <parameter name="gui_cascade_counter3" value="false" />
+  <parameter name="gui_cascade_counter4" value="false" />
+  <parameter name="gui_cascade_counter5" value="false" />
+  <parameter name="gui_cascade_counter6" value="false" />
+  <parameter name="gui_cascade_counter7" value="false" />
+  <parameter name="gui_cascade_counter8" value="false" />
+  <parameter name="gui_cascade_counter9" value="false" />
+  <parameter name="gui_cascade_outclk_index" value="0" />
+  <parameter name="gui_clk_bad" value="false" />
+  <parameter name="gui_clock_name_global" value="false" />
+  <parameter name="gui_clock_name_string0" value="outclk0" />
+  <parameter name="gui_clock_name_string1" value="outclk1" />
+  <parameter name="gui_clock_name_string10" value="outclk10" />
+  <parameter name="gui_clock_name_string11" value="outclk11" />
+  <parameter name="gui_clock_name_string12" value="outclk12" />
+  <parameter name="gui_clock_name_string13" value="outclk13" />
+  <parameter name="gui_clock_name_string14" value="outclk14" />
+  <parameter name="gui_clock_name_string15" value="outclk15" />
+  <parameter name="gui_clock_name_string16" value="outclk16" />
+  <parameter name="gui_clock_name_string17" value="outclk17" />
+  <parameter name="gui_clock_name_string2" value="outclk2" />
+  <parameter name="gui_clock_name_string3" value="outclk3" />
+  <parameter name="gui_clock_name_string4" value="outclk4" />
+  <parameter name="gui_clock_name_string5" value="outclk5" />
+  <parameter name="gui_clock_name_string6" value="outclk6" />
+  <parameter name="gui_clock_name_string7" value="outclk7" />
+  <parameter name="gui_clock_name_string8" value="outclk8" />
+  <parameter name="gui_clock_name_string9" value="outclk9" />
+  <parameter name="gui_clock_to_compensate" value="0" />
+  <parameter name="gui_device_speed_grade" value="1" />
+  <parameter name="gui_divide_factor_c0" value="6" />
+  <parameter name="gui_divide_factor_c1" value="6" />
+  <parameter name="gui_divide_factor_c10" value="6" />
+  <parameter name="gui_divide_factor_c11" value="6" />
+  <parameter name="gui_divide_factor_c12" value="6" />
+  <parameter name="gui_divide_factor_c13" value="6" />
+  <parameter name="gui_divide_factor_c14" value="6" />
+  <parameter name="gui_divide_factor_c15" value="6" />
+  <parameter name="gui_divide_factor_c16" value="6" />
+  <parameter name="gui_divide_factor_c17" value="6" />
+  <parameter name="gui_divide_factor_c2" value="6" />
+  <parameter name="gui_divide_factor_c3" value="6" />
+  <parameter name="gui_divide_factor_c4" value="6" />
+  <parameter name="gui_divide_factor_c5" value="6" />
+  <parameter name="gui_divide_factor_c6" value="6" />
+  <parameter name="gui_divide_factor_c7" value="6" />
+  <parameter name="gui_divide_factor_c8" value="6" />
+  <parameter name="gui_divide_factor_c9" value="6" />
+  <parameter name="gui_divide_factor_n" value="1" />
+  <parameter name="gui_dps_cntr" value="C0" />
+  <parameter name="gui_dps_dir" value="Positive" />
+  <parameter name="gui_dps_num" value="1" />
+  <parameter name="gui_dsm_out_sel" value="1st_order" />
+  <parameter name="gui_duty_cycle0" value="50.0" />
+  <parameter name="gui_duty_cycle1" value="50.0" />
+  <parameter name="gui_duty_cycle10" value="50.0" />
+  <parameter name="gui_duty_cycle11" value="50.0" />
+  <parameter name="gui_duty_cycle12" value="50.0" />
+  <parameter name="gui_duty_cycle13" value="50.0" />
+  <parameter name="gui_duty_cycle14" value="50.0" />
+  <parameter name="gui_duty_cycle15" value="50.0" />
+  <parameter name="gui_duty_cycle16" value="50.0" />
+  <parameter name="gui_duty_cycle17" value="50.0" />
+  <parameter name="gui_duty_cycle2" value="50.0" />
+  <parameter name="gui_duty_cycle3" value="50.0" />
+  <parameter name="gui_duty_cycle4" value="50.0" />
+  <parameter name="gui_duty_cycle5" value="50.0" />
+  <parameter name="gui_duty_cycle6" value="50.0" />
+  <parameter name="gui_duty_cycle7" value="50.0" />
+  <parameter name="gui_duty_cycle8" value="50.0" />
+  <parameter name="gui_duty_cycle9" value="50.0" />
+  <parameter name="gui_en_adv_params" value="false" />
+  <parameter name="gui_en_dps_ports" value="false" />
+  <parameter name="gui_en_extclkout_ports" value="false" />
+  <parameter name="gui_en_lvds_ports" value="Disabled" />
+  <parameter name="gui_en_phout_ports" value="false" />
+  <parameter name="gui_en_reconf" value="true" />
+  <parameter name="gui_enable_cascade_in" value="false" />
+  <parameter name="gui_enable_cascade_out" value="false" />
+  <parameter name="gui_enable_mif_dps" value="false" />
+  <parameter name="gui_enable_output_counter_cascading" value="false" />
+  <parameter name="gui_existing_mif_file_path" value="~/pll.mif" />
+  <parameter name="gui_extclkout_0_source" value="C0" />
+  <parameter name="gui_extclkout_1_source" value="C0" />
+  <parameter name="gui_feedback_clock" value="Global Clock" />
+  <parameter name="gui_fix_vco_frequency" value="false" />
+  <parameter name="gui_fixed_vco_frequency" value="600.0" />
+  <parameter name="gui_frac_multiply_factor" value="1" />
+  <parameter name="gui_fractional_cout" value="32" />
+  <parameter name="gui_lock_setting" value="Low Lock Time" />
+  <parameter name="gui_mif_config_name" value="unnamed" />
+  <parameter name="gui_mif_gen_options">Generate New MIF File</parameter>
+  <parameter name="gui_multiply_factor" value="6" />
+  <parameter name="gui_new_mif_file_path" value="~/pll.mif" />
+  <parameter name="gui_number_of_clocks" value="2" />
+  <parameter name="gui_operation_mode" value="direct" />
+  <parameter name="gui_output_clock_frequency0" value="400.0" />
+  <parameter name="gui_output_clock_frequency1" value="800.0" />
+  <parameter name="gui_output_clock_frequency10" value="100.0" />
+  <parameter name="gui_output_clock_frequency11" value="100.0" />
+  <parameter name="gui_output_clock_frequency12" value="100.0" />
+  <parameter name="gui_output_clock_frequency13" value="100.0" />
+  <parameter name="gui_output_clock_frequency14" value="100.0" />
+  <parameter name="gui_output_clock_frequency15" value="100.0" />
+  <parameter name="gui_output_clock_frequency16" value="100.0" />
+  <parameter name="gui_output_clock_frequency17" value="100.0" />
+  <parameter name="gui_output_clock_frequency2" value="100.0" />
+  <parameter name="gui_output_clock_frequency3" value="100.0" />
+  <parameter name="gui_output_clock_frequency4" value="100.0" />
+  <parameter name="gui_output_clock_frequency5" value="100.0" />
+  <parameter name="gui_output_clock_frequency6" value="100.0" />
+  <parameter name="gui_output_clock_frequency7" value="100.0" />
+  <parameter name="gui_output_clock_frequency8" value="100.0" />
+  <parameter name="gui_output_clock_frequency9" value="100.0" />
+  <parameter name="gui_phase_shift0" value="0.0" />
+  <parameter name="gui_phase_shift1" value="0.0" />
+  <parameter name="gui_phase_shift10" value="0.0" />
+  <parameter name="gui_phase_shift11" value="0.0" />
+  <parameter name="gui_phase_shift12" value="0.0" />
+  <parameter name="gui_phase_shift13" value="0.0" />
+  <parameter name="gui_phase_shift14" value="0.0" />
+  <parameter name="gui_phase_shift15" value="0.0" />
+  <parameter name="gui_phase_shift16" value="0.0" />
+  <parameter name="gui_phase_shift17" value="0.0" />
+  <parameter name="gui_phase_shift2" value="0.0" />
+  <parameter name="gui_phase_shift3" value="0.0" />
+  <parameter name="gui_phase_shift4" value="0.0" />
+  <parameter name="gui_phase_shift5" value="0.0" />
+  <parameter name="gui_phase_shift6" value="0.0" />
+  <parameter name="gui_phase_shift7" value="0.0" />
+  <parameter name="gui_phase_shift8" value="0.0" />
+  <parameter name="gui_phase_shift9" value="0.0" />
+  <parameter name="gui_phase_shift_deg0" value="0.0" />
+  <parameter name="gui_phase_shift_deg1" value="0.0" />
+  <parameter name="gui_phase_shift_deg10" value="0.0" />
+  <parameter name="gui_phase_shift_deg11" value="0.0" />
+  <parameter name="gui_phase_shift_deg12" value="0.0" />
+  <parameter name="gui_phase_shift_deg13" value="0.0" />
+  <parameter name="gui_phase_shift_deg14" value="0.0" />
+  <parameter name="gui_phase_shift_deg15" value="0.0" />
+  <parameter name="gui_phase_shift_deg16" value="0.0" />
+  <parameter name="gui_phase_shift_deg17" value="0.0" />
+  <parameter name="gui_phase_shift_deg2" value="0.0" />
+  <parameter name="gui_phase_shift_deg3" value="0.0" />
+  <parameter name="gui_phase_shift_deg4" value="0.0" />
+  <parameter name="gui_phase_shift_deg5" value="0.0" />
+  <parameter name="gui_phase_shift_deg6" value="0.0" />
+  <parameter name="gui_phase_shift_deg7" value="0.0" />
+  <parameter name="gui_phase_shift_deg8" value="0.0" />
+  <parameter name="gui_phase_shift_deg9" value="0.0" />
+  <parameter name="gui_phout_division" value="1" />
+  <parameter name="gui_pll_auto_reset" value="false" />
+  <parameter name="gui_pll_bandwidth_preset" value="Low" />
+  <parameter name="gui_pll_cascading_mode" value="adjpllin" />
+  <parameter name="gui_pll_mode" value="Integer-N PLL" />
+  <parameter name="gui_ps_units0" value="ps" />
+  <parameter name="gui_ps_units1" value="ps" />
+  <parameter name="gui_ps_units10" value="ps" />
+  <parameter name="gui_ps_units11" value="ps" />
+  <parameter name="gui_ps_units12" value="ps" />
+  <parameter name="gui_ps_units13" value="ps" />
+  <parameter name="gui_ps_units14" value="ps" />
+  <parameter name="gui_ps_units15" value="ps" />
+  <parameter name="gui_ps_units16" value="ps" />
+  <parameter name="gui_ps_units17" value="ps" />
+  <parameter name="gui_ps_units2" value="ps" />
+  <parameter name="gui_ps_units3" value="ps" />
+  <parameter name="gui_ps_units4" value="ps" />
+  <parameter name="gui_ps_units5" value="ps" />
+  <parameter name="gui_ps_units6" value="ps" />
+  <parameter name="gui_ps_units7" value="ps" />
+  <parameter name="gui_ps_units8" value="ps" />
+  <parameter name="gui_ps_units9" value="ps" />
+  <parameter name="gui_refclk1_frequency" value="100.0" />
+  <parameter name="gui_refclk_switch" value="false" />
+  <parameter name="gui_reference_clock_frequency" value="125.0" />
+  <parameter name="gui_switchover_delay" value="0" />
+  <parameter name="gui_switchover_mode">Automatic Switchover</parameter>
+  <parameter name="gui_use_NDFB_modes" value="false" />
+  <parameter name="gui_use_locked" value="true" />
+  <parameter name="gui_vco_frequency" value="600.0" />
+  <parameter name="system_info_device_component" value="10AX115S2F45I1SG" />
+  <parameter name="system_info_device_family" value="Arria 10" />
+  <parameter name="system_info_device_speed_grade" value="2" />
+  <parameter name="system_part_trait_speed_grade" value="1" />
+ </module>
+ <module name="pll_lock_avs" kind="pll_lock_avs" version="10.0" enabled="1">
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
+  <parameter name="WIDTH" value="32" />
+ </module>
+ <module
+   name="pll_reconfig"
+   kind="altera_pll_reconfig"
+   version="16.0"
+   enabled="1">
+  <parameter name="ENABLE_BYTEENABLE" value="false" />
+  <parameter name="ENABLE_MIF" value="true" />
+  <parameter name="MIF_FILE_NAME" value="pll_rom" />
+  <parameter name="device_family" value="Arria 10" />
+ </module>
+ <module name="pll_sw_reset" kind="sw_reset" version="10.0" enabled="1">
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
+  <parameter name="LOG2_RESET_CYCLES" value="10" />
+  <parameter name="WIDTH" value="32" />
+ </module>
+ <module name="version_id" kind="version_id" version="10.0" enabled="1">
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
+  <parameter name="VERSION_ID" value="-1598029822" />
+  <parameter name="WIDTH" value="32" />
+ </module>
+ <connection
+   kind="avalon"
+   version="16.0"
+   start="ctrl.m0"
+   end="pll_reconfig.mgmt_avalon_slave">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0800" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="16.0" start="ctrl.m0" end="counter.s">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0100" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="16.0" start="ctrl.m0" end="pll_sw_reset.s">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0110" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="16.0" start="ctrl.m0" end="version_id.s">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="16.0" start="ctrl.m0" end="pll_lock_avs.s">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0120" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="clock" version="16.0" start="clk.clk" end="ctrl.clk" />
+ <connection kind="clock" version="16.0" start="clk.clk" end="pll_sw_reset.clk" />
+ <connection kind="clock" version="16.0" start="clk.clk" end="version_id.clk" />
+ <connection kind="clock" version="16.0" start="clk.clk" end="pll_lock_avs.clk" />
+ <connection kind="clock" version="16.0" start="clk.clk" end="kernel_clk.clk_in" />
+ <connection
+   kind="clock"
+   version="16.0"
+   start="clk.clk"
+   end="pll_reconfig.mgmt_clk" />
+ <connection
+   kind="clock"
+   version="16.0"
+   start="kernel_pll.outclk0"
+   end="counter.clk" />
+ <connection
+   kind="clock"
+   version="16.0"
+   start="kernel_pll.outclk1"
+   end="counter.clk2x" />
+ <connection
+   kind="clock"
+   version="16.0"
+   start="kernel_pll.outclk1"
+   end="kernel_clk2x.clk_in" />
+ <connection
+   kind="conduit"
+   version="16.0"
+   start="pll_lock_avs.lock"
+   end="kernel_pll.locked">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="conduit"
+   version="16.0"
+   start="kernel_pll.reconfig_from_pll"
+   end="pll_reconfig.reconfig_from_pll">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="conduit"
+   version="16.0"
+   start="pll_reconfig.reconfig_to_pll"
+   end="kernel_pll.reconfig_to_pll">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="reset"
+   version="16.0"
+   start="clk.clk_reset"
+   end="kernel_clk.clk_in_reset" />
+ <connection
+   kind="reset"
+   version="16.0"
+   start="clk.clk_reset"
+   end="kernel_clk2x.clk_in_reset" />
+ <connection
+   kind="reset"
+   version="16.0"
+   start="clk.clk_reset"
+   end="pll_sw_reset.clk_reset" />
+ <connection
+   kind="reset"
+   version="16.0"
+   start="clk.clk_reset"
+   end="counter.clk_reset" />
+ <connection
+   kind="reset"
+   version="16.0"
+   start="clk.clk_reset"
+   end="version_id.clk_reset" />
+ <connection
+   kind="reset"
+   version="16.0"
+   start="clk.clk_reset"
+   end="pll_lock_avs.clk_reset" />
+ <connection
+   kind="reset"
+   version="16.0"
+   start="clk.clk_reset"
+   end="pll_reconfig.mgmt_reset" />
+ <connection kind="reset" version="16.0" start="clk.clk_reset" end="ctrl.reset" />
+ <connection
+   kind="reset"
+   version="16.0"
+   start="clk.clk_reset"
+   end="kernel_pll.reset" />
+ <connection
+   kind="reset"
+   version="16.0"
+   start="pll_sw_reset.sw_reset"
+   end="kernel_pll.reset" />
+ <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="FIFO" />
+ <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
+</system>

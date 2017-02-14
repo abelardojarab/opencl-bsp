@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<board version="16.0" name="bdw_fpga_mpf5">
+
+
+  <compile project="top" revision="top" qsys_file="system.qsys" generic_kernel="1">
+    <generate cmd="echo"/>
+    <synthesize cmd="bash sim_compile.sh"/>
+    <auto_migrate platform_type="a10_ref" >
+      <include fixes=""/>
+      <exclude fixes=""/>
+    </auto_migrate>
+  </compile>
+
+  
+  <device device_model="10ax115s2f45i2sges_dm.xml">
+    <used_resources>
+      <alms num="6566"/> <!-- ALMs used in final placement - ALMs used for registers -->
+      <ffs num="20030"/>
+      <dsps num="0"/>
+      <rams num="112"/>
+    </used_resources>
+  </device>
+
+
+
+
+  <!-- Two DDR3-1333 DIMMs, 64-bit data -->
+	<global_mem max_bandwidth="25000">
+   <interface name="rr_arb" type="slave" width="512" maxburst="16" address="0x00000000" size="0x1000000000000" latency="2000" addpipe="1">
+      <port name="avmm_r" direction="r"/>
+      <port name="avmm_w" direction="w"/>
+    </interface>
+  </global_mem>
+    
+	<host>
+		<kernel_config start="0x00000000" size="0x0100000"/>
+  </host>
+
+  <interfaces>
+		<interface name="board" port="kernel_cra" type="master" width="64" misc="0"/>
+		<interface name="board" port="kernel_irq" type="irq" width="1"/>
+		<kernel_clk_reset clk="board.kernel_clk" clk2x="board.kernel_clk2x" reset="board.kernel_reset"/>
+	</interfaces>
+</board>
