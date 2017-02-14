@@ -23,5 +23,3 @@ export CPPFLAGS=-I$LIB_TDL_PATH/usr/include
 make -j16 prefix=$AALSDK
 cp libMPF*so $AOCL_BOARD_PACKAGE_ROOT/host/linux64/lib/
 
-###copy filelist
-cp $MPF_INSTALL_PATH/hw/par/sim_file_list.txt $MPF_INSTALL_PATH/sim_file_list.txt
