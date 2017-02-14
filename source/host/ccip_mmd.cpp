@@ -212,6 +212,8 @@ public:
    void serviceAllocateFailed(const IEvent &rEvent);
 
    void serviceReleased(const AAL::TransactionID&);
+   
+   void serviceReleaseRequest(IBase *pServiceBase, const IEvent &rEvent);
 
    void serviceReleaseFailed(const AAL::IEvent&);
 
@@ -417,9 +419,10 @@ btInt CCIPMMD::open()
    #elif defined ( ASEAFU )         /* Use ASE based RTL simulation */
    Manifest.Add(keyRegHandle, 20);
 
-   ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_SERVICE_NAME, "libASEALIAFU");
-   ConfigRecord.Add(AAL_FACTORY_CREATE_SOFTWARE_SERVICE,true);
+   Manifest.Add(ALIAFU_NVS_KEY_TARGET, ali_afu_ase);
 
+   ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_SERVICE_NAME, "libALI");
+   ConfigRecord.Add(AAL_FACTORY_CREATE_SOFTWARE_SERVICE,true);
    #else                            /* default is Software Simulator */
 #if 0 // NOT CURRRENTLY SUPPORTED
    ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_SERVICE_NAME, "libSWSimALIAFU");
@@ -1014,6 +1017,16 @@ void CCIPMMD::serviceAllocateFailed(const IEvent &rEvent)
    // Unblock Main()
    m_Sem.Post(1);
 }
+
+ void CCIPMMD::serviceReleaseRequest(IBase *pServiceBase, const IEvent &rEvent)
+ {
+    MSG("Service unexpected requested back");
+    if(NULL != m_pALIAFU_AALService){
+       IAALService *pIAALService = dynamic_ptr<IAALService>(iidService, m_pALIAFU_AALService);
+       ASSERT(pIAALService);
+       pIAALService->Release(TransactionID());
+    }
+ }
 
  void CCIPMMD::serviceReleaseFailed(const IEvent        &rEvent)
  {
