@@ -65,6 +65,7 @@
 using namespace std;
 using namespace AAL;
 
+
 // Convenience macros for printing messages and errors.
 #ifdef MSG
 # undef MSG
@@ -111,28 +112,32 @@ using namespace AAL;
 #define HW_UNLOCK ;
 
 #ifdef SIM
-#define WAIT_TIME 2000000
-#define TIMEOUT 60000000
 
+#define SLOW
 #define  ASEAFU
 #define WORKSPACE_SIZE        (MB(64))
-#define DEBUG_PRINT(...) 
+
+
 #define DEBUG_PRINT(...) printf(__VA_ARGS__)
 #define SPEED_LIMIT()  SleepMicro(100000)
 #else
 #define  HWAFU
+
+
+//#define SLOW
 #define WORKSPACE_SIZE        (GB(4))
+#define WORKSPACE_SIZE        (MB(64))
+#define WORKSPACE_SIZE        (GB(1))
 #define DEBUG_PRINT(...) printf(__VA_ARGS__)
 #define DEBUG_PRINT(...)
 #define SPEED_LIMIT() 
-#define WAIT_TIME 1
-#define TIMEOUT 1000
+#define SPEED_LIMIT()  SleepMicro(1000)
+
 #endif
 
 
 
-
-
+ 
 
 
 
@@ -143,14 +148,17 @@ using namespace AAL;
 
 //#define NO_VTP_INIT
 
-#define TRACE_PRINT(...) printf(__VA_ARGS__)
+
 
 #define HW_LOCK ;
 #define HW_UNLOCK ;
 
 
-#define DEBUG_PRINT(...) 
-#define DEBUG_PRINT(...) printf(__VA_ARGS__)
+//#define DISABLE_MPF
+
+
+
+#define DISABLE_PR
 // Define handle values for kernel, kernel_clk (pLL), and global memory
 typedef enum {
   CCIP_DFH_RANGE = 0x0000,  
@@ -389,7 +397,7 @@ CCIPMMD::~CCIPMMD()
 btInt CCIPMMD::open()
 {
 
- pAALLogger()->AddToMask(LM_All, LOG_DEBUG);
+ //pAALLogger()->AddToMask(LM_All, LOG_DEBUG);
    // Request the Servcie we are interested in.
 
    // NOTE: This example is bypassing the Resource Manager's configuration record lookup
@@ -411,20 +419,19 @@ btInt CCIPMMD::open()
    ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_SERVICE_NAME, "libALI");
 
    // the AFUID to be passed to the Resource Manager. It will be used to locate the appropriate device.
-   ConfigRecord.Add(keyRegAFU_ID,"C000C966-0D82-4272-9AEF-FE5F84570612");
-  //ConfigRecord.Add(keyRegAFU_ID,"A7054572-7F50-1901-2000-000000380000");
-//ConfigRecord.Add(keyRegAFU_ID,"00000000-0000-0000-0000-000000000000");
+   //ConfigRecord.Add(keyRegAFU_ID,"D8424DC4-A4A3-C413-F89E-433683F9040B");
+	ConfigRecord.Add(keyRegAFU_ID,"C000C966-0D82-4272-9AEF-FE5F84570612");
+
    // indicate that this service needs to allocate an AIAService, too to talk to the HW
    ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_AIA_NAME, "libaia");
-
-   #elif defined ( ASEAFU )         /* Use ASE based RTL simulation */
+#elif defined ( ASEAFU )         /* Use ASE based RTL simulation */
    Manifest.Add(keyRegHandle, 20);
 
     Manifest.Add(ALIAFU_NVS_KEY_TARGET, ali_afu_ase);
    ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_SERVICE_NAME, "libALI");
    ConfigRecord.Add(AAL_FACTORY_CREATE_SOFTWARE_SERVICE,true);
 
-   #else                            /* default is Software Simulator */
+#else                            /* default is Software Simulator */
 #if 0 // NOT CURRRENTLY SUPPORTED
    ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_SERVICE_NAME, "libSWSimALIAFU");
    ConfigRecord.Add(AAL_FACTORY_CREATE_SOFTWARE_SERVICE,true);
@@ -488,7 +495,7 @@ btInt CCIPMMD::open()
       //goto done_1;
 	  return -1;
    }*/
-
+#ifndef DISABLE_MPF
    // Reuse Manifest and Configrecord for VTP service
    Manifest.Empty();
    ConfigRecord.Empty();
@@ -628,7 +635,7 @@ btInt CCIPMMD::open()
 	}
    m_WorkspaceSize = WORKSPACE_SIZE;
 
-
+#endif
 
    //=============================
    // Now we have the NLB Service
@@ -649,9 +656,9 @@ btInt CCIPMMD::open()
 
       // AFU Reset clear VTP, too, so reinitialize that
       // NOTE: this interface is likely to change in future releases of AAL.
- 
+#ifndef DISABLE_MPF	
       m_pVTPService->vtpReset();
-      
+#endif      
 
       SleepMicro(2000000);
       btUnsigned32bitInt id = 0;
@@ -659,15 +666,15 @@ btInt CCIPMMD::open()
 
 
       
-/*
+
       // Wait for test completion
-      btUnsigned32bitInt id = 0;
+
       //MSG("About to read");
-      while( id !=  0xa0c00001) {
+      //while( id !=  0xa0c00001) {
         m_pALIMMIOService->mmioRead32(AOCL_MMD_KERNEL ,&id);
-        //MSG("Read id as " << id);
+        MSG("Read id as " << id);
         SleepMicro(500000);
-      }*/
+     // }
 
     
 	  
@@ -676,7 +683,7 @@ btInt CCIPMMD::open()
    if(m_pVCMAPService)
    {
    //if(getenv("USE_VCMAP")){
-   
+#ifndef DISABLE_MPF	  
       //m_pVCMAPService->vcmapSetMapAll(true);
       m_pVCMAPService->vcmapSetMode(true,true,12);
       
@@ -707,11 +714,12 @@ btInt CCIPMMD::open()
       m_pVCMAPService->vcmapSetFixedMapping(true, 15);
    
    }
-   
+#endif   
      // m_pVCMAPService->vcmapSetMapAll(true);
     //  m_pVCMAPService->vcmapSetFixedMapping(true, 21);
    }
-#ifndef SIM
+
+#ifndef DISABLE_PR
   Manifest.Empty();
   ConfigRecord.Empty();
 
@@ -780,7 +788,8 @@ void CCIPMMD::printStats()
 btInt CCIPMMD::reprogram()
 {
   NamedValueSet nvs;
-   
+  
+#ifndef DISABLE_PR
   if(true == m_bIsOK){
     nvs.Add(AALCONF_FILENAMEKEY,"PRbitstream_temp.rbf");
 
@@ -791,7 +800,7 @@ btInt CCIPMMD::reprogram()
 
   m_pALIResetService->afuReset();
   m_pVTPService->vtpReset();
-
+#endif
   return 0;
 }
 
