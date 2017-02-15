@@ -116,8 +116,6 @@ using namespace AAL;
 
 #define  ASEAFU
 #define WORKSPACE_SIZE        (MB(64))
-#define WAIT()  usleep(WAIT_TIME)
-#define WAIT_WRITE()  usleep(WAIT_TIME)
 #define DEBUG_PRINT(...) 
 #define DEBUG_PRINT(...) printf(__VA_ARGS__)
 #define SPEED_LIMIT()  SleepMicro(100000)
@@ -133,11 +131,8 @@ using namespace AAL;
 
 
 
-#define WAIT() usleep(10000)
-#define WAIT_WRITE() usleep(10000)
 
-#define WAIT() 
-#define WAIT_WRITE() 
+
 
 
 
@@ -155,7 +150,7 @@ using namespace AAL;
 
 
 #define DEBUG_PRINT(...) 
-//#define DEBUG_PRINT(...) printf(__VA_ARGS__)
+#define DEBUG_PRINT(...) printf(__VA_ARGS__)
 // Define handle values for kernel, kernel_clk (pLL), and global memory
 typedef enum {
   CCIP_DFH_RANGE = 0x0000,  
@@ -212,9 +207,7 @@ public:
    void serviceAllocateFailed(const IEvent &rEvent);
 
    void serviceReleased(const AAL::TransactionID&);
-   
    void serviceReleaseRequest(IBase *pServiceBase, const IEvent &rEvent);
-
    void serviceReleaseFailed(const AAL::IEvent&);
 
    void serviceEvent(const IEvent &rEvent);
@@ -384,11 +377,19 @@ CCIPMMD::~CCIPMMD()
 ///               on whether a hardware, ASE or software implementation is desired.
 ///             - Allocates the necessary buffers to be used by the NLB AFU algorithm
 
-
+ void CCIPMMD::serviceReleaseRequest(IBase *pServiceBase, const IEvent &rEvent)
+ {
+    MSG("Service unexpected requested back");
+    if(NULL != m_pALIAFU_AALService){
+       IAALService *pIAALService = dynamic_ptr<IAALService>(iidService, m_pALIAFU_AALService);
+       ASSERT(pIAALService);
+       pIAALService->Release(TransactionID());
+    }
+ }
 btInt CCIPMMD::open()
 {
 
- // pAALLogger()->AddToMask(LM_All, LOG_INFO);
+ pAALLogger()->AddToMask(LM_All, LOG_DEBUG);
    // Request the Servcie we are interested in.
 
    // NOTE: This example is bypassing the Resource Manager's configuration record lookup
@@ -407,7 +408,7 @@ btInt CCIPMMD::open()
 
 #if defined( HWAFU )                /* Use FPGA hardware */
    // Service Library to use
-   ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_SERVICE_NAME, "libHWALIAFU");
+   ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_SERVICE_NAME, "libALI");
 
    // the AFUID to be passed to the Resource Manager. It will be used to locate the appropriate device.
    ConfigRecord.Add(keyRegAFU_ID,"C000C966-0D82-4272-9AEF-FE5F84570612");
@@ -419,10 +420,10 @@ btInt CCIPMMD::open()
    #elif defined ( ASEAFU )         /* Use ASE based RTL simulation */
    Manifest.Add(keyRegHandle, 20);
 
-   Manifest.Add(ALIAFU_NVS_KEY_TARGET, ali_afu_ase);
-
+    Manifest.Add(ALIAFU_NVS_KEY_TARGET, ali_afu_ase);
    ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_SERVICE_NAME, "libALI");
    ConfigRecord.Add(AAL_FACTORY_CREATE_SOFTWARE_SERVICE,true);
+
    #else                            /* default is Software Simulator */
 #if 0 // NOT CURRRENTLY SUPPORTED
    ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_SERVICE_NAME, "libSWSimALIAFU");
@@ -435,7 +436,7 @@ btInt CCIPMMD::open()
    Manifest.Add(AAL_FACTORY_CREATE_CONFIGRECORD_INCLUDED, &ConfigRecord);
 
    // in future, everything could be figured out by just giving the service name
-   Manifest.Add(AAL_FACTORY_CREATE_SERVICENAME, "Hello ALI NLB");
+   //Manifest.Add(AAL_FACTORY_CREATE_SERVICENAME, "Hello ALI NLB");
 
    //MSG("Allocating ALIAFU Service");
 
@@ -449,7 +450,7 @@ btInt CCIPMMD::open()
    //   service was allocated. This is only necessary if you are allocating more
    //   than one service from a single AAL service client.
 
- m_Runtime.allocService(dynamic_cast<IBase *>(this), Manifest, m_ALIAFUTranID);
+ m_Runtime.allocService(dynamic_cast<IBase *>(this), Manifest,m_ALIAFUTranID );
  m_Sem.Wait();
  
  if(!m_bIsOK){
@@ -523,10 +524,6 @@ btInt CCIPMMD::open()
 
    
    
-   
-   
-   
-   
      // Reuse Manifest and Configrecord for VCMAP service
    Manifest.Empty();
    ConfigRecord.Empty();
@@ -592,7 +589,7 @@ btInt CCIPMMD::open()
    
    
 
-//MSG("Allocated VTP Service");
+
    // Now that we have the Service and have saved the IMPFVTP interface pointer
    //  we can now Allocate the 3 Workspaces used by the NLB algorithm. The buffer allocate
    //  function is synchronous so no need to wait on the semaphore
@@ -620,14 +617,15 @@ btInt CCIPMMD::open()
    m_DSMSize = LPBK1_DSM_SIZE;
 
    // Repeat for the Input and Output Buffers
-   if( ali_errnumOK != m_pVTPService->bufferAllocate(WORKSPACE_SIZE, &m_pWorkspace)){
-      m_bIsOK = false;
-      m_Sem.Post(1);
-      m_Result = -1;
-      //goto done_3;
-	  return -1;
-   }
-
+   if(!getenv("ALLOC_PER_BUFFER")){
+	   if( ali_errnumOK != m_pVTPService->bufferAllocate(WORKSPACE_SIZE, &m_pWorkspace)){
+		  m_bIsOK = false;
+		  m_Sem.Post(1);
+		  m_Result = -1;
+		  //goto done_3;
+		  return -1;
+	   }
+	}
    m_WorkspaceSize = WORKSPACE_SIZE;
 
 
@@ -646,7 +644,7 @@ btInt CCIPMMD::open()
 
      
       m_pALIResetService->afuReset();
-
+		SleepMicro(2000000);
 
 
       // AFU Reset clear VTP, too, so reinitialize that
@@ -654,10 +652,6 @@ btInt CCIPMMD::open()
  
       m_pVTPService->vtpReset();
       
-
-
-
-
 
       SleepMicro(2000000);
       btUnsigned32bitInt id = 0;
@@ -684,7 +678,7 @@ btInt CCIPMMD::open()
    //if(getenv("USE_VCMAP")){
    
       //m_pVCMAPService->vcmapSetMapAll(true);
-      m_pVCMAPService->vcmapSetMode(true,true,10);
+      m_pVCMAPService->vcmapSetMode(true,true,12);
       
     if(getenv("USE_VCMAP_THRESH")){  
       m_pVCMAPService->vcmapSetLowTrafficThreshold(0x3f);
@@ -705,6 +699,15 @@ btInt CCIPMMD::open()
       m_pVCMAPService->vcmapSetFixedMapping(true, 0);
    
    }
+   
+     if(getenv("USE_VCMAP_FIXED")){
+  
+      printf("################ USING FIXED VC MAPPING  #################\n");
+      m_pVCMAPService->vcmapSetMapAll(true);
+      m_pVCMAPService->vcmapSetFixedMapping(true, 15);
+   
+   }
+   
      // m_pVCMAPService->vcmapSetMapAll(true);
     //  m_pVCMAPService->vcmapSetFixedMapping(true, 21);
    }
@@ -915,9 +918,9 @@ void CCIPMMD::serviceAllocated(IBase *pServiceBase,
    }
    else
    {
-      ERR("Unknown transaction ID encountered on serviceAllocated().");
-      m_bIsOK = false;
-      return;
+      MSG("Unknown transaction ID encountered on serviceAllocated().");
+      /*m_bIsOK = false;
+      return;*/
    }
 
    //MSG("Service Allocated");
@@ -1014,16 +1017,6 @@ void CCIPMMD::serviceAllocateFailed(const IEvent &rEvent)
    // Unblock Main()
    m_Sem.Post(1);
 }
-
- void CCIPMMD::serviceReleaseRequest(IBase *pServiceBase, const IEvent &rEvent)
- {
-    MSG("Service unexpected requested back");
-    if(NULL != m_pALIAFU_AALService){
-       IAALService *pIAALService = dynamic_ptr<IAALService>(iidService, m_pALIAFU_AALService);
-       ASSERT(pIAALService);
-       pIAALService->Release(TransactionID());
-    }
- }
 
  void CCIPMMD::serviceReleaseFailed(const IEvent        &rEvent)
  {
@@ -1241,7 +1234,12 @@ int CCIPMMD::MMIORead(size_t Addr, void* buffer, size_t len){
  
 void*  CCIPMMD::bufferAlloc(size_t len){
   btVirtAddr pointer; 
-  m_pVTPService->bufferAllocate(len, &pointer);
+  
+   if( ali_errnumOK != m_pVTPService->bufferAllocate(len, &pointer)){
+
+	  return 0;
+   }  
+  
   return pointer;
 }
 
@@ -1318,20 +1316,25 @@ void CCIPMMD::PrintReconfExceptionDescription(IEvent const &rEvent)
 //#define MAX_SHARED_BUFFERS 16
 //ICCIWorkspace* pCCIUserBuffer[MAX_SHARED_BUFFERS];
 #define ALIGNMENT 1024
-#define ALIGNMENT_2 1024*1024
+#define ALIGNMENT_2 1024
+
+#define TOP_BUFFER 1024*1024
+#define BACK_BUFFER  1024*1024
 AOCL_MMD_CALL void * aocl_mmd_shared_mem_alloc( int handle, size_t size, unsigned long long *device_ptr_out )
 {
   DEBUG_PRINT("ALLOCATING %d buffer!\n",size);
   if(getenv("ALLOC_PER_BUFFER")){
+  
+	printf("ALLOCATING %d VIA bufferAlloc\n", size);
     size_t bump = size%ALIGNMENT_2 ?    (1+(size/ALIGNMENT_2))*ALIGNMENT_2 : size;
-    void* ptr = pCCIPMMD->bufferAlloc(bump+MB(4));
+    void* ptr = pCCIPMMD->bufferAlloc(bump+TOP_BUFFER+BACK_BUFFER);
     if(ptr == NULL) {
       printf("Allocation Error\n");
       return 0;
     }
+    ptr=ptr+TOP_BUFFER;
     
     
-    printf("ALLOCATING %d VIA bufferAlloc\n", size);
     printf("Address of pointer is %p\n", (void *)ptr);  
      *device_ptr_out = (unsigned long long) ptr;
     return ptr;
@@ -1527,11 +1530,7 @@ int AOCL_MMD_CALL aocl_mmd_yield(int handle)
 
   if ( irqval )
   {
-
-
-
     kernel_interrupt( handle, kernel_interrupt_user_data );
-
   }
 
   return 0;
@@ -1611,7 +1610,7 @@ int aocl_mmd_get_info(
     #ifdef SIM 
     case AOCL_MMD_PLL_INTERFACES:        RESULT_INT(-1); break;
     #else
-    case AOCL_MMD_PLL_INTERFACES:        RESULT_INT(AOCL_MMD_PLL); break;
+    case AOCL_MMD_PLL_INTERFACES:        RESULT_INT(-1); break;
     #endif
     case AOCL_MMD_MEMORY_INTERFACE:      RESULT_INT(AOCL_MMD_MEMORY); break;
     case AOCL_MMD_PCIE_INFO:             RESULT_STR("N/A"); break;
@@ -1688,7 +1687,7 @@ int AOCL_MMD_CALL aocl_mmd_read(
   HW_LOCK;
 
   DEBUG_PRINT("aocl_mmd_read len: %d offset: %d mmd_interface: %d   address: %d \n", len, offset, mmd_interface, address);
-  #ifdef SIM    
+  #ifdef SLOW    
   sleep(2);
   #endif 
   int result = pCCIPMMD->MMIORead(address, dst, len);
@@ -1726,13 +1725,26 @@ int opened = 0;
 int AOCL_MMD_CALL aocl_mmd_open(const char *name)
 {
     
-		pCCIPMMD = new CCIPMMD();
-
+	pCCIPMMD = new CCIPMMD();
+		
 	if(!pCCIPMMD->isOK()){
-      ERR("Runtime Failed to Start");
+	  fprintf(stderr, "Error: Failed to initialize the OpenCL/AAL system. \n");
+	  fprintf(stderr, "Error: Ensure a correct OpenCL image is programmed on the FPGA, and that the CCI driver has been loaded. \n");
       exit(1);
    }
    btInt Result = pCCIPMMD->open();
+   #ifdef SLOW
+	printf("SLEEPING FOR 15 secs!\n");
+	SleepMicro(15000000);
+   
+#endif
+   if(Result != 0){
+    fprintf(stderr, "Error: Failed to initialize the OpenCL/AAL system. \n");
+	fprintf(stderr, "Error: Ensure a correct OpenCL image is programmed on the FPGA, and that the CCI driver has been loaded. \n");
+	
+    return -1;
+   }
+   
    unsigned long long device_ptr_out;
    cr_dsm_base =  aocl_mmd_shared_mem_alloc( 0, 256,  &device_ptr_out );
    
@@ -1756,11 +1768,9 @@ int AOCL_MMD_CALL aocl_mmd_open(const char *name)
    aocl_mmd_write(NULL,NULL, 8,&cci_config,0, QPI_ADDR_RANGE+NUM_RULES*3*8+8); 
 
 
-   if(Result != 0){
-    return -1;
-   }
+
    unsigned long int version_id = 0; 
-   aocl_mmd_read(NULL,NULL, 4, &version_id, 0, AOCL_MMD_VERSION_ID); 
+  // aocl_mmd_read(NULL,NULL, 4, &version_id, 0, AOCL_MMD_VERSION_ID); 
 /*
    if( version_id != 0x4D5FEA30 ){
 	fprintf(stderr, "aocl_mmd_open: Incorrect version ID\n");
