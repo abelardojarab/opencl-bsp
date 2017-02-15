@@ -51,6 +51,7 @@
 			clk_400_clk                : in  std_logic                      := 'X';             -- clk
 			global_reset_reset_n       : in  std_logic                      := 'X';             -- reset_n
 			kernel_clk_clk             : out std_logic;                                         -- clk
+			kernel_clk_in_clk          : in  std_logic                      := 'X';             -- clk
 			kernel_cra_waitrequest     : in  std_logic                      := 'X';             -- waitrequest
 			kernel_cra_readdata        : in  std_logic_vector(63 downto 0)  := (others => 'X'); -- readdata
 			kernel_cra_readdatavalid   : in  std_logic                      := 'X';             -- readdatavalid
@@ -63,8 +64,7 @@
 			kernel_cra_debugaccess     : out std_logic;                                         -- debugaccess
 			kernel_irq_irq             : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- irq
 			kernel_reset_reset_n       : out std_logic;                                         -- reset_n
-			psl_clk_clk                : in  std_logic                      := 'X';             -- clk
-			kernel_clk_in_clk          : in  std_logic                      := 'X'              -- clk
+			psl_clk_clk                : in  std_logic                      := 'X'              -- clk
 		);
 	end component board;
 
@@ -121,6 +121,7 @@
 			clk_400_clk                => CONNECTED_TO_clk_400_clk,                --       clk_400.clk
 			global_reset_reset_n       => CONNECTED_TO_global_reset_reset_n,       --  global_reset.reset_n
 			kernel_clk_clk             => CONNECTED_TO_kernel_clk_clk,             --    kernel_clk.clk
+			kernel_clk_in_clk          => CONNECTED_TO_kernel_clk_in_clk,          -- kernel_clk_in.clk
 			kernel_cra_waitrequest     => CONNECTED_TO_kernel_cra_waitrequest,     --    kernel_cra.waitrequest
 			kernel_cra_readdata        => CONNECTED_TO_kernel_cra_readdata,        --              .readdata
 			kernel_cra_readdatavalid   => CONNECTED_TO_kernel_cra_readdatavalid,   --              .readdatavalid
@@ -133,7 +134,6 @@
 			kernel_cra_debugaccess     => CONNECTED_TO_kernel_cra_debugaccess,     --              .debugaccess
 			kernel_irq_irq             => CONNECTED_TO_kernel_irq_irq,             --    kernel_irq.irq
 			kernel_reset_reset_n       => CONNECTED_TO_kernel_reset_reset_n,       --  kernel_reset.reset_n
-			psl_clk_clk                => CONNECTED_TO_psl_clk_clk,                --       psl_clk.clk
-			kernel_clk_in_clk          => CONNECTED_TO_kernel_clk_in_clk           -- kernel_clk_in.clk
+			psl_clk_clk                => CONNECTED_TO_psl_clk_clk                 --       psl_clk.clk
 		);
 

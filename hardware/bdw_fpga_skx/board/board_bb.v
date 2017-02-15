@@ -51,6 +51,7 @@ module board (
 	clk_400_clk,
 	global_reset_reset_n,
 	kernel_clk_clk,
+	kernel_clk_in_clk,
 	kernel_cra_waitrequest,
 	kernel_cra_readdata,
 	kernel_cra_readdatavalid,
@@ -63,8 +64,7 @@ module board (
 	kernel_cra_debugaccess,
 	kernel_irq_irq,
 	kernel_reset_reset_n,
-	psl_clk_clk,
-	kernel_clk_in_clk);	
+	psl_clk_clk);	
 
 	output		avmm_r_slave_waitrequest;
 	output	[511:0]	avmm_r_slave_readdata;
@@ -117,6 +117,7 @@ module board (
 	input		clk_400_clk;
 	input		global_reset_reset_n;
 	output		kernel_clk_clk;
+	input		kernel_clk_in_clk;
 	input		kernel_cra_waitrequest;
 	input	[63:0]	kernel_cra_readdata;
 	input		kernel_cra_readdatavalid;
@@ -130,5 +131,4 @@ module board (
 	input	[0:0]	kernel_irq_irq;
 	output		kernel_reset_reset_n;
 	input		psl_clk_clk;
-	input		kernel_clk_in_clk;
 endmodule

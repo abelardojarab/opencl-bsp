@@ -50,6 +50,7 @@
 		.clk_400_clk                (<connected-to-clk_400_clk>),                //       clk_400.clk
 		.global_reset_reset_n       (<connected-to-global_reset_reset_n>),       //  global_reset.reset_n
 		.kernel_clk_clk             (<connected-to-kernel_clk_clk>),             //    kernel_clk.clk
+		.kernel_clk_in_clk          (<connected-to-kernel_clk_in_clk>),          // kernel_clk_in.clk
 		.kernel_cra_waitrequest     (<connected-to-kernel_cra_waitrequest>),     //    kernel_cra.waitrequest
 		.kernel_cra_readdata        (<connected-to-kernel_cra_readdata>),        //              .readdata
 		.kernel_cra_readdatavalid   (<connected-to-kernel_cra_readdatavalid>),   //              .readdatavalid
@@ -62,7 +63,6 @@
 		.kernel_cra_debugaccess     (<connected-to-kernel_cra_debugaccess>),     //              .debugaccess
 		.kernel_irq_irq             (<connected-to-kernel_irq_irq>),             //    kernel_irq.irq
 		.kernel_reset_reset_n       (<connected-to-kernel_reset_reset_n>),       //  kernel_reset.reset_n
-		.psl_clk_clk                (<connected-to-psl_clk_clk>),                //       psl_clk.clk
-		.kernel_clk_in_clk          (<connected-to-kernel_clk_in_clk>)           // kernel_clk_in.clk
+		.psl_clk_clk                (<connected-to-psl_clk_clk>)                 //       psl_clk.clk
 	);
 

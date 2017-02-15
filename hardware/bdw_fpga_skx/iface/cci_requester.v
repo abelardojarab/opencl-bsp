@@ -381,7 +381,7 @@ always @(posedge clk or negedge reset_n) begin
 			tx_c0_header[PEND_REQS_LOG2-1:0]  <= buffer_r1[TAG_E:TAG_S];
 			tx_c0_header[ADDR_LO_E:ADDR_LO_S]  <= buffer_r1[ADDR_E:ADDR_S];
 			//tx_c0_header[ADDR_HI_E:ADDR_HI_S]  <= buffer_r1[ADDR_E:ADDR_E-25]; // CCI-E extra address
-			tx_c0_header[REQ_TYPE_E:REQ_TYPE_S]  <=  use_rdline_i ? RD_LINE_I: RD_LINE_S; //~full_write_r1 ? RD_LINE_S: buffer_r1[TYPE_E:TYPE_S];
+			tx_c0_header[REQ_TYPE_E:REQ_TYPE_S]  <=  RD_LINE_I;//  todo - re-enable//use_rdline_i ? RD_LINE_I: RD_LINE_S; //~full_write_r1 ? RD_LINE_S: buffer_r1[TYPE_E:TYPE_S];
 			//tx_c0_header[VIRT_ADDR]     <= buffer_r1[VA_B];
             tx_c0_header[73:72]     <=  use_bridge_mapping_r ? vc_sel : use_vl_r ? 2'b1 : use_vh_r ? vc_sel_vh : 2'b0 ;
 			tx_c0_header[71]     <= buffer_r1[SOP];
@@ -392,7 +392,7 @@ always @(posedge clk or negedge reset_n) begin
 			tx_c1_header[PEND_REQS_LOG2-1:0]  <= buffer_r1[TAG_E:TAG_S];
 			tx_c1_header[ADDR_LO_E:ADDR_LO_S]  <= buffer_r1[ADDR_E:ADDR_S];
 			//tx_c1_header[ADDR_HI_E:ADDR_HI_S]  <= buffer_r1[ADDR_E:ADDR_E-25]; // CCI-E extra address
-			tx_c1_header[REQ_TYPE_E:REQ_TYPE_S]  <= use_wrline_i ? WR_THRU: WR_LINE; // buffer_r1[TYPE_E:TYPE_S]; //WR_LINE;
+			tx_c1_header[REQ_TYPE_E:REQ_TYPE_S]  <= WR_THRU ; // todo clean upuse_wrline_i ? WR_THRU: WR_LINE; // buffer_r1[TYPE_E:TYPE_S]; //WR_LINE;
 			//tx_c1_header[VIRT_ADDR]     <= buffer_r1[VA_B];
 			tx_c1_header[71]     <= buffer_r1[SOP];
 			tx_c1_header[73:72]     <=  use_bridge_mapping_w ? vc_sel : use_vl_w ? 2'b1 : use_vh_w ? vc_sel_vh : 2'b0 ;
