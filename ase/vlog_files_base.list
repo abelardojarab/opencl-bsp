@@ -1,4 +1,4 @@
-+define+MPF_PLATFORM_BDX
++define+MPF_PLATFORM_DCP_PCIE
 
 -F ./mpf_src/hw/sim/cci_mpf_sim_addenda.txt
 

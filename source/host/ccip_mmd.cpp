@@ -678,6 +678,9 @@ btInt CCIPMMD::open()
     
 	  
    }
+   
+   if(m_pVCMAPService)
+   {
    //if(getenv("USE_VCMAP")){
    
       //m_pVCMAPService->vcmapSetMapAll(true);
@@ -704,7 +707,7 @@ btInt CCIPMMD::open()
    }
      // m_pVCMAPService->vcmapSetMapAll(true);
     //  m_pVCMAPService->vcmapSetFixedMapping(true, 21);
-
+   }
 #ifndef SIM
   Manifest.Empty();
   ConfigRecord.Empty();
@@ -879,14 +882,8 @@ void CCIPMMD::serviceAllocated(IBase *pServiceBase,
 
    }
    else if(rTranID == m_VCMAPTranID){
-   
+      //DCP doesn't have this so it is OK if m_pVCMAPService is NULL
       m_pVCMAPService = dynamic_ptr<IMPFVCMAP>(iidMPFVCMAPService, pServiceBase);
-          ASSERT(NULL != m_pVCMAPService);
-       if ( NULL == m_pVCMAPService ) {
-          m_bIsOK = false;
-          return;
-       }
-   
    }
    else if(rTranID == m_WROTranID){
    
