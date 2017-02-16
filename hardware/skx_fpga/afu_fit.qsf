@@ -82,3 +82,6 @@ set_global_assignment -name SDC_FILE dcp_top.sdc
 set_global_assignment -name PR_BASE_SOF "./blue_bits/dcp.sof"
 set_global_assignment -name PR_BASE_MSF "root_partition=./blue_bits/dcp.static.msf"
 set_global_assignment -name PR_BASE_MSF "pr_inst=./blue_bits/dcp.green_region.msf"
+
+# AFU + MPF IPs
+source afu_ip.qsf

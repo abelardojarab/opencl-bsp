@@ -2,7 +2,7 @@
 
 ## MPF directories
 ##
-set_global_assignment -name VERILOG_MACRO "MPF_PLATFORM_BDX=1"
+set_global_assignment -name VERILOG_MACRO "MPF_PLATFORM_DCP_PCIE=1"
 
 
 

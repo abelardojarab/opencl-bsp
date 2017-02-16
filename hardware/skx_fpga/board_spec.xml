@@ -2,7 +2,7 @@
 <board version="16.0" name="skx_fpga_1602">
 
 
-  <compile project="top" revision="top" qsys_file="none" generic_kernel="1">
+  <compile project="dcp" revision="afu_fit" qsys_file="none" generic_kernel="1">
     <generate cmd="echo"/>
     <synthesize cmd="bash run.sh"/>
     <auto_migrate platform_type="a10_ref" >

@@ -7,6 +7,8 @@ FLOW_SUCCESS=1
 echo "Restoring Blue BS lib files"
 echo "==========================="
 #TODO: copy files
+cp -fr $BLUE_BITS_SOF_DIR_PATH blue_bits
+cp $BLUE_BITS_QDB_FILE_PATH dcp.qdb
 
 # generate board.qsys
 qsys-generate --synthesis=VERILOG --family="Arria 10" --part=10AX115N3F40E2SG  kernel_system.qsys
@@ -28,11 +30,14 @@ else
     exit 1
 fi
 
+#run packager tool to create GBS
+packager create-gbs --rbf ./output_files/afu_fit.green_region.rbf --gbs ./output_files/afu_fit.gbs --no-metadata
+
 echo ""
 echo "==========================================================================="
 echo "SKX-P PR AFU compilation complete"
 echo "*** DEFAULT (uClk_usr, uClk_usrDiv2) is (312.5 MHz, 156.25 MHz) ****"
-echo "AFU gbs file located at output_files/skx_pr_afu.gbs"
+echo "AFU gbs file located at output_files/afu_fit.gbs"
 echo "Use this gbs file with aliconfafu utility to load PR bitstream"
 echo "==========================================================================="
 echo ""

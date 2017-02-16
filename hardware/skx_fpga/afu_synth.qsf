@@ -65,30 +65,19 @@ set_global_assignment -name LAST_QUARTUS_VERSION 16.0.2
 # Fileset
 # ===============================
 set_global_assignment -name TOP_LEVEL_ENTITY green_bs
-#set_global_assignment -name SYSTEMVERILOG_FILE ./afu/interfaces/ccip_if_pkg.sv
-#set_global_assignment -name SYSTEMVERILOG_FILE ./afu/interfaces/sys_cfg_pkg.svh
-#set_global_assignment -name SYSTEMVERILOG_FILE ./afu/interfaces/vendor_defines.vh
-#set_global_assignment -name SYSTEMVERILOG_FILE ./afu/green_bs.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ./afu/interfaces/ccip_if_pkg.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ./afu/interfaces/sys_cfg_pkg.svh
+set_global_assignment -name SYSTEMVERILOG_FILE ./afu/interfaces/vendor_defines.vh
+set_global_assignment -name SYSTEMVERILOG_FILE ./afu/green_bs.sv
 set_global_assignment -name SDC_FILE dcp_top.sdc
 
 set_global_assignment -name PR_BASE_SOF "./blue_bits/dcp.sof"
 set_global_assignment -name PR_BASE_MSF "root_partition=./blue_bits/dcp.static.msf"
 set_global_assignment -name PR_BASE_MSF "pr_inst=./blue_bits/dcp.green_region.msf"
 
-# Green Region Mandatory RTL files
-# ================================
-set_global_assignment -name SYSTEMVERILOG_FILE ./green/ccip_if_pkg.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ./green/hssi_eth_pkg.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ./green/green_bs.sv
-set_global_assignment -name MISC_FILE ./green/AFU_debug/SCJIO.qsys
-set_global_assignment -name QSYS_FILE ./green/AFU_debug/SCJIO.qsys
-
 # AFU  section - User AFU RTL goes here
 # =============================================
 # 
 # AFU + MPF IPs
 source afu_ip.qsf
-
-# Board + Kernel IP
-source opencl_bsp_ip.qsf
 
