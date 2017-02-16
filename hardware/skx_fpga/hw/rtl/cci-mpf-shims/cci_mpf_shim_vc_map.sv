@@ -123,6 +123,106 @@ module cci_mpf_shim_vc_map
 
     // ====================================================================
     //
+    //   Pick the right ratio for the current traffic and hardware.
+    //
+    // ====================================================================
+
+    //
+    // pickRatioVL0 assumes that there are three physical channels:
+    // VL0 and two PCIe channels.  The value returned is the fraction of
+    // requests that should be directed to VL0 in order to hit maximum
+    // bandwidth.  The returned value is the numerator of the fraction,
+    // measured as 64ths of all references.
+    //
+
+    // Fraction of requests to map to VL0 (of 64)
+    typedef logic [5:0] t_map_ratio;
+
+    function automatic t_map_ratio pickRatioVL0(logic mostlyRead,
+                                                logic mostlyWrite,
+                                                t_ccip_clLen reqLen);
+        int r;
+
+        //
+        // These values are computed using the output of
+        // test/test-mpf/test_mem_perf/sw/compute_vc_map_params in this MPF
+        // library.  The program emits the performance of all possible
+        // fractions and the best VL0 ratios are chosen manually.  When
+        // multiple ratios result in the same performance it is usually
+        // best to pick a value that is common to as many multi-beat sizes
+        // as possible, since some AFUs emit more than one size request
+        // simultaneously.
+        //
+
+        if (MPF_PLATFORM == "SKX")
+        begin
+            if (mostlyRead)
+            begin
+                case (reqLen)
+                    eCL_LEN_1: r = 36;
+                    eCL_LEN_2: r = 32;
+                    default: r = 30;
+                endcase
+            end
+            else if (mostlyWrite)
+            begin
+                case (reqLen)
+                    eCL_LEN_1: r = 18;
+                    eCL_LEN_2: r = 18;
+                    default: r = 16;
+                endcase
+            end
+            else
+            begin
+                case (reqLen)
+                    eCL_LEN_1: r = 24;
+                    eCL_LEN_2: r = 18;
+                    default: r = 16;
+                endcase
+            end
+        end
+        else if (MPF_PLATFORM == "BDX")
+        begin
+            if (mostlyRead)
+            begin
+                case (reqLen)
+                    eCL_LEN_1: r = 28;
+                    eCL_LEN_2: r = 26;
+                    default: r = 24;
+                endcase
+            end
+            else if (mostlyWrite)
+            begin
+                case (reqLen)
+                    eCL_LEN_1: r = 16;
+                    eCL_LEN_2: r = 16;
+                    default: r = 14;
+                endcase
+            end
+            else
+            begin
+                case (reqLen)
+                    eCL_LEN_1: r = 20;
+                    eCL_LEN_2: r = 16;
+                    default: r = 12;
+                endcase
+            end
+        end
+        else
+        begin
+            // Unknown platform.
+            $fatal(2, "Unknown platform");
+        end
+
+        return t_map_ratio'(r);
+    endfunction
+
+    // Set the default channel mapping ratio.
+    localparam RATIO_VL0_DEFAULT = pickRatioVL0(1'b0, 1'b0, eCL_LEN_2);
+
+
+    // ====================================================================
+    //
     //   Mapping control
     //
     // ====================================================================
@@ -131,23 +231,10 @@ module cci_mpf_shim_vc_map
     logic dynamic_mapping_disabled;
     logic map_all;
 
-    // Fraction of requests to map to VL0 (of 64)
-    typedef logic [5:0] t_map_ratio;
     t_map_ratio ratio_vl0;
     logic always_use_vl0;
 
     logic [MAX_SAMPLE_CYCLES_RADIX+2 : 0] always_use_vl0_threshold_mask;
-
-`ifdef MPF_PLATFORM_OME
-    // Don't care (only one physical channel)
-    localparam RATIO_VL0_DEFAULT = t_map_ratio'(16);
-`elsif MPF_PLATFORM_BDX
-    // Default ratio is 2 VL0 : 3 VH0 : 3 VH1 which is a reasonable compromise
-    // for CCI-P on BDX.
-    localparam RATIO_VL0_DEFAULT = t_map_ratio'(16);
-`else
-    ** ERROR: Unknown platform
-`endif
 
     // Should request be mapped?
     function automatic logic req_needs_mapping(t_cci_vc vc_sel);
@@ -335,95 +422,6 @@ module cci_mpf_shim_vc_map
             fiu.c1Tx.valid = 1'b1;
         end
     end
-
-
-    // ====================================================================
-    // 
-    //   Pick the right ratio for the current traffic and hardware.
-    //
-    // ====================================================================
-
-    function automatic t_map_ratio pickRatioVL0(logic mostlyRead,
-                                                logic mostlyWrite,
-                                                t_ccip_clLen reqLen);
-        int r;
-
-`ifdef MPF_PLATFORM_OME
-
-        // Mapping is irrelevant.  The HW has only one channel.
-        r = 16;
-
-`elsif MPF_PLATFORM_BDX
-
-        //
-        // The following memory throughput was determined experimentally
-        // for the Arria 10 on BDX.  The chart shows full performance in
-        // NLB mode 3 for read, write and trput in GB/s.  The first group
-        // is single line accesses, followed by 2 and then 4 line requests.
-        // Ratios are indicated in 64ths -- the same as the mapping above.
-        // Peak performance is marked with an X.
-        //
-        //
-        //                     BDX Arria 10 Xeon+FPGA
-        // Ratio
-        // (VL0:VH0:VH1) Read 1 CL     Write 1 CL    Trput R 1 CL  Trput W 1 CL
-        // VA (no map)   16.7          15.4          11.1          10.9
-        // 28:18:18      16.9 X        11.0          7.5           7.5
-        // 24:20:20      16.1          13.3          8.7           8.9
-        // 20:22:22      14.5          15.2 X        10.7 X        10.8 X
-        // 16:24:24      13.3          14.0          9.9           10.0
-        // 12:26:26      12.3          12.9          9.1           9.3
-        //
-        // Ratio
-        // (VL0:VH0:VH1) Read 2 CL     Write 2 CL    Trput R 2 CL  Trput W 2 CL
-        // VA (no map)   19.2          17.6          14.5          13.8
-        // 28:18:18      17.0          11.0          7.6           7.8
-        // 24:20:20      18.9 X        13.3          8.8           9.0
-        // 20:22:22      16.9          16.0          10.8          11.0
-        // 16:24:24      16.0          16.7 X        13.8 X        13.9 X
-        // 12:26:26      14.8          15.4          12.9          12.9
-        //
-        // Ratio
-        // (VL0:VH0:VH1) Read 4 CL     Write 4 CL    Trput R 4 CL  Trput W 4 CL
-        // VA (no map)   18.9          19.0          15.8          15.6
-        // 28:18:18      16.7          10.9          7.5           7.6
-        // 24:20:20      19.4 X        13.3          8.6           8.8
-        // 20:22:22      18.4          16.0          10.6          10.8
-        // 16:24:24      16.8          18.4 X        13.4          13.5
-        // 12:26:26      15.6          17.0          15.3 X        15.4 X
-        //
-
-        if (mostlyRead)
-        begin
-            case (reqLen)
-              eCL_LEN_1: r = 28;
-                default: r = 24;
-            endcase
-        end
-        else if (mostlyWrite)
-        begin
-            case (reqLen)
-              eCL_LEN_1: r = 20;
-                default: r = 16;
-            endcase
-        end
-        else
-        begin
-            case (reqLen)
-              eCL_LEN_1: r = 20;
-              eCL_LEN_2: r = 16;
-                default: r = 12;
-            endcase
-        end
-
-`else
-
-    ** ERROR: Unknown platform
-
-`endif
-
-        return t_map_ratio'(r);
-    endfunction
 
 
     // ====================================================================

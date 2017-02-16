@@ -35,11 +35,39 @@
 `ifndef __CCI_MPF_PLATFORM__
 `define __CCI_MPF_PLATFORM__
 
-`ifdef MPF_PLATFORM_BDX
+// Default platform: 3 physical channels (VL0, VH0, VH1)
+`define MPF_PLATFORM_NUM_PHYSICAL_CHANNELS 3
+`define MPF_PLATFORM_DEFAULT_PHYSICAL_CHANNEL eVC_VL0
+
+
+`ifdef MPF_PLATFORM_SKX
+     //
+     // Skylake Xeon+FPGA
+     //
+
+    localparam MPF_PLATFORM = "SKX";
+    `define MPF_HOST_IFC_CCIP
+
+`elsif MPF_PLATFORM_DCP_PCIE
+     //
+     // Discrete FPGA on a PCIe interface
+     //
+
+    localparam MPF_PLATFORM = "DCP_PCIE";
+    `define MPF_HOST_IFC_CCIP
+
+    // Use only VH0 (PCIe)
+    `undef  MPF_PLATFORM_NUM_PHYSICAL_CHANNELS
+    `define MPF_PLATFORM_NUM_PHYSICAL_CHANNELS 1
+    `undef  MPF_PLATFORM_DEFAULT_PHYSICAL_CHANNEL
+    `define MPF_PLATFORM_DEFAULT_PHYSICAL_CHANNEL eVC_VH0
+
+`elsif MPF_PLATFORM_BDX
      //
      // Broadwell Xeon+FPGA
      //
 
+    localparam MPF_PLATFORM = "BDX";
     `define MPF_HOST_IFC_CCIP
 
 `elsif MPF_PLATFORM_OME
@@ -47,7 +75,14 @@
      // OME2 and OME3 dual socket system development platforms
      //
 
+    localparam MPF_PLATFORM = "OME";
     `define MPF_HOST_IFC_CCIS
+
+    // Use only VL0 (QPI)
+    `undef  MPF_PLATFORM_NUM_PHYSICAL_CHANNELS
+    `define MPF_PLATFORM_NUM_PHYSICAL_CHANNELS 1
+    `undef  MPF_PLATFORM_DEFAULT_PHYSICAL_CHANNEL
+    `define MPF_PLATFORM_DEFAULT_PHYSICAL_CHANNEL eVC_VL0
 
 `else
 

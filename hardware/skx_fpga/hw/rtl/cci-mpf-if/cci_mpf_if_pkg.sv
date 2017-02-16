@@ -182,6 +182,16 @@ package cci_mpf_if_pkg;
 
     // ====================================================================
     //
+    //   Platform parameters
+    //
+    // ====================================================================
+
+    parameter MPF_PLATFORM_NUM_PHYSICAL_CHANNELS = `MPF_PLATFORM_NUM_PHYSICAL_CHANNELS;
+    parameter t_cci_vc MPF_PLATFORM_DEFAULT_PHYSICAL_CHANNEL = t_cci_vc'(`MPF_PLATFORM_DEFAULT_PHYSICAL_CHANNEL);
+
+
+    // ====================================================================
+    //
     //   MPF-specific header.
     //
     // ====================================================================
@@ -392,7 +402,7 @@ package cci_mpf_if_pkg;
         p.checkLoadStoreOrder = 1'b0;      // Default hardware behavior
         p.mapVAtoPhysChannel = 1'b0;
         p.addrIsVirtual = 1'(addrIsVirtual);
-        p.vc_sel = eVC_VL0;
+        p.vc_sel = MPF_PLATFORM_DEFAULT_PHYSICAL_CHANNEL;
         p.cl_len = eCL_LEN_1;
         p.sop = 1'b1;
         return p;
@@ -783,6 +793,12 @@ package cci_mpf_if_pkg;
         h_out.base.rsvd1 = 0;
         h_out.base.rsvd0 = 0;
 
+        // Force the physical channel on single channel systems
+        if (MPF_PLATFORM_NUM_PHYSICAL_CHANNELS == 1)
+        begin
+            h_out.base.vc_sel = MPF_PLATFORM_DEFAULT_PHYSICAL_CHANNEL;
+        end
+
         // Extension flags may only be set on read requests
         if (! isReadReq)
         begin
@@ -814,6 +830,12 @@ package cci_mpf_if_pkg;
         t_cci_mpf_c1_ReqMemHdr h_out = h;
         h_out.base.rsvd1 = 0;
         h_out.base.rsvd0 = 0;
+
+        // Force the physical channel on single channel systems
+        if (MPF_PLATFORM_NUM_PHYSICAL_CHANNELS == 1)
+        begin
+            h_out.base.vc_sel = MPF_PLATFORM_DEFAULT_PHYSICAL_CHANNEL;
+        end
 
         // Extension flags may only be set on write requests
         if (! isWriteReq)

@@ -135,13 +135,21 @@ module cci_mpf
     );
 
     // Maximum number of outstanding read and write requests per channel
-`ifdef MPF_PLATFORM_BDX
+`ifdef MPF_PLATFORM_SKX
+    localparam MAX_ACTIVE_REQS = 1024;
+`elsif MPF_PLATFORM_DCP_PCIE
+    localparam MAX_ACTIVE_REQS = 512;
+`elsif MPF_PLATFORM_BDX
     localparam MAX_ACTIVE_REQS = 1024;
 `elsif MPF_PLATFORM_OME
     localparam MAX_ACTIVE_REQS = 128;
 `else
     ** ERROR: Unknown platform
 `endif
+
+    // No point in enabling VC Map when there is only one channel
+    localparam MPF_ENABLE_VC_MAP =
+        (MPF_PLATFORM_NUM_PHYSICAL_CHANNELS > 1) ? ENABLE_VC_MAP : 0;
 
     logic reset = 1'b1;
     always @(posedge clk)
@@ -218,7 +226,7 @@ module cci_mpf
         .DFH_MMIO_NEXT_ADDR(DFH_MMIO_NEXT_ADDR),
         .MPF_ENABLE_VTP(ENABLE_VTP),
         .MPF_ENABLE_RSP_ORDER(SORT_READ_RESPONSES),
-        .MPF_ENABLE_VC_MAP(ENABLE_VC_MAP),
+        .MPF_ENABLE_VC_MAP(MPF_ENABLE_VC_MAP),
         .MPF_ENABLE_WRO(ENFORCE_WR_ORDER),
         .MPF_ENABLE_PWRITE(ENABLE_PARTIAL_WRITES)
         )
@@ -284,7 +292,7 @@ module cci_mpf
         .DFH_MMIO_BASE_ADDR(DFH_MMIO_BASE_ADDR),
         .DFH_MMIO_NEXT_ADDR(DFH_MMIO_NEXT_ADDR),
         .ENABLE_VTP(ENABLE_VTP),
-        .ENABLE_VC_MAP(ENABLE_VC_MAP),
+        .ENABLE_VC_MAP(MPF_ENABLE_VC_MAP),
         .ENABLE_DYNAMIC_VC_MAPPING(ENABLE_DYNAMIC_VC_MAPPING),
         .ENFORCE_WR_ORDER(ENFORCE_WR_ORDER),
         .SORT_READ_RESPONSES(SORT_READ_RESPONSES),
