@@ -1,2 +1,0 @@
-set_global_assignment -name TOP_LEVEL_ENTITY fpga_top
-set_global_assignment -name DEVICE 10AX115U3F45E2SG

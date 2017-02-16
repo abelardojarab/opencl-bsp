@@ -1,6 +1,6 @@
+`include "fpga_defines.vh"
 import ccip_if_pkg::*;
-`define INCLUDE_ETHERNET
-`ifdef  INCLUDE_ETHERNET
+`ifdef INCLUDE_ETHERNET
 import hssi_eth_pkg::*;
 `endif 
 parameter CCIP_TXPORT_WIDTH = $bits(t_if_ccip_Tx);  // TODO: Move this to ccip_if_pkg
@@ -19,12 +19,6 @@ module green_bs
    input   logic                         pck_cp2af_error,
    output  logic [CCIP_TXPORT_WIDTH-1:0] bus_ccip_Tx,         // CCI-P TX port
    input   logic [CCIP_RXPORT_WIDTH-1:0] bus_ccip_Rx,         // CCI-P RX port
-  
-   // JTAG Interface for PR region debug
-   input   logic            sr2pr_tms,
-   input   logic            sr2pr_tdi,             
-   output  logic            pr2sr_tdo,             
-   input   logic            sr2pr_tck,
    
 `ifdef INCLUDE_ETHERNET
    // HSSI Ethernet SERDES Interface
@@ -86,7 +80,7 @@ module green_bs
      input                    prmgmt_ram_ena,
      output                   prmgmt_fatal_err,
 `endif // INCLUDE_ETHERNET
-
+`ifdef INCLUDE_GPIO
      output  [4:0] g2b_GPIO_a         ,// GPIO port A
      output  [4:0] g2b_GPIO_b         ,// GPIO port B
      output        g2b_I2C0_scl       ,// I2C0 clock
@@ -112,7 +106,13 @@ module green_bs
      output        oen_I2C0_rstn      ,// I2C0 rstn
      output        oen_I2C1_scl       ,// I2C1 clock
      output        oen_I2C1_sda       ,// I2C1 data
-     output        oen_I2C1_rstn       // I2C1 rstn
+     output        oen_I2C1_rstn      ,// I2C1 rstn
+`endif
+   // JTAG Interface for PR region debug
+   input   logic            sr2pr_tms,
+   input   logic            sr2pr_tdi,             
+   output  logic            pr2sr_tdo,             
+   input   logic            sr2pr_tck
 );
 
 t_if_ccip_Tx af2cp_sTxPort;
@@ -128,6 +128,10 @@ end
 // AFU - Remote Debug JTAG IP instantiation
 // ===========================================
 
+`ifdef SIM_MODE
+  assign pr2sr_tdo = 0;
+`else
+  `ifdef INCLUDE_REMOTE_STP
     wire loopback;
     sld_virtual_jtag 
     inst_sld_virtual_jtag (
@@ -142,6 +146,10 @@ end
     		.tdo         (pr2sr_tdo),         //            .tdo
     		.tck         (sr2pr_tck)          //         tck.clk
     ); 
+  `else
+    assign pr2sr_tdo = 0;
+  `endif // SIM_MODE
+`endif // SIM_MODE
 
 // ===========================================
 // CCIP_STD_AFU Instantiation 
@@ -197,20 +205,7 @@ end
 // Partial reconfig zone
 ////////////////////////////////////////////////////////
 `ifdef INCLUDE_ETHERNET
-/*
-`ifdef HSSI_E10
-green_hssi_if_e10 prz0 (
-`else
-    `ifdef HSSI_E40
-    green_hssi_if_e40 prz0 (
-    `else
-        `ifdef HSSI_E100
-        green_hssi_if_e100 prz0 (
-        `else
-        green_hssi_if prz0 (
-        `endif
-    `endif
-`endif
+green_hssi_if prz0 (
 	.tx_analogreset(tx_analogreset),
 	.tx_digitalreset(tx_digitalreset),
 	.rx_analogreset(rx_analogreset),
@@ -269,7 +264,7 @@ green_hssi_if_e10 prz0 (
   	.prmgmt_ram_ena(prmgmt_ram_ena),
     .prmgmt_fatal_err(prmgmt_fatal_err)
 );
-*/
+
 assign g2b_GPIO_a    = 5'b0;
 assign g2b_GPIO_b    = 5'b0;
 assign g2b_I2C0_scl  = 1'b0;

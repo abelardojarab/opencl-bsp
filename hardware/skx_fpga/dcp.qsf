@@ -1,0 +1,421 @@
+set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST ON -section_id eda_simulation
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 1991-2016 Intel Corporation. All rights reserved.
+# Your use of Intel Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Intel Program License 
+# Subscription Agreement, the Intel Quartus Prime License Agreement,
+# the Intel MegaCore Function License Agreement, or other 
+# applicable license agreement, including, without limitation, 
+# that your use is for the sole purpose of programming logic 
+# devices manufactured by Intel and sold by Intel or its 
+# authorized distributors.  Please refer to the applicable 
+# agreement for further details.
+#
+# -------------------------------------------------------------------------- #
+
+
+# Project-Wide Assignments
+# ========================
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name SMART_RECOMPILE OFF
+set_global_assignment -name INI_VARS "hdd_max_fabrics=3"
+
+# EMIF Debug Declaration
+set_global_assignment -name VERILOG_MACRO "ALTERA_EMIF_ENABLE_ISSP=1"
+
+# Pin & Location Assignments
+# ==========================
+set_location_assignment PIN_AM21 -to pin_lvds_inp_vl_FABCLK_100_DP
+set_location_assignment PIN_AL29 -to pin_lvds_inp_vl_ATXCK0_x00_DP
+set_instance_assignment -name IO_STANDARD HCSL -to pin_lvds_inp_vl_ATXCK0_x00_DP
+set_instance_assignment -name XCVR_IO_PIN_TERMINATION 100_OHMS -to pin_lvds_inp_vl_ATXCK0_x00_DP
+set_location_assignment PIN_AN33 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[0]
+set_location_assignment PIN_AM31 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[1]
+set_location_assignment PIN_AM35 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[2]
+set_location_assignment PIN_AL33 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[3]
+set_location_assignment PIN_AK31 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[4]
+set_location_assignment PIN_AK35 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[5]
+set_location_assignment PIN_AJ33 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[6]
+set_location_assignment PIN_AH31 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[7]
+set_location_assignment PIN_AU37 -to pin_pcie_bid_vl8_PCIE0_DTX_DP[0]
+set_location_assignment PIN_AT35 -to pin_pcie_bid_vl8_PCIE0_DTX_DP[1]
+set_location_assignment PIN_AT39 -to pin_pcie_bid_vl8_PCIE0_DTX_DP[2]
+set_location_assignment PIN_AR37 -to pin_pcie_bid_vl8_PCIE0_DTX_DP[3]
+set_location_assignment PIN_AP35 -to pin_pcie_bid_vl8_PCIE0_DTX_DP[4]
+set_location_assignment PIN_AP39 -to pin_pcie_bid_vl8_PCIE0_DTX_DP[5]
+set_location_assignment PIN_AN37 -to pin_pcie_bid_vl8_PCIE0_DTX_DP[6]
+set_location_assignment PIN_AM39 -to pin_pcie_bid_vl8_PCIE0_DTX_DP[7]
+set_location_assignment PIN_AW16 -to pin_cmos18_inp_vl_PCIE0_RESET_N
+# DDR3 SDRAM Voltage Control
+set_location_assignment PIN_A26 -to user_vmemory_power_en
+set_instance_assignment -name IO_STANDARD 1.8V -to user_vmemory_power_en
+
+set_location_assignment PIN_AL9 -to ddr0_pll_ref_clk
+set_instance_assignment -name IO_STANDARD LVDS -to ddr0_pll_ref_clk
+set_instance_assignment -name INPUT_TERMINATION DIFFERENTIAL -to ddr0_pll_ref_clk
+
+set_location_assignment PIN_AT12 -to ddr0_rzq
+
+set_location_assignment PIN_AM6 -to ddr0_mem_ba[0]
+set_location_assignment PIN_AL7 -to ddr0_mem_ba[1]
+set_location_assignment PIN_AK7 -to ddr0_mem_ba[2]
+
+set_location_assignment PIN_AT2 -to ddr0_mem_a[0]
+set_location_assignment PIN_AT3 -to ddr0_mem_a[1]
+set_location_assignment PIN_AU1 -to ddr0_mem_a[2]
+set_location_assignment PIN_AU2 -to ddr0_mem_a[3]
+set_location_assignment PIN_AR5 -to ddr0_mem_a[4]
+set_location_assignment PIN_AP6 -to ddr0_mem_a[5]
+set_location_assignment PIN_AP4 -to ddr0_mem_a[6]
+set_location_assignment PIN_AP5 -to ddr0_mem_a[7]
+set_location_assignment PIN_AR3 -to ddr0_mem_a[8]
+set_location_assignment PIN_AP3 -to ddr0_mem_a[9]
+set_location_assignment PIN_AN4 -to ddr0_mem_a[10]
+set_location_assignment PIN_AM5 -to ddr0_mem_a[11]
+set_location_assignment PIN_AM9 -to ddr0_mem_a[12]
+set_location_assignment PIN_AN7 -to ddr0_mem_a[13]
+set_location_assignment PIN_AM7 -to ddr0_mem_a[14]
+set_location_assignment PIN_AL8 -to ddr0_mem_a[15]
+
+set_location_assignment PIN_AR6 -to ddr0_mem_ck[0]
+set_location_assignment PIN_AR7 -to ddr0_mem_ck_n[0]
+
+set_location_assignment PIN_AV4 -to ddr0_mem_cke[0]
+set_location_assignment PIN_AU5 -to ddr0_mem_cs_n[0]
+set_location_assignment PIN_AW6 -to ddr0_mem_odt[0]
+set_location_assignment PIN_AW5 -to ddr0_mem_reset_n[0]
+set_location_assignment PIN_AW4 -to ddr0_mem_we_n[0]
+set_location_assignment PIN_AK8 -to ddr0_mem_ras_n[0]
+set_location_assignment PIN_AN6 -to ddr0_mem_cas_n[0]
+
+set_location_assignment PIN_AF8 -to ddr0_mem_dqs[0]
+set_location_assignment PIN_AE8 -to ddr0_mem_dqs_n[0]
+set_location_assignment PIN_AC11 -to ddr0_mem_dq[0]
+set_location_assignment PIN_AE11 -to ddr0_mem_dq[1]
+set_location_assignment PIN_AD10 -to ddr0_mem_dq[2]
+set_location_assignment PIN_AF9 -to ddr0_mem_dq[3]
+set_location_assignment PIN_AD9 -to ddr0_mem_dq[4]
+set_location_assignment PIN_AE10 -to ddr0_mem_dq[5]
+set_location_assignment PIN_AC9 -to ddr0_mem_dq[6]
+set_location_assignment PIN_AD8 -to ddr0_mem_dq[7]
+set_location_assignment PIN_AF10 -to ddr0_mem_dm[0]
+
+set_location_assignment PIN_AJ3 -to ddr0_mem_dqs[1]
+set_location_assignment PIN_AH3 -to ddr0_mem_dqs_n[1]
+set_location_assignment PIN_AF5 -to ddr0_mem_dq[8]
+set_location_assignment PIN_AG7 -to ddr0_mem_dq[9]
+set_location_assignment PIN_AF4 -to ddr0_mem_dq[10]
+set_location_assignment PIN_AH4 -to ddr0_mem_dq[11]
+set_location_assignment PIN_AE7 -to ddr0_mem_dq[12]
+set_location_assignment PIN_AG6 -to ddr0_mem_dq[13]
+set_location_assignment PIN_AF7 -to ddr0_mem_dq[14]
+set_location_assignment PIN_AG5 -to ddr0_mem_dq[15]
+set_location_assignment PIN_AG4 -to ddr0_mem_dm[1]
+
+set_location_assignment PIN_AR1 -to ddr0_mem_dqs[2]
+set_location_assignment PIN_AR2 -to ddr0_mem_dqs_n[2]
+set_location_assignment PIN_AN1 -to ddr0_mem_dq[16]
+set_location_assignment PIN_AP1 -to ddr0_mem_dq[17]
+set_location_assignment PIN_AJ1 -to ddr0_mem_dq[18]
+set_location_assignment PIN_AL2 -to ddr0_mem_dq[19]
+set_location_assignment PIN_AM1 -to ddr0_mem_dq[20]
+set_location_assignment PIN_AK2 -to ddr0_mem_dq[21]
+set_location_assignment PIN_AH2 -to ddr0_mem_dq[22]
+set_location_assignment PIN_AN2 -to ddr0_mem_dq[23]
+set_location_assignment PIN_AM2 -to ddr0_mem_dm[2]
+
+set_location_assignment PIN_AR10 -to ddr0_mem_dqs[3]
+set_location_assignment PIN_AP10 -to ddr0_mem_dqs_n[3]
+set_location_assignment PIN_AR8 -to ddr0_mem_dq[24]
+set_location_assignment PIN_AP11 -to ddr0_mem_dq[25]
+set_location_assignment PIN_AN9 -to ddr0_mem_dq[26]
+set_location_assignment PIN_AU11 -to ddr0_mem_dq[27]
+set_location_assignment PIN_AP9 -to ddr0_mem_dq[28]
+set_location_assignment PIN_AR12 -to ddr0_mem_dq[29]
+set_location_assignment PIN_AP8 -to ddr0_mem_dq[30]
+set_location_assignment PIN_AR11 -to ddr0_mem_dq[31]
+set_location_assignment PIN_AU10 -to ddr0_mem_dm[3]
+
+set_location_assignment PIN_AL5 -to ddr0_mem_dqs[4]
+set_location_assignment PIN_AK5 -to ddr0_mem_dqs_n[4]
+set_location_assignment PIN_AL4 -to ddr0_mem_dq[32]
+set_location_assignment PIN_AJ6 -to ddr0_mem_dq[33]
+set_location_assignment PIN_AM4 -to ddr0_mem_dq[34]
+set_location_assignment PIN_AJ5 -to ddr0_mem_dq[35]
+set_location_assignment PIN_AN3 -to ddr0_mem_dq[36]
+set_location_assignment PIN_AH6 -to ddr0_mem_dq[37]
+set_location_assignment PIN_AK6 -to ddr0_mem_dq[38]
+set_location_assignment PIN_AK3 -to ddr0_mem_dq[39]
+set_location_assignment PIN_AJ4 -to ddr0_mem_dm[4]
+
+set_location_assignment PIN_AG9 -to ddr0_mem_dqs[5]
+set_location_assignment PIN_AG10 -to ddr0_mem_dqs_n[5]
+set_location_assignment PIN_AJ11 -to ddr0_mem_dq[40]
+set_location_assignment PIN_AH11 -to ddr0_mem_dq[41]
+set_location_assignment PIN_AJ10 -to ddr0_mem_dq[42]
+set_location_assignment PIN_AG12 -to ddr0_mem_dq[43]
+set_location_assignment PIN_AH8 -to ddr0_mem_dq[44]
+set_location_assignment PIN_AF12 -to ddr0_mem_dq[45]
+set_location_assignment PIN_AJ9 -to ddr0_mem_dq[46]
+set_location_assignment PIN_AG11 -to ddr0_mem_dq[47]
+set_location_assignment PIN_AH9 -to ddr0_mem_dm[5]
+
+set_location_assignment PIN_AW8 -to ddr0_mem_dqs[6]
+set_location_assignment PIN_AV8 -to ddr0_mem_dqs_n[6]
+set_location_assignment PIN_AT9 -to ddr0_mem_dq[48]
+set_location_assignment PIN_AU7 -to ddr0_mem_dq[49]
+set_location_assignment PIN_AT10 -to ddr0_mem_dq[50]
+set_location_assignment PIN_AT8 -to ddr0_mem_dq[51]
+set_location_assignment PIN_AW9 -to ddr0_mem_dq[52]
+set_location_assignment PIN_AU9 -to ddr0_mem_dq[53]
+set_location_assignment PIN_AW10 -to ddr0_mem_dq[54]
+set_location_assignment PIN_AV9 -to ddr0_mem_dq[55]
+set_location_assignment PIN_AT7 -to ddr0_mem_dm[6]
+
+set_location_assignment PIN_AN11 -to ddr0_mem_dqs[7]
+set_location_assignment PIN_AM11 -to ddr0_mem_dqs_n[7]
+set_location_assignment PIN_AK12 -to ddr0_mem_dq[56]
+set_location_assignment PIN_AN12 -to ddr0_mem_dq[57]
+set_location_assignment PIN_AL12 -to ddr0_mem_dq[58]
+set_location_assignment PIN_AK11 -to ddr0_mem_dq[59]
+set_location_assignment PIN_AL14 -to ddr0_mem_dq[60]
+set_location_assignment PIN_AL10 -to ddr0_mem_dq[61]
+set_location_assignment PIN_AN13 -to ddr0_mem_dq[62]
+set_location_assignment PIN_AM10 -to ddr0_mem_dq[63]
+set_location_assignment PIN_AM12 -to ddr0_mem_dm[7]
+
+#set_location_assignment PIN_AG14 -to ddr0_mem_dqs[8]
+#set_location_assignment PIN_AF14 -to ddr0_mem_dqs_n[8]
+#set_location_assignment PIN_AH13 -to ddr0_mem_dq[64]
+#set_location_assignment PIN_AH14 -to ddr0_mem_dq[65]
+#set_location_assignment PIN_AH12 -to ddr0_mem_dq[66]
+#set_location_assignment PIN_AJ15 -to ddr0_mem_dq[67]
+#set_location_assignment PIN_AK13 -to ddr0_mem_dq[68]
+#set_location_assignment PIN_AG15 -to ddr0_mem_dq[69]
+#set_location_assignment PIN_AJ13 -to ddr0_mem_dq[70]
+#set_location_assignment PIN_AJ14 -to ddr0_mem_dq[71]
+#set_location_assignment PIN_AF15 -to ddr0_mem_dm[8]
+
+
+# Classic Timing Assignments
+# ==========================
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 100
+set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
+
+# Compiler Assignments
+# ====================
+set_global_assignment -name OPTIMIZATION_MODE "HIGH PERFORMANCE EFFORT"
+
+# Analysis & Synthesis Assignments
+# ================================
+set_global_assignment -name TOP_LEVEL_ENTITY wcp_top
+set_global_assignment -name FAMILY "Arria 10"
+set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
+set_global_assignment -name VERILOG_SHOW_LMF_MAPPING_MESSAGES OFF
+set_global_assignment -name ALLOW_ANY_RAM_SIZE_FOR_RECOGNITION ON
+set_global_assignment -name OPTIMIZATION_TECHNIQUE SPEED
+set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS ON
+set_global_assignment -name ADD_PASS_THROUGH_LOGIC_TO_INFERRED_RAMS OFF
+set_global_assignment -name USE_HIGH_SPEED_ADDER ON
+set_global_assignment -name MUX_RESTRUCTURE ON
+set_global_assignment -name VERILOG_MACRO NLB400_MODE_0
+
+# Fitter Assignments
+# ==================
+set_global_assignment -name DEVICE 10AX115N3F40E2SG
+set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 4
+#set_global_assignment -name AUTO_RESERVE_CLKUSR_FOR_CALIBRATION OFF
+set_global_assignment -name SEED 8
+set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
+set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MAXIMUM
+set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
+set_global_assignment -name ROUTER_LCELL_INSERTION_AND_LOGIC_DUPLICATION ON
+set_global_assignment -name QII_AUTO_PACKED_REGISTERS NORMAL
+set_global_assignment -name PROGRAMMABLE_POWER_TECHNOLOGY_SETTING "FORCE ALL TILES WITH FAILING TIMING PATHS TO HIGH SPEED"
+set_global_assignment -name CRC_ERROR_OPEN_DRAIN OFF
+#set_global_assignment -name INTERNAL_SCRUBBING ON
+set_global_assignment -name ACTIVE_SERIAL_CLOCK FREQ_100MHZ
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "1.8 V"
+set_global_assignment -name SPECTRAQ_PHYSICAL_SYNTHESIS OFF
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS_WEAK_PULLUP "AS INPUT TRI-STATED WITH WEAK PULL-UP"
+#set_global_assignment -name VCCP_USER_VOLTAGE 0.95V
+#set_global_assignment -name VCCERAM_USER_VOLTAGE 0.95V
+set_global_assignment -name ENABLE_UNUSED_RX_CLOCK_WORKAROUND ON
+# Assembler Assignments
+# =====================
+set_global_assignment -name ENABLE_OCT_DONE OFF
+#set_global_assignment -name USE_CONFIGURATION_DEVICE ON
+set_global_assignment -name USE_CONFIGURATION_DEVICE OFF
+# Power Estimation Assignments
+# ============================
+#set_global_assignment -name VCCT_L_USER_VOLTAGE 0.9V
+#set_global_assignment -name VCCT_R_USER_VOLTAGE 0.9V
+#set_global_assignment -name VCCR_L_USER_VOLTAGE 0.9V
+#set_global_assignment -name VCCR_R_USER_VOLTAGE 0.9V
+#set_global_assignment -name VCCA_L_USER_VOLTAGE 1.8V
+#set_global_assignment -name VCCA_R_USER_VOLTAGE 1.8V
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -fall
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO"
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -rise
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -fall
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING"
+set_global_assignment -name ENABLE_BOOT_SEL_PIN OFF
+set_global_assignment -name ENABLE_NCE_PIN OFF
+
+
+	# Analysis & Synthesis Assignments
+	# ================================
+set_instance_assignment -name MAX_FANOUT 256 -to "*qlp_topph:topph_qlp|qlp_top:top_qlp|cci_top:cci_top|cci_pu:cci_pu_wr|ci2cr_CIPUSTAT_c0[2]"
+
+	# Fitter Assignments
+	# ==================
+# DCP CCI-P Clocks:400 MHz, 200, and 100 MHz 
+set_instance_assignment -name GLOBAL_SIGNAL GLOBAL_CLOCK -to bot_wcp|s45_fab_pll_reset_qph|qph_reset_pll_fab_s45_inst|altera_iopll_i|twentynm_pll|outclk[0]
+set_instance_assignment -name GLOBAL_SIGNAL GLOBAL_CLOCK -to bot_wcp|s45_fab_pll_reset_qph|qph_reset_pll_fab_s45_inst|altera_iopll_i|twentynm_pll|outclk[2]
+set_instance_assignment -name GLOBAL_SIGNAL GLOBAL_CLOCK -to bot_wcp|s45_fab_pll_reset_qph|qph_reset_pll_fab_s45_inst|altera_iopll_i|twentynm_pll|outclk[4]
+
+# CCI-P clocks: user clocks (300MHz)
+set_instance_assignment -name GLOBAL_SIGNAL GLOBAL_CLOCK -to bot_wcp|s45_fab_pll_reset_qph|qph_reset_pll_fab_s45_inst|altera_iopll_i|twentynm_pll|outclk[5]
+
+#
+set_instance_assignment -name GLOBAL_SIGNAL "REGIONAL CLOCK" -to altera_internal_jtag~TCKUTAP
+set_instance_assignment -name GLOBAL_SIGNAL GLOBAL_CLOCK -to pin_lvds_inp_vl_FABCLK_100_DP
+set_instance_assignment -name IO_STANDARD "1.8 V" -to pin_cmos18_inp_vl_PCIE0_RESET_N
+set_instance_assignment -name IO_STANDARD CML -to pin_pcie_bid_vl8_PCIE0_DRX_DP[0]
+set_instance_assignment -name XCVR_IO_PIN_TERMINATION 100_OHMS -to pin_pcie_bid_vl8_PCIE0_DRX_DP[0]
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to pin_pcie_bid_vl8_PCIE0_DRX_DP[0]
+set_instance_assignment -name XCVR_A10_RX_TERM_SEL R_R1 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[0]
+set_instance_assignment -name XCVR_A10_RX_ONE_STAGE_ENABLE NON_S1_MODE -to pin_pcie_bid_vl8_PCIE0_DRX_DP[0]
+set_instance_assignment -name XCVR_A10_RX_ADP_CTLE_ACGAIN_4S RADP_CTLE_ACGAIN_4S_7 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[0]
+set_instance_assignment -name XCVR_A10_RX_EQ_DC_GAIN_TRIM STG1_GAIN7 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[0]
+set_instance_assignment -name XCVR_A10_RX_ADP_VGA_SEL RADP_VGA_SEL_4 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[0]
+set_instance_assignment -name IO_STANDARD CML -to pin_pcie_bid_vl8_PCIE0_DRX_DP[1]
+set_instance_assignment -name XCVR_IO_PIN_TERMINATION 100_OHMS -to pin_pcie_bid_vl8_PCIE0_DRX_DP[1]
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to pin_pcie_bid_vl8_PCIE0_DRX_DP[1]
+set_instance_assignment -name XCVR_A10_RX_TERM_SEL R_R1 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[1]
+set_instance_assignment -name XCVR_A10_RX_ONE_STAGE_ENABLE NON_S1_MODE -to pin_pcie_bid_vl8_PCIE0_DRX_DP[1]
+set_instance_assignment -name XCVR_A10_RX_ADP_CTLE_ACGAIN_4S RADP_CTLE_ACGAIN_4S_7 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[1]
+set_instance_assignment -name XCVR_A10_RX_EQ_DC_GAIN_TRIM STG1_GAIN7 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[1]
+set_instance_assignment -name XCVR_A10_RX_ADP_VGA_SEL RADP_VGA_SEL_4 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[1]
+set_instance_assignment -name IO_STANDARD CML -to pin_pcie_bid_vl8_PCIE0_DRX_DP[2]
+set_instance_assignment -name XCVR_IO_PIN_TERMINATION 100_OHMS -to pin_pcie_bid_vl8_PCIE0_DRX_DP[2]
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to pin_pcie_bid_vl8_PCIE0_DRX_DP[2]
+set_instance_assignment -name XCVR_A10_RX_TERM_SEL R_R1 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[2]
+set_instance_assignment -name XCVR_A10_RX_ONE_STAGE_ENABLE NON_S1_MODE -to pin_pcie_bid_vl8_PCIE0_DRX_DP[2]
+set_instance_assignment -name XCVR_A10_RX_ADP_CTLE_ACGAIN_4S RADP_CTLE_ACGAIN_4S_7 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[2]
+set_instance_assignment -name XCVR_A10_RX_EQ_DC_GAIN_TRIM STG1_GAIN7 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[2]
+set_instance_assignment -name XCVR_A10_RX_ADP_VGA_SEL RADP_VGA_SEL_4 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[2]
+set_instance_assignment -name IO_STANDARD CML -to pin_pcie_bid_vl8_PCIE0_DRX_DP[3]
+set_instance_assignment -name XCVR_IO_PIN_TERMINATION 100_OHMS -to pin_pcie_bid_vl8_PCIE0_DRX_DP[3]
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to pin_pcie_bid_vl8_PCIE0_DRX_DP[3]
+set_instance_assignment -name XCVR_A10_RX_TERM_SEL R_R1 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[3]
+set_instance_assignment -name XCVR_A10_RX_ONE_STAGE_ENABLE NON_S1_MODE -to pin_pcie_bid_vl8_PCIE0_DRX_DP[3]
+set_instance_assignment -name XCVR_A10_RX_ADP_CTLE_ACGAIN_4S RADP_CTLE_ACGAIN_4S_7 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[3]
+set_instance_assignment -name XCVR_A10_RX_EQ_DC_GAIN_TRIM STG1_GAIN7 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[3]
+set_instance_assignment -name XCVR_A10_RX_ADP_VGA_SEL RADP_VGA_SEL_4 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[3]
+set_instance_assignment -name IO_STANDARD CML -to pin_pcie_bid_vl8_PCIE0_DRX_DP[4]
+set_instance_assignment -name XCVR_IO_PIN_TERMINATION 100_OHMS -to pin_pcie_bid_vl8_PCIE0_DRX_DP[4]
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to pin_pcie_bid_vl8_PCIE0_DRX_DP[4]
+set_instance_assignment -name XCVR_A10_RX_TERM_SEL R_R1 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[4]
+set_instance_assignment -name XCVR_A10_RX_ONE_STAGE_ENABLE NON_S1_MODE -to pin_pcie_bid_vl8_PCIE0_DRX_DP[4]
+set_instance_assignment -name XCVR_A10_RX_ADP_CTLE_ACGAIN_4S RADP_CTLE_ACGAIN_4S_7 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[4]
+set_instance_assignment -name XCVR_A10_RX_EQ_DC_GAIN_TRIM STG1_GAIN7 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[4]
+set_instance_assignment -name XCVR_A10_RX_ADP_VGA_SEL RADP_VGA_SEL_4 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[4]
+set_instance_assignment -name IO_STANDARD CML -to pin_pcie_bid_vl8_PCIE0_DRX_DP[5]
+set_instance_assignment -name XCVR_IO_PIN_TERMINATION 100_OHMS -to pin_pcie_bid_vl8_PCIE0_DRX_DP[5]
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to pin_pcie_bid_vl8_PCIE0_DRX_DP[5]
+set_instance_assignment -name XCVR_A10_RX_TERM_SEL R_R1 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[5]
+set_instance_assignment -name XCVR_A10_RX_ONE_STAGE_ENABLE NON_S1_MODE -to pin_pcie_bid_vl8_PCIE0_DRX_DP[5]
+set_instance_assignment -name XCVR_A10_RX_ADP_CTLE_ACGAIN_4S RADP_CTLE_ACGAIN_4S_7 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[5]
+set_instance_assignment -name XCVR_A10_RX_EQ_DC_GAIN_TRIM STG1_GAIN7 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[5]
+set_instance_assignment -name XCVR_A10_RX_ADP_VGA_SEL RADP_VGA_SEL_4 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[5]
+set_instance_assignment -name IO_STANDARD CML -to pin_pcie_bid_vl8_PCIE0_DRX_DP[6]
+set_instance_assignment -name XCVR_IO_PIN_TERMINATION 100_OHMS -to pin_pcie_bid_vl8_PCIE0_DRX_DP[6]
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to pin_pcie_bid_vl8_PCIE0_DRX_DP[6]
+set_instance_assignment -name XCVR_A10_RX_TERM_SEL R_R1 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[6]
+set_instance_assignment -name XCVR_A10_RX_ONE_STAGE_ENABLE NON_S1_MODE -to pin_pcie_bid_vl8_PCIE0_DRX_DP[6]
+set_instance_assignment -name XCVR_A10_RX_ADP_CTLE_ACGAIN_4S RADP_CTLE_ACGAIN_4S_7 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[6]
+set_instance_assignment -name XCVR_A10_RX_EQ_DC_GAIN_TRIM STG1_GAIN7 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[6]
+set_instance_assignment -name XCVR_A10_RX_ADP_VGA_SEL RADP_VGA_SEL_4 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[6]
+set_instance_assignment -name IO_STANDARD CML -to pin_pcie_bid_vl8_PCIE0_DRX_DP[7]
+set_instance_assignment -name XCVR_IO_PIN_TERMINATION 100_OHMS -to pin_pcie_bid_vl8_PCIE0_DRX_DP[7]
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to pin_pcie_bid_vl8_PCIE0_DRX_DP[7]
+set_instance_assignment -name XCVR_A10_RX_TERM_SEL R_R1 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[7]
+set_instance_assignment -name XCVR_A10_RX_ONE_STAGE_ENABLE NON_S1_MODE -to pin_pcie_bid_vl8_PCIE0_DRX_DP[7]
+set_instance_assignment -name XCVR_A10_RX_ADP_CTLE_ACGAIN_4S RADP_CTLE_ACGAIN_4S_7 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[7]
+set_instance_assignment -name XCVR_A10_RX_EQ_DC_GAIN_TRIM STG1_GAIN7 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[7]
+set_instance_assignment -name XCVR_A10_RX_ADP_VGA_SEL RADP_VGA_SEL_4 -to pin_pcie_bid_vl8_PCIE0_DRX_DP[7]
+set_instance_assignment -name IO_STANDARD "HSSI DIFFERENTIAL I/O" -to pin_pcie_bid_vl8_PCIE0_DTX_DP[0]
+set_instance_assignment -name IO_STANDARD "HSSI DIFFERENTIAL I/O" -to pin_pcie_bid_vl8_PCIE0_DTX_DP[1]
+set_instance_assignment -name IO_STANDARD "HSSI DIFFERENTIAL I/O" -to pin_pcie_bid_vl8_PCIE0_DTX_DP[2]
+set_instance_assignment -name IO_STANDARD "HSSI DIFFERENTIAL I/O" -to pin_pcie_bid_vl8_PCIE0_DTX_DP[3]
+set_instance_assignment -name IO_STANDARD "HSSI DIFFERENTIAL I/O" -to pin_pcie_bid_vl8_PCIE0_DTX_DP[4]
+set_instance_assignment -name IO_STANDARD "HSSI DIFFERENTIAL I/O" -to pin_pcie_bid_vl8_PCIE0_DTX_DP[5]
+set_instance_assignment -name IO_STANDARD "HSSI DIFFERENTIAL I/O" -to pin_pcie_bid_vl8_PCIE0_DTX_DP[6]
+set_instance_assignment -name IO_STANDARD "HSSI DIFFERENTIAL I/O" -to pin_pcie_bid_vl8_PCIE0_DTX_DP[7]
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to pin_pcie_bid_vl8_PCIE0_DTX_DP[0]
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to pin_pcie_bid_vl8_PCIE0_DTX_DP[1]
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to pin_pcie_bid_vl8_PCIE0_DTX_DP[2]
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to pin_pcie_bid_vl8_PCIE0_DTX_DP[3]
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to pin_pcie_bid_vl8_PCIE0_DTX_DP[4]
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to pin_pcie_bid_vl8_PCIE0_DTX_DP[5]
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to pin_pcie_bid_vl8_PCIE0_DTX_DP[6]
+set_instance_assignment -name XCVR_VCCR_VCCT_VOLTAGE 1_0V -to pin_pcie_bid_vl8_PCIE0_DTX_DP[7]
+set_instance_assignment -name GLOBAL_SIGNAL OFF -to "*ccip_fabric_top:inst_ccip_frabic_top|ccie_t_cdc:inst_pcie*_cdc|c32ui_SoftReset_q"
+set_instance_assignment -name GLOBAL_SIGNAL OFF -to "*async_fifo:inst_async_C*Tx_fifo|dcfifo*rdaclr*"
+set_instance_assignment -name GLOBAL_SIGNAL OFF -to "*inst_pcie*_cdc|async_fifo:inst_async_C*Rx_fifo|dcfifo*rdaclr*"
+set_instance_assignment -name QII_AUTO_PACKED_REGISTERS "MINIMIZE AREA" -to *inst_ccip_fabric_top|inst_cvl_top|gen_ccip_ports[0].inst_ccip_front_end|inst_C0Tx_fifo|inst_gram_sdp
+set_instance_assignment -name QII_AUTO_PACKED_REGISTERS "MINIMIZE AREA" -to *inst_ccip_fabric_top|inst_cvl_top|gen_ccip_ports[0].inst_ccip_front_end|inst_C1Tx_fifo|inst_gram_sdp
+# end ENTITY(wcp_top)
+# -------------------
+#set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
+#set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
+#set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
+#set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC_FOR_AREA ON
+#set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
+
+
+
+set_global_assignment -name ENABLE_PR_PINS OFF
+
+source dcp_green.qsf
+
+set_global_assignment -name LAST_QUARTUS_VERSION 16.0.2
+
+
+
+
+#set_global_assignment -name ENABLE_SIGNALTAP ON
+#set_global_assignment -name USE_SIGNALTAP_FILE beta_debug.stp
+#set_global_assignment -name SIGNALTAP_FILE dfpga_pci_debug.stp
+#set_global_assignment -name SIGNALTAP_FILE beta_debug.stp
+#set_global_assignment -name SLD_FILE db/beta_debug_auto_stripped.stp
+
+# Partial Reconfig Assignments
+# ============================ 
+set_instance_assignment -name PARTITION green_region -to inst_ccip_interface_reg|inst_green_top
+set_instance_assignment -name PARTIAL_RECONFIGURATION_PARTITION ON -to inst_ccip_interface_reg|inst_green_top
+set_instance_assignment -name CORE_ONLY_PLACE_REGION ON -to inst_ccip_interface_reg|inst_green_top
+set_instance_assignment -name RESERVE_PLACE_REGION ON -to inst_ccip_interface_reg|inst_green_top
+set_instance_assignment -name PLACE_REGION "0 60 224 224" -to inst_ccip_interface_reg|inst_green_top
+set_instance_assignment -name ROUTE_REGION "0 0 224 224" -to inst_ccip_interface_reg|inst_green_top
+
+#set_instance_assignment -name PLACE_REGION "69 149 132 205" -to inst_ccip_interface_reg|inst_green_top # old restrictive PR region
+#set_instance_assignment -name ROUTE_REGION "69 149 132 205" -to inst_ccip_interface_reg|inst_green_top
+
+
+set_global_assignment -name ENABLE_SIGNALTAP ON
+set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
+set_global_assignment -name SIGNALTAP_FILE stp1.stp
+
+set_global_assignment -name POST_MODULE_SCRIPT_FILE "quartus_sh:generate_jic.tcl"
+
