@@ -23,8 +23,9 @@ FLOW_SUCCESS=$?
 # =============
 if [ $FLOW_SUCCESS -eq 0 ]
 then
-    quartus_sta --do_report_timing $PROJ_REV1_NAME -c $PROJ_REV3_NAME
-	quartus_sh -t scripts/adjust_plls_mcp.tcl
+    #quartus_sta --do_report_timing dcp -c afu_fit
+	#quartus_sh -t scripts/adjust_plls_mcp.tcl
+	echo "skipping timing flow for now..."
 else
     echo "Persona compilation failed"
     exit 1

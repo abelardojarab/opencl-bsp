@@ -241,8 +241,8 @@ proc get_kernel_clks_and_fmax { k_clk_name k_clk2x_name jitter_compensation} {
 
 post_message "Running adjust PLLs script"
 
-set project_name "fpga_top"
-set revision_name "skx_pr_afu"
+set project_name "dcp"
+set revision_name "afu_fit"
 
 
 
