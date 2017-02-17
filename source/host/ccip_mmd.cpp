@@ -137,7 +137,7 @@ using namespace AAL;
 
 
 
- 
+#define NO_FME_SUPPORT
 
 
 
@@ -466,6 +466,7 @@ btInt CCIPMMD::open()
   return -1;
  }   
 #ifndef SIM
+#ifndef NO_FME_SUPPORT
    Manifest.Delete(AAL_FACTORY_CREATE_CONFIGRECORD_INCLUDED);
    ConfigRecord.Delete(keyRegAFU_ID);
 
@@ -482,6 +483,7 @@ btInt CCIPMMD::open()
          return -1;
       }
    }
+#endif
 #endif
 
    // Ask the ALI service for the VTP device feature header (DFH)
@@ -938,15 +940,18 @@ void CCIPMMD::serviceAllocated(IBase *pServiceBase,
 
 void CCIPMMD::getPerfCounters()
  {
-
     NamedValueSet PerfMon;
+	btUnsigned64bitInt     value;
 
+ 	if(m_pALIPerf == NULL)
+ 	{
+ 		MSG("\n ************* NO AAL PERF SUPPORT  ******************\n \n");
+ 		return;
+ 	}
     m_pALIPerf->performanceCountersGet(&PerfMon);
 
-    btUnsigned64bitInt     value;
     MSG("\n ************* PERFORMANCE COUNTERS START  ******************\n \n");
 
-    
     if (PerfMon.Has(AALPERF_VERSION)) {
        PerfMon.Get( AALPERF_VERSION, &value);
        printf("AALPERF_VERSION %llu \n",value);
