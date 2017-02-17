@@ -121,15 +121,15 @@ module ccip_std_afu(
 		.board_avmm_w_read              (board_avmm_w_read),
 		.board_avmm_w_byteenable        (board_avmm_w_byteenable),
 		.board_avmm_w_debugaccess       (board_avmm_w_debugaccess),
-		.kernel_clk(uClk_usrDiv2)
+		.kernel_clk(pClkDiv4)
 	);
   
 
   
 	freeze_wrapper freeze_wrapper_inst (
     .freeze                     	  (1'b0),
-		.board_kernel_clk_clk       	  (uClk_usrDiv2),
-		.board_kernel_clk2x_clk     	  (uClk_usr ),
+		.board_kernel_clk_clk       	  (pClkDiv4),
+		.board_kernel_clk2x_clk     	  (pClkDiv2 ),
 		.board_kernel_reset_reset_n 	  (board_kernel_reset_reset_n),
 		.board_kernel_irq_irq       	  (board_kernel_irq_irq),
 		.board_kernel_cra_waitrequest   (board_kernel_cra_waitrequest),
