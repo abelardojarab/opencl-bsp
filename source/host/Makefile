@@ -2,7 +2,7 @@
 
 ECHO = @
 CXX = g++ -o 
-CPPFLAGS = -DKERNEL_64BIT -Wall -Wno-unknown-pragmas  -fPIC -fpermissive -DLINUX  -D__USE_XOPEN2K8 -DACL_VERSION=\"v14.1\" -I. -I../../include -I$(ALTERAOCLSDKROOT)/host/include/CL -I$(ALTERAOCLSDKROOT)/board/s5_ref/source/include/  -I$(AALSDK)/include -I$(LIB_TDL_PATH)/usr/include -I$(MPF_INSTALL_PATH)/sw/include
+CPPFLAGS = -DKERNEL_64BIT -Wall -Wno-unknown-pragmas  -fPIC -fpermissive -DLINUX  -D__USE_XOPEN2K8 -DACL_VERSION=\"v14.1\" -I. -I../../include -I../include -I$(ALTERAOCLSDKROOT)/host/include/CL -I$(AALSDK)/include -I$(LIB_TDL_PATH)/usr/include -I$(MPF_INSTALL_PATH)/sw/include
 CFLAGS = -fPIC -m64 
 CXXFLAGS = -fPIC -m64 
 
@@ -16,7 +16,7 @@ LINK_LIBS =  -lelf
 DLLFILE = lib$(MMD_LIB_NAME).so
 DLLLIBFILE = 
 
-PERVASIVE_DEPENDENCIES =  $(ALTERAOCLSDKROOT)/board/s5_ref/source/include/aocl_mmd.h 
+PERVASIVE_DEPENDENCIES =  $(AOCL_BOARD_PACKAGE_ROOT)/source/include/aocl_mmd.h 
 
 OBJ_EXT = o
 OBJS = $(patsubst %.c,%.$(OBJ_EXT),$(wildcard *.c)) \
