@@ -120,6 +120,7 @@ using namespace AAL;
 
 #define DEBUG_PRINT(...) printf(__VA_ARGS__)
 #define SPEED_LIMIT()  SleepMicro(100000)
+#define INIT_SPEED_LIMIT()  SleepMicro(2000*1000)
 #else
 #define  HWAFU
 
@@ -132,6 +133,7 @@ using namespace AAL;
 #define DEBUG_PRINT(...)
 #define SPEED_LIMIT() 
 #define SPEED_LIMIT()  SleepMicro(1000)
+#define INIT_SPEED_LIMIT()  SleepMicro(1000)
 
 #endif
 
@@ -653,8 +655,7 @@ btInt CCIPMMD::open()
 
      
       m_pALIResetService->afuReset();
-		SleepMicro(2000000);
-
+      INIT_SPEED_LIMIT();
 
       // AFU Reset clear VTP, too, so reinitialize that
       // NOTE: this interface is likely to change in future releases of AAL.
@@ -662,12 +663,9 @@ btInt CCIPMMD::open()
       m_pVTPService->vtpReset();
 #endif      
 
-      SleepMicro(2000000);
       btUnsigned32bitInt id = 0;
       m_pALIMMIOService->mmioRead32(0x8000 ,&id);
-
-
-      
+      INIT_SPEED_LIMIT();
 
       // Wait for test completion
 
@@ -675,7 +673,7 @@ btInt CCIPMMD::open()
       //while( id !=  0xa0c00001) {
         m_pALIMMIOService->mmioRead32(AOCL_MMD_KERNEL ,&id);
         MSG("Read id as " << id);
-        SleepMicro(500000);
+        INIT_SPEED_LIMIT();
      // }
 
     
