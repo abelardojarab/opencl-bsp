@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ "$OPENCL_ASE_SIM" == "1" ]; then
+	sh sim_compile.sh
+	exit $?
+fi
+
 FLOW_SUCCESS=1
 
 # Copy Blue bitstream library 

@@ -1,8 +1,5 @@
 echo ase sim compile flow
 mkdir sim_files
-#cp -rf system_board_kernel_clk_generator.v ./system/simulation/submodules/system_board_kernel_clk_generator.v
-
-
 
 qsys-generate --synthesis=VERILOG --family="Arria 10" --part=10AX115U3F45E2SGE3  kernel_system.qsys
 qsys-generate --synthesis=VERILOG --family="Arria 10" --part=10AX115U3F45E2SGE3  board.qsys
