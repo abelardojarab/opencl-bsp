@@ -1,4 +1,4 @@
 +define+MPF_PLATFORM_DCP_PCIE
 
--F ./mpf_src/hw/sim/cci_mpf_sim_addenda.txt
+-F ./qsys_files/mpf/sim/cci_mpf_sim_addenda.txt
 

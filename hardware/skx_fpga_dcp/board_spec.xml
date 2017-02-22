@@ -4,7 +4,8 @@
 
   <compile project="dcp" revision="afu_fit" qsys_file="none" generic_kernel="1">
     <generate cmd="echo"/>
-    <synthesize cmd="bash run.sh"/>
+    <!-- <synthesize cmd="bash run.sh"/> -->
+    <synthesize cmd="bash sim_compile.sh"/>
     <auto_migrate platform_type="a10_ref" >
       <include fixes=""/>
       <exclude fixes=""/>
