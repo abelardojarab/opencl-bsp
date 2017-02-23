@@ -8,7 +8,7 @@ if [ "$OPENCL_ASE_SIM" == "1" ]; then
 	if [[ "$1" != "acl0" ]] ; then
 		echo "Not acl0, exiting without launching vcs"
 		exit 0
-	fi
+	fi                                                                                     
 	
 	#uncompress and prepare modelsim files
 	cp -rf $2 simulation.tar.gz
@@ -31,8 +31,10 @@ if [ "$OPENCL_ASE_SIM" == "1" ]; then
 else
 	#HW programming, run aal configuration program
 	#TODO: need to create custom reprogram utility so that we don't use this sample program.  Also using this path is a hack
-	$AALSDK/../aalsamples/ALI_Configure_AFU/SW/aliconfafu --force=TRUE --bitstream=$2
-	exit $?
+	cp $2 $2.gbs
+	$AALSDK/../aalsamples/ALI_Configure_AFU/SW/aliconfafu --force=TRUE --bitstream=$2.gbs
+	RESULT=$?
+	rm $2.gbs
+	exit $RESULT
 fi
-
 
