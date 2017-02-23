@@ -38,6 +38,12 @@ fi
 
 #run packager tool to create GBS
 packager create-gbs --rbf ./output_files/afu_fit.green_region.rbf --gbs ./output_files/afu_fit.gbs --no-metadata
+cp ./output_files/afu_fit.gbs fpga.bin
+
+if [ ! -f fpga.bin ]; then
+	echo "FPGA compilation failed!"
+	exit 1
+fi
 
 echo ""
 echo "==========================================================================="

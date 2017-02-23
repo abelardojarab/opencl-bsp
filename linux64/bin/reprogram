@@ -1,29 +1,38 @@
-#!/bin/sh
+#!/bin/bash
+
 echo $1
 echo $2
-if [[ "$1" != "acl0" ]] ; then
-    echo "Not acl0, exiting without launching vcs"
-    exit 0
+
+if [ "$OPENCL_ASE_SIM" == "1" ]; then
+	#simulation programming flow(start VCS)
+	if [[ "$1" != "acl0" ]] ; then
+		echo "Not acl0, exiting without launching vcs"
+		exit 0
+	fi
+	
+	#uncompress and prepare modelsim files
+	cp -rf $2 simulation.tar.gz
+	mkdir -p temp_simulation
+	cd temp_simulation
+	tar zxvf $2 
+	export KDIR=$PWD
+	
+	rm -fr ./ase
+	cp -r $ASE_SRC_PATH ./ase
+	cp -rf $AOCL_BOARD_PACKAGE_ROOT/ase/* ./ase
+	cd ase
+	
+	mkdir dummy_rtl_dir
+	touch dummy_rtl_dir/dummy_rtl_file.sv
+	python ./scripts/generate_ase_environment.py dummy_rtl_dir
+	
+	bash run_sim.sh
+
+else
+	#HW programming, run aal configuration program
+	#TODO: need to create custom reprogram utility so that we don't use this sample program.  Also using this path is a hack
+	$AALSDK/../aalsamples/ALI_Configure_AFU/SW/aliconfafu --force=TRUE --bitstream=$2
+	exit $?
 fi
 
-
-
-#uncompress and prepare modelsim files
-cp -rf $2 simulation.tar.gz
-mkdir -p temp_simulation
-cd temp_simulation
-tar zxvf $2 
-export KDIR=$PWD
-
-rm -fr ./ase
-cp -r $ASE_SRC_PATH ./ase
-cp -rf $AOCL_BOARD_PACKAGE_ROOT/ase/* ./ase
-cd ase
-
-mkdir dummy_rtl_dir
-touch dummy_rtl_dir/dummy_rtl_file.sv
-python ./scripts/generate_ase_environment.py dummy_rtl_dir
-
-
-bash run_sim.sh
 
