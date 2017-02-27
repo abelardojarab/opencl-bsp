@@ -14,3 +14,6 @@ pkill -9 ase_simv
 make
 cp $KDIR/*.hex ./work/
 make sim&
+
+#sleep for 5 seconds to make sure everything gets setup
+sleep 5
