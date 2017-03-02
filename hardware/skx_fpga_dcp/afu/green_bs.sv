@@ -20,6 +20,28 @@ module green_bs
    output  logic [CCIP_TXPORT_WIDTH-1:0] bus_ccip_Tx,         // CCI-P TX port
    input   logic [CCIP_RXPORT_WIDTH-1:0] bus_ccip_Rx,         // CCI-P RX port
    
+`ifdef INCLUDE_DDR4
+     input                    DDR4_USERCLK,
+     input                    DDR4a_waitrequest,
+     input  [511:0]           DDR4a_readdata,
+     input                    DDR4a_readdatavalid,
+     output  [6:0]            DDR4a_burstcount,
+     output  [511:0]          DDR4a_writedata,
+     output  [25:0]           DDR4a_address,
+     output                   DDR4a_write,
+     output                   DDR4a_read,
+     output  [63:0]           DDR4a_byteenable,
+     input                    DDR4b_waitrequest,
+     input  [511:0]           DDR4b_readdata,
+     input                    DDR4b_readdatavalid,
+     output  [6:0]            DDR4b_burstcount,
+     output  [511:0]          DDR4b_writedata,
+     output  [25:0]           DDR4b_address,
+     output                   DDR4b_write,
+     output                   DDR4b_read,
+     output  [63:0]           DDR4b_byteenable,
+`endif
+
 `ifdef INCLUDE_ETHERNET
    // HSSI Ethernet SERDES Interface
      output  [NUM_LN-1:0]     tx_analogreset,
@@ -160,7 +182,28 @@ ccip_std_afu inst_ccip_std_afu (
   .pClkDiv2               (Clk_200),               // 32ui link/protocol clock domain. Synchronous to interface clock
   .pClkDiv4               (Clk_100),               // 64ui link/protocol clock domain. Synchronous to interface clock
   .uClk_usr               (uClk_usr),
-  .uClk_usrDiv2           (uClk_usrDiv2),
+  .uClk_usrDiv2           (uClk_usrDiv2),  
+`ifdef INCLUDE_DDR4
+  .DDR4_USERCLK           (DDR4_USERCLK),     
+  .DDR4a_waitrequest      (DDR4a_waitrequest),
+  .DDR4a_readdata         (DDR4a_readdata),
+  .DDR4a_readdatavalid    (DDR4a_readdatavalid),
+  .DDR4a_burstcount       (DDR4a_burstcount),
+  .DDR4a_writedata        (DDR4a_writedata),
+  .DDR4a_address          (DDR4a_address),
+  .DDR4a_write            (DDR4a_write),
+  .DDR4a_read             (DDR4a_read),
+  .DDR4a_byteenable       (DDR4a_byteenable),
+  .DDR4b_waitrequest      (DDR4b_waitrequest),
+  .DDR4b_readdata         (DDR4b_readdata),
+  .DDR4b_readdatavalid    (DDR4b_readdatavalid),
+  .DDR4b_burstcount       (DDR4b_burstcount),
+  .DDR4b_writedata        (DDR4b_writedata),
+  .DDR4b_address          (DDR4b_address),
+  .DDR4b_byteenable       (DDR4b_byteenable),
+  .DDR4b_write            (DDR4b_write),
+  .DDR4b_read             (DDR4b_read),
+`endif
   .pck_cp2af_softReset    (SoftReset),
   .pck_cp2af_pwrState     (pck_cp2af_pwrState),
   .pck_cp2af_error        (pck_cp2af_error),                   
