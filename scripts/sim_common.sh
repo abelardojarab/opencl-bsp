@@ -27,6 +27,3 @@ export ASE_WORKDIR=./temp_simulation/ase/work/
 export MPF_INSTALL_PATH=$BUILD_DIR/mpf
 export ASE_SRC_PATH=$AALSDK_PATH/ase
 
-export BLUE_BITS_SOF_DIR_PATH=/net/sj-crauer-l/build2/crauer/adapt/opencl_project/git/afu_template_pll_sysclk/blue_bits
-export BLUE_BITS_QDB_FILE_PATH=/net/sj-crauer-l/build2/crauer/adapt/opencl_project/git/afu_template_pll_sysclk/dcp.qdb
-

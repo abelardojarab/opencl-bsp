@@ -11,9 +11,17 @@ FLOW_SUCCESS=1
 # ===========================
 echo "Restoring Blue BS lib files"
 echo "==========================="
-#TODO: copy files
-cp -fr $BLUE_BITS_SOF_DIR_PATH blue_bits
-cp $BLUE_BITS_QDB_FILE_PATH dcp.qdb
+
+if [ -f "dcp.qdb" ]; then
+	echo "INFO: blue bits already imported"
+else
+	sh import_blue_bits.sh
+	FLOW_SUCCESS=$?
+	if [ $FLOW_SUCCESS != 0 ]; then
+		echo "ERROR: Blue bits import failed!"
+		exit 1
+	fi
+fi
 
 # generate board.qsys
 qsys-generate --synthesis=VERILOG --family="Arria 10" --part=10AX115N3F40E2SG  kernel_system.qsys
