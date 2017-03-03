@@ -36,7 +36,6 @@
 //      `define     INCLUDE_SMBUS                               // Include SMBus
         `define     INCLUDE_NLB                                 // Include Native Loopback Module 
         `define     INCLUDE_PCIE0                               // Include PCI-E port0
-		`define     INCLUDE_DDR4                                // Include DDR4 local memory
 //      `define     INCLUDE_PCIE1                               // Include PCI-E port1 
 //      `define     INCLUDE_HSSI0                               // Include HSSI port0
 //      `define     INCLUDE_HSSI1                               // Include HSSI port1
@@ -74,5 +73,5 @@
         `define     VENDOR_ALTERA                               // For Altera FPGA
         `define     TOOL_QUARTUS                                // Use Altera Quartus Tool        
 
-        `define E_UC_FPLL_RF100M
+        `define E_UC_FPLL_RF322M
 `endif       
