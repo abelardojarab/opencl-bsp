@@ -25,6 +25,7 @@ set jitter_compensation 0.01
 
 
 
+
 proc list_plls_in_design { } {
 	post_message "Found the following IOPLLs in design:"
 	foreach_in_collection node [get_atom_nodes -type IOPLL] {
@@ -352,6 +353,27 @@ close $outfile
 
 # Preserve original sta report
 #file copy -force $revision_name.sta.rpt $revision_name.sta-orig.rpt
+
+# write  file for kernel freq
+set clockfile   [open "pll.txt" w]
+set pll_setting [expr int($k_fmax * 2)]
+set pll_setting [expr min($pll_setting,500) ]
+puts $clockfile "$pll_setting"
+close $clockfile
+
+# write  file for kernel freq
+
+														
+file rename -force user_clock.sdc user_clock_orig.sdc													
+
+set sdcfile   [open "user_clock.sdc" w]
+set period [expr 1000 / $k_fmax]
+puts $sdcfile "create_clock -name {uClk_usrDiv2} -period $period \[get_pins {inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk[0]}\]"
+set period2 [expr 500 / $k_fmax]
+puts $sdcfile "create_clock -name {uClk_usr} -period $period2 \[get_pins {inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk[1]}\]"
+close $sdcfile
+
+
 
 # Force sta timing netlist to be rebuilt
 file delete [glob -nocomplain db/$revision_name.sta_cmp.*.tdb]
