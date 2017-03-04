@@ -36,9 +36,7 @@ FLOW_SUCCESS=$?
 # =============
 if [ $FLOW_SUCCESS -eq 0 ]
 then
-    #quartus_sta --do_report_timing dcp -c afu_fit
-	#quartus_sh -t scripts/adjust_plls_mcp.tcl
-	echo "skipping timing flow for now..."
+	quartus_sh -t scripts/adjust_plls_mcp.tcl
 else
     echo "Persona compilation failed"
     exit 1
@@ -46,7 +44,12 @@ fi
 
 #run packager tool to create GBS
 packager create-gbs --rbf ./output_files/afu_fit.green_region.rbf --gbs ./output_files/afu_fit.gbs --no-metadata
-cp ./output_files/afu_fit.gbs fpga.bin
+
+rm -rf fpga.bin
+
+aocl binedit fpga.bin create
+aocl binedit fpga.bin add .acl.gbs ./output_files/afu_fit.gbs 
+aocl binedit fpga.bin add .acl.pll ./pll.txt
 
 if [ ! -f fpga.bin ]; then
 	echo "FPGA compilation failed!"

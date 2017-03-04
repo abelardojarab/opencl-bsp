@@ -17,8 +17,10 @@ package require ::quartus::flow
 #
 
 #these are currently reversed
-set k_clk_name "uClk_usrDiv2"
-set k_clk2x_name "uClk_usr"
+#set k_clk_name "fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk[0]"
+set k_clk_name "fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|outclk0"
+#set k_clk2x_name "fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk[1]"
+set k_clk2x_name "fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|outclk1"
 set k_fmax -1
 set jitter_compensation 0.01
 
@@ -364,29 +366,29 @@ close $clockfile
 # write  file for kernel freq
 
 														
-file rename -force user_clock.sdc user_clock_orig.sdc													
-
-set sdcfile   [open "user_clock.sdc" w]
-set period [expr 1000 / $k_fmax]
-puts $sdcfile "create_clock -name {uClk_usrDiv2} -period $period \[get_pins {inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk[0]}\]"
-set period2 [expr 500 / $k_fmax]
-puts $sdcfile "create_clock -name {uClk_usr} -period $period2 \[get_pins {inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk[1]}\]"
-close $sdcfile
-
-
-
-# Force sta timing netlist to be rebuilt
-file delete [glob -nocomplain db/$revision_name.sta_cmp.*.tdb]
-file delete [glob -nocomplain qdb/_compiler/$revision_name/root_partition/*/final/1/*cache*]
-file delete [glob -nocomplain qdb/_compiler/$revision_name/root_partition/*/final/1/timing_netlist*]
-
-# Re-run STA
-set sdk_root [string map {"\\" "/"} $::env(ALTERAOCLSDKROOT)]
-post_message "Launching STA with report script $sdk_root/ip/board/bsp/failing_clocks.tcl"
-if {[catch {execute_module -tool sta -args "--report_script=$sdk_root/ip/board/bsp/failing_clocks.tcl"} result]} {
-  post_message -type error "Error! $result"
-  exit 2
-}
+##file rename -force user_clock.sdc user_clock_orig.sdc													
+##
+##set sdcfile   [open "user_clock.sdc" w]
+##set period [expr 1000 / $k_fmax]
+##puts $sdcfile "create_clock -name {uClk_usrDiv2} -period $period \[get_pins {inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk[0]}\]"
+##set period2 [expr 500 / $k_fmax]
+##puts $sdcfile "create_clock -name {uClk_usr} -period $period2 \[get_pins {inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk[1]}\]"
+##close $sdcfile
+##
+##
+##
+### Force sta timing netlist to be rebuilt
+##file delete [glob -nocomplain db/$revision_name.sta_cmp.*.tdb]
+##file delete [glob -nocomplain qdb/_compiler/$revision_name/root_partition/*/final/1/*cache*]
+##file delete [glob -nocomplain qdb/_compiler/$revision_name/root_partition/*/final/1/timing_netlist*]
+##
+### Re-run STA
+##set sdk_root [string map {"\\" "/"} $::env(ALTERAOCLSDKROOT)]
+##post_message "Launching STA with report script $sdk_root/ip/board/bsp/failing_clocks.tcl"
+##if {[catch {execute_module -tool sta -args "--report_script=$sdk_root/ip/board/bsp/failing_clocks.tcl"} result]} {
+##  post_message -type error "Error! $result"
+##  exit 2
+##}
 
 design::unload_design
 project_close

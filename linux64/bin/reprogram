@@ -31,10 +31,20 @@ if [ "$OPENCL_ASE_SIM" == "1" ]; then
 else
 	#HW programming, run aal configuration program
 	#TODO: need to create custom reprogram utility so that we don't use this sample program.  Also using this path is a hack
-	cp $2 $2.gbs
+	
+	#reconfigure pll
+	aocl binedit $2 get .acl.pll $2.pll
+	#$AOCL_BOARD_PACKAGE_ROOT/linux64/bin/aal_6.3.0_skx-p_user_clk.bin 0 0 0 $(cat $2.pll)
+	
+	#reprogram 
+	aocl binedit $2 get .acl.gbs $2.gbs
 	$AALSDK/../aalsamples/ALI_Configure_AFU/SW/aliconfafu --force=TRUE --bitstream=$2.gbs
 	RESULT=$?
 	rm $2.gbs
+	
+	rm -rf $2.gbs 
+	rm -rf $2.pll
+	
 	exit $RESULT
 fi
 
