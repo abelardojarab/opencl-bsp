@@ -11,6 +11,12 @@ if [ ! -d "$AALSDK" ]; then
   sh $SCRIPT_DIR_PATH/build_aal.sh
 fi
 
+#check for aal clock util
+if [ ! -f "$ROOT_PROJECT_PATH/linux64/bin/aal_6.2.1_skx-p_user_clk.bin" ]; then
+  echo "aal clock tool does not exist.  need to build"
+  sh $SCRIPT_DIR_PATH/build_aal_clock_tool.sh
+fi
+
 #check for MPF
 if [ ! -d "$MPF_INSTALL_PATH" ]; then
   echo "MPF does not exist.  need to build"

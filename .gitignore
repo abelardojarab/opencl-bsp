@@ -8,3 +8,5 @@ host/linux64/lib/*.so*
 ase/mpf_src
 linux64/bin/diagnostic
 *.pyc
+linux64/bin/aal_6.2.1_skx-p_user_clk.bin
+
