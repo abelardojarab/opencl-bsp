@@ -37,6 +37,7 @@ FLOW_SUCCESS=$?
 if [ $FLOW_SUCCESS -eq 0 ]
 then
 	quartus_sh -t scripts/adjust_plls_mcp.tcl
+	quartus_sh -t scripts/create_afu_quartus_report.tcl dcp afu_fit
 else
     echo "Persona compilation failed"
     exit 1
