@@ -15,5 +15,5 @@ if [ "$?" != "0" ]; then
 	exit $?
 fi
 
-source $SCRIPT_DIR_PATH/sim_common.sh
+source $SCRIPT_DIR_PATH/bsp_common.sh
 aoc $AOC_ARGS

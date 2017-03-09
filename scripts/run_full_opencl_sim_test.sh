@@ -15,7 +15,7 @@ if [ "$?" != "0" ]; then
 	exit $?
 fi
 
-. $SCRIPT_DIR_PATH/sim_common.sh
+. $SCRIPT_DIR_PATH/bsp_common.sh
 
 export OPENCL_ASE_SIM=1
 $SCRIPT_DIR_PATH/setup_packages.sh

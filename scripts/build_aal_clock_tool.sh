@@ -3,7 +3,7 @@
 SCRIPT_PATH=`readlink -f ${BASH_SOURCE[0]}`
 #get director of script path
 SCRIPT_DIR_PATH="$(dirname $SCRIPT_PATH)"
-. $SCRIPT_DIR_PATH/sim_common.sh
+. $SCRIPT_DIR_PATH/bsp_common.sh
 
 cd $ROOT_PROJECT_PATH/packages/aal_clock_utility
 make prefix=$AALSDK
