@@ -26,11 +26,11 @@ copy_platform_file() {
 	cp $SRC_FILE $DEST_PATH
 }
 
-rm -fr "blue_bits"
-mkdir "blue_bits"
+rm -fr "output_files"
+mkdir "output_files"
 
 copy_platform_file "$FULL_PLATFORM_PATH/dcp.qdb" "."
-copy_platform_file "$FULL_PLATFORM_PATH/output_files/dcp.green_region.msf" "blue_bits"
-copy_platform_file "$FULL_PLATFORM_PATH/output_files/dcp.sof" "blue_bits"
-copy_platform_file "$FULL_PLATFORM_PATH/output_files/dcp.static.msf" "blue_bits"
+copy_platform_file "$FULL_PLATFORM_PATH/output_files/dcp.sof" "output_files"
+copy_platform_file "$FULL_PLATFORM_PATH/output_files/dcp.static.msf" "output_files"
+copy_platform_file "$FULL_PLATFORM_PATH/output_files/dcp.green_region.pmsf" "output_files"
 

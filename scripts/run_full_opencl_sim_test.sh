@@ -4,7 +4,9 @@ SCRIPT_PATH=`readlink -f ${BASH_SOURCE[0]}`
 #get director of script path
 SCRIPT_DIR_PATH="$(dirname $SCRIPT_PATH)"
 
-ARC_RESOURCES_NEEDED="vcs,vcs-vcsmx-lic/vrtn-dev,gcc/4.8.2,acl/16.0.2,vcs,acds/16.0.2,qedition/pro,python"
+. $SCRIPT_DIR_PATH/bsp_common.sh
+
+ARC_RESOURCES_NEEDED="vcs,vcs-vcsmx-lic/vrtn-dev,gcc/4.8.2,$ACDS_ARC_RESOURCES,python"
 SCRIPT_ARGS="$@"
 
 #check for opencl aoc command, and get resources if needed
@@ -14,8 +16,6 @@ if [ "$?" != "0" ]; then
 	arc shell $ARC_RESOURCES_NEEDED -- $SCRIPT_PATH $SCRIPT_ARGS
 	exit $?
 fi
-
-. $SCRIPT_DIR_PATH/bsp_common.sh
 
 export OPENCL_ASE_SIM=1
 $SCRIPT_DIR_PATH/setup_packages.sh

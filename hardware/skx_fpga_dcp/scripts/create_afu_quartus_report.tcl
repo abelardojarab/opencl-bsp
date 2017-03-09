@@ -6,8 +6,8 @@ package require ::quartus::flow
 #clocks paths from afu
 #these names are extracted from afu_fit.sta.rpt
 
-set pClk_name "u0|dcp_iopll|clk2x"
-set pClkDiv2_name "u0|dcp_iopll|clk1x"
+set pClk_name "u0|dcp_iopll|dcp_iopll|clk2x"
+set pClkDiv2_name "u0|dcp_iopll|dcp_iopll|clk1x"
 set pClkDiv4_name "SYS_RefClk"
 set uClk_usr_name "fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|outclk1"
 set uClk_usrDiv2_name "fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|outclk0"

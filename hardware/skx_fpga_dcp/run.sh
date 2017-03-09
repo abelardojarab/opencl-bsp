@@ -29,7 +29,7 @@ qsys-generate --synthesis=VERILOG --family="Arria 10" --part=10AX115N3F40E2SG  b
 
 # compile project
 # =====================
-quartus_sh -t a10_partial_reconfig.tcl -setup_script pr_setup.tcl -impl afu_fit
+quartus_sh -t a10_partial_reconfig/flow.tcl -setup_script a10_partial_reconfig/setup.tcl -impl afu_fit
 FLOW_SUCCESS=$?
 
 # Report Timing
