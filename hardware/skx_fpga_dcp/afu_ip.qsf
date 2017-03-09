@@ -90,6 +90,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE ./system.v
 set_global_assignment -name SYSTEMVERILOG_FILE ./ccip_std_afu.sv
 set_global_assignment -name QIP_FILE ./board/board.qip
 set_global_assignment -name QIP_FILE ./kernel_system/kernel_system.qip
+set_global_assignment -name QIP_FILE ./iface/cci_interface/cci_interface.qip
 
 set_global_assignment -name VERILOG_FILE ./ip/freeze_wrapper.v
 set_global_assignment -name VERILOG_FILE ./ip/kernel_wrapper.v
@@ -100,3 +101,4 @@ set_instance_assignment -name GLOBAL_SIGNAL GLOBAL_CLOCK -to inst_ccip_interface
 set_global_assignment -name SDC_FILE ./reset.sdc
 
 set_global_assignment -name SOURCE_TCL_SCRIPT_FILE ip_include.tcl
+

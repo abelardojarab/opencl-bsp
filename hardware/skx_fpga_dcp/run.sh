@@ -26,7 +26,6 @@ fi
 # generate board.qsys
 qsys-generate --synthesis=VERILOG -qpf=dcp -c=afu_synth kernel_system.qsys
 qsys-generate --synthesis=VERILOG -qpf=dcp -c=afu_synth board.qsys
-
 # compile project
 # =====================
 quartus_sh -t a10_partial_reconfig/flow.tcl -setup_script a10_partial_reconfig/setup.tcl -impl afu_fit
