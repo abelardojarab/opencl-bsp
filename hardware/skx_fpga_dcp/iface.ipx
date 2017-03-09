@@ -89,18 +89,6 @@
   <tag2 key="TCL_PACKAGE_VERSION" value="10.0" />
  </component>
  
-  <component
-   name="acl_kernel_clk_a10"
-   file="acl_kernel_clk_a10.qsys"
-   displayName="OpenCL Kernel Clock Generator"
-   version="15.1"
-   description="Generates the kernel clocks for ACL"
-   tags="INTERNAL_COMPONENT=false"
-   categories="OpenCL BSP Components"
-   factory="QsysFactory">
-  <tag2 key="COMPONENT_EDITABLE" value="false" />
-  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
- </component>
  <component
    name="acl_kernel_clk"
    file="${ALTERAOCLSDKROOT}/ip/board/iface/acl_kernel_clk.qsys"

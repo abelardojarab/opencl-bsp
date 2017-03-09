@@ -28,7 +28,6 @@ sed -i 's/RRP_FIFO_DEPTH(64)/RRP_FIFO_DEPTH(256)/g'  ./sim_files/*_system.v
 
 cp -rf extra_sim_files/global_routing.v ./sim_files/global_routing.v
 cp -rf system.v ./sim_files/system.v
-cp -rf rr_arb.v ./sim_files/rr_arb.v
 cp -rf bsp_logic.sv ./sim_files/bsp_logic.sv
 cp -fr hw sim_files/mpf
 rm simulation.tar.gz
