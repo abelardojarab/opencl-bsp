@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<system name="$${FILENAME}">
+<system name="kernel_system">
  <component
    name="$${FILENAME}"
    displayName="$${FILENAME}"
    version="1.0"
    description=""
    tags=""
-   categories=""
+   categories="System"
    tool="QsysStandard" />
  <parameter name="bonusData"><![CDATA[bonusData 
 {
@@ -14,7 +14,7 @@
    {
       datum _sortIndex
       {
-         value = "4";
+         value = "3";
          type = "int";
       }
    }
@@ -22,7 +22,7 @@
    {
       datum _sortIndex
       {
-         value = "5";
+         value = "4";
          type = "int";
       }
    }
@@ -30,7 +30,7 @@
    {
       datum _sortIndex
       {
-         value = "10";
+         value = "9";
          type = "int";
       }
    }
@@ -38,7 +38,7 @@
    {
       datum _sortIndex
       {
-         value = "11";
+         value = "10";
          type = "int";
       }
    }
@@ -46,7 +46,7 @@
    {
       datum _sortIndex
       {
-         value = "12";
+         value = "11";
          type = "int";
       }
    }
@@ -70,7 +70,7 @@
    {
       datum _sortIndex
       {
-         value = "9";
+         value = "8";
          type = "int";
       }
    }
@@ -78,7 +78,7 @@
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "7";
          type = "int";
       }
    }
@@ -86,7 +86,7 @@
    {
       datum _sortIndex
       {
-         value = "7";
+         value = "6";
          type = "int";
       }
    }
@@ -94,15 +94,7 @@
    {
       datum _sortIndex
       {
-         value = "6";
-         type = "int";
-      }
-   }
-   element mem_bandwidth_system
-   {
-      datum _sortIndex
-      {
-         value = "3";
+         value = "5";
          type = "int";
       }
    }
@@ -118,7 +110,7 @@
    {
       datum _sortIndex
       {
-         value = "13";
+         value = "12";
          type = "int";
       }
    }
@@ -140,7 +132,53 @@
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="0" />
  <parameter name="systemInfos"><![CDATA[<systemInfosDefinition>
-    <connPtSystemInfos/>
+    <connPtSystemInfos>
+        <entry>
+            <key>avmm_w</key>
+            <value>
+                <connectionPointName>avmm_w</connectionPointName>
+                <suppliedSystemInfos>
+                    <entry>
+                        <key>ADDRESS_WIDTH</key>
+                    </entry>
+                </suppliedSystemInfos>
+                <consumedSystemInfos/>
+            </value>
+        </entry>
+        <entry>
+            <key>clock_reset2x</key>
+            <value>
+                <connectionPointName>clock_reset2x</connectionPointName>
+                <suppliedSystemInfos>
+                    <entry>
+                        <key>CLOCK_RATE</key>
+                    </entry>
+                </suppliedSystemInfos>
+                <consumedSystemInfos/>
+            </value>
+        </entry>
+        <entry>
+            <key>kernel_cra</key>
+            <value>
+                <connectionPointName>kernel_cra</connectionPointName>
+                <suppliedSystemInfos/>
+                <consumedSystemInfos>
+                    <entry>
+                        <key>ADDRESS_MAP</key>
+                        <value>&lt;address-map&gt;&lt;slave name='cra_root.cra_slave' start='0x0' end='0x400' type='cra_ring_root.cra_slave' /&gt;&lt;/address-map&gt;</value>
+                    </entry>
+                    <entry>
+                        <key>ADDRESS_WIDTH</key>
+                        <value>10</value>
+                    </entry>
+                    <entry>
+                        <key>MAX_SLAVE_DATA_WIDTH</key>
+                        <value>64</value>
+                    </entry>
+                </consumedSystemInfos>
+            </value>
+        </entry>
+    </connPtSystemInfos>
 </systemInfosDefinition>]]></parameter>
  <parameter name="testBenchDutName" value="" />
  <parameter name="timeStamp" value="0" />
@@ -273,18 +311,13 @@
   <parameter name="USE_RESPONSE" value="0" />
  </module>
  <module name="kernel_irq" kind="altera_irq_bridge" version="16.0" enabled="1">
-  <parameter name="AUTO_RECEIVER_IRQ_INTERRUPTS_USED" value="-1" />
+  <parameter name="AUTO_RECEIVER_IRQ_INTERRUPTS_USED" value="0" />
   <parameter name="IRQ_N" value="0" />
   <parameter name="IRQ_WIDTH" value="1" />
  </module>
- <module
-   name="mem_bandwidth_system"
-   kind="mem_bandwidth_system"
-   version="14.0"
-   enabled="1" />
  <module name="reset" kind="altera_reset_bridge" version="16.0" enabled="1">
   <parameter name="ACTIVE_LOW_RESET" value="1" />
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="-1" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="0" />
   <parameter name="NUM_RESET_OUTPUTS" value="1" />
   <parameter name="SYNCHRONOUS_EDGES" value="deassert" />
   <parameter name="USE_RESET_REQUEST" value="0" />
@@ -298,51 +331,6 @@
   <parameter name="DATA_WIDTH" value="64" />
   <parameter name="INIT_FILE" value="sys_description.hex" />
  </module>
- <connection
-   kind="avalon"
-   version="16.0"
-   start="mem_bandwidth_system.avm_memgmem0_port_0_0_r"
-   end="avmm_r.s0">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="16.0"
-   start="mem_bandwidth_system.avm_memgmem0_port_0_0_w"
-   end="avmm_w.s0">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="16.0"
-   start="avs_memcopy_cra_cra_ring.cra_master"
-   end="mem_bandwidth_system.avs_memcopy_cra">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="16.0"
-   start="avs_memread_cra_cra_ring.cra_master"
-   end="mem_bandwidth_system.avs_memread_cra">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="16.0"
-   start="avs_memwrite_cra_cra_ring.cra_master"
-   end="mem_bandwidth_system.avs_memwrite_cra">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
  <connection
    kind="avalon"
    version="16.0"
@@ -405,16 +393,6 @@
    start="clk_1x.out_clk"
    end="avs_memwrite_cra_cra_ring.clock" />
  <connection
-   kind="clock"
-   version="16.0"
-   start="clk_1x.out_clk"
-   end="mem_bandwidth_system.clock_reset" />
- <connection
-   kind="clock"
-   version="16.0"
-   start="clk_2x.out_clk"
-   end="mem_bandwidth_system.clock_reset2x" />
- <connection
    kind="conduit"
    version="16.0"
    start="cra_root.ring_out"
@@ -470,22 +448,10 @@
   <parameter name="width" value="0" />
  </connection>
  <connection
-   kind="interrupt"
-   version="16.0"
-   start="kernel_irq.receiver_irq"
-   end="mem_bandwidth_system.kernel_irq">
-  <parameter name="irqNumber" value="0" />
- </connection>
- <connection
    kind="reset"
    version="16.0"
    start="reset.out_reset"
    end="kernel_irq.clk_reset" />
- <connection
-   kind="reset"
-   version="16.0"
-   start="reset.out_reset"
-   end="mem_bandwidth_system.clock_reset_reset" />
  <connection
    kind="reset"
    version="16.0"
