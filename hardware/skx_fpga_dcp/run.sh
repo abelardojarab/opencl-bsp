@@ -24,8 +24,8 @@ else
 fi
 
 # generate board.qsys
-qsys-generate --synthesis=VERILOG --family="Arria 10" --part=10AX115N3F40E2SG  kernel_system.qsys
-qsys-generate --synthesis=VERILOG --family="Arria 10" --part=10AX115N3F40E2SG  board.qsys
+qsys-generate --synthesis=VERILOG -qpf=dcp -c=afu_synth kernel_system.qsys
+qsys-generate --synthesis=VERILOG -qpf=dcp -c=afu_synth board.qsys
 
 # compile project
 # =====================
