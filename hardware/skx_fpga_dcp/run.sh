@@ -48,8 +48,9 @@ packager create-gbs --rbf ./output_files/afu_fit.green_region.rbf --gbs ./output
 
 rm -rf fpga.bin
 
+gzip -9c ./output_files/afu_fit.gbs > afu_fit.gbs.gz
 aocl binedit fpga.bin create
-aocl binedit fpga.bin add .acl.gbs ./output_files/afu_fit.gbs 
+aocl binedit fpga.bin add .acl.gbs.gz ./afu_fit.gbs.gz
 aocl binedit fpga.bin add .acl.pll ./pll.txt
 
 if [ ! -f fpga.bin ]; then

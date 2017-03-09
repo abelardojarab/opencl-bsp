@@ -43,7 +43,15 @@ else
 	fi
 	
 	#reprogram 
-	aocl binedit $2 get .acl.gbs $2.gbs
+	aocl binedit $2 exists .acl.gbs.gz
+	RESULT=$?
+	
+	if [ $RESULT -eq 0 ]; then
+		aocl binedit $2 print .acl.gbs.gz | gzip -dc > $2.gbs
+	else
+		aocl binedit $2 get .acl.gbs $2.gbs
+	fi
+	
 	$AALSDK/../aalsamples/ALI_Configure_AFU/SW/aliconfafu --force=TRUE --bitstream=$2.gbs
 	RESULT=$?
 	rm -rf $2.gbs 
