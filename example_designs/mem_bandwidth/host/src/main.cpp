@@ -82,9 +82,9 @@ static void freeResources() {
   if(queue) 
     clReleaseCommandQueue(queue);
   if(hdatain) 
-   clSVMFreeAltera(context,hdatain);
+   clSVMFreeIntelFPGA(context,hdatain);
   if(hdataout) 
-   clSVMFreeAltera(context,hdataout);     
+   clSVMFreeIntelFPGA(context,hdataout);     
   if(context) 
     clReleaseContext(context);
 
@@ -151,8 +151,8 @@ int main(int argc, char *argv[]) {
   unsigned int buf_size =  vectorSize <= 0 ? 64 : vectorSize*4;
  
   // allocate and initialize the input vectors
-  hdatain = (unsigned int*)clSVMAllocAltera(context, 0, buf_size, 1024); 
-  hdataout = (unsigned int*)clSVMAllocAltera(context, 0, buf_size, 1024);
+  hdatain = (unsigned int*)clSVMAllocIntelFPGA(context, 0, buf_size, 1024); 
+  hdataout = (unsigned int*)clSVMAllocIntelFPGA(context, 0, buf_size, 1024);
   if(!hdatain || !hdataout) {
     dump_error("Failed to allocate buffers.", status);
     freeResources();
@@ -212,12 +212,12 @@ int main(int argc, char *argv[]) {
     }
 
     // set the arguments
-    status = clSetKernelArgSVMPointerAltera(kernel, 0, (void*)hdatain);
+    status = clSetKernelArgSVMPointerIntelFPGA(kernel, 0, (void*)hdatain);
     if(status != CL_SUCCESS) {
       dump_error("Failed set arg 0.", status);
       return 1;
     }
-    status = clSetKernelArgSVMPointerAltera(kernel, 1, (void*)hdataout);
+    status = clSetKernelArgSVMPointerIntelFPGA(kernel, 1, (void*)hdataout);
     if(status != CL_SUCCESS) {
       dump_error("Failed Set arg 1.", status);
       freeResources();
@@ -307,12 +307,12 @@ int main(int argc, char *argv[]) {
     }
 
     // set the arguments
-    status = clSetKernelArgSVMPointerAltera(kernel, 0, (void*)hdatain);
+    status = clSetKernelArgSVMPointerIntelFPGA(kernel, 0, (void*)hdatain);
     if(status != CL_SUCCESS) {
       dump_error("Failed set arg 0.", status);
       return 1;
     }
-    status = clSetKernelArgSVMPointerAltera(kernel, 1, (void*)hdataout);
+    status = clSetKernelArgSVMPointerIntelFPGA(kernel, 1, (void*)hdataout);
     if(status != CL_SUCCESS) {
       dump_error("Failed Set arg 1.", status);
       freeResources();
@@ -400,12 +400,12 @@ int main(int argc, char *argv[]) {
     }
 
     // set the arguments
-    status = clSetKernelArgSVMPointerAltera(kernel_read, 0, (void*)hdatain);
+    status = clSetKernelArgSVMPointerIntelFPGA(kernel_read, 0, (void*)hdatain);
     if(status != CL_SUCCESS) {
       dump_error("Failed set arg 0.", status);
       return 1;
     }
-    status = clSetKernelArgSVMPointerAltera(kernel_read, 1, (void*)hdataout);
+    status = clSetKernelArgSVMPointerIntelFPGA(kernel_read, 1, (void*)hdataout);
     if(status != CL_SUCCESS) {
       dump_error("Failed Set arg 1.", status);
       freeResources();
@@ -485,12 +485,12 @@ int main(int argc, char *argv[]) {
     }
 
     // set the arguments
-    status = clSetKernelArgSVMPointerAltera(kernel_write, 0, (void*)hdatain);
+    status = clSetKernelArgSVMPointerIntelFPGA(kernel_write, 0, (void*)hdatain);
     if(status != CL_SUCCESS) {
       dump_error("Failed set arg 0.", status);
       return 1;
     }
-    status = clSetKernelArgSVMPointerAltera(kernel_write, 1, (void*)hdataout);
+    status = clSetKernelArgSVMPointerIntelFPGA(kernel_write, 1, (void*)hdataout);
     if(status != CL_SUCCESS) {
       dump_error("Failed Set arg 1.", status);
       freeResources();
