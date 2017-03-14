@@ -24,7 +24,9 @@ if [ "$OPENCL_ASE_SIM" == "1" ]; then
 	
 	mkdir dummy_rtl_dir
 	touch dummy_rtl_dir/dummy_rtl_file.sv
-	python ./scripts/generate_ase_environment.py dummy_rtl_dir
+	mkdir dummy_vhd_dir
+	touch dummy_vhd_dir/dummy_vhd_file.vhd
+	python ./scripts/generate_ase_environment.py dummy_rtl_dir dummy_vhd_dir
 	
 	bash run_sim.sh
 

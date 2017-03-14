@@ -2,42 +2,25 @@ echo ase sim compile flow
 rm -fr sim_files
 mkdir sim_files
 
-#TODO: fix sim flow
-#qsys-generate --simulation=VERILOG -qpf=dcp -c=afu_synth kernel_system.qsys
-#qsys-generate --simulation=VERILOG -qpf=dcp -c=afu_synth board.qsys
 qsys-generate --synthesis=VERILOG -qpf=dcp -c=afu_synth kernel_system.qsys
 qsys-generate --synthesis=VERILOG -qpf=dcp -c=afu_synth board.qsys
 
-find . -type f -name "*.v" -o -name "*.sv" -o -name "*.vhd" -o -name "*.vh"  -o -name "*.vo"  | grep -v /sim/ | grep -e /kernel_system/ -e /ip/kernel_system  | grep -v _inst.v | grep -v _bb.v | xargs cp -t ./sim_files
-find . -type f -name "*.v" -o -name "*.sv" -o -name "*.vhd" -o -name "*.vh"  -o -name "*.vo"  | grep -v /sim/ | grep -e /board/ -e /ip/board  | grep -v _inst.v | grep -v _bb.v | xargs cp -t ./sim_files
+find iface/ip -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -name "*.sv" | xargs cp -t ./sim_files
+find iface/cci_interface -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -name "*.sv" | xargs cp -t ./sim_files
 
+find board -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -name "*.sv" | xargs cp -t ./sim_files
+find ip/board -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -name "*.sv" | xargs cp -t ./sim_files
 
-#find ./kernel_system/synth/*.v | xargs cp -t ./sim_files
-#find ./kernel_system/*/synth/*.vo | xargs cp -t ./sim_files
-#find ./kernel_system/*/synth/*.v | xargs cp -t ./sim_files
-#find ./kernel_system/*/synth/*.sv| xargs cp -t  ./sim_files
-#find ./kernel_system/*/synth/*.vh  | xargs cp -t ./sim_files
-#find ./kernel_system/*/synth/*.vhd  | xargs cp -t ./sim_files
-#
-#find ./ip/kernel_system/synth/*.v | xargs cp -t ./sim_files
-#find ./ip/kernel_system/*/synth/*.vo | xargs cp -t ./sim_files
-#find ./ip/kernel_system/*/synth/*.v | xargs cp -t ./sim_files
-#find ./ip/kernel_system/*/synth/*.sv| xargs cp -t  ./sim_files
-#find ./ip/kernel_system/*/synth/*.vh  | xargs cp -t ./sim_files
-#find ./ip/kernel_system/*/synth/*.vhd  | xargs cp -t ./sim_files
-#
-#find ./board/synth/*.v | xargs cp -t ./sim_files
-#find ./board/*/synth/*.vo | xargs cp -t ./sim_files
-#find ./board/*/synth/*.v | xargs cp -t ./sim_files
-#find ./board/*/synth/*.sv | xargs cp -t  ./sim_files
-#find ./board/*/synth/*.vh  | xargs cp -t ./sim_files
-#
+find kernel_system -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -name "*.sv" | xargs cp -t ./sim_files
+find ip/kernel_system -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -name "*.sv" | xargs cp -t ./sim_files
+
+find kernel_hdl -type f | xargs cp -t ./sim_files
+
 find ./ip/*.v | xargs cp -t ./sim_files
 find ./ip/*.sv | xargs cp -t  ./sim_files
 
 cp -rf ccip_std_afu.sv ./sim_files/ccip_std_afu.sv
 find *.sv  | xargs cp -t ./sim_files
-
 
 sed -i 's/RRP_FIFO_DEPTH(64)/RRP_FIFO_DEPTH(256)/g'  ./sim_files/*_system.v
 
