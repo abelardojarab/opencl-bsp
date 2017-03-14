@@ -1,23 +1,10 @@
-// ***************************************************************************
-// Copyright (c) 2013-2017, Intel Corporation All Rights Reserved.
-// The source code contained or described herein and all  documents related to
-// the  source  code  ("Material")  are  owned by  Intel  Corporation  or  its
-// suppliers  or  licensors.    Title  to  the  Material  remains  with  Intel
-// Corporation or  its suppliers  and licensors.  The Material  contains trade
-// secrets and  proprietary  and  confidential  information  of  Intel or  its
-// suppliers and licensors.  The Material is protected  by worldwide copyright
-// and trade secret laws and treaty provisions. No part of the Material may be
-// copied,    reproduced,    modified,    published,     uploaded,     posted,
-// transmitted,  distributed,  or  disclosed  in any way without Intel's prior
-// express written permission.
-// ***************************************************************************
 // Date: 02/2/2016
-// Compliant with CCI-P spec v0.71
+// Compliant with CCI-P spec v0.7
 package ccip_if_pkg;
 //=====================================================================
 // CCI-P interface defines
 //=====================================================================
-parameter CCIP_VERSION_NUMBER    = 12'h071;
+parameter CCIP_VERSION_NUMBER    = 12'h070;
 
 parameter CCIP_CLADDR_WIDTH      = 42; 
 parameter CCIP_CLDATA_WIDTH      = 512; 
@@ -64,7 +51,7 @@ typedef enum logic [3:0] {
 typedef enum logic [3:0] {
     eREQ_WRLINE_I  = 4'h0,      // Memory Write with FPGA Cache Hint=Invalid
     eREQ_WRLINE_M  = 4'h1,      // Memory Write with FPGA Cache Hint=Modified
-//    eREQ_WRPUSH_I  = 4'h2,      // Memory Write with DDIO Hint ** NOT SUPPORTED CURRENTLY **
+    eREQ_WRPUSH_I  = 4'h2,      // Memory Write with DDIO Hint
     eREQ_WRFENCE   = 4'h4,      // Memory Write Fence
 //    eREQ_ATOMIC    = 4'h5,      // Atomic operation: Compare-Exchange for Memory Addr  ** NOT SUPPORTED CURRENTELY **
     eREQ_INTR      = 4'h6       // Interrupt the CPU ** NOT SUPPORTED CURRENTLY **
@@ -141,6 +128,13 @@ typedef struct packed {
 }t_ccip_c1_ReqFenceHdr;
 
 typedef struct packed {
+    logic [11:0]    rsvd1;          // reserved, drive 0
+    t_ccip_c1_req   req_type;
+    logic [60:0]    rsvd0;          // reserved, drive 0
+    logic [2:0]     id;
+}t_ccip_c1_ReqIntrHdr;
+
+typedef struct packed {
     t_ccip_vc       vc_used;
     logic           rsvd1;          // reserved, don't care
     logic           hit_miss;
@@ -169,6 +163,14 @@ typedef struct packed {
     t_ccip_mdata    mdata;
 } t_ccip_c1_RspFenceHdr;
 
+typedef struct packed {
+    logic [7:0]     rsvd1;          // reserved, don't care
+    t_ccip_c1_rsp   resp_type;
+    logic [12:0]    rsvd0;          // reserved, don't care
+    logic [2:0]     id;
+} t_ccip_c1_RspIntrHdr;
+
+
 // Alternate Channel 0 MMIO request from host : 
 //  MMIO requests arrive on the same channel as read responses, sharing
 //  t_if_ccip_c0_Rx below.  When either mmioRdValid or mmioWrValid is set
@@ -180,6 +182,7 @@ typedef struct packed {
     logic           rsvd;       // reserved, don't care
     t_ccip_tid      tid;
 } t_ccip_c0_ReqMmioHdr;
+parameter CCIP_C0RX_MMIOHDR_WIDTH = $bits(t_ccip_c0_ReqMmioHdr);
 
 typedef struct packed {
     t_ccip_tid     tid;         // Returned back from ReqMmioHdr

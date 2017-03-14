@@ -26,4 +26,4 @@ export QUARTUS_HOME=$QUARTUS_ROOTDIR
 export ASE_WORKDIR=./temp_simulation/ase/work/
 export MPF_INSTALL_PATH=$BUILD_DIR/mpf
 export ASE_SRC_PATH=$AALSDK_PATH/ase
-export ACDS_ARC_RESOURCES="acl/17.0,acds/17.0/248,qedition/pro"
+export ACDS_ARC_RESOURCES="acl/17.0,acds/17.0,qedition/pro"

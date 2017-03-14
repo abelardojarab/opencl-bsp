@@ -23,6 +23,11 @@ else
 	fi
 fi
 
+#HACK for design directory
+#need to design directory with timing files so that they are the same as blue 
+#bits
+rsync -rvua design/ ../design
+
 # generate board.qsys
 qsys-generate --synthesis=VERILOG -qpf=dcp -c=afu_synth kernel_system.qsys
 qsys-generate --synthesis=VERILOG -qpf=dcp -c=afu_synth board.qsys
