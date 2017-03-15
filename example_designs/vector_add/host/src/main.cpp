@@ -113,7 +113,7 @@ bool init_opencl() {
   }
 
   // Get the OpenCL platform.
-  platform = findPlatform("Altera");
+  platform = findPlatform("fpga");
   if(platform == NULL) {
     printf("ERROR: Unable to find Altera OpenCL platform.\n");
     return false;
