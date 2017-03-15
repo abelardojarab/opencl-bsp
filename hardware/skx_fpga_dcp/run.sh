@@ -48,7 +48,7 @@ else
 fi
 
 #run packager tool to create GBS
-packager create-gbs --rbf ./output_files/afu_fit.green_region.rbf --gbs ./output_files/afu_fit.gbs --no-metadata
+$ADAPT_DEST_ROOT/bin/packager create-gbs --rbf ./output_files/afu_fit.green_region.rbf --gbs ./output_files/afu_fit.gbs --no-metadata
 
 rm -rf fpga.bin
 
