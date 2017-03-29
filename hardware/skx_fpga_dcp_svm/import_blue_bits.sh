@@ -28,9 +28,12 @@ copy_platform_file() {
 
 rm -fr "output_files"
 mkdir "output_files"
+mkdir -p "afu"
+mkdir -p "afu/interfaces"
 
 copy_platform_file "$FULL_PLATFORM_PATH/dcp.qsf" "."
 copy_platform_file "$FULL_PLATFORM_PATH/dcp.qdb" "."
+copy_platform_file "$FULL_PLATFORM_PATH/dcp_bbs.sdc" "."
 copy_platform_file "$FULL_PLATFORM_PATH/output_files/dcp.sof" "output_files"
 copy_platform_file "$FULL_PLATFORM_PATH/output_files/dcp.static.msf" "output_files"
 copy_platform_file "$FULL_PLATFORM_PATH/output_files/dcp.green_region.pmsf" "output_files"
