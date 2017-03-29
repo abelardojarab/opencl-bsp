@@ -5,7 +5,7 @@ SCRIPT_PATH=`readlink -f ${BASH_SOURCE[0]}`
 SCRIPT_DIR_PATH="$(dirname $SCRIPT_PATH)"
 MAIN_SCRIPTS_DIR_PATH="$(dirname $SCRIPT_PATH)/../scripts/"
 
-AOC_CMD="sh $MAIN_SCRIPTS_DIR_PATH/aoc_for_bsp.sh --board skx_fpga_dcp"
+AOC_CMD="sh $MAIN_SCRIPTS_DIR_PATH/aoc_for_bsp.sh --board skx_fpga_dcp_svm"
 
 KERNEL_LIST=`find $SCRIPT_DIR_PATH -name "*.cl"`
 
