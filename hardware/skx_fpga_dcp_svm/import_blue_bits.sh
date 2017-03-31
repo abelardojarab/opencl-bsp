@@ -43,6 +43,7 @@ copy_platform_file "$FULL_PLATFORM_PATH/../empty_afu/afu/interfaces/fpga_defines
 copy_platform_file "$FULL_PLATFORM_PATH/../empty_afu/afu/interfaces/vendor_defines.vh"      "./afu/interfaces/vendor_defines.vh"
 copy_platform_file "$FULL_PLATFORM_PATH/../empty_afu/afu/interfaces/ccip_if_pkg.sv"         "./afu/interfaces/ccip_if_pkg.sv"
 copy_platform_file "$FULL_PLATFORM_PATH/../empty_afu/afu/green_bs.sv" "./afu/green_bs.sv"
+copy_platform_file "$FULL_PLATFORM_PATH/../empty_afu/afu/interfaces/SCJIO.qsys"         "./afu/interfaces/SCJIO.qsys"
 
 rsync -rvua --delete "$FULL_PLATFORM_PATH/../empty_afu/design/" design
 
