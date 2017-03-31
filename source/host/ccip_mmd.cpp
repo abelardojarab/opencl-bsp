@@ -1147,7 +1147,7 @@ void CCIPMMD::activateFailed( IEvent const &rEvent )
  {
      //MSG("Generic message handler (runtime)");
  }
-#define WORKAROUND_MMIO_BIT_6
+//#define WORKAROUND_MMIO_BIT_6
 #define BIT_TO_MASK 6
 int CCIPMMD::MMIOWrite(size_t Addr, const void* buffer, size_t len){
 

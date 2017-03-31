@@ -250,7 +250,7 @@ module altera_avalon_mm_cci_bridge #(
 	reg [8:0] oustanding_tid;
 	reg outstanding_unaligned;
   
-`define WORKAROUND_MMIO_BIT_6 
+//`define WORKAROUND_MMIO_BIT_6 
 `ifdef WORKAROUND_MMIO_BIT_6 
 	assign kernel_address = {mmio_address[15:5],    mmio_address[3:1]};
 `else   
