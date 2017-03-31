@@ -43,7 +43,7 @@ proc add_files { toplevel } {
 	add_fileset_file cci_requester.v VERILOG PATH ./cci_requester.v
 	add_fileset_file parallel_match.v VERILOG PATH ./parallel_match.v
   add_fileset_file addr_range_cmp.v VERILOG PATH ./addr_range_cmp.v
-  add_fileset_file cci_master.v VERILOG PATH cci_master/cci_master.v
+  add_fileset_file cci_master.v VERILOG PATH ./cci_master.v
 }
 # | 
 # +-----------------------------------

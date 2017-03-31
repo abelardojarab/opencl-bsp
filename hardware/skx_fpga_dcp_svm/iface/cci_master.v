@@ -33,8 +33,8 @@ module cci_master #(parameter PEND_THRESH=1, ADDR_LMT=20, MDATA=14)
 	output [31:0] kernel_writedata,
   input  [31:0] kernel_readdata,
   input  kernel_readdatavalid,
-	input  kernel_waitrequest
-  
+	input  kernel_waitrequest,
+    input [63:0] dsm_base
 );
 
 	//internal state machine to update id
@@ -45,9 +45,9 @@ module cci_master #(parameter PEND_THRESH=1, ADDR_LMT=20, MDATA=14)
 	localparam      CSR_AFU_DSM_BASEL    = 12'ha00;                 // WO - Lower 32-bits of AFU DSM base address. The lower 6-bbits are 4x00 since the address is cache aligned.
 	localparam      CSR_AFU_DSM_BASEH    = 12'ha04;                 // WO - Upper 32-bits of AFU DSM base address.
 
-  reg [63:0] cci_addr;
+  wire [63:0] cci_addr;
   //next lowest addr, cache aligned
-  
+  assign cci_addr = dsm_base[63:6]+1;
 
   localparam      STATE_IDLE                = 8'h00; 
   localparam      STATE_READ_REQUEST        = 8'h01; 
@@ -69,13 +69,7 @@ module cci_master #(parameter PEND_THRESH=1, ADDR_LMT=20, MDATA=14)
   reg [31:0] read_addr;
 
 
-  always @(posedge clk or posedge reset) begin
-    if (reset) begin 
-        cci_addr <=0;
-    end else  begin
-        cci_addr <= dsm_base[63:6]+1;
-    end
-  end
+
 
   always @(posedge clk or posedge reset) begin
     if (reset) begin 
