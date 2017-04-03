@@ -22,6 +22,7 @@ $SCRIPT_DIR_PATH/setup_packages.sh
 cd $ROOT_PROJECT_PATH/example_designs/mem_bandwidth
 rm -fr bin/mem_bandwidth
 aoc device/mem_bandwidth.cl -o bin/mem_bandwidth.aocx
+rm -fr mem_bandwidth_comp
 mv bin/mem_bandwidth mem_bandwidth_comp
 aocl program acl0 bin/mem_bandwidth.aocx
 make
