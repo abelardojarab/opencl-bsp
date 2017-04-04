@@ -113,13 +113,13 @@ using namespace AAL;
 
 #ifdef SIM
 
-#define SLOW
+//#define SLOW
 #define  ASEAFU
 #define WORKSPACE_SIZE        (MB(64))
 
 
 #define DEBUG_PRINT(...) printf(__VA_ARGS__)
-#define SPEED_LIMIT()  SleepMicro(100000)
+#define SPEED_LIMIT()  SleepMicro(1000)
 #define INIT_SPEED_LIMIT()  SleepMicro(2000*1000)
 #else
 #define  HWAFU
@@ -137,6 +137,9 @@ using namespace AAL;
 
 #endif
 
+
+#define DCP_DEBUG_MEM(...) 
+//#define DCP_DEBUG_MEM(...) printf(__VA_ARGS__)
 
 
 #define NO_FME_SUPPORT
@@ -245,6 +248,8 @@ public:
    btBool isOK()  {return m_bIsOK;}
 	 int MMIOWrite(size_t Addr, const void* buffer, size_t len);
 	 int MMIORead(size_t Addr, void* buffer, size_t len);
+	 int MMIOWriteFast(size_t Addr, const void* buffer, size_t len);
+	 int MMIOReadFast(size_t Addr, void* buffer, size_t len);
 	void getPerfCounters();
    void* bufferAlloc(size_t len);
    
@@ -1149,7 +1154,7 @@ void CCIPMMD::activateFailed( IEvent const &rEvent )
  }
 //#define WORKAROUND_MMIO_BIT_6
 #define BIT_TO_MASK 6
-int CCIPMMD::MMIOWrite(size_t Addr, const void* buffer, size_t len){
+int CCIPMMD::MMIOWriteFast(size_t Addr, const void* buffer, size_t len){
 
  {
     const unsigned long int* src_dw = (unsigned long int*)buffer;
@@ -1173,14 +1178,23 @@ int CCIPMMD::MMIOWrite(size_t Addr, const void* buffer, size_t len){
     }
   }
   
+	return 0;
+}
+
+int CCIPMMD::MMIOWrite(size_t Addr, const void* buffer, size_t len){
+  MMIOWriteFast(Addr, buffer, len);
   SPEED_LIMIT();
 	return 0;
 }
 
 
-
-
 int CCIPMMD::MMIORead(size_t Addr, void* buffer, size_t len){
+    MMIOReadFast(Addr, buffer, len);
+  SPEED_LIMIT();
+	return 0;
+}
+
+int CCIPMMD::MMIOReadFast(size_t Addr, void* buffer, size_t len){
 
  {
     unsigned long int* src_dw = (unsigned long int*)buffer;
@@ -1240,7 +1254,6 @@ int CCIPMMD::MMIORead(size_t Addr, void* buffer, size_t len){
     
     #endif
   }
-  SPEED_LIMIT();
 	return 0;
 }
  
@@ -1586,12 +1599,32 @@ int AOCL_MMD_CALL aocl_mmd_yield(int handle)
     if (param_size_ret) *param_size_ret=Xlen; \
   } while(0)
 
+static bool check_for_svm_env()
+{
+	static bool env_checked = false;
+	static bool svm_enabled = false;
+	
+	if(!env_checked)
+	{
+		if(getenv("ENABLE_DCP_OPENCL_SVM")){
+			svm_enabled = true;
+		}
+		env_checked = true;
+	}
+	
+	return svm_enabled;
+}
+  	  
 int aocl_mmd_get_offline_info(
     aocl_mmd_offline_info_t requested_info_id,
     size_t param_value_size,
     void* param_value,
     size_t* param_size_ret )
 {
+  int mem_type_info = (int)AOCL_MMD_PHYSICAL_MEMORY;
+  if(check_for_svm_env())
+  	  mem_type_info = (int)AOCL_MMD_SVM_COARSE_GRAIN_BUFFER;
+	
   switch(requested_info_id)
   {
     case AOCL_MMD_VERSION:              RESULT_STR("14.1"); break;
@@ -1600,7 +1633,7 @@ int aocl_mmd_get_offline_info(
     case AOCL_MMD_BOARD_NAMES:          RESULT_STR("acl0"); break;
     case AOCL_MMD_VENDOR_ID:            RESULT_INT(0); break;
     case AOCL_MMD_USES_YIELD:           RESULT_INT(1); break;
-    case AOCL_MMD_MEM_TYPES_SUPPORTED:  RESULT_INT(AOCL_MMD_SVM_COARSE_GRAIN_BUFFER); break;
+    case AOCL_MMD_MEM_TYPES_SUPPORTED:  RESULT_INT(mem_type_info); break;
   }
   
   return 0;
@@ -1616,7 +1649,7 @@ int aocl_mmd_get_info(
   HW_LOCK;
   switch(requested_info_id)
   {
-    case AOCL_MMD_BOARD_NAME:            RESULT_STR("BDW FPGA OpenCL BSP"); break;
+    case AOCL_MMD_BOARD_NAME:            RESULT_STR("SKX DCP FPGA OpenCL BSP"); break;
     case AOCL_MMD_NUM_KERNEL_INTERFACES: RESULT_INT(1); break;
     case AOCL_MMD_KERNEL_INTERFACES:     RESULT_INT(AOCL_MMD_KERNEL); break;
     #ifdef SIM 
@@ -1658,6 +1691,10 @@ int AOCL_MMD_CALL aocl_mmd_set_status_handler( int handle, aocl_mmd_status_handl
   return 0;
 }
 
+#define MEM_WINDOW_CRTL 0xc800
+#define MEM_WINDOW_MEM 0x10000
+#define MEM_WINDOW_SPAN (64*1024)
+#define MEM_WINDOW_SPAN_MASK ((long)(MEM_WINDOW_SPAN-1))
 
 // Host to device-global-memory write
 int AOCL_MMD_CALL aocl_mmd_write(
@@ -1667,6 +1704,38 @@ int AOCL_MMD_CALL aocl_mmd_write(
     const void* src,
     int mmd_interface, size_t offset )
 {
+	if(mmd_interface == AOCL_MMD_MEMORY)
+	{
+		DCP_DEBUG_MEM("DCP DEBUG: aocl_mmd_write called with AOCL_MMD_MEMORY!\n");
+		DCP_DEBUG_MEM("DCP DEBUG: len=%d offset = %08x, data = %08x\n", len, (unsigned)offset,((int *)src)[0]);
+		
+		void * host_addr = const_cast<void *>(src);
+	    long dev_addr  = offset;
+	    
+		long cur_mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
+		pCCIPMMD->MMIOWriteFast(MEM_WINDOW_CRTL, &cur_mem_page, 8);
+		DCP_DEBUG_MEM("DCP DEBUG: set page %08x\n", cur_mem_page);
+		for(long i = 0; i < len/8; i++)
+		{
+			long mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
+			if(mem_page != cur_mem_page)
+			{
+				cur_mem_page = mem_page;
+				pCCIPMMD->MMIOWriteFast(MEM_WINDOW_CRTL, &cur_mem_page, 8);
+				DCP_DEBUG_MEM("DCP DEBUG: set page %08x\n", cur_mem_page);
+			}
+			pCCIPMMD->MMIOWriteFast(MEM_WINDOW_MEM+(dev_addr&MEM_WINDOW_SPAN_MASK), host_addr, 8);
+			DCP_DEBUG_MEM("DCP DEBUG: write data %08x %08x %016lx\n", host_addr, dev_addr, ((long *)host_addr)[0]);
+			
+			host_addr += 8;
+			dev_addr += 8;
+		}
+		
+		DCP_DEBUG_MEM("DCP DEBUG: aocl_mmd_write done!\n");
+	}
+	else
+	{
+	
   unsigned long int address = mmd_interface + offset; // We defined it this way
   
   HW_LOCK;
@@ -1676,7 +1745,8 @@ int AOCL_MMD_CALL aocl_mmd_write(
 	int result = pCCIPMMD->MMIOWrite(address, src, len);
     #ifdef SIM    
   sleep(2);
-  #endif 
+  #endif
+  	}
   if (op)
   {
     //assert(event_update);
@@ -1695,6 +1765,36 @@ int AOCL_MMD_CALL aocl_mmd_read(
     void* dst,
     int mmd_interface, size_t offset )
 {
+	if(mmd_interface == AOCL_MMD_MEMORY)
+	{
+		DCP_DEBUG_MEM("DCP DEBUG: aocl_mmd_read called with AOCL_MMD_MEMORY!\n");
+		DCP_DEBUG_MEM("DCP DEBUG: len: %d offset: %08x\n", len, offset);
+		
+		void * host_addr = const_cast<void *>(dst);
+	    long dev_addr  = offset;
+	    
+		long cur_mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
+		pCCIPMMD->MMIOWriteFast(MEM_WINDOW_CRTL, &cur_mem_page, 8);
+		DCP_DEBUG_MEM("DCP DEBUG: set page %08x\n", cur_mem_page);
+		for(long i = 0; i < len/8; i++)
+		{
+			long mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
+			if(mem_page != cur_mem_page)
+			{
+				cur_mem_page = mem_page;
+				pCCIPMMD->MMIOWriteFast(MEM_WINDOW_CRTL, &cur_mem_page, 8);
+				DCP_DEBUG_MEM("DCP DEBUG: set page %08x\n", cur_mem_page);
+			}
+			pCCIPMMD->MMIOReadFast(MEM_WINDOW_MEM+(dev_addr&MEM_WINDOW_SPAN_MASK), host_addr, 8);
+			DCP_DEBUG_MEM("DCP DEBUG: read data %08x %08x %016lx\n", host_addr, dev_addr, ((long *)host_addr)[0]);
+			
+			host_addr += 8;
+			dev_addr += 8;
+		}
+		DCP_DEBUG_MEM("DCP DEBUG: aocl_mmd_read done!\n");
+	}
+	else
+	{
   int address = mmd_interface + offset; // We defined it this way
   HW_LOCK;
 
@@ -1704,7 +1804,7 @@ int AOCL_MMD_CALL aocl_mmd_read(
   #endif 
   int result = pCCIPMMD->MMIORead(address, dst, len);
 
-  
+  	}  
   if (op)
   {
     //assert(event_update);
@@ -1724,6 +1824,7 @@ int AOCL_MMD_CALL aocl_mmd_copy(
     size_t len,
     int mmd_interface, size_t src_offset, size_t dst_offset )
 {
+  DCP_DEBUG_MEM("DCP DEBUG: aocl_mmd_copy called!\n");
   HW_LOCK;
   HW_UNLOCK;
    return 0;
