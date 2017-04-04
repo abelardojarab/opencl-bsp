@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <unistd.h>
+#include <map>
 // ACL specific includes
 #include "CL/opencl.h"
 //#include "ACLHostUtils.h"
@@ -31,6 +32,8 @@
 using namespace aocl_utils;
 static const size_t V = 16;
 static size_t vectorSize = 1024*1024*4*16;
+
+static bool use_svm = false;
 
 static const char *kernel_name =  "memcopy";
 
@@ -48,6 +51,47 @@ static cl_kernel kernel_write;
 static cl_program program;
 static cl_int status;
 
+#define ACL_ALIGNMENT 64
+
+#include <stdlib.h>
+
+void* acl_aligned_malloc (size_t size) {
+	void *result = NULL;
+	  posix_memalign (&result, ACL_ALIGNMENT, size);
+		return result;
+}
+void acl_aligned_free (void *ptr) {
+	free (ptr);
+}
+
+static bool device_has_svm(cl_device_id device) {
+   cl_device_svm_capabilities a;
+   clGetDeviceInfo(device, CL_DEVICE_SVM_CAPABILITIES, sizeof(cl_uint), &a, NULL);
+   
+   if( a & CL_DEVICE_SVM_COARSE_GRAIN_BUFFER)
+   	   return true;
+   
+   return false;
+}
+
+//hdatain = (unsigned int*)clSVMAllocIntelFPGA(context, 0, buf_size, 1024); 
+void *alloc_fpga_host_buffer(cl_context &in_context, int some_int, int size, int some_int2);
+cl_int set_fpga_buffer_kernel_param(cl_kernel &kernel, int param, void *ptr);
+
+cl_int enqueue_fpga_buffer(cl_command_queue  queue/* command_queue */,
+                cl_bool  blocking         /* blocking_map */,
+                cl_map_flags  flags    /* flags */,
+                void *ptr            /* svm_ptr */,
+                size_t len           /* size */,
+                cl_uint    num_events       /* num_events_in_wait_list */,
+                const cl_event *events  /* event_wait_list */,
+                cl_event *the_event        /* event */);
+cl_int unenqueue_fpga_buffer(cl_command_queue queue /* command_queue */,
+                  void *ptr            /* svm_ptr */,
+                  cl_uint  num_events         /* num_events_in_wait_list */,
+                  const cl_event *events  /* event_wait_list */,
+                  cl_event *the_event        /* event */);
+void remove_fpga_buffer(cl_context &context, void *ptr);
 
 // input and output vectors
 static unsigned *hdatain, *hdataout;
@@ -82,18 +126,89 @@ static void freeResources() {
   if(queue) 
     clReleaseCommandQueue(queue);
   if(hdatain) 
-   clSVMFreeIntelFPGA(context,hdatain);
+   remove_fpga_buffer(context,hdatain);
   if(hdataout) 
-   clSVMFreeIntelFPGA(context,hdataout);     
+   remove_fpga_buffer(context,hdataout);     
   if(context) 
     clReleaseContext(context);
 
 }
 
+std::map <void *, cl_mem> buffer_map;
+std::map <void *, int> buffer_size_map;
+void *alloc_fpga_host_buffer(cl_context &in_context, int some_int, int size, int some_int2)
+{
+	if(use_svm)
+		return clSVMAllocIntelFPGA(in_context, some_int, size, some_int2);
+	else
+	{
+		cl_int status;
+		void *ptr = acl_aligned_malloc(size);
+		buffer_map[ptr] = clCreateBuffer(in_context, CL_MEM_READ_WRITE, 
+			size, NULL, &status);
+		if(status != CL_SUCCESS)
+		{
+			printf("ERROR: clCreateBuffer");
+			exit(1);
+		}
+		buffer_size_map[ptr] = size;
+		return ptr;
+	}
+}
+
+cl_int set_fpga_buffer_kernel_param(cl_kernel &kernel, int param, void *ptr)
+{
+	if(use_svm)
+		return clSetKernelArgSVMPointerIntelFPGA(kernel, param, (void*)ptr);
+	else
+		return clSetKernelArg(kernel, param, sizeof(cl_mem), &(buffer_map[ptr]));
+}
+
+cl_int enqueue_fpga_buffer(cl_command_queue  queue/* command_queue */,
+                cl_bool  blocking         /* blocking_map */,
+                cl_map_flags  flags    /* flags */,
+                void *ptr            /* svm_ptr */,
+                size_t len           /* size */,
+                cl_uint    num_events       /* num_events_in_wait_list */,
+                const cl_event *events  /* event_wait_list */,
+                cl_event *the_event        /* event */)
+{
+	if(use_svm)
+		return clEnqueueSVMMap(queue, blocking, flags, ptr, len, num_events, events, the_event);
+	else
+		return clEnqueueWriteBuffer(queue, buffer_map[ptr], blocking,
+			0, len, ptr, num_events, events, the_event);
+}
 
 
+cl_int unenqueue_fpga_buffer(cl_command_queue queue /* command_queue */,
+                  void *ptr            /* svm_ptr */,
+                  cl_uint  num_events         /* num_events_in_wait_list */,
+                  const cl_event *events  /* event_wait_list */,
+                  cl_event *the_event        /* event */)
+{
+	if(use_svm)
+		return clEnqueueSVMUnmap(queue, ptr, num_events, events, the_event);
+	else
+	{
+		int len = buffer_size_map[ptr];
+		return clEnqueueReadBuffer(queue, buffer_map[ptr], CL_TRUE,
+			0, len, ptr, num_events, events, the_event);
+	}
+}
 
 
+void remove_fpga_buffer(cl_context &context, void *ptr)
+{
+	if(use_svm)
+		clSVMFreeIntelFPGA(context,ptr);
+	else
+	{
+		acl_aligned_free(ptr);
+		//acl_aligned_malloc
+		//TODO
+	}
+}
 
 void cleanup() {
 
@@ -146,13 +261,19 @@ int main(int argc, char *argv[]) {
     freeResources();
     return 1;
   }
-    
+  
+  use_svm = device_has_svm(device);
+  if(use_svm)
+  	printf("SVM enabled!\n");
+  else
+    printf("SVM is disabled!\n");
+
   printf("Creating host buffers.\n");
   unsigned int buf_size =  vectorSize <= 0 ? 64 : vectorSize*4;
  
   // allocate and initialize the input vectors
-  hdatain = (unsigned int*)clSVMAllocIntelFPGA(context, 0, buf_size, 1024); 
-  hdataout = (unsigned int*)clSVMAllocIntelFPGA(context, 0, buf_size, 1024);
+  hdatain = (unsigned int*)alloc_fpga_host_buffer(context, 0, buf_size, 1024); 
+  hdataout = (unsigned int*)alloc_fpga_host_buffer(context, 0, buf_size, 1024);
   if(!hdatain || !hdataout) {
     dump_error("Failed to allocate buffers.", status);
     freeResources();
@@ -212,12 +333,12 @@ int main(int argc, char *argv[]) {
     }
 
     // set the arguments
-    status = clSetKernelArgSVMPointerIntelFPGA(kernel, 0, (void*)hdatain);
+    status = set_fpga_buffer_kernel_param(kernel, 0, (void*)hdatain);
     if(status != CL_SUCCESS) {
       dump_error("Failed set arg 0.", status);
       return 1;
     }
-    status = clSetKernelArgSVMPointerIntelFPGA(kernel, 1, (void*)hdataout);
+    status = set_fpga_buffer_kernel_param(kernel, 1, (void*)hdataout);
     if(status != CL_SUCCESS) {
       dump_error("Failed Set arg 1.", status);
       freeResources();
@@ -234,17 +355,17 @@ int main(int argc, char *argv[]) {
 
     printf("Launching the kernel...\n");
 
-    status = clEnqueueSVMMap(queue, CL_TRUE, CL_MAP_READ | CL_MAP_WRITE, 
+    status = enqueue_fpga_buffer(queue, CL_TRUE, CL_MAP_READ | CL_MAP_WRITE, 
        (void *)hdatain,buf_size, 0, NULL, NULL); 
     if(status != CL_SUCCESS) {
-      dump_error("Failed clEnqueueSVMMap", status);
+      dump_error("Failed enqueue_fpga_buffer", status);
       freeResources();
       return 1;
     }
-    status = clEnqueueSVMMap(queue, CL_TRUE,  CL_MAP_READ | CL_MAP_WRITE, 
+    status = enqueue_fpga_buffer(queue, CL_TRUE,  CL_MAP_READ | CL_MAP_WRITE, 
        (void *)hdataout, buf_size, 0, NULL, NULL); 
     if(status != CL_SUCCESS) {
-      dump_error("Failed clEnqueueSVMMap", status);
+      dump_error("Failed enqueue_fpga_buffer", status);
       freeResources();
       return 1;
     }	
@@ -258,24 +379,25 @@ int main(int argc, char *argv[]) {
       freeResources();
       return 1;
     }
+    clFinish(queue);
+    const double end_time = getCurrentTimestamp();
 	
-    status = clEnqueueSVMUnmap(queue, (void *)hdatain, 0, NULL, NULL); 
+    status = unenqueue_fpga_buffer(queue, (void *)hdatain, 0, NULL, NULL); 
     if(status != CL_SUCCESS) {
-      dump_error("Failed clEnqueueSVMUnmap", status);
+      dump_error("Failed unenqueue_fpga_buffer", status);
       freeResources();
       return 1;
     }
-    status = clEnqueueSVMUnmap(queue, (void *)hdataout, 0, NULL, NULL); 
+    status = unenqueue_fpga_buffer(queue, (void *)hdataout, 0, NULL, NULL); 
     if(status != CL_SUCCESS) {
-      dump_error("Failed clEnqueueSVMUnmap", status);
+      dump_error("Failed unenqueue_fpga_buffer", status);
       freeResources();
       return 1;
     }	
 	
+	 clFinish(queue);
 	
-	
-    clFinish(queue);
-    const double end_time = getCurrentTimestamp();
+
 
     // Wall-clock time taken.
     float time = (end_time - start_time);
@@ -307,12 +429,12 @@ int main(int argc, char *argv[]) {
     }
 
     // set the arguments
-    status = clSetKernelArgSVMPointerIntelFPGA(kernel, 0, (void*)hdatain);
+    status = set_fpga_buffer_kernel_param(kernel, 0, (void*)hdatain);
     if(status != CL_SUCCESS) {
       dump_error("Failed set arg 0.", status);
       return 1;
     }
-    status = clSetKernelArgSVMPointerIntelFPGA(kernel, 1, (void*)hdataout);
+    status = set_fpga_buffer_kernel_param(kernel, 1, (void*)hdataout);
     if(status != CL_SUCCESS) {
       dump_error("Failed Set arg 1.", status);
       freeResources();
@@ -328,17 +450,17 @@ int main(int argc, char *argv[]) {
     }
 
     printf("Launching the kernel...\n");
-    status = clEnqueueSVMMap(queue, CL_TRUE, CL_MAP_READ | CL_MAP_WRITE, 
+    status = enqueue_fpga_buffer(queue, CL_TRUE, CL_MAP_READ | CL_MAP_WRITE, 
        (void *)hdatain,buf_size, 0, NULL, NULL); 
     if(status != CL_SUCCESS) {
-      dump_error("Failed clEnqueueSVMMap", status);
+      dump_error("Failed enqueue_fpga_buffer", status);
       freeResources();
       return 1;
     }
-    status = clEnqueueSVMMap(queue, CL_TRUE,  CL_MAP_READ | CL_MAP_WRITE, 
+    status = enqueue_fpga_buffer(queue, CL_TRUE,  CL_MAP_READ | CL_MAP_WRITE, 
        (void *)hdataout, buf_size, 0, NULL, NULL); 
     if(status != CL_SUCCESS) {
-      dump_error("Failed clEnqueueSVMMap", status);
+      dump_error("Failed enqueue_fpga_buffer", status);
       freeResources();
       return 1;
     }	
@@ -352,24 +474,24 @@ int main(int argc, char *argv[]) {
       freeResources();
       return 1;
     }
-	
-		
-	status = clEnqueueSVMUnmap(queue, (void *)hdatain, 0, NULL, NULL); 
+
+    clFinish(queue);
+    const double end_time = getCurrentTimestamp();
+
+	status = unenqueue_fpga_buffer(queue, (void *)hdatain, 0, NULL, NULL); 
     if(status != CL_SUCCESS) {
-      dump_error("Failed clEnqueueSVMUnmap", status);
+      dump_error("Failed unenqueue_fpga_buffer", status);
       freeResources();
       return 1;
     }
-    status = clEnqueueSVMUnmap(queue, (void *)hdataout, 0, NULL, NULL); 
+    status = unenqueue_fpga_buffer(queue, (void *)hdataout, 0, NULL, NULL); 
     if(status != CL_SUCCESS) {
-      dump_error("Failed clEnqueueSVMUnmap", status);
+      dump_error("Failed unenqueue_fpga_buffer", status);
       freeResources();
       return 1;
     }	
 	
-	
     clFinish(queue);
-    const double end_time = getCurrentTimestamp();
 
     // Wall-clock time taken.
     float time = (end_time - start_time);
@@ -400,12 +522,12 @@ int main(int argc, char *argv[]) {
     }
 
     // set the arguments
-    status = clSetKernelArgSVMPointerIntelFPGA(kernel_read, 0, (void*)hdatain);
+    status = set_fpga_buffer_kernel_param(kernel_read, 0, (void*)hdatain);
     if(status != CL_SUCCESS) {
       dump_error("Failed set arg 0.", status);
       return 1;
     }
-    status = clSetKernelArgSVMPointerIntelFPGA(kernel_read, 1, (void*)hdataout);
+    status = set_fpga_buffer_kernel_param(kernel_read, 1, (void*)hdataout);
     if(status != CL_SUCCESS) {
       dump_error("Failed Set arg 1.", status);
       freeResources();
@@ -420,17 +542,17 @@ int main(int argc, char *argv[]) {
       return 1;
     }
     printf("Launching the kernel...\n");
-    status = clEnqueueSVMMap(queue, CL_TRUE, CL_MAP_READ | CL_MAP_WRITE, 
+    status = enqueue_fpga_buffer(queue, CL_TRUE, CL_MAP_READ | CL_MAP_WRITE, 
        (void *)hdatain,buf_size, 0, NULL, NULL); 
     if(status != CL_SUCCESS) {
-      dump_error("Failed clEnqueueSVMMap", status);
+      dump_error("Failed enqueue_fpga_buffer", status);
       freeResources();
       return 1;
     }
-    status = clEnqueueSVMMap(queue, CL_TRUE,  CL_MAP_READ | CL_MAP_WRITE, 
+    status = enqueue_fpga_buffer(queue, CL_TRUE,  CL_MAP_READ | CL_MAP_WRITE, 
        (void *)hdataout, buf_size, 0, NULL, NULL); 
     if(status != CL_SUCCESS) {
-      dump_error("Failed clEnqueueSVMMap", status);
+      dump_error("Failed enqueue_fpga_buffer", status);
       freeResources();
       return 1;
     }	
@@ -443,26 +565,24 @@ int main(int argc, char *argv[]) {
       freeResources();
       return 1;
     }
-	
 
-	status = clEnqueueSVMUnmap(queue, (void *)hdatain, 0, NULL, NULL); 
+    clFinish(queue);
+    const double end_time = getCurrentTimestamp();
+
+	status = unenqueue_fpga_buffer(queue, (void *)hdatain, 0, NULL, NULL); 
     if(status != CL_SUCCESS) {
-      dump_error("Failed clEnqueueSVMUnmap", status);
+      dump_error("Failed unenqueue_fpga_buffer", status);
       freeResources();
       return 1;
     }
-    status = clEnqueueSVMUnmap(queue, (void *)hdataout, 0, NULL, NULL); 
+    status = unenqueue_fpga_buffer(queue, (void *)hdataout, 0, NULL, NULL); 
     if(status != CL_SUCCESS) {
-      dump_error("Failed clEnqueueSVMUnmap", status);
+      dump_error("Failed unenqueue_fpga_buffer", status);
       freeResources();
       return 1;
     }	
 	
-	
-
-	
     clFinish(queue);
-    const double end_time = getCurrentTimestamp();
 
     // Wall-clock time taken.
     float time = (end_time - start_time);
@@ -485,12 +605,12 @@ int main(int argc, char *argv[]) {
     }
 
     // set the arguments
-    status = clSetKernelArgSVMPointerIntelFPGA(kernel_write, 0, (void*)hdatain);
+    status = set_fpga_buffer_kernel_param(kernel_write, 0, (void*)hdatain);
     if(status != CL_SUCCESS) {
       dump_error("Failed set arg 0.", status);
       return 1;
     }
-    status = clSetKernelArgSVMPointerIntelFPGA(kernel_write, 1, (void*)hdataout);
+    status = set_fpga_buffer_kernel_param(kernel_write, 1, (void*)hdataout);
     if(status != CL_SUCCESS) {
       dump_error("Failed Set arg 1.", status);
       freeResources();
@@ -504,17 +624,17 @@ int main(int argc, char *argv[]) {
       freeResources();
       return 1;
     }
-    status = clEnqueueSVMMap(queue, CL_TRUE, CL_MAP_READ | CL_MAP_WRITE, 
+    status = enqueue_fpga_buffer(queue, CL_TRUE, CL_MAP_READ | CL_MAP_WRITE, 
        (void *)hdatain,buf_size, 0, NULL, NULL); 
     if(status != CL_SUCCESS) {
-      dump_error("Failed clEnqueueSVMMap", status);
+      dump_error("Failed enqueue_fpga_buffer", status);
       freeResources();
       return 1;
     }
-    status = clEnqueueSVMMap(queue, CL_TRUE,  CL_MAP_READ | CL_MAP_WRITE, 
+    status = enqueue_fpga_buffer(queue, CL_TRUE,  CL_MAP_READ | CL_MAP_WRITE, 
        (void *)hdataout, buf_size, 0, NULL, NULL); 
     if(status != CL_SUCCESS) {
-      dump_error("Failed clEnqueueSVMMap", status);
+      dump_error("Failed enqueue_fpga_buffer", status);
       freeResources();
       return 1;
     }	
