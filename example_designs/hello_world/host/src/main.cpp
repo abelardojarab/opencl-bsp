@@ -204,6 +204,16 @@ static void device_info_string( cl_device_id device, cl_device_info param, const
    clGetDeviceInfo(device, param, STRING_BUFFER_LEN, &a, NULL);
    printf("%-40s = %s\n", name, a);
 }
+static void device_info_svm( cl_device_id device, cl_device_info param, const char* name) {
+   cl_device_svm_capabilities a;
+   clGetDeviceInfo(device, param, sizeof(cl_uint), &a, NULL);
+   printf("%-40s = %u ", name, (cl_uint)a);
+   
+   if( a & CL_DEVICE_SVM_COARSE_GRAIN_BUFFER)
+   	   printf("CL_DEVICE_SVM_COARSE_GRAIN_BUFFER", name, (cl_uint)a);
+   
+   printf("\n");
+}
 
 // Query and display OpenCL information on device and runtime environment
 static void display_device_info( cl_device_id device ) {
@@ -236,6 +246,8 @@ static void display_device_info( cl_device_id device ) {
    device_info_uint(device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG, "CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG");
    device_info_uint(device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT, "CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT");
    device_info_uint(device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE, "CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE");
+   device_info_svm(device, CL_DEVICE_SVM_CAPABILITIES, "CL_DEVICE_SVM_CAPABILITIES");
+   
 
    {
       cl_command_queue_properties ccp;
