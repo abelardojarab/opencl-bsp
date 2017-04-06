@@ -80,6 +80,7 @@ set_global_assignment -name VCCERAM_USER_VOLTAGE 0.95V
 set_global_assignment -name ENABLE_BOOT_SEL_PIN OFF
 
 set_global_assignment -name SDC_FILE dcp_bbs.sdc
+set_global_assignment -name SDC_FILE user_clock.sdc
 
 set_global_assignment -name REVISION_TYPE PR_IMPL
 set_global_assignment -name POWER_AUTO_COMPUTE_TJ ON
