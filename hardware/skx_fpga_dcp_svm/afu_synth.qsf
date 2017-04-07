@@ -113,17 +113,3 @@ set_global_assignment -name IP_FILE iface/ip/cci_interface/cci_interface_mm_cci_
 set_global_assignment -name IP_FILE iface/ip/cci_interface/cci_interface_clk_0.ip
 
 
-set_global_assignment -name IP_FILE ip/kernel_system/kernel_system_avs_memcopy_cra_cra_ring.ip
-set_global_assignment -name IP_FILE ip/kernel_system/kernel_system_avmm_r.ip
-set_global_assignment -name IP_FILE ip/kernel_system/kernel_system_avmm_w.ip
-set_global_assignment -name IP_FILE ip/kernel_system/kernel_system_avs_memwrite_cra_cra_ring.ip
-set_global_assignment -name IP_FILE ip/kernel_system/kernel_system_clk_1x.ip
-set_global_assignment -name IP_FILE ip/kernel_system/kernel_system_avs_memread_cra_cra_ring.ip
-set_global_assignment -name IP_FILE ip/kernel_system/kernel_system_cra_root.ip
-set_global_assignment -name IP_FILE ip/kernel_system/kernel_system_cra_ring_rom.ip
-set_global_assignment -name IP_FILE ip/kernel_system/kernel_system_clk_2x.ip
-set_global_assignment -name IP_FILE ip/kernel_system/kernel_system_reset.ip
-set_global_assignment -name IP_FILE ip/kernel_system/kernel_system_kernel_irq.ip
-set_global_assignment -name IP_FILE ip/kernel_system/kernel_system_kernel_cra.ip
-set_global_assignment -name IP_FILE ip/kernel_system/kernel_system_sys_description_rom.ip
-
