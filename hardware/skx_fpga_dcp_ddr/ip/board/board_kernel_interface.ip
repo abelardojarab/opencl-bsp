@@ -2254,6 +2254,7 @@
       <altera:interface_mapping altera:name="acl_bsp_memorg_host0x018" altera:internal="kernel_interface.acl_bsp_memorg_host0x018" altera:type="conduit" altera:dir="end">
         <altera:port_mapping altera:name="acl_bsp_memorg_host0x018_mode" altera:internal="acl_bsp_memorg_host0x018_mode"></altera:port_mapping>
       </altera:interface_mapping>
+      <altera:interface_mapping altera:name="acl_bsp_memorg_host0x100" altera:internal="kernel_interface.acl_bsp_memorg_host0x100"></altera:interface_mapping>
       <altera:interface_mapping altera:name="clk" altera:internal="kernel_interface.clk" altera:type="clock" altera:dir="end">
         <altera:port_mapping altera:name="clk_clk" altera:internal="clk_clk"></altera:port_mapping>
       </altera:interface_mapping>

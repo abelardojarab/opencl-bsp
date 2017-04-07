@@ -10,9 +10,6 @@
    tool="QsysPro" />
  <parameter name="bonusData"><![CDATA[bonusData 
 {
-   element $system
-   {
-   }
    element cci_interface
    {
       datum _originalDeviceFamily
@@ -56,7 +53,7 @@
 }
 ]]></parameter>
  <parameter name="clockCrossingAdapter" value="HANDSHAKE" />
- <parameter name="device" value="10AX115U3F45E2SGE3" />
+ <parameter name="device" value="10AX115N3F40E2SG" />
  <parameter name="deviceFamily" value="Arria 10" />
  <parameter name="deviceSpeedGrade" value="2" />
  <parameter name="fabricMode" value="QSYS" />
@@ -175,11 +172,11 @@
                 <suppliedSystemInfos>
                     <entry>
                         <key>ADDRESS_MAP</key>
-                        <value>&lt;address-map&gt;&lt;slave name='parent/afu_regs.s1' start='0x0' end='0x40' datawidth='64' /&gt;&lt;slave name='parent/acl_irq_to_polling_slave_0.s1' start='0x100' end='0x104' datawidth='32' /&gt;&lt;slave name='parent/cci_interface.mm_cci_bridge_0.addr_cfg' start='0x2000' end='0x3000' datawidth='64' /&gt;&lt;slave name='parent/cci_interface.mm_cci_bridge_0.debug' start='0x3000' end='0x4000' datawidth='64' /&gt;&lt;slave name='parent/kernel_interface.ctrl' start='0x4000' end='0x8000' datawidth='32' /&gt;&lt;slave name='parent/pr_base_id.s' start='0xCF80' end='0xCF84' datawidth='32' /&gt;&lt;slave name='parent/version_id_0.s' start='0xCFC0' end='0xCFC4' datawidth='32' /&gt;&lt;/address-map&gt;</value>
+                        <value>&lt;address-map&gt;&lt;slave name='parent/afu_regs.s1' start='0x0' end='0x40' datawidth='64' /&gt;&lt;slave name='parent/acl_irq_to_polling_slave_0.s1' start='0x100' end='0x104' datawidth='32' /&gt;&lt;slave name='parent/cci_interface.mm_cci_bridge_0.addr_cfg' start='0x2000' end='0x3000' datawidth='64' /&gt;&lt;slave name='parent/cci_interface.mm_cci_bridge_0.debug' start='0x3000' end='0x4000' datawidth='64' /&gt;&lt;slave name='parent/kernel_interface.ctrl' start='0x4000' end='0x8000' datawidth='32' /&gt;&lt;slave name='parent/memwindow.cntl' start='0xC800' end='0xC808' datawidth='64' /&gt;&lt;slave name='parent/pr_base_id.s' start='0xCF80' end='0xCF84' datawidth='32' /&gt;&lt;slave name='parent/version_id_0.s' start='0xCFC0' end='0xCFC4' datawidth='32' /&gt;&lt;slave name='parent/memwindow.windowed_slave' start='0x10000' end='0x20000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
                     </entry>
                     <entry>
                         <key>ADDRESS_WIDTH</key>
-                        <value>16</value>
+                        <value>18</value>
                     </entry>
                 </suppliedSystemInfos>
                 <consumedSystemInfos/>
@@ -2642,7 +2639,7 @@
                         <name>m0_address</name>
                         <role>address</role>
                         <direction>Output</direction>
-                        <width>16</width>
+                        <width>18</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -2901,7 +2898,7 @@
                         <name>s0_address</name>
                         <role>address</role>
                         <direction>Input</direction>
-                        <width>16</width>
+                        <width>18</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -2970,7 +2967,7 @@
                         </entry>
                         <entry>
                             <key>addressSpan</key>
-                            <value>65536</value>
+                            <value>262144</value>
                         </entry>
                         <entry>
                             <key>addressUnits</key>

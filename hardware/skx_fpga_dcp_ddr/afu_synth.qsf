@@ -96,12 +96,6 @@ set_global_assignment -name IP_FILE ip/board/board_clk_400.ip
 set_global_assignment -name IP_FILE ip/board/board_kernel_interface.ip
 set_global_assignment -name IP_FILE ip/board/board_kernel_clk_in.ip
 set_global_assignment -name IP_FILE ip/board/board_kernel_clk_export.ip
-set_global_assignment -name IP_FILE ip/board/board_kernel_mem_stage_avmm_r_4burst.ip
-set_global_assignment -name IP_FILE ip/board/board_kernel_mem_board_avmm_rw_clock_crosser.ip
-set_global_assignment -name IP_FILE ip/board/board_kernel_mem_stage_avmm_r.ip
-set_global_assignment -name IP_FILE ip/board/board_kernel_mem_stage_avmm_w_4burst.ip
-set_global_assignment -name IP_FILE ip/board/board_kernel_mem_stage_avmm_rw.ip
-set_global_assignment -name IP_FILE ip/board/board_kernel_mem_stage_avmm_w.ip
 set_global_assignment -name IP_FILE ip/board/board_por_reset_counter.ip
 set_global_assignment -name IP_FILE ip/board/board_pr_base_id.ip
 set_global_assignment -name IP_FILE ip/board/board_por_reset_controller.ip
@@ -112,4 +106,16 @@ set_global_assignment -name IP_FILE ip/board/board_version_id_0.ip
 set_global_assignment -name IP_FILE iface/ip/cci_interface/cci_interface_mm_cci_bridge_0.ip
 set_global_assignment -name IP_FILE iface/ip/cci_interface/cci_interface_clk_0.ip
 
+set_global_assignment -name QSYS_FILE board.qsys
+set_global_assignment -name QSYS_FILE iface/cci_interface.qsys
+set_global_assignment -name IP_FILE ip/ddr_board/csr_clk.ip
+set_global_assignment -name IP_FILE ip/ddr_board/kernel_clk.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_clk.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_0.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_reset_bridge_0.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_reset_bridge_1.ip
+set_global_assignment -name QSYS_FILE ddr_board.qsys
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_1.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_address_span_extender_0.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_acl_memory_bank_divider_0.ip
 
