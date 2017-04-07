@@ -49,26 +49,57 @@ module bsp_logic(
   output logic         	board_kernel_cra_read,
   output logic   [7:0]  	board_kernel_cra_byteenable,
   output logic         	board_kernel_cra_debugaccess,
-  output logic           board_avmm_r_waitrequest,
-  output logic  [511:0] 	board_avmm_r_readdata,
-  output logic          	board_avmm_r_readdatavalid,
-  input logic [4:0]   	board_avmm_r_burstcount,
-  input logic [511:0]	board_avmm_r_writedata,
-  input logic [63:0]  	board_avmm_r_address,
-  input logic        	board_avmm_r_write,
-  input logic         	board_avmm_r_read,
-  input logic [63:0]  	board_avmm_r_byteenable,
-  input logic         	board_avmm_r_debugaccess,
-  output logic          	board_avmm_w_waitrequest,
-  output logic  [511:0] 	board_avmm_w_readdata,
-  output logic          	board_avmm_w_readdatavalid,
-  input logic [4:0]   	board_avmm_w_burstcount,
-  input logic [511:0] 	board_avmm_w_writedata,
-  input logic [63:0]  	board_avmm_w_address,
-  input logic         	board_avmm_w_write,
-  input logic         	board_avmm_w_read,
-  input logic [63:0]  	board_avmm_w_byteenable,
-  input logic         	board_avmm_w_debugaccess,
+
+	output	[32:0]	acl_internal_snoop_data,
+	output		acl_internal_snoop_valid,
+	input		acl_internal_snoop_ready,
+  
+  	input		ddr_clk_clk,
+	
+	input		emif_ddr4a_waitrequest,
+	input	[511:0]	emif_ddr4a_readdata,
+	input		emif_ddr4a_readdatavalid,
+	output	[6:0]	emif_ddr4a_burstcount,
+	output	[511:0]	emif_ddr4a_writedata,
+	output	[31:0]	emif_ddr4a_address,
+	output		emif_ddr4a_write,
+	output		emif_ddr4a_read,
+	output	[63:0]	emif_ddr4a_byteenable,
+	output		emif_ddr4a_debugaccess,
+	
+	input		emif_ddr4b_waitrequest,
+	input	[511:0]	emif_ddr4b_readdata,
+	input		emif_ddr4b_readdatavalid,
+	output	[6:0]	emif_ddr4b_burstcount,
+	output	[511:0]	emif_ddr4b_writedata,
+	output	[31:0]	emif_ddr4b_address,
+	output		emif_ddr4b_write,
+	output		emif_ddr4b_read,
+	output	[63:0]	emif_ddr4b_byteenable,
+	output		emif_ddr4b_debugaccess,
+	
+	output		kernel_ddr4a_waitrequest,
+	output	[511:0]	kernel_ddr4a_readdata,
+	output		kernel_ddr4a_readdatavalid,
+	input	[4:0]	kernel_ddr4a_burstcount,
+	input	[511:0]	kernel_ddr4a_writedata,
+	input	[31:0]	kernel_ddr4a_address,
+	input		kernel_ddr4a_write,
+	input		kernel_ddr4a_read,
+	input	[63:0]	kernel_ddr4a_byteenable,
+	input		kernel_ddr4a_debugaccess,
+	
+	output		kernel_ddr4b_waitrequest,
+	output	[511:0]	kernel_ddr4b_readdata,
+	output		kernel_ddr4b_readdatavalid,
+	input	[4:0]	kernel_ddr4b_burstcount,
+	input	[511:0]	kernel_ddr4b_writedata,
+	input	[31:0]	kernel_ddr4b_address,
+	input		kernel_ddr4b_write,
+	input		kernel_ddr4b_read,
+	input	[63:0]	kernel_ddr4b_byteenable,
+	input		kernel_ddr4b_debugaccess,
+	
   input kernel_clk
 
 
@@ -170,10 +201,6 @@ begin
     afu.c2Tx = afu_tx.c2;
 end
 
-
-
-
-
     system u0 (
       .ci0_InitDone         (1'b1 ),         //   ci0.InitDone
       // TODO - make sure PLL is ok!
@@ -233,26 +260,57 @@ end
 		.board_kernel_cra_read          (board_kernel_cra_read),
 		.board_kernel_cra_byteenable    (board_kernel_cra_byteenable),
 		.board_kernel_cra_debugaccess   (board_kernel_cra_debugaccess),
-		.board_avmm_r_waitrequest       (board_avmm_r_waitrequest),
-		.board_avmm_r_readdata          (board_avmm_r_readdata),
-		.board_avmm_r_readdatavalid     (board_avmm_r_readdatavalid),
-		.board_avmm_r_burstcount        (board_avmm_r_burstcount),
-		.board_avmm_r_writedata         (board_avmm_r_writedata),
-		.board_avmm_r_address           (board_avmm_r_address),
-		.board_avmm_r_write             (board_avmm_r_write),
-		.board_avmm_r_read              (board_avmm_r_read),
-		.board_avmm_r_byteenable        (board_avmm_r_byteenable),
-		.board_avmm_r_debugaccess       (board_avmm_r_debugaccess),
-		.board_avmm_w_waitrequest       (board_avmm_w_waitrequest),
-		.board_avmm_w_readdata          (board_avmm_w_readdata),
-		.board_avmm_w_readdatavalid     (board_avmm_w_readdatavalid),
-		.board_avmm_w_burstcount        (board_avmm_w_burstcount),
-		.board_avmm_w_writedata         (board_avmm_w_writedata),
-		.board_avmm_w_address           (board_avmm_w_address),
-		.board_avmm_w_write             (board_avmm_w_write),
-		.board_avmm_w_read              (board_avmm_w_read),
-		.board_avmm_w_byteenable        (board_avmm_w_byteenable),
-		.board_avmm_w_debugaccess       (board_avmm_w_debugaccess),
+
+
+.acl_internal_snoop_data(acl_internal_snoop_data),
+.acl_internal_snoop_valid(acl_internal_snoop_valid),
+.acl_internal_snoop_ready(acl_internal_snoop_ready),
+
+.ddr_clk_clk(ddr_clk_clk),
+
+.emif_ddr4a_waitrequest(emif_ddr4a_waitrequest),
+.emif_ddr4a_readdata(emif_ddr4a_readdata),
+.emif_ddr4a_readdatavalid(emif_ddr4a_readdatavalid),
+.emif_ddr4a_burstcount(emif_ddr4a_burstcount),
+.emif_ddr4a_writedata(emif_ddr4a_writedata),
+.emif_ddr4a_address(emif_ddr4a_address),
+.emif_ddr4a_write(emif_ddr4a_write),
+.emif_ddr4a_read(emif_ddr4a_read),
+.emif_ddr4a_byteenable(emif_ddr4a_byteenable),
+.emif_ddr4a_debugaccess(emif_ddr4a_debugaccess),
+
+.emif_ddr4b_waitrequest(emif_ddr4b_waitrequest),
+.emif_ddr4b_readdata(emif_ddr4b_readdata),
+.emif_ddr4b_readdatavalid(emif_ddr4b_readdatavalid),
+.emif_ddr4b_burstcount(emif_ddr4b_burstcount),
+.emif_ddr4b_writedata(emif_ddr4b_writedata),
+.emif_ddr4b_address(emif_ddr4b_address),
+.emif_ddr4b_write(emif_ddr4b_write),
+.emif_ddr4b_read(emif_ddr4b_read),
+.emif_ddr4b_byteenable(emif_ddr4b_byteenable),
+.emif_ddr4b_debugaccess(emif_ddr4b_debugaccess),
+
+.kernel_ddr4a_waitrequest(kernel_ddr4a_waitrequest),
+.kernel_ddr4a_readdata(kernel_ddr4a_readdata),
+.kernel_ddr4a_readdatavalid(kernel_ddr4a_readdatavalid),
+.kernel_ddr4a_burstcount(kernel_ddr4a_burstcount),
+.kernel_ddr4a_writedata(kernel_ddr4a_writedata),
+.kernel_ddr4a_address(kernel_ddr4a_address),
+.kernel_ddr4a_write(kernel_ddr4a_write),
+.kernel_ddr4a_read(kernel_ddr4a_read),
+.kernel_ddr4a_byteenable(kernel_ddr4a_byteenable),
+.kernel_ddr4a_debugaccess(kernel_ddr4a_debugaccess),
+
+.kernel_ddr4b_waitrequest(kernel_ddr4b_waitrequest),
+.kernel_ddr4b_readdata(kernel_ddr4b_readdata),
+.kernel_ddr4b_readdatavalid(kernel_ddr4b_readdatavalid),
+.kernel_ddr4b_burstcount(kernel_ddr4b_burstcount),
+.kernel_ddr4b_writedata(kernel_ddr4b_writedata),
+.kernel_ddr4b_address(kernel_ddr4b_address),
+.kernel_ddr4b_write(kernel_ddr4b_write),
+.kernel_ddr4b_read(kernel_ddr4b_read),
+.kernel_ddr4b_byteenable(kernel_ddr4b_byteenable),
+.kernel_ddr4b_debugaccess(kernel_ddr4b_debugaccess),
 
 		 
       .kernel_clk(kernel_clk)

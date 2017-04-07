@@ -30,26 +30,33 @@ module freeze_wrapper(
   input         	board_kernel_cra_read,
   input   [7:0]  	board_kernel_cra_byteenable,
   input         	board_kernel_cra_debugaccess,
-  input           board_avmm_r_waitrequest,
-  input  [511:0] 	board_avmm_r_readdata,
-  input          	board_avmm_r_readdatavalid,
-  output [4:0]   	board_avmm_r_burstcount,
-  output [511:0]	board_avmm_r_writedata,
-  output [63:0]  	board_avmm_r_address,
-  output        	board_avmm_r_write,
-  output         	board_avmm_r_read,
-  output [63:0]  	board_avmm_r_byteenable,
-  output         	board_avmm_r_debugaccess,
-  input          	board_avmm_w_waitrequest,
-  input  [511:0] 	board_avmm_w_readdata,
-  input          	board_avmm_w_readdatavalid,
-  output [4:0]   	board_avmm_w_burstcount,
-  output [511:0] 	board_avmm_w_writedata,
-  output [63:0]  	board_avmm_w_address,
-  output         	board_avmm_w_write,
-  output         	board_avmm_w_read,
-  output [63:0]  	board_avmm_w_byteenable,
-  output         	board_avmm_w_debugaccess
+  
+   	input	[32:0]	acl_internal_snoop_data,
+	input		acl_internal_snoop_valid,
+	output		acl_internal_snoop_ready,
+  
+  
+  	input		kernel_ddr4a_waitrequest,
+	input	[511:0]	kernel_ddr4a_readdata,
+	input		kernel_ddr4a_readdatavalid,
+	output	[4:0]	kernel_ddr4a_burstcount,
+	output	[511:0]	kernel_ddr4a_writedata,
+	output	[31:0]	kernel_ddr4a_address,
+	output		kernel_ddr4a_write,
+	output		kernel_ddr4a_read,
+	output	[63:0]	kernel_ddr4a_byteenable,
+	output		kernel_ddr4a_debugaccess,
+	
+	input		kernel_ddr4b_waitrequest,
+	input	[511:0]	kernel_ddr4b_readdata,
+	input		kernel_ddr4b_readdatavalid,
+	output	[4:0]	kernel_ddr4b_burstcount,
+	output	[511:0]	kernel_ddr4b_writedata,
+	output	[31:0]	kernel_ddr4b_address,
+	output		kernel_ddr4b_write,
+	output		kernel_ddr4b_read,
+	output	[63:0]	kernel_ddr4b_byteenable,
+	output		kernel_ddr4b_debugaccess
 );
 
 reg  [7:0]    kernel_reset_count;                            // counter to release RESETn and FREEZE in the proper sequence
@@ -61,8 +68,12 @@ reg           pr_freeze_reg;                                 // internal copy of
 wire         	kernel_system_kernel_irq_irq;
 wire         	kernel_system_kernel_cra_waitrequest;
 wire         	kernel_system_kernel_cra_readdatavalid;
-wire         	kernel_system_avmm_r_read;
-wire         	kernel_system_avmm_w_write;
+wire         	freeze_kernel_ddr4a_read;
+wire         	freeze_kernel_ddr4a_write;
+wire         	freeze_kernel_ddr4b_read;
+wire         	freeze_kernel_ddr4b_write;
+wire			freeze_acl_internal_snoop_ready;
+
 
 // capture the freeze signal onto the kernel clock domain
 always @( posedge board_kernel_clk_clk or negedge board_kernel_reset_reset_n)  
@@ -119,19 +130,16 @@ end
 assign board_kernel_irq_irq	            = pr_freeze_reg ? 1'b0:kernel_system_kernel_irq_irq;
 assign board_kernel_cra_waitrequest    	= pr_freeze_reg ? 1'b1:kernel_system_kernel_cra_waitrequest;
 assign board_kernel_cra_readdatavalid   = pr_freeze_reg ? 1'b0:kernel_system_kernel_cra_readdatavalid;
-assign board_avmm_r_read			          = pr_freeze_reg ? 1'b0:kernel_system_avmm_r_read;
-assign board_avmm_w_write			          = pr_freeze_reg ? 1'b0:kernel_system_avmm_w_write;
+assign kernel_ddr4a_read			          = pr_freeze_reg ? 1'b0:freeze_kernel_ddr4a_read;
+assign kernel_ddr4a_write			          = pr_freeze_reg ? 1'b0:freeze_kernel_ddr4a_write;
+assign kernel_ddr4b_read			          = pr_freeze_reg ? 1'b0:freeze_kernel_ddr4b_read;
+assign kernel_ddr4b_write			          = pr_freeze_reg ? 1'b0:freeze_kernel_ddr4b_write;
+assign acl_internal_snoop_ready  = pr_freeze_reg ?   1'b0:freeze_acl_internal_snoop_ready;
+
 
 // Signals not used
-assign board_avmm_r_write	              = 1'b0;
-assign board_avmm_r_debugaccess			    = 1'b0;
-assign board_avmm_r_writedata           = 512'b0;
-assign board_avmm_r_byteenable          = 64'b0;
-assign board_avmm_w_read			          = 1'b0;
-assign board_avmm_w_debugaccess			    = 1'b0;
-
-//assign board_avmm_w_address[63:48]      = 16'b0;
-//assign board_avmm_r_address[63:48]      = 16'b0;
+assign kernel_ddr4a_debugaccess			    = 1'b0;
+assign kernel_ddr4b_debugaccess			    = 1'b0;
 
 //=======================================================
 //  kernel_system instantiation
@@ -151,18 +159,31 @@ kernel_wrapper kernel_wrapper_inst (
   .kernel_cra_read(board_kernel_cra_read),
   .kernel_cra_byteenable(board_kernel_cra_byteenable),
   .kernel_cra_debugaccess(board_kernel_cra_debugaccess),
-  .avmm_r_waitrequest(board_avmm_r_waitrequest),
-  .avmm_r_readdata(board_avmm_r_readdata),
-  .avmm_r_readdatavalid(board_avmm_r_readdatavalid),
-  .avmm_r_burstcount(board_avmm_r_burstcount),
-  .avmm_r_address(board_avmm_r_address),
-  .avmm_r_read(kernel_system_avmm_r_read),
-  .avmm_w_waitrequest(board_avmm_w_waitrequest),
-  .avmm_w_burstcount(board_avmm_w_burstcount),
-  .avmm_w_writedata(board_avmm_w_writedata),
-  .avmm_w_address(board_avmm_w_address),
-  .avmm_w_write(kernel_system_avmm_w_write),
-  .avmm_w_byteenable(board_avmm_w_byteenable)
+  
+.acl_internal_snoop_data(acl_internal_snoop_data),
+.acl_internal_snoop_valid(acl_internal_snoop_valid),
+.acl_internal_snoop_ready(freeze_acl_internal_snoop_ready),
+  
+.kernel_ddr4a_waitrequest(kernel_ddr4a_waitrequest),
+.kernel_ddr4a_readdata(kernel_ddr4a_readdata),
+.kernel_ddr4a_readdatavalid(kernel_ddr4a_readdatavalid),
+.kernel_ddr4a_burstcount(kernel_ddr4a_burstcount),
+.kernel_ddr4a_writedata(kernel_ddr4a_writedata),
+.kernel_ddr4a_address(kernel_ddr4a_address),
+.kernel_ddr4a_write(freeze_kernel_ddr4a_write),
+.kernel_ddr4a_read(freeze_kernel_ddr4a_read),
+.kernel_ddr4a_byteenable(kernel_ddr4a_byteenable),
+
+.kernel_ddr4b_waitrequest(kernel_ddr4b_waitrequest),
+.kernel_ddr4b_readdata(kernel_ddr4b_readdata),
+.kernel_ddr4b_readdatavalid(kernel_ddr4b_readdatavalid),
+.kernel_ddr4b_burstcount(kernel_ddr4b_burstcount),
+.kernel_ddr4b_writedata(kernel_ddr4b_writedata),
+.kernel_ddr4b_address(kernel_ddr4b_address),
+.kernel_ddr4b_write(freeze_kernel_ddr4b_write),
+.kernel_ddr4b_read(freeze_kernel_ddr4b_read),
+.kernel_ddr4b_byteenable(kernel_ddr4b_byteenable)
+
 );
 
 endmodule

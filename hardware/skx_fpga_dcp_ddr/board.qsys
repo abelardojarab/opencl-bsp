@@ -268,6 +268,36 @@
             </value>
         </entry>
         <entry>
+            <key>emif_ddr4a</key>
+            <value>
+                <connectionPointName>emif_ddr4a</connectionPointName>
+                <suppliedSystemInfos>
+                    <entry>
+                        <key>ADDRESS_MAP</key>
+                    </entry>
+                    <entry>
+                        <key>ADDRESS_WIDTH</key>
+                    </entry>
+                </suppliedSystemInfos>
+                <consumedSystemInfos/>
+            </value>
+        </entry>
+        <entry>
+            <key>emif_ddr4b</key>
+            <value>
+                <connectionPointName>emif_ddr4b</connectionPointName>
+                <suppliedSystemInfos>
+                    <entry>
+                        <key>ADDRESS_MAP</key>
+                    </entry>
+                    <entry>
+                        <key>ADDRESS_WIDTH</key>
+                    </entry>
+                </suppliedSystemInfos>
+                <consumedSystemInfos/>
+            </value>
+        </entry>
+        <entry>
             <key>kernel_clk</key>
             <value>
                 <connectionPointName>kernel_clk</connectionPointName>
@@ -286,6 +316,48 @@
                     <entry>
                         <key>CLOCK_RATE</key>
                         <value>0</value>
+                    </entry>
+                </consumedSystemInfos>
+            </value>
+        </entry>
+        <entry>
+            <key>kernel_ddr4a</key>
+            <value>
+                <connectionPointName>kernel_ddr4a</connectionPointName>
+                <suppliedSystemInfos/>
+                <consumedSystemInfos>
+                    <entry>
+                        <key>ADDRESS_MAP</key>
+                        <value>&lt;address-map&gt;&lt;slave name='ddr_board.kernel_ddr4a' start='0x0' end='0x100000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
+                    </entry>
+                    <entry>
+                        <key>ADDRESS_WIDTH</key>
+                        <value>32</value>
+                    </entry>
+                    <entry>
+                        <key>MAX_SLAVE_DATA_WIDTH</key>
+                        <value>512</value>
+                    </entry>
+                </consumedSystemInfos>
+            </value>
+        </entry>
+        <entry>
+            <key>kernel_ddr4b</key>
+            <value>
+                <connectionPointName>kernel_ddr4b</connectionPointName>
+                <suppliedSystemInfos/>
+                <consumedSystemInfos>
+                    <entry>
+                        <key>ADDRESS_MAP</key>
+                        <value>&lt;address-map&gt;&lt;slave name='ddr_board.kernel_ddr4b' start='0x0' end='0x100000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
+                    </entry>
+                    <entry>
+                        <key>ADDRESS_WIDTH</key>
+                        <value>32</value>
+                    </entry>
+                    <entry>
+                        <key>MAX_SLAVE_DATA_WIDTH</key>
+                        <value>512</value>
                     </entry>
                 </consumedSystemInfos>
             </value>
@@ -310,6 +382,11 @@
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface
+   name="acl_internal_snoop"
+   internal="ddr_board.acl_bsp_snoop"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
    name="bridge_reset"
    internal="bridge_reset.in_reset"
    type="reset"
@@ -322,6 +399,16 @@
  <interface name="ci0" internal="cci_interface.ci0" type="conduit" dir="end" />
  <interface name="clk_400" internal="clk_400.in_clk" type="clock" dir="end" />
  <interface name="ddr_clk" internal="ddr_board.ddr_clk" type="clock" dir="end" />
+ <interface
+   name="emif_ddr4a"
+   internal="ddr_board.emif_ddr4a"
+   type="avalon"
+   dir="start" />
+ <interface
+   name="emif_ddr4b"
+   internal="ddr_board.emif_ddr4b"
+   type="avalon"
+   dir="start" />
  <interface
    name="global_reset"
    internal="global_reset_in.in_reset"
@@ -342,6 +429,16 @@
    internal="kernel_interface.kernel_cra"
    type="avalon"
    dir="start" />
+ <interface
+   name="kernel_ddr4a"
+   internal="ddr_board.kernel_ddr4a"
+   type="avalon"
+   dir="end" />
+ <interface
+   name="kernel_ddr4b"
+   internal="ddr_board.kernel_ddr4b"
+   type="avalon"
+   dir="end" />
  <interface
    name="kernel_irq"
    internal="kernel_interface.kernel_irq_from_kernel"
@@ -711,7 +808,7 @@
                     <consumedSystemInfos>
                         <entry>
                             <key>CLOCK_RATE</key>
-                            <value>100</value>
+                            <value>200000000</value>
                         </entry>
                     </consumedSystemInfos>
                 </value>
@@ -1429,7 +1526,7 @@
                     <consumedSystemInfos>
                         <entry>
                             <key>CLOCK_RATE</key>
-                            <value>200</value>
+                            <value>400000000</value>
                         </entry>
                     </consumedSystemInfos>
                 </value>
@@ -1468,7 +1565,7 @@
  </module>
  <module name="cci_interface" kind="cci_interface" version="1.0" enabled="1">
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="2" />
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="200" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="400000000" />
   <parameter name="AUTO_CLK_RESET_DOMAIN" value="2" />
   <parameter name="AUTO_DEVICE" value="10AX115N3F40E2SG" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
@@ -1545,7 +1642,7 @@
                         </entry>
                         <entry>
                             <key>clockRate</key>
-                            <value>100</value>
+                            <value>200000000</value>
                         </entry>
                         <entry>
                             <key>clockRateKnown</key>
@@ -1601,7 +1698,7 @@
                     <suppliedSystemInfos>
                         <entry>
                             <key>CLOCK_RATE</key>
-                            <value>100</value>
+                            <value>200000000</value>
                         </entry>
                     </suppliedSystemInfos>
                     <consumedSystemInfos/>
@@ -1705,7 +1802,7 @@
                         </entry>
                         <entry>
                             <key>clockRate</key>
-                            <value>200</value>
+                            <value>400000000</value>
                         </entry>
                         <entry>
                             <key>clockRateKnown</key>
@@ -1761,7 +1858,7 @@
                     <suppliedSystemInfos>
                         <entry>
                             <key>CLOCK_RATE</key>
-                            <value>200</value>
+                            <value>400000000</value>
                         </entry>
                     </suppliedSystemInfos>
                     <consumedSystemInfos/>
@@ -1800,26 +1897,8 @@
 </assignmentDefinition>]]></parameter>
  </module>
  <module name="ddr_board" kind="ddr_board" version="1.0" enabled="1">
-  <parameter
-     name="AUTO_BOARD_ACL_MEMORY_BANK_DIVIDER_0_BANK1_ADDRESS_MAP"
-     value="" />
-  <parameter
-     name="AUTO_BOARD_ACL_MEMORY_BANK_DIVIDER_0_BANK1_ADDRESS_WIDTH"
-     value="-1" />
-  <parameter
-     name="AUTO_BOARD_ACL_MEMORY_BANK_DIVIDER_0_BANK2_ADDRESS_MAP"
-     value="" />
-  <parameter
-     name="AUTO_BOARD_ACL_MEMORY_BANK_DIVIDER_0_BANK2_ADDRESS_WIDTH"
-     value="-1" />
-  <parameter name="AUTO_CLK_0_CLOCK_DOMAIN" value="-1" />
-  <parameter name="AUTO_CLK_0_CLOCK_RATE" value="-1" />
-  <parameter name="AUTO_CLK_0_RESET_DOMAIN" value="-1" />
-  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="-1" />
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="-1" />
-  <parameter name="AUTO_CLK_RESET_DOMAIN" value="-1" />
   <parameter name="AUTO_CSR_CLK_CLOCK_DOMAIN" value="8" />
-  <parameter name="AUTO_CSR_CLK_CLOCK_RATE" value="100" />
+  <parameter name="AUTO_CSR_CLK_CLOCK_RATE" value="200000000" />
   <parameter name="AUTO_CSR_CLK_RESET_DOMAIN" value="8" />
   <parameter name="AUTO_DDR_CLK_CLOCK_DOMAIN" value="3" />
   <parameter name="AUTO_DDR_CLK_CLOCK_RATE" value="0" />
@@ -1827,6 +1906,10 @@
   <parameter name="AUTO_DEVICE" value="10AX115N3F40E2SG" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="2" />
+  <parameter name="AUTO_EMIF_DDR4A_ADDRESS_MAP" value="" />
+  <parameter name="AUTO_EMIF_DDR4A_ADDRESS_WIDTH" value="-1" />
+  <parameter name="AUTO_EMIF_DDR4B_ADDRESS_MAP" value="" />
+  <parameter name="AUTO_EMIF_DDR4B_ADDRESS_WIDTH" value="-1" />
   <parameter name="AUTO_GENERATION_ID" value="0" />
   <parameter name="AUTO_KERNEL_CLK_CLOCK_DOMAIN" value="6" />
   <parameter name="AUTO_KERNEL_CLK_CLOCK_RATE" value="0" />
@@ -4467,7 +4550,7 @@
                     <consumedSystemInfos>
                         <entry>
                             <key>CLOCK_RATE</key>
-                            <value>100</value>
+                            <value>200000000</value>
                         </entry>
                     </consumedSystemInfos>
                 </value>
@@ -4834,7 +4917,7 @@
                     <consumedSystemInfos>
                         <entry>
                             <key>CLOCK_RATE</key>
-                            <value>100</value>
+                            <value>200000000</value>
                         </entry>
                     </consumedSystemInfos>
                 </value>
@@ -5201,7 +5284,7 @@
                     <consumedSystemInfos>
                         <entry>
                             <key>CLOCK_RATE</key>
-                            <value>100</value>
+                            <value>200000000</value>
                         </entry>
                     </consumedSystemInfos>
                 </value>

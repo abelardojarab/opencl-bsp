@@ -106,6 +106,7 @@ set_global_assignment -name IP_FILE ip/board/board_version_id_0.ip
 set_global_assignment -name IP_FILE iface/ip/cci_interface/cci_interface_mm_cci_bridge_0.ip
 set_global_assignment -name IP_FILE iface/ip/cci_interface/cci_interface_clk_0.ip
 
+
 set_global_assignment -name QSYS_FILE board.qsys
 set_global_assignment -name QSYS_FILE iface/cci_interface.qsys
 set_global_assignment -name IP_FILE ip/ddr_board/csr_clk.ip
@@ -119,3 +120,11 @@ set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_1.ip
 set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_address_span_extender_0.ip
 set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_acl_memory_bank_divider_0.ip
 
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_2.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_3.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_clock_crossing_bridge_0.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_clock_crossing_bridge_1.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_4.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_5.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_clock_crossing_bridge_2.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_clock_crossing_bridge_3.ip

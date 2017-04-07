@@ -97,6 +97,200 @@ module ccip_std_afu(
   output  wire                          DDR4b_write;
   output  wire                          DDR4b_read;
   output  wire [63:0]                   DDR4b_byteenable;
+`else
+	 /*wire                   DDR4_USERCLK;
+     wire                   DDR4a_waitrequest;
+     wire [511:0]           DDR4a_readdata;
+     wire                   DDR4a_readdatavalid;
+     wire  [6:0]            DDR4a_burstcount;
+     wire  [511:0]          DDR4a_writedata;
+     wire  [25:0]           DDR4a_address;
+     wire                   DDR4a_write;
+     wire                   DDR4a_read;
+     wire  [63:0]           DDR4a_byteenable;
+     wire                   DDR4b_waitrequest;
+     wire [511:0]           DDR4b_readdata;
+     wire                   DDR4b_readdatavalid;
+     wire  [6:0]            DDR4b_burstcount;
+     wire  [511:0]          DDR4b_writedata;
+     wire  [25:0]           DDR4b_address;
+     wire                   DDR4b_write;
+     wire                   DDR4b_read;
+     wire  [63:0]           DDR4b_byteenable;
+     
+     assign DDR4_USERCLK = pClkDiv2;*/
+     
+     wire SoftReset;
+     assign SoftReset = pck_cp2af_softReset;
+     
+	`timescale 1 ps / 1 ps
+	
+	wire          DDR4a_waitrequest;
+	reg [511:0]  DDR4a_readdata = 512'b0;
+	reg          DDR4a_readdatavalid = 0;
+	wire [6:0]   DDR4a_burstcount;
+	wire [511:0] DDR4a_writedata;
+	wire [25:0]  DDR4a_address;
+	wire         DDR4a_write;
+	wire         DDR4a_read;
+	wire [63:0]  DDR4a_byteenable;
+	wire          DDR4b_waitrequest;
+	reg [511:0]  DDR4b_readdata = 512'b0;
+	reg          DDR4b_readdatavalid = 0;
+	wire [6:0]   DDR4b_burstcount;
+	wire [511:0] DDR4b_writedata;
+	wire [25:0]  DDR4b_address;
+	wire [63:0]  DDR4b_byteenable;
+	wire         DDR4b_write;
+	wire         DDR4b_read;
+	reg  [511:0] local_mem_bankA[ reg [25:0] ]; // Fake emif sim model, we model 2 banks of memory using systemverilog associative arrays
+	reg  [511:0] local_mem_bankB[ reg [25:0] ];
+	
+	reg          DDR4_USERCLK = 0;  
+	always begin
+		#1875 DDR4_USERCLK = ~DDR4_USERCLK;
+	end
+	
+	wire [511:0] DDR4a_byteenable_mask;
+	wire [511:0] DDR4b_byteenable_mask;
+	reg [511:0] DDR4a_tmp_read = 0;
+	reg [511:0] DDR4b_tmp_read = 0;
+	reg [6:0] DDR4a_burst_state = 0;
+	reg [6:0] DDR4b_burst_state = 0;
+	reg [25:0]  DDR4a_burst_address = 0;
+	reg [25:0]  DDR4b_burst_address = 0;
+	reg [511:0] DDR4a_burst_byteenable_mask = 0;
+	reg [511:0] DDR4b_burst_byteenable_mask = 0;
+	genvar i;
+	generate
+	for (i = 0; i < 64 ; i = i + 1) 
+	begin: gen_loop1 
+		assign DDR4a_byteenable_mask[(i+1)*8-1:i*8] = {8{DDR4a_byteenable[i]}};
+		assign DDR4b_byteenable_mask[(i+1)*8-1:i*8] = {8{DDR4b_byteenable[i]}};
+	end
+	endgenerate
+	
+	reg DDR4a_is_reset;
+	reg DDR4b_is_reset; 
+	initial DDR4a_is_reset = 0;
+	initial DDR4b_is_reset = 0; 
+	initial DDR4a_burst_address = 0;
+	initial DDR4b_burst_address = 0;
+	reg is_ddr4a_read_burst = 0;
+	reg is_ddr4b_read_burst = 0;
+	reg is_ddr4a_write_burst = 0;
+	reg is_ddr4b_write_burst = 0;
+	assign DDR4a_waitrequest = (DDR4a_burst_state != 6'b000000) & is_ddr4a_read_burst;
+	assign DDR4b_waitrequest = (DDR4b_burst_state != 6'b000000) & is_ddr4b_read_burst;
+	
+	always @(posedge DDR4_USERCLK) begin
+		if (SoftReset || ~DDR4a_is_reset) begin // global reset
+			DDR4a_readdata      <= 512'b0;
+			DDR4a_readdatavalid <= 1'b0;
+			DDR4a_burst_state <= 6'b0;
+			DDR4a_burst_address <= 25'b0;
+			DDR4a_burst_byteenable_mask <= 512'b0;
+			is_ddr4a_read_burst <= 1'b0;
+			is_ddr4a_write_burst <= 1'b0;
+			DDR4a_is_reset <= 1'b1;
+		end
+		else begin
+			DDR4a_readdatavalid <= 1'b0;
+			if(!(is_ddr4a_read_burst | is_ddr4a_write_burst)) begin
+				if (DDR4a_read) begin
+					DDR4a_burst_state <= DDR4a_burstcount;
+					DDR4a_burst_address <= DDR4a_address;
+					DDR4a_burst_byteenable_mask <= DDR4a_byteenable_mask;
+					is_ddr4a_read_burst <= DDR4a_read;
+				end
+				else if (DDR4a_write) begin
+					DDR4a_burst_state <= DDR4a_burstcount-1;
+					DDR4a_burst_address <= DDR4a_address+1;
+					DDR4a_burst_byteenable_mask <= DDR4a_byteenable_mask;
+					is_ddr4a_write_burst <= (DDR4a_burstcount != 6'b000001);
+					//need to write first word!
+					if (local_mem_bankA.exists(DDR4a_address)) DDR4a_tmp_read = local_mem_bankA[DDR4a_address];
+					else DDR4a_tmp_read = 512'b0;
+					local_mem_bankA[DDR4a_address] <= (DDR4a_tmp_read & ~DDR4a_byteenable_mask) | (DDR4a_writedata & DDR4a_byteenable_mask);
+				end
+			end
+			else if(is_ddr4a_read_burst) begin
+				DDR4a_burst_state <= DDR4a_burst_state - 1;
+				DDR4a_burst_address <= DDR4a_burst_address + 1;
+				if(is_ddr4a_read_burst) begin
+					if (local_mem_bankA.exists(DDR4a_burst_address)) DDR4a_readdata <= local_mem_bankA[DDR4a_burst_address];
+					else DDR4a_readdata <= 512'b0;
+					DDR4a_readdatavalid <= 1'b1;
+					is_ddr4a_read_burst <= (DDR4a_burst_state != 6'b000001);
+				end
+			end 
+			else if(is_ddr4a_write_burst) begin
+				if (DDR4a_write) begin
+					DDR4a_burst_state <= DDR4a_burst_state - 1;
+					DDR4a_burst_address <= DDR4a_burst_address + 1;
+					if (local_mem_bankA.exists(DDR4a_burst_address)) DDR4a_tmp_read = local_mem_bankA[DDR4a_burst_address];
+					else DDR4a_tmp_read = 512'b0;
+					local_mem_bankA[DDR4a_burst_address] <= (DDR4a_tmp_read & ~DDR4a_burst_byteenable_mask) | (DDR4a_writedata & DDR4a_burst_byteenable_mask);
+					is_ddr4a_write_burst <= (DDR4a_burst_state != 6'b000001);
+				end
+			end
+		end
+	end
+	
+	always @(posedge DDR4_USERCLK) begin
+		if (SoftReset || ~DDR4b_is_reset) begin // global reset
+			DDR4b_readdata      <= 512'b0;
+			DDR4b_readdatavalid <= 1'b0;
+			DDR4b_burst_state <= 6'b0;
+			DDR4b_burst_address <= 25'b0;
+			DDR4b_burst_byteenable_mask <= 512'b0;
+			is_ddr4b_read_burst <= 1'b0;
+			is_ddr4b_write_burst <= 1'b0;
+			DDR4b_is_reset <= 1'b1;
+		end
+		else begin
+			DDR4b_readdatavalid <= 1'b0;
+			if(!(is_ddr4b_read_burst | is_ddr4b_write_burst)) begin
+				if (DDR4b_read) begin
+					DDR4b_burst_state <= DDR4b_burstcount;
+					DDR4b_burst_address <= DDR4b_address;
+					DDR4b_burst_byteenable_mask <= DDR4b_byteenable_mask;
+					is_ddr4b_read_burst <= DDR4b_read;
+				end
+				else if (DDR4b_write) begin
+					DDR4b_burst_state <= DDR4b_burstcount-1;
+					DDR4b_burst_address <= DDR4b_address+1;
+					DDR4b_burst_byteenable_mask <= DDR4b_byteenable_mask;
+					is_ddr4b_write_burst <= (DDR4b_burstcount != 6'b000001);
+					//need to write first word!
+					if (local_mem_bankB.exists(DDR4b_address)) DDR4b_tmp_read = local_mem_bankB[DDR4b_address];
+					else DDR4b_tmp_read = 512'b0;
+					local_mem_bankB[DDR4b_address] <= (DDR4b_tmp_read & ~DDR4b_byteenable_mask) | (DDR4b_writedata & DDR4b_byteenable_mask);
+				end
+			end
+			else if(is_ddr4b_read_burst) begin
+				DDR4b_burst_state <= DDR4b_burst_state - 1;
+				DDR4b_burst_address <= DDR4b_burst_address + 1;
+				if(is_ddr4b_read_burst) begin
+					if (local_mem_bankB.exists(DDR4b_burst_address)) DDR4b_readdata <= local_mem_bankB[DDR4b_burst_address];
+					else DDR4b_readdata <= 512'b0;
+					DDR4b_readdatavalid <= 1'b1;
+					is_ddr4b_read_burst <= (DDR4b_burst_state != 6'b000001);
+				end
+			end 
+			else if(is_ddr4b_write_burst) begin
+				if (DDR4b_write) begin
+					DDR4b_burst_state <= DDR4b_burst_state - 1;
+					DDR4b_burst_address <= DDR4b_burst_address + 1;
+					if (local_mem_bankB.exists(DDR4b_burst_address)) DDR4b_tmp_read = local_mem_bankB[DDR4b_burst_address];
+					else DDR4b_tmp_read = 512'b0;
+					local_mem_bankB[DDR4b_burst_address] <= (DDR4b_tmp_read & ~DDR4b_burst_byteenable_mask) | (DDR4b_writedata & DDR4b_burst_byteenable_mask);
+					is_ddr4b_write_burst <= (DDR4b_burst_state != 6'b000001);
+				end
+			end
+		end
+	end
+	
 `endif
   // Interface structures
   input           t_if_ccip_Rx     pck_cp2af_sRx;           // CCI-P Rx Port
@@ -116,38 +310,44 @@ module ccip_std_afu(
 	wire          board_kernel_clk_clk;                            // board:kernel_clk_clk -> [irq_mapper:clk, board:clock_reset_clk, mm_interconnect_0:board_kernel_clk_clk, mm_interconnect_1:board_kernel_clk_clk, mm_interconnect_2:board_kernel_clk_clk, rr_arb:clk, rst_controller:clk]
 	wire          board_kernel_clk2x_clk;                          // board:kernel_clk2x_clk -> board:clock_reset2x_clk
 	wire          board_kernel_reset_reset_n;                        // board:kernel_reset_reset_n -> [board:clock_reset_reset_reset_n, mm_interconnect_0:rr_arb_reset_reset_bridge_in_reset_reset, mm_interconnect_1:board_clock_reset_reset_reset_bridge_in_reset_reset, mm_interconnect_2:board_clock_reset_reset_reset_bridge_in_reset_reset, rr_arb:reset]
-	wire          board_avmm_r_waitrequest;                // mm_interconnect_1:board_avmm_r_waitrequest -> board:avmm_r_waitrequest
-	wire  [511:0] board_avmm_r_readdata;                   // mm_interconnect_1:board_avmm_r_readdata -> board:avmm_r_readdata
-	wire          board_avmm_r_debugaccess;                // board:avmm_r_debugaccess -> mm_interconnect_1:board_avmm_r_debugaccess
-	wire   [63:0] board_avmm_r_address;                    // board:avmm_r_address -> mm_interconnect_1:board_avmm_r_address
-	wire          board_avmm_r_read;                       // board:avmm_r_read -> mm_interconnect_1:board_avmm_r_read
-	wire   [63:0] board_avmm_r_byteenable;                 // board:avmm_r_byteenable -> mm_interconnect_1:board_avmm_r_byteenable
-	wire          board_avmm_r_readdatavalid;              // mm_interconnect_1:board_avmm_r_readdatavalid -> board:avmm_r_readdatavalid
-	wire  [511:0] board_avmm_r_writedata;                  // board:avmm_r_writedata -> mm_interconnect_1:board_avmm_r_writedata
-	wire          board_avmm_r_write;                      // board:avmm_r_write -> mm_interconnect_1:board_avmm_r_write
-	wire    [4:0] board_avmm_r_burstcount;                 // board:avmm_r_burstcount -> mm_interconnect_1:board_avmm_r_burstcount
-	wire          board_avmm_w_waitrequest;                // mm_interconnect_2:board_avmm_w_waitrequest -> board:avmm_w_waitrequest
-	wire  [511:0] board_avmm_w_readdata;                   // mm_interconnect_2:board_avmm_w_readdata -> board:avmm_w_readdata
-	wire          board_avmm_w_debugaccess;                // board:avmm_w_debugaccess -> mm_interconnect_2:board_avmm_w_debugaccess
-	wire   [63:0] board_avmm_w_address;                    // board:avmm_w_address -> mm_interconnect_2:board_avmm_w_address
-	wire          board_avmm_w_read;                       // board:avmm_w_read -> mm_interconnect_2:board_avmm_w_read
-	wire   [63:0] board_avmm_w_byteenable;                 // board:avmm_w_byteenable -> mm_interconnect_2:board_avmm_w_byteenable
-	wire          board_avmm_w_readdatavalid;              // mm_interconnect_2:board_avmm_w_readdatavalid -> board:avmm_w_readdatavalid
-	wire  [511:0] board_avmm_w_writedata;                  // board:avmm_w_writedata -> mm_interconnect_2:board_avmm_w_writedata
-	wire          board_avmm_w_write;                      // board:avmm_w_write -> mm_interconnect_2:board_avmm_w_write
-	wire    [4:0] board_avmm_w_burstcount;                 // board:avmm_w_burstcount -> mm_interconnect_2:board_avmm_w_burstcount
 	wire          irq_mapper_receiver0_irq;                        // board:kernel_irq_irq -> irq_mapper:receiver0_irq
 	wire    [0:0] board_kernel_irq_irq;                            // irq_mapper:sender_irq -> board:kernel_irq_irq
 	wire          rst_controller_reset_out_reset;                  // rst_controller:reset_out -> [irq_mapper:reset, mm_interconnect_0:board_global_reset_reset_bridge_in_reset_reset, mm_interconnect_0:board_qpi_slave_translator_reset_reset_bridge_in_reset_reset]
   
 
+wire	[32:0]	acl_internal_snoop_data;
+wire		acl_internal_snoop_valid;
+wire		acl_internal_snoop_ready;  
   
+wire		kernel_ddr4a_waitrequest;
+wire	[511:0]	kernel_ddr4a_readdata;
+wire		kernel_ddr4a_readdatavalid;
+wire	[4:0]	kernel_ddr4a_burstcount;
+wire	[511:0]	kernel_ddr4a_writedata;
+wire	[31:0]	kernel_ddr4a_address;
+wire		kernel_ddr4a_write;
+wire		kernel_ddr4a_read;
+wire	[63:0]	kernel_ddr4a_byteenable;
+wire		kernel_ddr4a_debugaccess;
+wire		kernel_ddr4b_waitrequest;
+wire	[511:0]	kernel_ddr4b_readdata;
+wire		kernel_ddr4b_readdatavalid;
+wire	[4:0]	kernel_ddr4b_burstcount;
+wire	[511:0]	kernel_ddr4b_writedata;
+wire	[31:0]	kernel_ddr4b_address;
+wire		kernel_ddr4b_write;
+wire		kernel_ddr4b_read;
+wire	[63:0]	kernel_ddr4b_byteenable;
+wire		kernel_ddr4b_debugaccess;
   
-  
-  
-  
-  
-  
+wire [5:0]	ddr4a_byte_address_bits;
+wire [5:0]	ddr4b_byte_address_bits;
+
+wire	[511:0]	kernel_ddr4a_writedata2;
+wire	[511:0]	kernel_ddr4b_writedata2;
+assign kernel_ddr4a_writedata2 =kernel_ddr4a_writedata;
+assign kernel_ddr4b_writedata2 =kernel_ddr4b_writedata;
+
   bsp_logic bsp_logic_inst (
         .pClk                ( pClk),
         .pClkDiv2            ( pClkDiv2),
@@ -173,26 +373,58 @@ module ccip_std_afu(
 		.board_kernel_cra_read          (board_kernel_cra_read),
 		.board_kernel_cra_byteenable    (board_kernel_cra_byteenable),
 		.board_kernel_cra_debugaccess   (board_kernel_cra_debugaccess),
-		.board_avmm_r_waitrequest       (board_avmm_r_waitrequest),
-		.board_avmm_r_readdata          (board_avmm_r_readdata),
-		.board_avmm_r_readdatavalid     (board_avmm_r_readdatavalid),
-		.board_avmm_r_burstcount        (board_avmm_r_burstcount),
-		.board_avmm_r_writedata         (board_avmm_r_writedata),
-		.board_avmm_r_address           (board_avmm_r_address),
-		.board_avmm_r_write             (board_avmm_r_write),
-		.board_avmm_r_read              (board_avmm_r_read),
-		.board_avmm_r_byteenable        (board_avmm_r_byteenable),
-		.board_avmm_r_debugaccess       (board_avmm_r_debugaccess),
-		.board_avmm_w_waitrequest       (board_avmm_w_waitrequest),
-		.board_avmm_w_readdata          (board_avmm_w_readdata),
-		.board_avmm_w_readdatavalid     (board_avmm_w_readdatavalid),
-		.board_avmm_w_burstcount        (board_avmm_w_burstcount),
-		.board_avmm_w_writedata         (board_avmm_w_writedata),
-		.board_avmm_w_address           (board_avmm_w_address),
-		.board_avmm_w_write             (board_avmm_w_write),
-		.board_avmm_w_read              (board_avmm_w_read),
-		.board_avmm_w_byteenable        (board_avmm_w_byteenable),
-		.board_avmm_w_debugaccess       (board_avmm_w_debugaccess),
+
+
+.acl_internal_snoop_data(acl_internal_snoop_data),
+.acl_internal_snoop_valid(acl_internal_snoop_valid),
+.acl_internal_snoop_ready(acl_internal_snoop_ready),
+
+.ddr_clk_clk(DDR4_USERCLK),
+
+.emif_ddr4a_waitrequest(DDR4a_waitrequest),
+.emif_ddr4a_readdata(DDR4a_readdata),
+.emif_ddr4a_readdatavalid(DDR4a_readdatavalid),
+.emif_ddr4a_burstcount(DDR4a_burstcount),
+.emif_ddr4a_writedata(DDR4a_writedata),
+.emif_ddr4a_address({DDR4a_address, ddr4a_byte_address_bits}),
+.emif_ddr4a_write(DDR4a_write),
+.emif_ddr4a_read(DDR4a_read),
+.emif_ddr4a_byteenable(DDR4a_byteenable),
+.emif_ddr4a_debugaccess(),
+
+.emif_ddr4b_waitrequest(DDR4b_waitrequest),
+.emif_ddr4b_readdata(DDR4b_readdata),
+.emif_ddr4b_readdatavalid(DDR4b_readdatavalid),
+.emif_ddr4b_burstcount(DDR4b_burstcount),
+.emif_ddr4b_writedata(DDR4b_writedata),
+.emif_ddr4b_address({DDR4b_address, ddr4b_byte_address_bits}),
+.emif_ddr4b_write(DDR4b_write),
+.emif_ddr4b_read(DDR4b_read),
+.emif_ddr4b_byteenable(DDR4b_byteenable),
+.emif_ddr4b_debugaccess(),
+
+.kernel_ddr4a_waitrequest(kernel_ddr4a_waitrequest),
+.kernel_ddr4a_readdata(kernel_ddr4a_readdata),
+.kernel_ddr4a_readdatavalid(kernel_ddr4a_readdatavalid),
+.kernel_ddr4a_burstcount(kernel_ddr4a_burstcount),
+.kernel_ddr4a_writedata(kernel_ddr4a_writedata2),
+.kernel_ddr4a_address(kernel_ddr4a_address),
+.kernel_ddr4a_write(kernel_ddr4a_write),
+.kernel_ddr4a_read(kernel_ddr4a_read),
+.kernel_ddr4a_byteenable(kernel_ddr4a_byteenable),
+.kernel_ddr4a_debugaccess(kernel_ddr4a_debugaccess),
+
+.kernel_ddr4b_waitrequest(kernel_ddr4b_waitrequest),
+.kernel_ddr4b_readdata(kernel_ddr4b_readdata),
+.kernel_ddr4b_readdatavalid(kernel_ddr4b_readdatavalid),
+.kernel_ddr4b_burstcount(kernel_ddr4b_burstcount),
+.kernel_ddr4b_writedata(kernel_ddr4b_writedata2),
+.kernel_ddr4b_address(kernel_ddr4b_address),
+.kernel_ddr4b_write(kernel_ddr4b_write),
+.kernel_ddr4b_read(kernel_ddr4b_read),
+.kernel_ddr4b_byteenable(kernel_ddr4b_byteenable),
+.kernel_ddr4b_debugaccess(kernel_ddr4b_debugaccess),
+		
 		.kernel_clk(uClk_usrDiv2)
 	);
   
@@ -214,26 +446,32 @@ module ccip_std_afu(
 		.board_kernel_cra_read          (board_kernel_cra_read),
 		.board_kernel_cra_byteenable    (board_kernel_cra_byteenable),
 		.board_kernel_cra_debugaccess   (board_kernel_cra_debugaccess),
-		.board_avmm_r_waitrequest       (board_avmm_r_waitrequest),
-		.board_avmm_r_readdata          (board_avmm_r_readdata),
-		.board_avmm_r_readdatavalid     (board_avmm_r_readdatavalid),
-		.board_avmm_r_burstcount        (board_avmm_r_burstcount),
-		.board_avmm_r_writedata         (board_avmm_r_writedata),
-		.board_avmm_r_address           (board_avmm_r_address),
-		.board_avmm_r_write             (board_avmm_r_write),
-		.board_avmm_r_read              (board_avmm_r_read),
-		.board_avmm_r_byteenable        (board_avmm_r_byteenable),
-		.board_avmm_r_debugaccess       (board_avmm_r_debugaccess),
-		.board_avmm_w_waitrequest       (board_avmm_w_waitrequest),
-		.board_avmm_w_readdata          (board_avmm_w_readdata),
-		.board_avmm_w_readdatavalid     (board_avmm_w_readdatavalid),
-		.board_avmm_w_burstcount        (board_avmm_w_burstcount),
-		.board_avmm_w_writedata         (board_avmm_w_writedata),
-		.board_avmm_w_address           (board_avmm_w_address),
-		.board_avmm_w_write             (board_avmm_w_write),
-		.board_avmm_w_read              (board_avmm_w_read),
-		.board_avmm_w_byteenable        (board_avmm_w_byteenable),
-		.board_avmm_w_debugaccess       (board_avmm_w_debugaccess)
+
+.acl_internal_snoop_data(acl_internal_snoop_data),
+.acl_internal_snoop_valid(acl_internal_snoop_valid),
+.acl_internal_snoop_ready(acl_internal_snoop_ready),
+
+.kernel_ddr4a_waitrequest(kernel_ddr4a_waitrequest),
+.kernel_ddr4a_readdata(kernel_ddr4a_readdata),
+.kernel_ddr4a_readdatavalid(kernel_ddr4a_readdatavalid),
+.kernel_ddr4a_burstcount(kernel_ddr4a_burstcount),
+.kernel_ddr4a_writedata(kernel_ddr4a_writedata),
+.kernel_ddr4a_address(kernel_ddr4a_address),
+.kernel_ddr4a_write(kernel_ddr4a_write),
+.kernel_ddr4a_read(kernel_ddr4a_read),
+.kernel_ddr4a_byteenable(kernel_ddr4a_byteenable),
+.kernel_ddr4a_debugaccess(kernel_ddr4a_debugaccess),
+
+.kernel_ddr4b_waitrequest(kernel_ddr4b_waitrequest),
+.kernel_ddr4b_readdata(kernel_ddr4b_readdata),
+.kernel_ddr4b_readdatavalid(kernel_ddr4b_readdatavalid),
+.kernel_ddr4b_burstcount(kernel_ddr4b_burstcount),
+.kernel_ddr4b_writedata(kernel_ddr4b_writedata),
+.kernel_ddr4b_address(kernel_ddr4b_address),
+.kernel_ddr4b_write(kernel_ddr4b_write),
+.kernel_ddr4b_read(kernel_ddr4b_read),
+.kernel_ddr4b_byteenable(kernel_ddr4b_byteenable),
+.kernel_ddr4b_debugaccess(kernel_ddr4b_debugaccess)
 	);
 
 endmodule

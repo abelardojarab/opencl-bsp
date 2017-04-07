@@ -238,7 +238,7 @@
         <spirit:parameter>
           <spirit:name>clockFrequency</spirit:name>
           <spirit:displayName>Clock frequency</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="clockFrequency">50000000</spirit:value>
+          <spirit:value spirit:format="string" spirit:id="clockFrequency">350000000</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>clockFrequencyKnown</spirit:name>
