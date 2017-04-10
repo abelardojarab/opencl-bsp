@@ -178,7 +178,6 @@ typedef enum {
 } aocl_mmd_interface_t;
 
 
-//#define POLL_ON_FPGA
 static long unsigned int workspace_size;
 int jtag_ndx;
 
@@ -192,6 +191,7 @@ void * event_update_user_data;
 static int verbose;
 
 // static helper functions
+static bool check_for_svm_env();
 static bool blob_has_elf_signature( void* data, size_t data_size );
 int pr_base_id_test(unsigned int pr_import_version);
 
@@ -1487,7 +1487,6 @@ int AOCL_MMD_CALL aocl_mmd_reprogram(int handle, void *data, size_t data_size)
   return MMDHANDLE;
 }
 
-//#define POLL_ON_FPGA
 void printdebug(){
 
    unsigned long int pr_base_version = 0; // make sure it's not what we hope to find. 
@@ -1527,26 +1526,25 @@ int AOCL_MMD_CALL aocl_mmd_yield(int handle)
   static int last_irqval = -1;
   static int count = 1;
 
+  SPEED_LIMIT();
 
-  
-  SPEED_LIMIT();  
-#ifdef POLL_ON_FPGA
-
-  aocl_mmd_read(NULL,NULL, 4,&irqval ,0, address); 
-
-#else
-  
-  int mem_value =  *(volatile uint32_t *) ( cr_dsm_base+128);
-  //printf();
-   DEBUG_PRINT("IRW VAL %d\n", mem_value); 
-  //SleepMicro(100);
-
-  if(mem_value) {
-    irqval = 1;
+  //svm used svm shared memory polling instead od mmio polling
+  if(check_for_svm_env())
+  {
+    int mem_value =  *(volatile uint32_t *) ( cr_dsm_base+128);
+    //printf();
+    DEBUG_PRINT("IRW VAL %d\n", mem_value); 
+    //SleepMicro(100);
+    
+    if(mem_value) {
+      irqval = 1;
+    }
+  }
+  else
+  {
+    aocl_mmd_read(NULL,NULL, 4,&irqval ,0, address);
   }
 
-#endif 
-  
    if(getenv("MMD_DEBUG")){
      printdebug();
      SleepMicro(1000000);

@@ -1571,7 +1571,7 @@
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="2" />
   <parameter name="AUTO_GENERATION_ID" value="0" />
-  <parameter name="AUTO_KERNEL_IRQ_INTERRUPTS_USED" value="1" />
+  <parameter name="AUTO_KERNEL_IRQ_INTERRUPTS_USED" value="0" />
   <parameter name="AUTO_KERNEL_MASTER_ADDRESS_MAP"><![CDATA[<address-map><slave name='afu_regs.s1' start='0x0' end='0x40' datawidth='64' /><slave name='acl_irq_to_polling_slave_0.s1' start='0x100' end='0x104' datawidth='32' /><slave name='cci_interface.mm_cci_bridge_0.addr_cfg' start='0x2000' end='0x3000' datawidth='64' /><slave name='cci_interface.mm_cci_bridge_0.debug' start='0x3000' end='0x4000' datawidth='64' /><slave name='kernel_interface.ctrl' start='0x4000' end='0x8000' datawidth='32' /><slave name='ddr_board.ddr_board_address_span_extender_0.cntl' start='0xC800' end='0xC808' datawidth='64' /><slave name='pr_base_id.s' start='0xCF80' end='0xCF84' datawidth='32' /><slave name='version_id_0.s' start='0xCFC0' end='0xCFC4' datawidth='32' /><slave name='ddr_board.ddr_board_address_span_extender_0.windowed_slave' start='0x10000' end='0x20000' datawidth='512' /></address-map>]]></parameter>
   <parameter name="AUTO_KERNEL_MASTER_ADDRESS_WIDTH" value="18" />
   <parameter name="AUTO_UNIQUE_ID" value="board_cci_interface" />
@@ -5491,11 +5491,6 @@
    kind="interrupt"
    version="17.0"
    start="acl_irq_to_polling_slave_0.irq"
-   end="kernel_interface.kernel_irq_to_host" />
- <connection
-   kind="interrupt"
-   version="17.0"
-   start="cci_interface.kernel_irq"
    end="kernel_interface.kernel_irq_to_host" />
  <connection
    kind="reset"
