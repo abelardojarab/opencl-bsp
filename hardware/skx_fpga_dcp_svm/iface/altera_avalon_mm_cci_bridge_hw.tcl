@@ -42,7 +42,6 @@ proc add_files { toplevel } {
 	add_fileset_file cci_write_granter.v VERILOG PATH ./cci_write_granter.v
 	add_fileset_file cci_requester.v VERILOG PATH ./cci_requester.v
   add_fileset_file addr_range_cmp.v VERILOG PATH ./addr_range_cmp.v
-  add_fileset_file cci_master.v VERILOG PATH ./cci_master.v
 }
 # | 
 # +-----------------------------------
