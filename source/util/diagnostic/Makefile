@@ -6,7 +6,7 @@ CXXFLAGS = -fPIC -m64
 LINKER = g++
 LINKER_LIBDIRARGS = -L$(TOP_DEST_DIR)/linux64/lib -L$(ALTERAOCLSDKROOT)/host/linux64/lib -L$(AOCL_BOARD_PACKAGE_ROOT)/host/linux64/lib
 LINKER_ARGS = -fPIC
-LINK_LIBS = -L/usr/local/lib -L$(AALSDK)/lib -Wl,--no-as-needed -lalteracl  -lalterahalmmd -laltera_qpi_mmd -lrt   -lpthread -lOSAL -lAAS -laalrt  -lelf
+LINK_LIBS = -L/usr/local/lib -L$(FPGA_API_PATH)/lib -Wl,--no-as-needed -lalteracl  -lalterahalmmd -laltera_qpi_mmd -lrt   -lpthread -lOSAL -lAAS -laalrt  -lelf
 
 INCORPORATE_LIBS = 
 PREBUILT_OBJS = 

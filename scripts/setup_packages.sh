@@ -5,7 +5,7 @@ SCRIPT_PATH=`readlink -f ${BASH_SOURCE[0]}`
 SCRIPT_DIR_PATH="$(dirname $SCRIPT_PATH)"
 . $SCRIPT_DIR_PATH/bsp_common.sh
 
-#check for AAL
+#check for FPGA API
 if [ ! -d "$FPGA_API_PATH" ]; then
   echo "FPGA_API_PATH does not exist.  need to build"
   sh $SCRIPT_DIR_PATH/build_aal.sh

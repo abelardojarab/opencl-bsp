@@ -2,7 +2,7 @@
 <board_env version="13.0" name="jtag">
   <hardware dir="hardware" default="skx_fpga_dcp_ddr"></hardware>
   <platform name="linux64">
-    <linkflags>-L%a/linux64/lib -L%b/host/linux64/lib -L$AALSDK/lib/ </linkflags>
+    <linkflags>-L%a/linux64/lib -L%b/host/linux64/lib -L$FPGA_API_PATH/lib/ </linkflags>
     <linklibs> -lalterahalmmd -laltera_qpi_mmd -lrt -lpthread -lOSAL -lAAS -laalrt
  </linklibs>
     <utilbindir>%b/linux64/bin</utilbindir>
