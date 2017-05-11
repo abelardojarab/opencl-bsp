@@ -8,7 +8,7 @@ SCRIPT_DIR_PATH="$(dirname $SCRIPT_PATH)"
 #check for FPGA API
 if [ ! -d "$FPGA_API_PATH" ]; then
   echo "FPGA_API_PATH does not exist.  need to build"
-  sh $SCRIPT_DIR_PATH/build_aal.sh
+  sh $SCRIPT_DIR_PATH/build_fpga_api.sh
 fi
 
 #TODO: reenable MPF build

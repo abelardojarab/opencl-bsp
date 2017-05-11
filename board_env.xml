@@ -3,7 +3,7 @@
   <hardware dir="hardware" default="skx_fpga_dcp_ddr"></hardware>
   <platform name="linux64">
     <linkflags>-L%a/linux64/lib -L%b/host/linux64/lib -L$FPGA_API_PATH/lib/ </linkflags>
-    <linklibs> -lalterahalmmd -laltera_ccip_mmd -lrt -lpthread -lOSAL -lAAS -laalrt
+    <linklibs> -lalterahalmmd -laltera_ccip_mmd -lrt -lpthread -lfpga -luuid
  </linklibs>
     <utilbindir>%b/linux64/bin</utilbindir>
   </platform>

@@ -5,5 +5,7 @@ SCRIPT_PATH=`readlink -f ${BASH_SOURCE[0]}`
 SCRIPT_DIR_PATH="$(dirname $SCRIPT_PATH)"
 . $SCRIPT_DIR_PATH/bsp_common.sh
 
-export OPENCL_ASE_SIM=1
+export OPENCL_ASE_SIM=0
+setup_arc_for_script
+
 bash
