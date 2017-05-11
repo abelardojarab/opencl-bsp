@@ -1,6 +1,6 @@
 HOW TO RUN SIM:
 cd git_repo_root
-arc shell vcs,vcs-vcsmx-lic/vrtn-dev,gcc/4.8.2,acl/17.0,vcs,acds/17.0,qedition/pro,python
+arc shell vcs,vcs-vcsmx-lic/vrtn-dev,gcc/4.8.2,acl/17.0,vcs,acds/17.0,qedition/pro,python,cmake/3.7.2
 
 #you can aslo run ./scripts/run_full_opencl_sim_test.sh
 export OPENCL_ASE_SIM=1

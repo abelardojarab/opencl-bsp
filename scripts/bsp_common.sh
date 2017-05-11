@@ -8,10 +8,9 @@ COMMON_SCRIPT_DIR_PATH="$(dirname $COMMON_SCRIPT_PATH)"
 export ROOT_PROJECT_PATH="$(dirname $COMMON_SCRIPT_DIR_PATH)"
 
 BUILD_DIR=$ROOT_PROJECT_PATH/build
-AALSDK_PATH=$BUILD_DIR/aalsdk_src
-AAL_INST_PATH=$BUILD_DIR/aalsdk
-AAL_BUILD_PATH=$BUILD_DIR/aalsdk_build
-export LIB_TDL_PATH=$BUILD_DIR/lib_tdl
+AALSDK_SRC_PATH=$BUILD_DIR/fpga_api_src
+AAL_INST_PATH=$BUILD_DIR/fpga_api_inst
+AAL_BUILD_PATH=$BUILD_DIR/fpga_api_build
 PACKAGE_DIR_PATH=$ROOT_PROJECT_PATH/packages
 
 if [ "$AALSDK" == "" ]; then
@@ -25,5 +24,5 @@ export CL_CONTEXT_COMPILER_MODE_ALTERA=3
 export QUARTUS_HOME=$QUARTUS_ROOTDIR
 export ASE_WORKDIR=./temp_simulation/ase/work/
 export MPF_INSTALL_PATH=$BUILD_DIR/mpf
-export ASE_SRC_PATH=$AALSDK_PATH/ase
+export ASE_SRC_PATH=$AALSDK_SRC_PATH/ase
 export ACDS_ARC_RESOURCES="acl/17.0,acds/17.0,qedition/pro"

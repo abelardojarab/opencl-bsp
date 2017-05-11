@@ -18,6 +18,7 @@ cd $MPF_INSTALL_PATH
 
 ###compile mpf sw and copy it to dest
 cd $MPF_INSTALL_PATH/sw
+#TODO: remove lib tdl and get this working with fpga-sw
 export LIBRARY_PATH=$LIB_TDL_PATH/usr/lib64
 export CPPFLAGS=-I$LIB_TDL_PATH/usr/include
 make -j16 prefix=$AALSDK
