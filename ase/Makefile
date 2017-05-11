@@ -74,18 +74,18 @@ ASE_SCRIPT ?= $(ASE_SRCDIR)/ase_regress.sh
 #########################################################################
 ## ASE HW file setup
 ASEHW_FILE_LIST = \
-	$(ASE_SRCDIR)/hw/ccip_if_pkg.sv \
-	$(ASE_SRCDIR)/hw/ase_pkg.sv \
-	$(ASE_SRCDIR)/hw/outoforder_wrf_channel.sv \
-	$(ASE_SRCDIR)/hw/latency_pipe.sv \
-	$(ASE_SRCDIR)/hw/ccip_emulator.sv \
-	$(ASE_SRCDIR)/hw/ase_svfifo.sv \
-	$(ASE_SRCDIR)/hw/ccip_logger.sv \
-	$(ASE_SRCDIR)/hw/ccip_checker.sv \
-	$(ASE_SRCDIR)/hw/ase_top.sv \
+	$(ASE_SRCDIR)/rtl/ccip_if_pkg.sv \
+	$(ASE_SRCDIR)/rtl/ase_pkg.sv \
+	$(ASE_SRCDIR)/rtl/outoforder_wrf_channel.sv \
+	$(ASE_SRCDIR)/rtl/latency_pipe.sv \
+	$(ASE_SRCDIR)/rtl/ccip_emulator.sv \
+	$(ASE_SRCDIR)/rtl/ase_svfifo.sv \
+	$(ASE_SRCDIR)/rtl/ccip_logger.sv \
+	$(ASE_SRCDIR)/rtl/ccip_checker.sv \
+	$(ASE_SRCDIR)/rtl/ase_top.sv \
 
 ## ASE HW include directory setup
-ASE_INCDIR = $(ASE_SRCDIR)/hw/+
+ASE_INCDIR = $(ASE_SRCDIR)/rtl/+
 
 ## ASE SW file setup
 ASESW_FILE_LIST = \
@@ -141,7 +141,7 @@ ASE_SHOBJ_SO = $(ASE_SHOBJ_NAME).so
 
 # -lrt option is required in order to use shared memory /dev/shm,
 # -message queues and pthreads
-ASE_LD_SWITCHES = -lrt -lpthread -lstdc++
+ASE_LD_SWITCHES = -lrt -lpthread -lstdc++ -luuid
 
 
 #########################################################################
@@ -206,7 +206,6 @@ ifeq ($(GLS_SIM), 1)
   MENT_VLOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/220model.v
   MENT_VLOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/sgate.v
   MENT_VLOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/altera_mf.v
-  MENT_VLOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/stratixv_atoms.v
 #  MENT_VLOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/synopsys/stratixv_hssi_atoms_ncrypt.v
   MENT_VLOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/stratixv_hssi_atoms.v
   MENT_VLOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/stratixv_pcie_hip_atoms.v
