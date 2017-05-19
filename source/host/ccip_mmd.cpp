@@ -27,6 +27,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <unistd.h>
 
 #include <uuid/uuid.h>
 #include <fpga/enum.h>
@@ -46,15 +48,38 @@ using namespace std;
 #define MEM_WINDOW_SPAN (64*1024)
 #define MEM_WINDOW_SPAN_MASK ((long)(MEM_WINDOW_SPAN-1))
 
+
+// TODO: refactor globals
+// Previous MMD used many global variables maintain
+// for initial port but eventually refactor 
+#define MMDHANDLE 1
+aocl_mmd_interrupt_handler_fn kernel_interrupt = NULL;
+void * kernel_interrupt_user_data;
+aocl_mmd_status_handler_fn event_update = NULL;
+void * event_update_user_data;
+
+
+fpga_handle afc_handle;
+
+#define SPEED_LIMIT()  usleep(50)
+
+
 #ifdef SIM
 //TODO: put sim specific stuff here
 #endif
 
-//for debug
-#define DCP_DEBUG_MEM(...) 
-//#define DCP_DEBUG_MEM(...) printf(__VA_ARGS__)
+//debugging
+#if 1
+#define DEBUG_PRINT(...) printf(__VA_ARGS__)
+#else
 #define DEBUG_PRINT(...)
-//#define DEBUG_PRINT(...) printf(__VA_ARGS__)
+#endif
+
+#if 1
+#define DCP_DEBUG_MEM(...) printf(__VA_ARGS__)
+#else
+#define DCP_DEBUG_MEM(...) 
+#endif
 
 // Define handle values for kernel, kernel_clk (pLL), and global memory
 typedef enum {
@@ -108,8 +133,18 @@ int AOCL_MMD_CALL aocl_mmd_reprogram(int handle, void *data, size_t data_size)
   
 int AOCL_MMD_CALL aocl_mmd_yield(int handle)
 {
-  	printf("aocl_mmd_yield is not implemented\n");
-	exit(1);
+	int address = AOCL_IRQ_POLLING_BASE;
+	int irqval = 0;
+	static int last_irqval = -1;
+	static int count = 1;
+	DEBUG_PRINT("* Called: aocl_mmd_yield\n");
+	SPEED_LIMIT();
+	aocl_mmd_read(NULL, NULL, 4, &irqval, 0, address);
+
+	if(irqval) {
+		kernel_interrupt( handle, kernel_interrupt_user_data );
+	}
+
 	return 0;
 }
 
@@ -193,84 +228,112 @@ int aocl_mmd_get_info(
 
 int AOCL_MMD_CALL aocl_mmd_set_interrupt_handler( int handle, aocl_mmd_interrupt_handler_fn fn, void* user_data )
 {
-	//this code is mostly same but with new API
-	printf("aocl_mmd_set_interrupt_handler is not implemented\n");
-	exit(1);
+	int err;
+	kernel_interrupt = fn;
+	kernel_interrupt_user_data = user_data;
 	return 0;
 }
 
 int AOCL_MMD_CALL aocl_mmd_set_status_handler( int handle, aocl_mmd_status_handler_fn fn, void* user_data )
 {
-	//this code is mostly same but with new API
-	printf("aocl_mmd_set_status_handler is not implemented\n");
-	exit(1);
+	// TODO: this code uses globals similar to Alex's old code.  The 
+	// A10 ref driver encapsulates device information in a class
+	event_update = fn;
+	event_update_user_data = user_data;
 	return 0;
 }
 
 // Host to device-global-memory write
 int AOCL_MMD_CALL aocl_mmd_write(
-    int handle,
-    aocl_mmd_op_t op,
-    size_t len,
-    const void* src,
-    int mmd_interface, size_t offset )
+		int handle,
+		aocl_mmd_op_t op,
+		size_t len,
+		const void* src,
+		int mmd_interface, size_t offset )
 {
-	//this code is mostly same but with new API
-	printf("aocl_mmd_write is not implemented\n");
-	exit(1);
-	return 0;
-	/*if(mmd_interface == AOCL_MMD_MEMORY)
-	{
+	DCP_DEBUG_MEM("\n- aocl_mmd_write: %d\t %p\t %d\t %p\t %d\t %d\n",handle, op, len, src, mmd_interface, offset);
+
+	fpga_result res = FPGA_OK;
+	if(mmd_interface == AOCL_MMD_MEMORY) {
 		DCP_DEBUG_MEM("DCP DEBUG: aocl_mmd_write called with AOCL_MMD_MEMORY!\n");
 		DCP_DEBUG_MEM("DCP DEBUG: len=%d offset = %08x, data = %08x\n", len, (unsigned)offset,((int *)src)[0]);
-		
+
 		void * host_addr = const_cast<void *>(src);
-	    long dev_addr  = offset;
-	    
+		long dev_addr  = offset;
+
 		long cur_mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
-		pCCIPMMD->MMIOWriteFast(MEM_WINDOW_CRTL, &cur_mem_page, 8);
+		//pCCIPMMD->MMIOWriteFast(MEM_WINDOW_CRTL, &cur_mem_page, 8);
+		res = fpgaWriteMMIO64(afc_handle, 0, MEM_WINDOW_CRTL, &cur_mem_page);
+		if(res != FPGA_OK) {
+			fprintf(stderr, "Error: aocl_mmd_write: %d\n", res);
+			exit(-1);
+		}
 		DCP_DEBUG_MEM("DCP DEBUG: set page %08x\n", cur_mem_page);
-		for(long i = 0; i < len/8; i++)
-		{
+		for(long i = 0; i < len/8; i++) {
 			long mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
-			if(mem_page != cur_mem_page)
-			{
+			if(mem_page != cur_mem_page) {
 				cur_mem_page = mem_page;
-				pCCIPMMD->MMIOWriteFast(MEM_WINDOW_CRTL, &cur_mem_page, 8);
-				DCP_DEBUG_MEM("DCP DEBUG: set page %08x\n", cur_mem_page);
+				//pCCIPMMD->MMIOWriteFast(MEM_WINDOW_CRTL, &cur_mem_page, 8);
+				res = fpgaWriteMMIO64(afc_handle, 0, MEM_WINDOW_CRTL, &cur_mem_page);
+				if(res != FPGA_OK) {
+					fprintf(stderr, "Error: aocl_mmd_write: %d\n", res);
+					exit(-1);
+				}	
+			DCP_DEBUG_MEM("DCP DEBUG: set page %08x\n", cur_mem_page);
 			}
-			pCCIPMMD->MMIOWriteFast(MEM_WINDOW_MEM+(dev_addr&MEM_WINDOW_SPAN_MASK), host_addr, 8);
+			//pCCIPMMD->MMIOWriteFast(MEM_WINDOW_MEM+(dev_addr&MEM_WINDOW_SPAN_MASK), host_addr, 8);
+			res = fpgaWriteMMIO64(afc_handle, 0, MEM_WINDOW_MEM+(dev_addr&MEM_WINDOW_SPAN_MASK), host_addr);
 			DCP_DEBUG_MEM("DCP DEBUG: write data %08x %08x %016lx\n", host_addr, dev_addr, ((long *)host_addr)[0]);
-			
+
 			host_addr += 8;
 			dev_addr += 8;
 		}
-		
+
 		DCP_DEBUG_MEM("DCP DEBUG: aocl_mmd_write done!\n");
-	}
-	else
-	{
+	} else {
+
+		unsigned long int address = mmd_interface + offset; // We defined it this way
+
+  		SPEED_LIMIT();
+		DEBUG_PRINT("mmd write: address = %09x, offset = %08x, data = %08x\n",address, (unsigned)offset,((int *)src)[0]);
 	
-  unsigned long int address = mmd_interface + offset; // We defined it this way
-  
-  HW_LOCK;
+		//TODO: add more robust bounds and type checking
+		uint64_t *src_addr64 = src;
+		while(len >= 8) {
+			res = fpgaWriteMMIO64(afc_handle, 0, address, src_addr64);
+			if(res != FPGA_OK) {
+				fprintf(stderr,"Error MMIO read: %d\n",res);
+				exit(-1);
+			}
+			src_addr64 += 1;
+			address += 8;
+			len -= 8;
+		}
+		uint32_t *src_addr32 = reinterpret_cast<uint32_t *>(src_addr64);
+		while(len >= 4) {
+			res = fpgaWriteMMIO32(afc_handle, 0, address, src_addr32);
+			if(res != FPGA_OK) {
+				fprintf(stderr,"Error MMIO read: %d\n",res);
+				exit(-1);
+			}
+			src_addr32 += 1;
+			address += 4;
+			len -= 4;
+		}
+		if(len > 0) {
+			//TODO: Potentially unsafe - rewrite to not overflow bounds
+			DEBUG_PRINT("Warning unaligned write\n");
+			res = fpgaWriteMMIO32(afc_handle, 0, address, src_addr32);
+		}
 
-  DEBUG_PRINT("mmd write: address = %09x, offset = %08x, data = %08x\n",address, (unsigned)offset,((int *)src)[0]);
-
-	int result = pCCIPMMD->MMIOWrite(address, src, len);
-    #ifdef SIM    
-  sleep(2);
-  #endif
-  	}
-  if (op)
-  {
-    //assert(event_update);
-    event_update(handle, event_update_user_data, op, 0);
-  }
-  HW_UNLOCK;
-
-  
-  return 0;*/
+		//int result = pCCIPMMD->MMIOWrite(address, src, len);
+	}
+	if (op) {
+		//assert(event_update);
+		event_update(handle, event_update_user_data, op, 0);
+	}
+	//HW_UNLOCK;
+	return 0;
 }
 
 int AOCL_MMD_CALL aocl_mmd_read(
@@ -280,20 +343,23 @@ int AOCL_MMD_CALL aocl_mmd_read(
     void* dst,
     int mmd_interface, size_t offset )
 {
-	//this code is mostly same but with new API
-	printf("aocl_mmd_read is not implemented\n");
-	exit(1);
-	return 0;
-/*	if(mmd_interface == AOCL_MMD_MEMORY)
-	{
+	fpga_result res = FPGA_OK;
+
+	DCP_DEBUG_MEM("\n+ aocl_mmd_read: %d\t %p\t %d\t %p\t %d\t %d\n",handle, op, len, dst, mmd_interface, offset);
+	if(mmd_interface == AOCL_MMD_MEMORY) {
 		DCP_DEBUG_MEM("DCP DEBUG: aocl_mmd_read called with AOCL_MMD_MEMORY!\n");
 		DCP_DEBUG_MEM("DCP DEBUG: len: %d offset: %08x\n", len, offset);
-		
+
 		void * host_addr = const_cast<void *>(dst);
-	    long dev_addr  = offset;
-	    
+		long dev_addr  = offset;
+
 		long cur_mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
-		pCCIPMMD->MMIOWriteFast(MEM_WINDOW_CRTL, &cur_mem_page, 8);
+		//pCCIPMMD->MMIOWriteFast(MEM_WINDOW_CRTL, &cur_mem_page, 8);
+		res = fpgaWriteMMIO64(afc_handle, 0, MEM_WINDOW_CRTL, &cur_mem_page);
+		if(res != FPGA_OK) {
+			fprintf(stderr,"Error MMIO write: %d\n",res);
+			exit(-1);
+		}
 		DCP_DEBUG_MEM("DCP DEBUG: set page %08x\n", cur_mem_page);
 		for(long i = 0; i < len/8; i++)
 		{
@@ -301,37 +367,73 @@ int AOCL_MMD_CALL aocl_mmd_read(
 			if(mem_page != cur_mem_page)
 			{
 				cur_mem_page = mem_page;
-				pCCIPMMD->MMIOWriteFast(MEM_WINDOW_CRTL, &cur_mem_page, 8);
+				//pCCIPMMD->MMIOWriteFast(MEM_WINDOW_CRTL, &cur_mem_page, 8);
+				res = fpgaWriteMMIO64(afc_handle, 0, MEM_WINDOW_CRTL, &cur_mem_page);
+				if(res != FPGA_OK) {
+					fprintf(stderr,"Error MMIO write: %d\n",res);
+					exit(-1);
+				}
 				DCP_DEBUG_MEM("DCP DEBUG: set page %08x\n", cur_mem_page);
 			}
-			pCCIPMMD->MMIOReadFast(MEM_WINDOW_MEM+(dev_addr&MEM_WINDOW_SPAN_MASK), host_addr, 8);
+			//pCCIPMMD->MMIOReadFast(MEM_WINDOW_MEM+(dev_addr&MEM_WINDOW_SPAN_MASK), host_addr, 8);
+			res = fpgaReadMMIO64(afc_handle, 0,MEM_WINDOW_MEM+(dev_addr&MEM_WINDOW_SPAN_MASK), host_addr);
+			if(res != FPGA_OK) {
+				fprintf(stderr,"Error MMIO write: %d\n",res);
+				exit(-1);
+			}
 			DCP_DEBUG_MEM("DCP DEBUG: read data %08x %08x %016lx\n", host_addr, dev_addr, ((long *)host_addr)[0]);
-			
+
 			host_addr += 8;
 			dev_addr += 8;
 		}
 		DCP_DEBUG_MEM("DCP DEBUG: aocl_mmd_read done!\n");
-	}
-	else
+	} else {
+		int address = mmd_interface + offset; // We defined it this way
+
+  		SPEED_LIMIT();
+		DEBUG_PRINT("aocl_mmd_read len: %d offset: %d mmd_interface: %d   address: %d \n", len, offset, mmd_interface, address);
+		//int result = pCCIPMMD->MMIORead(address, dst, len);
+
+		//TODO: add more robust bounds and type checking
+		uint64_t *dst_addr64 = dst;
+		while(len >= 8) {
+			res = fpgaReadMMIO64(afc_handle, 0, address, dst_addr64);
+			if(res != FPGA_OK) {
+				fprintf(stderr,"Error MMIO read: %d\n",res);
+				exit(-1);
+			}
+			dst_addr64 += 1;
+			address += 8;
+			len -= 8;
+		}
+		uint32_t *dst_addr32 = reinterpret_cast<uint32_t *>(dst_addr64);
+		while(len >= 4) {
+			res = fpgaReadMMIO32(afc_handle, 0, address, dst_addr32);
+			if(res != FPGA_OK) {
+				fprintf(stderr,"Error MMIO read: %d\n",res);
+				exit(-1);
+			}
+			dst_addr32 += 1;
+			address += 4;
+			len -= 4;
+		}
+		if(len > 0) {
+			//TODO: Potentially unsafe - rewrite to not overflow bounds
+			DEBUG_PRINT("WARNING: unaligned read\n");
+			res = fpgaReadMMIO32(afc_handle, 0, address, dst_addr32);
+		}
+
+		//pCCIPMMD->MMIORead(address, dst, len);
+
+	}  
+	if (op)
 	{
-  int address = mmd_interface + offset; // We defined it this way
-  HW_LOCK;
+		//assert(event_update);
+		event_update(handle, event_update_user_data, op, 0);
+	}
 
-  DEBUG_PRINT("aocl_mmd_read len: %d offset: %d mmd_interface: %d   address: %d \n", len, offset, mmd_interface, address);
-  #ifdef SLOW    
-  sleep(2);
-  #endif 
-  int result = pCCIPMMD->MMIORead(address, dst, len);
-
-  	}  
-  if (op)
-  {
-    //assert(event_update);
-    event_update(handle, event_update_user_data, op, 0);
-  }
-
-  HW_UNLOCK;
-  return 0;*/
+	//HW_UNLOCK;
+	return 0;
 }
 
 int AOCL_MMD_CALL aocl_mmd_copy(
@@ -356,29 +458,59 @@ int AOCL_MMD_CALL aocl_mmd_open(const char *name)
 
 	if (uuid_parse(AFU_ID, guid) < 0) {
 		fprintf(stderr, "Error parsing guid '%s'\n", AFU_ID);
-		return 0;
+		return -1;
 	}
 
 	/* Look for AFC with AFU_ID */
 	res = fpgaGetProperties(NULL, &filter);
 	if(res != FPGA_OK) {
 		fprintf(stderr, "Error creating properties object\n");
-		return 0;
+		return -1;
 	}
 	
 	res = fpgaPropertiesSetObjectType(filter, FPGA_AFC);
+	if(res != FPGA_OK) {
+		fprintf(stderr, "Error setting object type\n");
+		return -1;
+	}
 
 	res = fpgaPropertiesSetGuid(filter, guid);
+	if(res != FPGA_OK) {
+		fprintf(stderr, "Error setting GUID\n");
+		return -1;
+	}
 
 	fpga_token         afc_token;
-	fpga_handle        afc_handle;
 	uint32_t           num_matches;
+	
 	//TODO: Add selection via BDF / device ID
 	res = fpgaEnumerate(&filter, 1, &afc_token, 1, &num_matches);
-	
-	printf("aocl_mmd_open is not implemented\n");
-	exit(1);
-	return 0;
+	if(res != FPGA_OK) {
+		fprintf(stderr, "Error enumerating AFCs: %d\n", res);
+		return -1;
+	}
+
+	if(num_matches < 1) {
+		fprintf(stderr, "AFC not found\n");
+		res = fpgaDestroyProperties(&filter);
+		return -1;
+	}
+
+	res = fpgaOpen(afc_token, &afc_handle, 0);
+	if(res != FPGA_OK) {
+		fprintf(stderr, "Error opening AFC: %d\n", res);
+		return -1;
+	}
+
+
+	res = fpgaMapMMIO(afc_handle, 0, NULL);
+	if(res != FPGA_OK) {
+		fprintf(stderr, "Error mapping MMIO space: %d\n", res);
+		return -1;
+	}
+	//printf("aocl_mmd_open is not implemented\n");
+	//exit(1);
+	return MMDHANDLE;   //TODO: need to support multiple cards.  Keep track of handle
 }
 
 int AOCL_MMD_CALL  aocl_mmd_close(int handle) 

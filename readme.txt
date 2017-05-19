@@ -13,12 +13,15 @@ make
 ./bin/mem_bandwidth 1
 
 
-HOW TO RUN HW:
+HOW TO RUN HW IN MINICLOUD:
 export OPENCL_ASE_SIM=0
+export MINICLOUD=1
 ./scripts/bsp_env_shell.sh
 ./scripts/setup_packages.sh
+source /storage/shared/home_directories/crauer/opencl_install/aclrte/init_opencl.sh
 aoc device/mem_bandwidth.cl -o bin/mem_bandwidth.aocx
 rm -fr bin/mem_bandwidth
 make
 ./bin/mem_bandwidth
+
 

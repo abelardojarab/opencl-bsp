@@ -12,12 +12,18 @@ PACKAGE_DIR_PATH=$ROOT_PROJECT_PATH/packages
 
 FPGA_API_SRC_PATH=$BUILD_DIR/fpga_api_src
 FPGA_API_INST_PATH=$BUILD_DIR/fpga_api_inst
-FPGA_API_BUILD_PATH=$BUILD_DIR/fpga_api_build
+
+#TODO: don't export FPGA_API_BUILD_PATH once fpgaconf util is available with install
+export FPGA_API_BUILD_PATH=$BUILD_DIR/fpga_api_build
 if [ "$FPGA_API_PATH" == "" ]; then
 	export FPGA_API_PATH=$FPGA_API_INST_PATH
 fi
 if [ "$FPGA_API_GIT_PATH" == "" ]; then
-	FPGA_API_GIT_PATH=/swip_apps/avl_vm/git_sync/git/cpt_sys_sw-fpga-sw.git
+	if [ $MINICLOUD ]; then
+		FPGA_API_GIT_PATH=/storage/shared/tools/git/cpt_sys_sw-fpga-sw
+	else
+		FPGA_API_GIT_PATH=/swip_apps/avl_vm/git_sync/git/cpt_sys_sw-fpga-sw.git
+	fi
 fi
 
 export AOCL_BOARD_PACKAGE_ROOT=$ROOT_PROJECT_PATH
