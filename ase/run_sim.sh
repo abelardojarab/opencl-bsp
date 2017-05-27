@@ -65,9 +65,17 @@ vlogan +v2k5 -nc -full64 -work twentynm_hip $QUARTUS_HOME/eda/sim_lib/synopsys/t
 vhdlan  -nc -full64 -work twentynm_hip $QUARTUS_HOME/eda/sim_lib/twentynm_hip_components.vhd 
 vhdlan  -nc -full64 -work twentynm_hip $QUARTUS_HOME/eda/sim_lib/twentynm_hip_atoms.vhd 
 
+set -e
 make
 cp $KDIR/*.hex ./work/
 make sim&
 
-#sleep for 5 seconds to make sure everything gets setup
-sleep 5
+ASE_READY_FILE=./work/.ase_ready.pid
+
+while [ ! -f $ASE_READY_FILE ]
+do
+	echo "Waiting for simulation to start..."
+	sleep 1
+done
+
+echo "simulation is ready!"
