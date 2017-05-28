@@ -18,8 +18,15 @@ cd $MPF_INSTALL_PATH
 
 ###compile mpf sw and copy it to dest
 cd $MPF_INSTALL_PATH/sw
-export LIBRARY_PATH=$LIB_TDL_PATH/usr/lib64
-export CPPFLAGS=-I$LIB_TDL_PATH/usr/include
-make -j16 prefix=$AALSDK
+#export LIBRARY_PATH=$LIB_TDL_PATH/usr/lib64
+#export CPPFLAGS=-I$LIB_TDL_PATH/usr/include
+export CMAKE_LIBRARY_PATH=$AALSDK/lib
+export CMAKE_INCLUDE_PATH=$AALSDK/include
+export CMAKE_PREFIX_PATH=$AALSDK
+cp $PACKAGE_DIR_PATH/patches/mpf/CMakeLists.txt .
+mkdir build
+cd build
+cmake -DCMAKE_REQUIRED_INCLUDES=$AALSDK/include ..
+make -j16
 cp libMPF*so $AOCL_BOARD_PACKAGE_ROOT/host/linux64/lib/
 

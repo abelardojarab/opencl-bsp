@@ -51,7 +51,7 @@
 
 #include <aalsdk/service/IALIAFU.h>
 #include <aalsdk/aalclp/aalclp.h>
-#include "IMPF.h"
+#include "aalsdk/mpf/IMPF.h"
 
 #include <string.h>
 #include "aocl_mmd.h"
@@ -511,7 +511,7 @@ btInt CCIPMMD::open()
 
    // Allocate VTP service
    // Service Library to use
-   ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_SERVICE_NAME, "libMPF");
+   ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_SERVICE_NAME, "libMPF_AAL");
    ConfigRecord.Add(AAL_FACTORY_CREATE_SOFTWARE_SERVICE,true);
 
    // Add the Config Record to the Manifest describing what we want to allocate
@@ -546,7 +546,7 @@ btInt CCIPMMD::open()
 
    // Allocate VTP service
    // Service Library to use
-   ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_SERVICE_NAME, "libMPF");
+   ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_SERVICE_NAME, "libMPF_AAL");
    ConfigRecord.Add(AAL_FACTORY_CREATE_SOFTWARE_SERVICE,true);
 
    // Add the Config Record to the Manifest describing what we want to allocate
@@ -579,7 +579,7 @@ btInt CCIPMMD::open()
 
    // Allocate VTP service
    // Service Library to use
-   ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_SERVICE_NAME, "libMPF");
+   ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_SERVICE_NAME, "libMPF_AAL");
    ConfigRecord.Add(AAL_FACTORY_CREATE_SOFTWARE_SERVICE,true);
 
    // Add the Config Record to the Manifest describing what we want to allocate
