@@ -426,8 +426,15 @@ btInt CCIPMMD::open()
    ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_SERVICE_NAME, "libALI");
 
    // the AFUID to be passed to the Resource Manager. It will be used to locate the appropriate device.
-   //ConfigRecord.Add(keyRegAFU_ID,"D8424DC4-A4A3-C413-F89E-433683F9040B");
-	ConfigRecord.Add(keyRegAFU_ID,"C000C966-0D82-4272-9AEF-FE5F84570612");
+   //ConfigRecord.Add(keyRegAFU_ID,"C000C966-0D82-4272-9AEF-FE5F84570612");
+   if(check_for_svm_env())
+   {
+   	   ConfigRecord.Add(keyRegAFU_ID,"3A00972E-7AAC-41DE-BBD1-3901124E8CDA");
+   }
+   else
+   {
+   	   ConfigRecord.Add(keyRegAFU_ID,"18B79FFA-2EE5-4AA0-96EF-4230DAFACB5F");
+   }
 
    // indicate that this service needs to allocate an AIAService, too to talk to the HW
    ConfigRecord.Add(AAL_FACTORY_CREATE_CONFIGRECORD_FULL_AIA_NAME, "libaia");
