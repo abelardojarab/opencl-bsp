@@ -87,6 +87,16 @@ module cci_mpf
     // is 0.
     parameter ENABLE_DYNAMIC_VC_MAPPING = 1,
 
+    // Manage traffic to reduce latency without sacrificing bandwidth?
+    // The blue bitstream buffers for a given channel may be larger than
+    // necessary to sustain full bandwidth.  Allowing more requests beyond
+    // this threshold to enter the channel increases latency without
+    // increasing bandwidth.  While this is fine for some applications,
+    // those with multiple kernels connected to the CCI memory interface
+    // may see performance gains when a kernel's performance is a
+    // latency-sensitive.
+    parameter ENABLE_LATENCY_QOS = 0,
+
     // Enforce write/write and write/read ordering with cache lines?
     parameter ENFORCE_WR_ORDER = 0,
 
@@ -147,6 +157,9 @@ module cci_mpf
     ** ERROR: Unknown platform
 `endif
 
+    // Reserved bits in the mdata field, used by various modules.
+    localparam RESERVED_MDATA_IDX = CCI_PLATFORM_MDATA_WIDTH - 2;
+
     // No point in enabling VC Map when there is only one channel
     localparam MPF_ENABLE_VC_MAP =
         (MPF_PLATFORM_NUM_PHYSICAL_CHANNELS > 1) ? ENABLE_VC_MAP : 0;
@@ -157,6 +170,49 @@ module cci_mpf
         reset <= fiu.reset;
     end
 
+    cci_mpf_csrs mpf_csrs ();
+
+
+    // ====================================================================
+    //
+    //  Track channel credits, limiting the number of outstanding requests.
+    //  Thresholds are platform-specific.
+    //
+    //  This module must go right at the edge of the FIU since it is
+    //  managing the almost full signal up the stack to maintain optimal
+    //  traffic into the FIU.
+    //
+    // ====================================================================
+
+    cci_mpf_if stgm1_fiu_latency_qos (.clk);
+
+    generate
+        if (ENABLE_LATENCY_QOS)
+        begin : lat_qos
+            cci_mpf_shim_latency_qos
+              #(
+                .MAX_ACTIVE_LINES(MAX_ACTIVE_REQS)
+                )
+              latency_qos
+               (
+                .clk,
+                .fiu(fiu),
+                .afu(stgm1_fiu_latency_qos),
+                .csrs(mpf_csrs)
+                );
+        end
+        else
+        begin : no_lat_qos
+            cci_mpf_shim_null
+              no_latency_qos
+               (
+                .clk,
+                .fiu(fiu),
+                .afu(stgm1_fiu_latency_qos)
+                );
+        end
+    endgenerate
+
 
     // ====================================================================
     //
@@ -165,7 +221,7 @@ module cci_mpf
     //
     // ====================================================================
 
-    cci_mpf_if stgm1_mpf_fiu (.clk);
+    cci_mpf_if stgm2_mpf_fiu (.clk);
 
     // Number of unique write request packets that may be active in MPF.
     // Multi-flit packets count as one entry. Packets become active when
@@ -197,13 +253,13 @@ module cci_mpf
         // to the page table walker to tag internal loads.  The Mdata
         // location is guaranteed to be zero on all requests flowing
         // in to VTP from the AFU.
-        .RESERVED_MDATA_IDX(CCI_PLATFORM_MDATA_WIDTH-2)
+        .RESERVED_MDATA_IDX(RESERVED_MDATA_IDX)
         )
       mpf_edge_fiu
        (
         .clk,
-        .fiu,
-        .afu(stgm1_mpf_fiu),
+        .fiu(stgm1_fiu_latency_qos),
+        .afu(stgm2_mpf_fiu),
         .afu_edge(edge_if),
         .pt_walk,
         .pwrite
@@ -216,8 +272,7 @@ module cci_mpf
     //
     // ====================================================================
 
-    cci_mpf_if stgm2_fiu_csrs (.clk);
-    cci_mpf_csrs mpf_csrs ();
+    cci_mpf_if stgm3_fiu_csrs (.clk);
 
     cci_mpf_shim_csr
       #(
@@ -227,14 +282,15 @@ module cci_mpf
         .MPF_ENABLE_VTP(ENABLE_VTP),
         .MPF_ENABLE_RSP_ORDER(SORT_READ_RESPONSES),
         .MPF_ENABLE_VC_MAP(MPF_ENABLE_VC_MAP),
+        .MPF_ENABLE_LATENCY_QOS(ENABLE_LATENCY_QOS),
         .MPF_ENABLE_WRO(ENFORCE_WR_ORDER),
         .MPF_ENABLE_PWRITE(ENABLE_PARTIAL_WRITES)
         )
       csr
        (
         .clk,
-        .fiu(stgm1_mpf_fiu),
-        .afu(stgm2_fiu_csrs),
+        .fiu(stgm2_mpf_fiu),
+        .afu(stgm3_fiu_csrs),
         .csrs(mpf_csrs),
         .events(mpf_csrs)
         );
@@ -300,12 +356,12 @@ module cci_mpf
         .MERGE_DUPLICATE_READS(MERGE_DUPLICATE_READS),
         .ENABLE_PARTIAL_WRITES(ENABLE_PARTIAL_WRITES),
         .N_WRITE_HEAP_ENTRIES(N_WRITE_HEAP_ENTRIES),
-        .RESERVED_MDATA_IDX(CCI_PLATFORM_MDATA_WIDTH-2)
+        .RESERVED_MDATA_IDX(RESERVED_MDATA_IDX)
         )
       mpf_pipe
        (
         .clk,
-        .fiu(stgm2_fiu_csrs),
+        .fiu(stgm3_fiu_csrs),
         .afu,
         .mpf_csrs,
         .edge_if,

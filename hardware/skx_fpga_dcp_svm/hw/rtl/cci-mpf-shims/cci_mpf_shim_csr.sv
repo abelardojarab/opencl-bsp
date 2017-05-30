@@ -51,14 +51,16 @@ typedef logic [$clog2(CCI_MPF_CSR_SIZE64)-1:0] t_mpf_csr_offset;
 // similar to base addresses above, but the origin is the first feature
 // managed by MPF.
 parameter CCI_MPF_VTP_CSR_OFFSET = 0;
-parameter CCI_MPF_RSP_ORDER_CSR_OFFSET = CCI_MPF_VTP_CSR_OFFSET +
-                                         CCI_MPF_VTP_CSR_SIZE;
-parameter CCI_MPF_VC_MAP_CSR_OFFSET =    CCI_MPF_RSP_ORDER_CSR_OFFSET +
-                                         CCI_MPF_RSP_ORDER_CSR_SIZE;
-parameter CCI_MPF_WRO_CSR_OFFSET =       CCI_MPF_VC_MAP_CSR_OFFSET +
-                                         CCI_MPF_VC_MAP_CSR_SIZE;
-parameter CCI_MPF_PWRITE_CSR_OFFSET =    CCI_MPF_WRO_CSR_OFFSET +
-                                         CCI_MPF_WRO_CSR_SIZE;
+parameter CCI_MPF_RSP_ORDER_CSR_OFFSET =   CCI_MPF_VTP_CSR_OFFSET +
+                                           CCI_MPF_VTP_CSR_SIZE;
+parameter CCI_MPF_VC_MAP_CSR_OFFSET =      CCI_MPF_RSP_ORDER_CSR_OFFSET +
+                                           CCI_MPF_RSP_ORDER_CSR_SIZE;
+parameter CCI_MPF_LATENCY_QOS_CSR_OFFSET = CCI_MPF_VC_MAP_CSR_OFFSET +
+                                           CCI_MPF_VC_MAP_CSR_SIZE;
+parameter CCI_MPF_WRO_CSR_OFFSET =         CCI_MPF_LATENCY_QOS_CSR_OFFSET +
+                                           CCI_MPF_LATENCY_QOS_CSR_SIZE;
+parameter CCI_MPF_PWRITE_CSR_OFFSET =      CCI_MPF_WRO_CSR_OFFSET +
+                                           CCI_MPF_WRO_CSR_SIZE;
 
 // Size of the intermediate statistics counter bucket. These buckets
 // are added periodically to the CSR memory by cci_mpf_shim_csr.
@@ -95,6 +97,7 @@ module cci_mpf_shim_csr
     parameter MPF_ENABLE_VTP = 0,
     parameter MPF_ENABLE_RSP_ORDER = 0,
     parameter MPF_ENABLE_VC_MAP = 0,
+    parameter MPF_ENABLE_LATENCY_QOS = 0,
     parameter MPF_ENABLE_WRO = 0,
     parameter MPF_ENABLE_PWRITE = 0
     )
@@ -133,14 +136,16 @@ module cci_mpf_shim_csr
 
     // Base address of each shim's CSR range
     localparam CCI_MPF_VTP_CSR_BASE = DFH_MMIO_BASE_ADDR;
-    localparam CCI_MPF_RSP_ORDER_CSR_BASE = CCI_MPF_VTP_CSR_BASE +
-                                            CCI_MPF_VTP_CSR_SIZE;
-    localparam CCI_MPF_VC_MAP_CSR_BASE =    CCI_MPF_RSP_ORDER_CSR_BASE +
-                                            CCI_MPF_RSP_ORDER_CSR_SIZE;
-    localparam CCI_MPF_WRO_CSR_BASE =       CCI_MPF_VC_MAP_CSR_BASE +
-                                            CCI_MPF_VC_MAP_CSR_SIZE;
-    localparam CCI_MPF_PWRITE_CSR_BASE =    CCI_MPF_WRO_CSR_BASE +
-                                            CCI_MPF_WRO_CSR_SIZE;
+    localparam CCI_MPF_RSP_ORDER_CSR_BASE =   CCI_MPF_VTP_CSR_BASE +
+                                              CCI_MPF_VTP_CSR_SIZE;
+    localparam CCI_MPF_VC_MAP_CSR_BASE =      CCI_MPF_RSP_ORDER_CSR_BASE +
+                                              CCI_MPF_RSP_ORDER_CSR_SIZE;
+    localparam CCI_MPF_LATENCY_QOS_CSR_BASE = CCI_MPF_VC_MAP_CSR_BASE +
+                                              CCI_MPF_VC_MAP_CSR_SIZE;
+    localparam CCI_MPF_WRO_CSR_BASE =         CCI_MPF_LATENCY_QOS_CSR_BASE +
+                                              CCI_MPF_LATENCY_QOS_CSR_SIZE;
+    localparam CCI_MPF_PWRITE_CSR_BASE =      CCI_MPF_WRO_CSR_BASE +
+                                              CCI_MPF_WRO_CSR_SIZE;
 
 
     // Register incoming requests
@@ -179,11 +184,16 @@ module cci_mpf_shim_csr
     begin
         // Momentary data set unconditionally to avoid control logic.
         csrs.vc_map_ctrl <= c0_rx.data[63:0];
+        csrs.latency_qos_ctrl <= c0_rx.data[63:0];
         csrs.wro_ctrl <= c0_rx.data[63:0];
 
         csrs.vc_map_ctrl_valid <=
             csrAddrMatches(c0_rx, CCI_MPF_VC_MAP_CSR_BASE +
                                   CCI_MPF_VC_MAP_CSR_CTRL_REG);
+
+        csrs.latency_qos_ctrl_valid <=
+            csrAddrMatches(c0_rx, CCI_MPF_LATENCY_QOS_CSR_BASE +
+                                  CCI_MPF_LATENCY_QOS_CSR_CTRL_REG);
 
         csrs.wro_ctrl_valid <=
             csrAddrMatches(c0_rx, CCI_MPF_WRO_CSR_BASE +
@@ -220,6 +230,7 @@ module cci_mpf_shim_csr
             csrs.vtp_in_page_table_base_valid <= 1'b0;
             csrs.vtp_in_inval_page_valid <= 1'b0;
             csrs.vc_map_ctrl_valid <= 1'b0;
+            csrs.latency_qos_ctrl_valid <= 1'b0;
             csrs.wro_ctrl_valid <= 1'b0;
         end
     end
@@ -254,11 +265,13 @@ module cci_mpf_shim_csr
         .CCI_MPF_VTP_CSR_BASE(CCI_MPF_VTP_CSR_BASE),
         .CCI_MPF_RSP_ORDER_CSR_BASE(CCI_MPF_RSP_ORDER_CSR_BASE),
         .CCI_MPF_VC_MAP_CSR_BASE(CCI_MPF_VC_MAP_CSR_BASE),
+        .CCI_MPF_LATENCY_QOS_CSR_BASE(CCI_MPF_LATENCY_QOS_CSR_BASE),
         .CCI_MPF_WRO_CSR_BASE(CCI_MPF_WRO_CSR_BASE),
         .CCI_MPF_PWRITE_CSR_BASE(CCI_MPF_PWRITE_CSR_BASE),
         .MPF_ENABLE_VTP(MPF_ENABLE_VTP),
         .MPF_ENABLE_RSP_ORDER(MPF_ENABLE_RSP_ORDER),
         .MPF_ENABLE_VC_MAP(MPF_ENABLE_VC_MAP),
+        .MPF_ENABLE_LATENCY_QOS(MPF_ENABLE_LATENCY_QOS),
         .MPF_ENABLE_WRO(MPF_ENABLE_WRO),
         .MPF_ENABLE_PWRITE(MPF_ENABLE_PWRITE)
         )
@@ -699,11 +712,13 @@ module cci_mpf_shim_csr_rd_memory
     parameter CCI_MPF_VTP_CSR_BASE = 0,
     parameter CCI_MPF_RSP_ORDER_CSR_BASE = 0,
     parameter CCI_MPF_VC_MAP_CSR_BASE = 0,
+    parameter CCI_MPF_LATENCY_QOS_CSR_BASE = 0,
     parameter CCI_MPF_WRO_CSR_BASE = 0,
     parameter CCI_MPF_PWRITE_CSR_BASE = 0,
     parameter MPF_ENABLE_VTP = 0,
     parameter MPF_ENABLE_RSP_ORDER = 0,
     parameter MPF_ENABLE_VC_MAP = 0,
+    parameter MPF_ENABLE_LATENCY_QOS = 0,
     parameter MPF_ENABLE_WRO = 0,
     parameter MPF_ENABLE_PWRITE = 0
     )
@@ -776,7 +791,7 @@ module cci_mpf_shim_csr_rd_memory
 
     // Initialization state.
     logic initialized;
-    localparam NUM_INIT_ENTRIES = 15;   // Count of 64 bit entries
+    localparam NUM_INIT_ENTRIES = 18;   // Count of 64 bit entries
     logic [(NUM_INIT_ENTRIES*2)-1 : 0][31:0] init_val;
     t_mpf_csr_offset [NUM_INIT_ENTRIES-1 : 0] init_idx;
 
@@ -979,6 +994,8 @@ module cci_mpf_shim_csr_rd_memory
         logic [127:0] rsp_order_uid;
         t_ccip_dfh vc_map_dfh;
         logic [127:0] vc_map_uid;
+        t_ccip_dfh latency_qos_dfh;
+        logic [127:0] latency_qos_uid;
         t_ccip_dfh wro_dfh;
         logic [127:0] wro_uid;
         t_ccip_dfh pwrite_dfh;
@@ -1001,6 +1018,12 @@ module cci_mpf_shim_csr_rd_memory
         vc_map_uid = (MPF_ENABLE_VC_MAP != 0) ?
                       // UID of VC_MAP feature (from cci_mpf_csrs.h)
                       128'h5046c86f_ba48_4856_b8f9_3b76e3dd4e74 :
+                      128'h0;
+
+        latency_qos_dfh = genDFH(CCI_MPF_LATENCY_QOS_CSR_SIZE);
+        latency_qos_uid = (MPF_ENABLE_LATENCY_QOS != 0) ?
+                      // UID of LATENCY_QOS feature (from cci_mpf_csrs.h)
+                      128'hb35138f6_ea39_4603_9412_a4cf1a999c49 :
                       128'h0;
 
         wro_dfh = genDFH(CCI_MPF_WRO_CSR_SIZE);
@@ -1030,6 +1053,7 @@ module cci_mpf_shim_csr_rd_memory
         init_val_start = { vtp_dfh, vtp_uid,
                            rsp_order_dfh, rsp_order_uid,
                            vc_map_dfh, vc_map_uid,
+                           latency_qos_dfh, latency_qos_uid,
                            wro_dfh, wro_uid,
                            pwrite_dfh, pwrite_uid };
 
@@ -1054,6 +1078,13 @@ module cci_mpf_shim_csr_rd_memory
             t_mpf_csr_offset'((CCI_MPF_VC_MAP_CSR_OFFSET + CCI_MPF_VC_MAP_CSR_ID_H) >> 3),
             // VC_MAP UID low
             t_mpf_csr_offset'((CCI_MPF_VC_MAP_CSR_OFFSET + CCI_MPF_VC_MAP_CSR_ID_L) >> 3),
+
+            // LATENCY_QOS DFH (device feature header)
+            t_mpf_csr_offset'((CCI_MPF_LATENCY_QOS_CSR_OFFSET + CCI_MPF_LATENCY_QOS_CSR_DFH) >> 3),
+            // LATENCY_QOS UID high
+            t_mpf_csr_offset'((CCI_MPF_LATENCY_QOS_CSR_OFFSET + CCI_MPF_LATENCY_QOS_CSR_ID_H) >> 3),
+            // LATENCY_QOS UID low
+            t_mpf_csr_offset'((CCI_MPF_LATENCY_QOS_CSR_OFFSET + CCI_MPF_LATENCY_QOS_CSR_ID_L) >> 3),
 
             // WRO DFH (device feature header)
             t_mpf_csr_offset'((CCI_MPF_WRO_CSR_OFFSET + CCI_MPF_WRO_CSR_DFH) >> 3),

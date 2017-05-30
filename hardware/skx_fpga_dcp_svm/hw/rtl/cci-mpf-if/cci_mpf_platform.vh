@@ -48,6 +48,9 @@
     localparam MPF_PLATFORM = "SKX";
     `define MPF_HOST_IFC_CCIP
 
+    // CCI-P with support for WrPush_I
+    `define MPF_HOST_IFC_CCIP_WRPUSH
+
 `elsif MPF_PLATFORM_DCP_PCIE
      //
      // Discrete FPGA on a PCIe interface
