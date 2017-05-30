@@ -38,13 +38,17 @@
 // **                                                                    **
 // ************************************************************************
 
-// Width of a virtual address (byte addresses).  This value must match
+// Width of a virtual address (line addresses).  This value must match
 // the width of the CCI request header defined in the base CCI structures
 // and the page table data structure.
-localparam CCI_PT_VA_BITS = 42;        // Line sized data (48-6)
+localparam CCI_PT_VA_BITS = CCI_MPF_CLADDR_WIDTH;
 
-// Width of a physical address (byte addresses).
-localparam CCI_PT_PA_BITS = 32;        // Broadwell server
+// Width of a physical address (line addresses).  Old machines supported
+// only 32 bits.  Recent machines support larger spaces.
+localparam CCI_PT_PA_BITS =
+    ((MPF_PLATFORM == "OME" || MPF_PLATFORM == "BDX") ?
+        32 /* Old, small memory machine */ :
+        CCI_MPF_CLADDR_WIDTH);
 
 
 //
@@ -115,12 +119,20 @@ function automatic t_tlb_4kb_va_page_idx vtp2mbTo4kbVA(t_tlb_2mb_va_page_idx p);
     return {p, 9'b0};
 endfunction
 
+function automatic t_tlb_4kb_va_page_idx vtp2mbTo4kbVAx(t_tlb_2mb_va_page_idx p);
+    return {p, 9'bx};
+endfunction
+
 function automatic t_tlb_2mb_pa_page_idx vtp4kbTo2mbPA(t_tlb_4kb_pa_page_idx p);
     return p[9 +: CCI_PT_2MB_PA_PAGE_INDEX_BITS];
 endfunction
 
 function automatic t_tlb_4kb_pa_page_idx vtp2mbTo4kbPA(t_tlb_2mb_pa_page_idx p);
     return {p, 9'b0};
+endfunction
+
+function automatic t_tlb_4kb_pa_page_idx vtp2mbTo4kbPAx(t_tlb_2mb_pa_page_idx p);
+    return {p, 9'bx};
 endfunction
 
 

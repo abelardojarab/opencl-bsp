@@ -80,6 +80,13 @@ interface cci_mpf_csrs();
 
 
     //
+    // Latency QoS -- Throttle request rate to maintain bandwidth but reduce
+    //                latency.
+    //
+    logic [63:0] latency_qos_ctrl;
+    logic        latency_qos_ctrl_valid;
+
+    //
     // WRO -- write/read ordering
     //
 
@@ -113,6 +120,9 @@ interface cci_mpf_csrs();
         output vc_map_ctrl,
         output vc_map_ctrl_valid,
         input  vc_map_history,
+
+        output latency_qos_ctrl,
+        output latency_qos_ctrl_valid,
 
         output wro_ctrl,
         output wro_ctrl_valid
@@ -165,6 +175,12 @@ interface cci_mpf_csrs();
     modport vc_map_events
        (
         output vc_map_out_event_mapping_changed
+        );
+
+    modport latency_qos
+       (
+        input  latency_qos_ctrl,
+        input  latency_qos_ctrl_valid
         );
 
     modport wro
