@@ -30,7 +30,7 @@
    {
       datum _sortIndex
       {
-         value = "11";
+         value = "10";
          type = "int";
       }
    }
@@ -46,24 +46,8 @@
    {
       datum _sortIndex
       {
-         value = "13";
+         value = "12";
          type = "int";
-      }
-   }
-   element cci_interface
-   {
-      datum _sortIndex
-      {
-         value = "10";
-         type = "int";
-      }
-   }
-   element cci_interface.cci_bridge_debug
-   {
-      datum baseAddress
-      {
-         value = "12288";
-         type = "String";
       }
    }
    element clk_200
@@ -86,7 +70,7 @@
    {
       datum _sortIndex
       {
-         value = "12";
+         value = "11";
          type = "int";
       }
    }
@@ -94,7 +78,7 @@
    {
       datum _sortIndex
       {
-         value = "15";
+         value = "14";
          type = "int";
       }
    }
@@ -134,7 +118,7 @@
    {
       datum _sortIndex
       {
-         value = "14";
+         value = "13";
          type = "int";
       }
    }
@@ -228,27 +212,6 @@
  <parameter name="systemHash" value="0" />
  <parameter name="systemInfos"><![CDATA[<systemInfosDefinition>
     <connPtSystemInfos>
-        <entry>
-            <key>cci_interface_slave_unused</key>
-            <value>
-                <connectionPointName>cci_interface_slave_unused</connectionPointName>
-                <suppliedSystemInfos/>
-                <consumedSystemInfos>
-                    <entry>
-                        <key>ADDRESS_MAP</key>
-                        <value>&lt;address-map&gt;&lt;slave name='cci_interface.cci_slave' start='0x0' end='0x10000000000000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
-                    </entry>
-                    <entry>
-                        <key>ADDRESS_WIDTH</key>
-                        <value>64</value>
-                    </entry>
-                    <entry>
-                        <key>MAX_SLAVE_DATA_WIDTH</key>
-                        <value>512</value>
-                    </entry>
-                </consumedSystemInfos>
-            </value>
-        </entry>
         <entry>
             <key>ddr_clk</key>
             <value>
@@ -391,12 +354,6 @@
    internal="bridge_reset.in_reset"
    type="reset"
    dir="end" />
- <interface
-   name="cci_interface_slave_unused"
-   internal="cci_interface.cci_slave"
-   type="avalon"
-   dir="end" />
- <interface name="ci0" internal="cci_interface.ci0" type="conduit" dir="end" />
  <interface name="clk_400" internal="clk_400.in_clk" type="clock" dir="end" />
  <interface name="ddr_clk" internal="ddr_board.ddr_clk" type="clock" dir="end" />
  <interface
@@ -1562,19 +1519,6 @@
   <parameter name="moduleAssignmentDefinition"><![CDATA[<assignmentDefinition>
     <assignmentValueMap/>
 </assignmentDefinition>]]></parameter>
- </module>
- <module name="cci_interface" kind="cci_interface" version="1.0" enabled="1">
-  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="2" />
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="400000000" />
-  <parameter name="AUTO_CLK_RESET_DOMAIN" value="2" />
-  <parameter name="AUTO_DEVICE" value="10AX115N3F40E2SG" />
-  <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
-  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="2" />
-  <parameter name="AUTO_GENERATION_ID" value="0" />
-  <parameter name="AUTO_KERNEL_IRQ_INTERRUPTS_USED" value="0" />
-  <parameter name="AUTO_KERNEL_MASTER_ADDRESS_MAP"><![CDATA[<address-map><slave name='afu_regs.s1' start='0x0' end='0x40' datawidth='64' /><slave name='acl_irq_to_polling_slave_0.s1' start='0x100' end='0x104' datawidth='32' /><slave name='cci_interface.mm_cci_bridge_0.addr_cfg' start='0x2000' end='0x3000' datawidth='64' /><slave name='cci_interface.mm_cci_bridge_0.debug' start='0x3000' end='0x4000' datawidth='64' /><slave name='kernel_interface.ctrl' start='0x4000' end='0x8000' datawidth='32' /><slave name='ddr_board.ddr_board_address_span_extender_0.cntl' start='0xC800' end='0xC808' datawidth='64' /><slave name='pr_base_id.s' start='0xCF80' end='0xCF84' datawidth='32' /><slave name='version_id_0.s' start='0xCFC0' end='0xCFC4' datawidth='32' /><slave name='ddr_board.ddr_board_address_span_extender_0.windowed_slave' start='0x10000' end='0x20000' datawidth='512' /></address-map>]]></parameter>
-  <parameter name="AUTO_KERNEL_MASTER_ADDRESS_WIDTH" value="18" />
-  <parameter name="AUTO_UNIQUE_ID" value="board_cci_interface" />
  </module>
  <module
    name="clk_200"
@@ -5345,27 +5289,6 @@
  <connection
    kind="avalon"
    version="17.0"
-   start="cci_interface.kernel_master"
-   end="pipe_stage_host_ctrl.s0">
-  <parameter name="baseAddress" value="0x0000" />
- </connection>
- <connection
-   kind="avalon"
-   version="17.0"
-   start="pipe_stage_host_ctrl.m0"
-   end="cci_interface.addr_cfg">
-  <parameter name="baseAddress" value="0x2000" />
- </connection>
- <connection
-   kind="avalon"
-   version="17.0"
-   start="pipe_stage_host_ctrl.m0"
-   end="cci_interface.cci_bridge_debug">
-  <parameter name="baseAddress" value="0x3000" />
- </connection>
- <connection
-   kind="avalon"
-   version="17.0"
    start="pipe_stage_host_ctrl.m0"
    end="kernel_interface.ctrl">
   <parameter name="baseAddress" value="0x4000" />
@@ -5445,11 +5368,6 @@
  <connection
    kind="clock"
    version="17.0"
-   start="clk_400.out_clk"
-   end="cci_interface.clk" />
- <connection
-   kind="clock"
-   version="17.0"
    start="clk_200.out_clk"
    end="pr_base_id.clk" />
  <connection
@@ -5507,11 +5425,6 @@
    version="17.0"
    start="bridge_reset.out_reset"
    end="por_reset_counter.clk_reset" />
- <connection
-   kind="reset"
-   version="17.0"
-   start="bridge_reset.out_reset"
-   end="cci_interface.reset" />
  <connection
    kind="reset"
    version="17.0"

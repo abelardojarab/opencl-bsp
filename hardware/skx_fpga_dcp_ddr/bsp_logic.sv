@@ -35,8 +35,6 @@ module bsp_logic(
   // kernel interface
   
     //////// board ports //////////
-  /*output logic	          board_kernel_clk_clk,
-  output logic	          board_kernel_clk2x_clk,*/
   output  logic      		board_kernel_reset_reset_n,
   input logic    	board_kernel_irq_irq,
   input logic          board_kernel_cra_waitrequest,
@@ -101,21 +99,9 @@ module bsp_logic(
 	input		kernel_ddr4b_debugaccess,
 	
   input kernel_clk
-
-
-
-  
-  
-  
 );
 
-
-
 localparam MPF_DFH_MMIO_ADDR = 'h1000;
-
-
-
-
 
 //
 // Expose FIU as an MPF interface

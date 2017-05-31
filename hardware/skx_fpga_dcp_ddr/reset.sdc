@@ -1,7 +1,3 @@
-set_multicycle_path -to * -setup 2 -from {*inst_green_bs|inst_ccip_std_afu|u0|board_inst|cci_interface|rst_controller|alt_rst_sync_uq1|altera_reset_synchronizer_int_chain_out}
-set_multicycle_path -to * -hold 1 -from {*inst_green_bs|inst_ccip_std_afu|u0|board_inst|cci_interface|rst_controller|alt_rst_sync_uq1|altera_reset_synchronizer_int_chain_out}
-
-
 # Make the kernel reset multicycle
 set_multicycle_path -to * -setup 4 -from {*inst_green_bs|inst_ccip_std_afu|bsp_logic_inst|u0|board_inst|kernel_interface|reset_controller_sw|alt_rst_sync_uq1|altera_reset_synchronizer_int_chain_out}                                        
 set_multicycle_path -to * -hold 3 -from {*inst_green_bs|inst_ccip_std_afu|bsp_logic_inst|u0|board_inst|kernel_interface|reset_controller_sw|alt_rst_sync_uq1|altera_reset_synchronizer_int_chain_out}

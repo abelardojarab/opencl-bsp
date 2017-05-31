@@ -100,15 +100,9 @@ set_global_assignment -name IP_FILE ip/board/board_por_reset_counter.ip
 set_global_assignment -name IP_FILE ip/board/board_pr_base_id.ip
 set_global_assignment -name IP_FILE ip/board/board_por_reset_controller.ip
 set_global_assignment -name IP_FILE ip/board/board_pipe_stage_host_ctrl.ip
-set_global_assignment -name IP_FILE iface/ip/cci_interface/cci_interface_mm_bridge_0.ip
-set_global_assignment -name IP_FILE iface/ip/cci_interface/cci_interface_mmio_bridge.ip
 set_global_assignment -name IP_FILE ip/board/board_version_id_0.ip
-set_global_assignment -name IP_FILE iface/ip/cci_interface/cci_interface_mm_cci_bridge_0.ip
-set_global_assignment -name IP_FILE iface/ip/cci_interface/cci_interface_clk_0.ip
-
 
 set_global_assignment -name QSYS_FILE board.qsys
-set_global_assignment -name QSYS_FILE iface/cci_interface.qsys
 set_global_assignment -name IP_FILE ip/ddr_board/csr_clk.ip
 set_global_assignment -name IP_FILE ip/ddr_board/kernel_clk.ip
 set_global_assignment -name IP_FILE ip/ddr_board/ddr_clk.ip
