@@ -228,6 +228,7 @@ module cci_mpf_shim_vc_map
     // ====================================================================
 
     logic mapping_disabled;
+    logic c0_mapping_disabled, c1_mapping_disabled;
     logic dynamic_mapping_disabled;
     logic map_all;
 
@@ -266,10 +267,13 @@ module cci_mpf_shim_vc_map
             // Group A
             if (csrs.vc_map_ctrl[63])
             begin
-                mapping_disabled <= ~ csrs.vc_map_ctrl[0];
-                dynamic_mapping_disabled <= ~ csrs.vc_map_ctrl[1];
+                mapping_disabled <= ~ (|(csrs.vc_map_ctrl[1:0]));
+                c0_mapping_disabled <= ~ csrs.vc_map_ctrl[0];
+                c1_mapping_disabled <= ~ csrs.vc_map_ctrl[1];
+
+                dynamic_mapping_disabled <= ~ csrs.vc_map_ctrl[2];
                 sample_interval_idx <=
-                    (csrs.vc_map_ctrl[5:2] != 4'b0) ? csrs.vc_map_ctrl[5:2] :
+                    (csrs.vc_map_ctrl[6:3] != 4'b0) ? csrs.vc_map_ctrl[6:3] :
                                                       DEFAULT_SAMPLE_INTERVAL_IDX;
                 ratio_vl0 <= RATIO_VL0_DEFAULT;
             end
@@ -277,16 +281,16 @@ module cci_mpf_shim_vc_map
             // Group B
             if (csrs.vc_map_ctrl[62])
             begin
-                map_all <= csrs.vc_map_ctrl[6];
+                map_all <= csrs.vc_map_ctrl[7];
             end
 
             // Group C
             if (csrs.vc_map_ctrl[61])
             begin
                 dynamic_mapping_disabled <= 1'b1;
-                ratio_vl0 <= csrs.vc_map_ctrl[7] ? csrs.vc_map_ctrl[13:8] :
+                ratio_vl0 <= csrs.vc_map_ctrl[8] ? csrs.vc_map_ctrl[14:9] :
                                                    RATIO_VL0_DEFAULT;
-                always_use_vl0 <= csrs.vc_map_ctrl[14];
+                always_use_vl0 <= csrs.vc_map_ctrl[15];
             end
 
             // Group D
@@ -309,6 +313,8 @@ module cci_mpf_shim_vc_map
         if (reset)
         begin
             mapping_disabled <= 1'b0;
+            c0_mapping_disabled <= 1'b0;
+            c1_mapping_disabled <= 1'b0;
             dynamic_mapping_disabled <= (ENABLE_DYNAMIC_VC_MAPPING == 0);
             sample_interval_idx <= DEFAULT_SAMPLE_INTERVAL_IDX;
 
@@ -382,7 +388,7 @@ module cci_mpf_shim_vc_map
     begin
         fiu.c0Tx = c0_tx;
 
-        if (! mapping_disabled &&
+        if (! c0_mapping_disabled &&
             cci_mpf_c0_getReqMapVA(c0_tx.hdr) &&
             req_needs_mapping(c0_tx.hdr.base.vc_sel))
         begin
@@ -396,7 +402,7 @@ module cci_mpf_shim_vc_map
     begin
         fiu.c1Tx = c1_tx;
 
-        if (! mapping_disabled &&
+        if (! c1_mapping_disabled &&
             cci_mpf_c1_getReqMapVA(c1_tx.hdr) &&
             req_needs_mapping(c1_tx.hdr.base.vc_sel))
         begin

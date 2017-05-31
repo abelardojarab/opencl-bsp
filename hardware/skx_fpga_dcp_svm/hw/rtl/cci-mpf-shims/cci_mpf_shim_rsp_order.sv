@@ -97,6 +97,13 @@ module cci_mpf_shim_rsp_order
     cci_mpf_if.to_afu afu
     );
 
+    // MPF treats MAX_ACTIVE_REQS as both the maximum number of requests
+    // of any size and the maximum number of lines outstanding.  It turns
+    // out that maximum throughput is typically reached with the same
+    // number of lines outstanding, independent of request size.  Of
+    // course the bandwidth may vary as a function of request size.
+    localparam MAX_ACTIVE_LINES = MAX_ACTIVE_REQS;
+
     assign afu.reset = fiu.reset;
 
     logic reset = 1'b1;
@@ -258,7 +265,10 @@ module cci_mpf_shim_rsp_order
             //
             cci_mpf_prim_rob
               #(
-                .N_ENTRIES(MAX_ACTIVE_REQS),
+                // MAX_ACTIVE_LINES is used here for clarity, since the ROB
+                // is line-based.  However, in MPF MAX_ACTIVE_LINES is equal
+                // to MAX_ACTIVE_REQS.
+                .N_ENTRIES(MAX_ACTIVE_LINES),
                 .N_DATA_BITS($bits(t_cci_clNum) + CCI_CLDATA_WIDTH),
                 .N_META_BITS($bits(t_cci_clNum) + CCI_MDATA_WIDTH),
                 .MIN_FREE_SLOTS((CCI_TX_ALMOST_FULL_THRESHOLD + THRESHOLD_EXTRA) * CCI_MAX_MULTI_LINE_BEATS),

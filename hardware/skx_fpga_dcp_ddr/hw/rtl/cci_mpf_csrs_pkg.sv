@@ -51,6 +51,7 @@ package cci_mpf_csrs_pkg;
     parameter CCI_MPF_MMIO_SIZE = CCI_MPF_VTP_CSR_SIZE +
                                   CCI_MPF_RSP_ORDER_CSR_SIZE +
                                   CCI_MPF_VC_MAP_CSR_SIZE +
+                                  CCI_MPF_LATENCY_QOS_CSR_SIZE +
                                   CCI_MPF_WRO_CSR_SIZE +
                                   CCI_MPF_PWRITE_CSR_SIZE;
 

@@ -28,6 +28,28 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+/**
+ * \file cci_mpf_csrs.h
+ * \brief Define the CSR address space for MPF shims.
+ */
+
+
+/**
+ * All MPF shims that have feature IDs.
+ */
+typedef enum
+{
+    CCI_MPF_SHIM_VTP,
+    CCI_MPF_SHIM_RSP_ORDER,
+    CCI_MPF_SHIM_VC_MAP,
+    CCI_MPF_SHIM_LATENCY_QOS,
+    CCI_MPF_SHIM_WRO,
+    CCI_MPF_SHIM_PWRITE,
+    CCI_MPF_SHIM_LAST_IDX           // Must be last!
+}
+t_cci_mpf_shim_idx;
+
+
 //
 // CSR address offsets in MPF shims.
 //
@@ -35,9 +57,9 @@
 //   syntactically correct in both.
 //
 
-//
-// VTP feature -- {c8a2982f-ff96-42bf-a705-45727f501901}
-//
+/**
+ * VTP feature -- {c8a2982f-ff96-42bf-a705-45727f501901}
+ */
 typedef enum
 {
     // VTP BBB feature header (read)
@@ -81,9 +103,9 @@ typedef enum
 t_cci_mpf_vtp_csr_offsets;
 
 
-//
-// Read responses ordering feature -- {4c9c96f4-65ba-4dd8-b383-c70ace57bfe4}
-//
+/**
+ * Read responses ordering feature -- {4c9c96f4-65ba-4dd8-b383-c70ace57bfe4}
+ */
 typedef enum
 {
     // MPF write/read order BBB feature header (read)
@@ -99,9 +121,9 @@ typedef enum
 t_cci_mpf_rsp_order_csr_offsets;
 
 
-//
-// Memory virtual channel mapping feature -- {5046c86f-ba48-4856-b8f9-3b76e3dd4e74}
-//
+/**
+ * Memory virtual channel mapping feature -- {5046c86f-ba48-4856-b8f9-3b76e3dd4e74}
+ */
 typedef enum
 {
     // MPF vc mapping BBB feature header (read)
@@ -121,23 +143,27 @@ typedef enum
     //  GROUP A:
     //
     //   Bit 0:
-    //      Enable mapping when 1.  Default 1.
+    //      Enable mapping when 1 on c0 for reads.  Default 1.
     //      Writing 0 will disable mapping and requests on eVC_VA will be
     //      forwarded to the FIU remaining on eVC_VA.
     //   Bit 1:
+    //      The equivalent of bit 0, but on c1 for writes.
+    //      Writing 0 will disable mapping and requests on eVC_VA will be
+    //      forwarded to the FIU remaining on eVC_VA.
+    //   Bit 2:
     //      Enable dynamic mapping.  Default 1.
     //      Dynamic mapping monitors traffic and adjusts the ratio of
     //      mapped channels to optimize throughput.  Optimal mapping
     //      varies depending on the ratio of reads to writes and the
     //      number of lines per request.
-    //   Bits 5-2:
+    //   Bits 6-3:
     //      Log2 of the dynamic sampling window size in cycles.  The
     //      dynamic mapper will consider changing only after 16
     //      consecutive windows suggest the same ratio.
     //
     //  GROUP B:
     //
-    //   Bit 6:
+    //   Bit 7:
     //      When 0: Only change the mapping on incoming requests to eVC_VA.
     //      When 1: Treat all incoming requests as though they were on eVC_VA.
     //              All requests will then be mapped using whatever policy
@@ -145,11 +171,11 @@ typedef enum
     //
     //  GROUP C:
     //
-    //   Bit 7:
+    //   Bit 8:
     //      When 0: Set mapping ratio to default for the platform.
-    //      When 1: Use the ratio specifiers in bits 13-8.
-    //   Bits 14-8:
-    //      When bit 7 is 1 these are used to define the fraction of requests
+    //      When 1: Use the ratio specifiers in bits 14-9.
+    //   Bits 15-9:
+    //      When bit 8 is 1 these are used to define the fraction of requests
     //      mapped to channel VL0.  The value is the number of 64ths that
     //      should be assigned VL0.  The remaining channel mappings are split
     //      evenly between VH0 and VH1.
@@ -189,9 +215,30 @@ typedef enum
 t_cci_mpf_vc_map_csr_offsets;
 
 
-//
-// Write ordering feature -- {56b06b48-9dd7-4004-a47e-0681b4207a6d}
-//
+/**
+ * Latency QoS feature -- {b35138f6-ea39-4603-9412-a4cf1a999c49}
+ */
+typedef enum
+{
+    // MPF latency QoS BBB feature header (read)
+    CCI_MPF_LATENCY_QOS_CSR_DFH = 0,
+    // BBB feature ID low (read)
+    CCI_MPF_LATENCY_QOS_CSR_ID_L = 8,
+    // BBB feature ID high (read)
+    CCI_MPF_LATENCY_QOS_CSR_ID_H = 16,
+
+    // Control register.  See cci_mpf_shim_latency_qos.sv for definition.
+    CCI_MPF_LATENCY_QOS_CSR_CTRL_REG = 24,
+
+    // Must be last
+    CCI_MPF_LATENCY_QOS_CSR_SIZE = 32
+}
+t_cci_mpf_latency_qos_csr_offsets;
+
+
+/**
+ * Write ordering feature -- {56b06b48-9dd7-4004-a47e-0681b4207a6d}
+ */
 typedef enum
 {
     // MPF write/read order BBB feature header (read)
@@ -219,9 +266,9 @@ typedef enum
 t_cci_mpf_wro_csr_offsets;
 
 
-//
-// Partial write feature -- {9bdbbcaf-2c5a-4d17-a636-75b19a0b4f5c}
-//
+/**
+ * Partial write feature -- {9bdbbcaf-2c5a-4d17-a636-75b19a0b4f5c}
+ */
 typedef enum
 {
     // MPF write/read order BBB feature header (read)

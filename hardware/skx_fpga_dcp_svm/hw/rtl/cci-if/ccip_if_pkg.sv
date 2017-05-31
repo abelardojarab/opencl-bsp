@@ -51,7 +51,7 @@ typedef enum logic [3:0] {
 typedef enum logic [3:0] {
     eREQ_WRLINE_I  = 4'h0,      // Memory Write with FPGA Cache Hint=Invalid
     eREQ_WRLINE_M  = 4'h1,      // Memory Write with FPGA Cache Hint=Modified
-//    eREQ_WRPUSH_I  = 4'h2,      // Memory Write with DDIO Hint ** NOT SUPPORTED CURRENTLY **
+    eREQ_WRPUSH_I  = 4'h2,      // Memory Write with DDIO Hint
     eREQ_WRFENCE   = 4'h4,      // Memory Write Fence
 //    eREQ_ATOMIC    = 4'h5,      // Atomic operation: Compare-Exchange for Memory Addr  ** NOT SUPPORTED CURRENTELY **
     eREQ_INTR      = 4'h6       // Interrupt the CPU ** NOT SUPPORTED CURRENTLY **

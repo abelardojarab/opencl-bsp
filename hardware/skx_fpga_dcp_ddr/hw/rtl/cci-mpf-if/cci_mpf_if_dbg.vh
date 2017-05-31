@@ -37,7 +37,9 @@
         case (req)
             eREQ_WRLINE_I: return "WrLine_I  ";
             eREQ_WRLINE_M: return "WrLine_M  ";
-         // eREQ_WRPUSH_I: return "WRPush_I  ";
+`ifdef MPF_HOST_IFC_CCIP_WRPUSH
+            eREQ_WRPUSH_I: return "WrPush_I  ";
+`endif
             eREQ_WRFENCE:  return "WrFence   ";
          // eREQ_ATOMIC:   return "Atomic    ";
             eREQ_INTR:     return "IntrReq   ";

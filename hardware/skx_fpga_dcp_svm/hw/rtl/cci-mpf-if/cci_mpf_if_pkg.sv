@@ -717,7 +717,11 @@ package cci_mpf_if_pkg;
         );
 
         return ((r.hdr.base.req_type == eREQ_WRLINE_I) ||
-                (r.hdr.base.req_type == eREQ_WRLINE_M));
+                (r.hdr.base.req_type == eREQ_WRLINE_M)
+`ifdef MPF_HOST_IFC_CCIP_WRPUSH
+                || (r.hdr.base.req_type == eREQ_WRPUSH_I)
+`endif
+                );
     endfunction
 
     // Does an MPF C0 TX have a valid write request?
