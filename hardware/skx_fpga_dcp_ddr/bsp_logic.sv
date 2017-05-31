@@ -21,15 +21,11 @@ module bsp_logic(
   input           logic             uClk_usr,          // User clock domain. Refer to clock programming guide  ** Currently provides fixed 300MHz clock **
   input           logic             uClk_usrDiv2,      // User clock domain. Half the programmed frequency  ** Currently provides fixed 150MHz clock **
   input           logic             pck_cp2af_softReset,      // CCI-P ACTIVE HIGH Soft Reset
-  input           logic [1:0]       pck_cp2af_pwrState,       // CCI-P AFU Power State
-  input           logic             pck_cp2af_error,          // CCI-P Protocol Error Detected
 
   // Interface structures
   input           t_if_ccip_Rx      pck_cp2af_sRx,        // CCI-P Rx Port
   output          t_if_ccip_Tx      pck_af2cp_sTx,        // CCI-P Tx Port
 
-  
-  
   // kernel interface
 
   // kernel interface
@@ -101,137 +97,39 @@ module bsp_logic(
   input kernel_clk
 );
 
-localparam MPF_DFH_MMIO_ADDR = 'h1000;
-
-//
-// Expose FIU as an MPF interface
-//
-
-cci_mpf_if fiu(.clk(pClk));  
-    ccip_wires_to_mpf
-      #(
-        // All inputs and outputs in PR region (AFU) must be registered!
-        .REGISTER_INPUTS(1),
-        .REGISTER_OUTPUTS(1)
-        )
-      map_ifc(.*);
-
-  
-//
-// Put MPF between AFU and FIU.
-//
-cci_mpf_if afu(.clk(pClk));
-
-cci_mpf
-  #(
-    .SORT_READ_RESPONSES(1 ),
-    .PRESERVE_WRITE_MDATA(1 ),
-
-    // Don't enforce write/write or write/read ordering within a cache line.
-    // (Default CCI behavior.)
-   .ENABLE_VC_MAP(1 ), 
-   .ENABLE_DYNAMIC_VC_MAPPING(1 ),	
-    .ENFORCE_WR_ORDER(1 ),
-    .ENABLE_PARTIAL_WRITES(1 ),
-    // Address of the MPF feature header
-    .DFH_MMIO_BASE_ADDR(MPF_DFH_MMIO_ADDR)
-    )
-  mpf
-   (
-    .clk(pClk ),
-    .fiu,
-    .afu
-    );
-
-    wire [63:0] tx_c1_byteen;
-t_if_ccip_Rx afu_rx;
-t_if_ccip_Tx afu_tx;
-
-
-wire  nohazards_rd;     
-wire nohazards_wr_full; 
-wire nohazards_wr_all;
-always_comb
-begin
-    afu_rx.c0 = afu.c0Rx;
-    afu_rx.c1 = afu.c1Rx;
-
-    afu_rx.c0TxAlmFull = afu.c0TxAlmFull;
-    afu_rx.c1TxAlmFull = afu.c1TxAlmFull;
-
-    afu.c0Tx = cci_mpf_cvtC0TxFromBase(afu_tx.c0);
-    // Treat all addresses as virtual
-    if (cci_mpf_c0TxIsReadReq(afu.c0Tx))
-    begin
-        afu.c0Tx.hdr.ext.addrIsVirtual = 1'b1;
-            // Enable eVC_VA to physical channel mapping.  This will only
-            // be triggered when ENABLE_VC_MAP is set above.
-            afu.c0Tx.hdr.ext.mapVAtoPhysChannel = 1'b1;
-            
-            afu.c0Tx.hdr.ext.checkLoadStoreOrder = nohazards_rd ? 1'b0: 1'b1;
-    end
-
-    afu.c1Tx = cci_mpf_cvtC1TxFromBase(afu_tx.c1);
-    if (cci_mpf_c1TxIsWriteReq(afu.c1Tx))
-    begin
-        afu.c1Tx.hdr.ext.addrIsVirtual = 1'b1;
-            // Enable eVC_VA to physical channel mapping.  This will only
-            // be triggered when ENABLE_VC_MAP is set above.
-        afu.c1Tx.hdr.ext.mapVAtoPhysChannel = 1'b1;
-        
-        afu.c1Tx.hdr.ext.checkLoadStoreOrder = nohazards_wr_all ? 1'b0 :nohazards_wr_full ? tx_c1_byteen != {64{1'b1}} :  1'b1;
-        afu.c1Tx.hdr.pwrite.isPartialWrite = tx_c1_byteen != {64{1'b1}};
-        afu.c1Tx.hdr.pwrite.mask = tx_c1_byteen;
-    end
-
-    afu.c2Tx = afu_tx.c2;
-end
+	wire	[560:0]	avst_host_cmd_data;
+	wire		avst_host_cmd_valid;
+	wire		avst_host_cmd_ready;
+	wire	[511:0]	avst_host_rsp_data;
+	wire		avst_host_rsp_valid;
+	wire		avst_host_rsp_ready;
+	wire	[83:0]	avst_mmio_cmd_data;
+	wire		avst_mmio_cmd_valid;
+	wire		avst_mmio_cmd_ready;
+	wire	[63:0]	avst_mmio_rsp_data;
+	wire		avst_mmio_rsp_valid;
+	wire		avst_mmio_rsp_ready;
 
     system u0 (
-      .ci0_InitDone         (1'b1 ),         //   ci0.InitDone
-      // TODO - make sure PLL is ok!
-      //.kernel_pll_refclk_clk (pClkDiv2 ),
-      .global_reset_reset_n (~pck_cp2af_softReset ), //  global_reset.reset_n
-      .clk_400_clk           (pClk ),
-      .bridge_reset_reset(pck_cp2af_softReset ),
-      .opencl_freeze (opencl_freeze ), 
-		.clk_200_clk           (pClkDiv4 ),  
-		  .ci0_rx_c0_header                   (afu_rx.c0.hdr ),
-		  .ci0_rx_c0_data                     (afu_rx.c0.data ),
-		  .ci0_rx_c0_wrvalid                  (1'b0 ),
-		  .ci0_rx_c0_rdvalid                  (afu_rx.c0.rspValid ),
-		  
-      .ci0_rx_c0_ugvalid                  (1'b0 ),
-      .ci0_rx_c0_mmiordvalid                 (afu_rx.c0.mmioRdValid ),
-      .ci0_rx_c0_mmiowrvalid                 (afu_rx.c0.mmioWrValid ),
-      
-      
-		  .ci0_rx_c1_header                   (afu_rx.c1.hdr ),
-		  .ci0_rx_c1_wrvalid                  (afu_rx.c1.rspValid ),
-		  .ci0_rx_c1_irvalid                  (1'b0 ),
-		  
-      
-      .ci0_tx_c0_almostfull                  (afu_rx.c0TxAlmFull ),
-		  .ci0_tx_c1_almostfull                  (afu_rx.c1TxAlmFull ),
-      
-      .ci0_tx_c1_byteen(    tx_c1_byteen ),
-		  .ci0_tx_c0_header                      (afu_tx.c0.hdr),
-		  .ci0_tx_c0_rdvalid                  (afu_tx.c0.valid),
-      
-		  .ci0_tx_c1_header                      (afu_tx.c1.hdr),
-		  .ci0_tx_c1_data                     (afu_tx.c1.data),
-		  .ci0_tx_c1_wrvalid                  (afu_tx.c1.valid),
-		  .ci0_tx_c1_irvalid                (),
-      
-      .ci0_tx_c2_header                     (afu_tx.c2.hdr),
-		  .ci0_tx_c2_rdvalid                 (afu_tx.c2.mmioRdValid),
-		  .ci0_tx_c2_data                (afu_tx.c2.data),
-		  
-		 .nohazards_rd  (nohazards_rd ),   
-         .nohazards_wr_full (nohazards_wr_full ),
-         .nohazards_wr_all (nohazards_wr_all ),
-		 
-		 
+		.global_reset_reset_n (~pck_cp2af_softReset ), //  global_reset.reset_n
+		.clk_400_clk           (pClk ),
+		.bridge_reset_reset(pck_cp2af_softReset ),
+		.clk_200_clk           (pClkDiv4 ),
+		
+		.avst_host_cmd_data         (avst_host_cmd_data ),         //      avst_host_cmd.data
+		.avst_host_cmd_valid        (avst_host_cmd_valid),        //                   .valid
+		.avst_host_cmd_ready        (avst_host_cmd_ready),        //                   .ready
+		.avst_host_rsp_data         (avst_host_rsp_data ),         //      avst_host_rsp.data
+		.avst_host_rsp_valid        (avst_host_rsp_valid),        //                   .valid
+		.avst_host_rsp_ready        (avst_host_rsp_ready),        //                   .ready
+		.avst_mmio_cmd_data         (avst_mmio_cmd_data ),         //      avst_mmio_cmd.data
+		.avst_mmio_cmd_valid        (avst_mmio_cmd_valid),        //                   .valid
+		.avst_mmio_cmd_ready        (avst_mmio_cmd_ready),        //                   .ready
+		.avst_mmio_rsp_data         (avst_mmio_rsp_data ),         //      avst_mmio_rsp.data
+		.avst_mmio_rsp_valid        (avst_mmio_rsp_valid),        //                   .valid
+		.avst_mmio_rsp_ready        (avst_mmio_rsp_ready),        //                   .ready
+
+		
 		.board_kernel_clk_clk       	(board_kernel_clk_clk       	),
 		.board_kernel_clk2x_clk     	(board_kernel_clk2x_clk     	),
 		.board_kernel_reset_reset_n 	(board_kernel_reset_reset_n 	),
@@ -246,62 +144,103 @@ end
 		.board_kernel_cra_read          (board_kernel_cra_read),
 		.board_kernel_cra_byteenable    (board_kernel_cra_byteenable),
 		.board_kernel_cra_debugaccess   (board_kernel_cra_debugaccess),
-
-
-.acl_internal_snoop_data(acl_internal_snoop_data),
-.acl_internal_snoop_valid(acl_internal_snoop_valid),
-.acl_internal_snoop_ready(acl_internal_snoop_ready),
-
-.ddr_clk_clk(ddr_clk_clk),
-
-.emif_ddr4a_waitrequest(emif_ddr4a_waitrequest),
-.emif_ddr4a_readdata(emif_ddr4a_readdata),
-.emif_ddr4a_readdatavalid(emif_ddr4a_readdatavalid),
-.emif_ddr4a_burstcount(emif_ddr4a_burstcount),
-.emif_ddr4a_writedata(emif_ddr4a_writedata),
-.emif_ddr4a_address(emif_ddr4a_address),
-.emif_ddr4a_write(emif_ddr4a_write),
-.emif_ddr4a_read(emif_ddr4a_read),
-.emif_ddr4a_byteenable(emif_ddr4a_byteenable),
-.emif_ddr4a_debugaccess(emif_ddr4a_debugaccess),
-
-.emif_ddr4b_waitrequest(emif_ddr4b_waitrequest),
-.emif_ddr4b_readdata(emif_ddr4b_readdata),
-.emif_ddr4b_readdatavalid(emif_ddr4b_readdatavalid),
-.emif_ddr4b_burstcount(emif_ddr4b_burstcount),
-.emif_ddr4b_writedata(emif_ddr4b_writedata),
-.emif_ddr4b_address(emif_ddr4b_address),
-.emif_ddr4b_write(emif_ddr4b_write),
-.emif_ddr4b_read(emif_ddr4b_read),
-.emif_ddr4b_byteenable(emif_ddr4b_byteenable),
-.emif_ddr4b_debugaccess(emif_ddr4b_debugaccess),
-
-.kernel_ddr4a_waitrequest(kernel_ddr4a_waitrequest),
-.kernel_ddr4a_readdata(kernel_ddr4a_readdata),
-.kernel_ddr4a_readdatavalid(kernel_ddr4a_readdatavalid),
-.kernel_ddr4a_burstcount(kernel_ddr4a_burstcount),
-.kernel_ddr4a_writedata(kernel_ddr4a_writedata),
-.kernel_ddr4a_address(kernel_ddr4a_address),
-.kernel_ddr4a_write(kernel_ddr4a_write),
-.kernel_ddr4a_read(kernel_ddr4a_read),
-.kernel_ddr4a_byteenable(kernel_ddr4a_byteenable),
-.kernel_ddr4a_debugaccess(kernel_ddr4a_debugaccess),
-
-.kernel_ddr4b_waitrequest(kernel_ddr4b_waitrequest),
-.kernel_ddr4b_readdata(kernel_ddr4b_readdata),
-.kernel_ddr4b_readdatavalid(kernel_ddr4b_readdatavalid),
-.kernel_ddr4b_burstcount(kernel_ddr4b_burstcount),
-.kernel_ddr4b_writedata(kernel_ddr4b_writedata),
-.kernel_ddr4b_address(kernel_ddr4b_address),
-.kernel_ddr4b_write(kernel_ddr4b_write),
-.kernel_ddr4b_read(kernel_ddr4b_read),
-.kernel_ddr4b_byteenable(kernel_ddr4b_byteenable),
-.kernel_ddr4b_debugaccess(kernel_ddr4b_debugaccess),
-
-		 
-      .kernel_clk(kernel_clk)
-
+		
+		.acl_internal_snoop_data(acl_internal_snoop_data),
+		.acl_internal_snoop_valid(acl_internal_snoop_valid),
+		.acl_internal_snoop_ready(acl_internal_snoop_ready),
+		
+		.ddr_clk_clk(ddr_clk_clk),
+		
+		.emif_ddr4a_waitrequest(emif_ddr4a_waitrequest),
+		.emif_ddr4a_readdata(emif_ddr4a_readdata),
+		.emif_ddr4a_readdatavalid(emif_ddr4a_readdatavalid),
+		.emif_ddr4a_burstcount(emif_ddr4a_burstcount),
+		.emif_ddr4a_writedata(emif_ddr4a_writedata),
+		.emif_ddr4a_address(emif_ddr4a_address),
+		.emif_ddr4a_write(emif_ddr4a_write),
+		.emif_ddr4a_read(emif_ddr4a_read),
+		.emif_ddr4a_byteenable(emif_ddr4a_byteenable),
+		.emif_ddr4a_debugaccess(emif_ddr4a_debugaccess),
+		
+		.emif_ddr4b_waitrequest(emif_ddr4b_waitrequest),
+		.emif_ddr4b_readdata(emif_ddr4b_readdata),
+		.emif_ddr4b_readdatavalid(emif_ddr4b_readdatavalid),
+		.emif_ddr4b_burstcount(emif_ddr4b_burstcount),
+		.emif_ddr4b_writedata(emif_ddr4b_writedata),
+		.emif_ddr4b_address(emif_ddr4b_address),
+		.emif_ddr4b_write(emif_ddr4b_write),
+		.emif_ddr4b_read(emif_ddr4b_read),
+		.emif_ddr4b_byteenable(emif_ddr4b_byteenable),
+		.emif_ddr4b_debugaccess(emif_ddr4b_debugaccess),
+		
+		.kernel_ddr4a_waitrequest(kernel_ddr4a_waitrequest),
+		.kernel_ddr4a_readdata(kernel_ddr4a_readdata),
+		.kernel_ddr4a_readdatavalid(kernel_ddr4a_readdatavalid),
+		.kernel_ddr4a_burstcount(kernel_ddr4a_burstcount),
+		.kernel_ddr4a_writedata(kernel_ddr4a_writedata),
+		.kernel_ddr4a_address(kernel_ddr4a_address),
+		.kernel_ddr4a_write(kernel_ddr4a_write),
+		.kernel_ddr4a_read(kernel_ddr4a_read),
+		.kernel_ddr4a_byteenable(kernel_ddr4a_byteenable),
+		.kernel_ddr4a_debugaccess(kernel_ddr4a_debugaccess),
+		
+		.kernel_ddr4b_waitrequest(kernel_ddr4b_waitrequest),
+		.kernel_ddr4b_readdata(kernel_ddr4b_readdata),
+		.kernel_ddr4b_readdatavalid(kernel_ddr4b_readdatavalid),
+		.kernel_ddr4b_burstcount(kernel_ddr4b_burstcount),
+		.kernel_ddr4b_writedata(kernel_ddr4b_writedata),
+		.kernel_ddr4b_address(kernel_ddr4b_address),
+		.kernel_ddr4b_write(kernel_ddr4b_write),
+		.kernel_ddr4b_read(kernel_ddr4b_read),
+		.kernel_ddr4b_byteenable(kernel_ddr4b_byteenable),
+		.kernel_ddr4b_debugaccess(kernel_ddr4b_debugaccess),
+		
+		.kernel_clk(kernel_clk)
     );
+    
+    	avmm_ccip_host #(
+		.AVMM_ADDR_WIDTH(48), 
+		.AVMM_DATA_WIDTH(512))
+	avmm_ccip_host_inst (
+		.clk            (Clk_400),            //   clk.clk
+		.reset        (SoftReset),         // reset.reset
+		
+		.avst_rd_rsp_data(avst_host_rsp_data),
+		.avst_rd_rsp_valid(avst_host_rsp_valid),
+		.avst_rd_rsp_ready(avst_host_rsp_ready), 
+		
+		.avst_avcmd_data(avst_host_cmd_data),
+		.avst_avcmd_valid(avst_host_cmd_valid),
+		.avst_avcmd_ready(avst_host_cmd_ready), 
+		
+		.c0TxAlmFull(cp2af_sRxPort.c0TxAlmFull),
+		.c1TxAlmFull(cp2af_sRxPort.c1TxAlmFull),
+		.c0rx(cp2af_sRxPort.c0),
+		//.c1rx(cp2af_sRxPort.c1),
+		.c0tx(af2cp_sTxPort.c0),
+		.c1tx(af2cp_sTxPort.c1)
+	);
+	
+	localparam AVMM_ADDR_WIDTH = 18;
+	localparam AVMM_DATA_WIDTH = 64;
+	localparam AVMM_BYTE_ENABLE_WIDTH=(AVMM_DATA_WIDTH/8);
+	
+	ccip_avmm_mmio #(AVMM_ADDR_WIDTH, AVMM_DATA_WIDTH)
+	ccip_avmm_mmio_inst (
+		.in_data (avst_mmio_cmd_data),
+		.in_valid(avst_mmio_cmd_valid),
+		.in_ready(avst_mmio_cmd_ready),
+				 
+		.out_data(avst_mmio_rsp_data),
+		.out_valid(avst_mmio_rsp_valid),
+		.out_ready(avst_mmio_rsp_ready),
+
+		.clk            (Clk_400),            //   clk.clk
+		.SoftReset        (SoftReset),         // reset.reset
+		
+		.ccip_c0_Rx_port(cp2af_sRxPort.c0),
+		.ccip_c2_Tx_port(af2cp_sTxPort.c2)
+	);
 
 
 endmodule         

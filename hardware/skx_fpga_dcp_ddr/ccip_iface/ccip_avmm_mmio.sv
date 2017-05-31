@@ -51,7 +51,7 @@ module ccip_avmm_mmio #(
 	
 	wire fifo_mmio32_highword_req = tid_fifo_output[TID_FIFO_WIDTH-1];
 	
-	wire mmio_address_valid = !(mmioHdr.address >= 16'h800 && mmioHdr.address < (16'h800+CCI_MPF_MMIO_SIZE/4));
+	wire mmio_address_valid = !(mmioHdr.address >= 16'h400 && mmioHdr.address < (16'h400+CCI_MPF_MMIO_SIZE/4));
 	
 	scfifo  tid_fifo_inst (
 		.data(tid_fifo_input),
