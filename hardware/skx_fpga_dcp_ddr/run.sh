@@ -55,23 +55,27 @@ else
 	FME_IFC_ID="01234567-89AB-CDEF-0123-456789ABCDEF"
 fi
 
+PLL_METADATA=""
+PLL_METADATA_FILE="pll_metadata.txt"
+if [ -f "$PLL_METADATA_FILE" ]; then
+	PLL_METADATA=`cat $PLL_METADATA_FILE`
+fi
+
 rm -f afu.gbs
 $ADAPT_DEST_ROOT/bin/packager create-gbs \
 	--rbf ./output_files/afu_fit.green_region.rbf \
 	--gbs ./output_files/afu_fit.gbs \
 	--afu-json opencl_afu.json \
 	--set-value \
-		interface-uuid:$FME_IFC_ID
-
-#TODO: set PLL frequency in metadeta
-#		clock-frequency-low:200 \
-#		clock-frequency-high:400
+		interface-uuid:$FME_IFC_ID \
+		$PLL_METADATA
 
 rm -rf fpga.bin
 
 gzip -9c ./output_files/afu_fit.gbs > afu_fit.gbs.gz
 aocl binedit fpga.bin create
 aocl binedit fpga.bin add .acl.gbs.gz ./afu_fit.gbs.gz
+#TODO: remove pll.txt after swtich to new aal/OPAE
 aocl binedit fpga.bin add .acl.pll ./pll.txt
 
 if [ -f afu_quartus_report.txt ]; then
