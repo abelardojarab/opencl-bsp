@@ -26,6 +26,17 @@ copy_platform_file() {
 	cp $SRC_FILE $DEST_PATH
 }
 
+copy_platform_file_no_err() {
+	SRC_FILE=$1
+	DEST_PATH=$2
+	
+	if [ -f "$SRC_FILE" ]; then
+		cp $SRC_FILE $DEST_PATH
+	else
+		echo "WARNING: $SRC_FILE not found"
+	fi
+}
+
 rm -fr "output_files"
 mkdir "output_files"
 mkdir -p "afu"
@@ -47,4 +58,5 @@ copy_platform_file "$FULL_PLATFORM_PATH/../empty_afu/afu/interfaces/SCJIO.qsys" 
 
 rsync -rvua --delete "$FULL_PLATFORM_PATH/../empty_afu/design/" design
 
-#tar xzvf 
+copy_platform_file_no_err "$FULL_PLATFORM_PATH/../fme-ifc-id.txt" "."
+

@@ -48,7 +48,24 @@ else
 fi
 
 #run packager tool to create GBS
-$ADAPT_DEST_ROOT/bin/packager create-gbs --rbf ./output_files/afu_fit.green_region.rbf --gbs ./output_files/afu_fit.gbs --no-metadata
+BBS_ID_FILE="fme-ifc-id.txt"
+if [ -f "$BBS_ID_FILE" ]; then
+	FME_IFC_ID=`cat $BBS_ID_FILE`
+else
+	FME_IFC_ID="01234567-89AB-CDEF-0123-456789ABCDEF"
+fi
+
+rm -f afu.gbs
+$ADAPT_DEST_ROOT/bin/packager create-gbs \
+	--rbf ./output_files/afu_fit.green_region.rbf \
+	--gbs ./output_files/afu_fit.gbs \
+	--afu-json opencl_afu.json \
+	--set-value \
+		interface-uuid:$FME_IFC_ID
+
+#TODO: set PLL frequency in metadeta
+#		clock-frequency-low:200 \
+#		clock-frequency-high:400
 
 rm -rf fpga.bin
 
@@ -56,6 +73,10 @@ gzip -9c ./output_files/afu_fit.gbs > afu_fit.gbs.gz
 aocl binedit fpga.bin create
 aocl binedit fpga.bin add .acl.gbs.gz ./afu_fit.gbs.gz
 aocl binedit fpga.bin add .acl.pll ./pll.txt
+
+if [ -f afu_quartus_report.txt ]; then
+	aocl binedit fpga.bin add .afu_quartus_report.txt ./afu_quartus_report.txt
+fi
 
 if [ ! -f fpga.bin ]; then
 	echo "FPGA compilation failed!"
