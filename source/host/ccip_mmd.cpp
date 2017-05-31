@@ -40,7 +40,9 @@
 
 using namespace std;
 
-#define AFU_ID "C000C966-0D82-4272-9AEF-FE5F84570612"
+#define MCP_OPENCL_AFU_ID "C000C966-0D82-4272-9AEF-FE5F84570612"
+#define DCP_OPENCL_SVM_AFU_ID "3A00972E-7AAC-41DE-BBD1-3901124E8CDA"
+#define DCP_OPENCL_DDR_AFU_ID "18B79FFA-2EE5-4AA0-96EF-4230DAFACB5F"
 
 //for DDR through MMIO
 #define MEM_WINDOW_CRTL 0xc800
@@ -462,12 +464,12 @@ int AOCL_MMD_CALL aocl_mmd_open(const char *name)
 
 	fpga_result     res = FPGA_OK;
 
-	if (uuid_parse(AFU_ID, guid) < 0) {
-		fprintf(stderr, "Error parsing guid '%s'\n", AFU_ID);
+	if (uuid_parse(DCP_OPENCL_DDR_AFU_ID, guid) < 0) {
+		fprintf(stderr, "Error parsing guid '%s'\n", DCP_OPENCL_DDR_AFU_ID);
 		return -1;
 	}
 
-	/* Look for AFC with AFU_ID */
+	/* Look for AFC with DCP_OPENCL_DDR_AFU_ID */
 	res = fpgaGetProperties(NULL, &filter);
 	if(res != FPGA_OK) {
 		fprintf(stderr, "Error creating properties object\n");
