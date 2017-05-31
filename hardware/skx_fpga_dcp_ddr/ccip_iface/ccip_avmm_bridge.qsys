@@ -136,15 +136,15 @@
                 <suppliedSystemInfos>
                     <entry>
                         <key>CLOCK_DOMAIN</key>
-                        <value>3</value>
+                        <value>2</value>
                     </entry>
                     <entry>
                         <key>CLOCK_RATE</key>
-                        <value>0</value>
+                        <value>400000000</value>
                     </entry>
                     <entry>
                         <key>RESET_DOMAIN</key>
-                        <value>3</value>
+                        <value>2</value>
                     </entry>
                 </suppliedSystemInfos>
                 <consumedSystemInfos/>
@@ -3134,7 +3134,7 @@
                     <consumedSystemInfos>
                         <entry>
                             <key>CLOCK_RATE</key>
-                            <value>0</value>
+                            <value>400000000</value>
                         </entry>
                     </consumedSystemInfos>
                 </value>
