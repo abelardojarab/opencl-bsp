@@ -444,8 +444,8 @@ assign kernel_ddr4b_writedata2 =kernel_ddr4b_writedata;
         .ENABLE_PARTIAL_WRITES(0),
 
         // Address of the MPF feature header.  See comment above.
-        .DFH_MMIO_BASE_ADDR(MPF_DFH_MMIO_ADDR),
-        //.DFH_MMIO_NEXT_ADDR(MPF_DFH_MMIO_NEXT_ADDR)
+        .DFH_MMIO_BASE_ADDR(MPF_DFH_MMIO_ADDR)/*,
+        .DFH_MMIO_NEXT_ADDR(MPF_DFH_MMIO_NEXT_ADDR)*/
         )
       mpf
        (
@@ -536,8 +536,8 @@ assign kernel_ddr4b_writedata2 =kernel_ddr4b_writedata;
         .uClk_usrDiv2        ( uClk_usrDiv2),
         
 		.pck_cp2af_softReset ( fiu.reset ) ,
-		.cp2af_sRxPort       ( mpf2af_sRxPort ) ,
-		.af2cp_sTxPort       ( af2mpf_sTxPort ) 
+		.pck_cp2af_sRx       ( mpf2af_sRxPort ) ,
+		.pck_af2cp_sTx       ( af2mpf_sTxPort ) ,
         
 		.board_kernel_reset_reset_n 	  (board_kernel_reset_reset_n),
 		.board_kernel_irq_irq       	  (board_kernel_irq_irq),

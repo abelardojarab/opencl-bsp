@@ -335,6 +335,27 @@
                 <consumedSystemInfos/>
             </value>
         </entry>
+        <entry>
+            <key>tmp</key>
+            <value>
+                <connectionPointName>tmp</connectionPointName>
+                <suppliedSystemInfos/>
+                <consumedSystemInfos>
+                    <entry>
+                        <key>ADDRESS_MAP</key>
+                        <value>&lt;address-map&gt;&lt;slave name='ccip_avmm_bridge_inst.ccip_avmm_bridge_avst_to_avmm_master_0_avmm' start='0x0' end='0x1000000000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
+                    </entry>
+                    <entry>
+                        <key>ADDRESS_WIDTH</key>
+                        <value>48</value>
+                    </entry>
+                    <entry>
+                        <key>MAX_SLAVE_DATA_WIDTH</key>
+                        <value>512</value>
+                    </entry>
+                </consumedSystemInfos>
+            </value>
+        </entry>
     </connPtSystemInfos>
 </systemInfosDefinition>]]></parameter>
  <parameter name="systemScripts" value="" />
@@ -431,6 +452,11 @@
  <interface name="mem_export_export" internal=".export" />
  <interface name="mem_export_irq_export" internal=".irq_export" />
  <interface name="psl_clk" internal="clk_200.in_clk" type="clock" dir="end" />
+ <interface
+   name="tmp"
+   internal="ccip_avmm_bridge_inst.ccip_avmm_bridge_avst_to_avmm_master_0_avmm"
+   type="avalon"
+   dir="end" />
  <module
    name="acl_irq_to_polling_slave_0"
    kind="altera_generic_component"
@@ -1708,11 +1734,10 @@
    version="1.0"
    enabled="1">
   <parameter
-     name="AUTO_CCIP_AVMM_BRIDGE_AVST_TO_AVMM_SLAVE_0_AVALON_MASTER_ADDRESS_MAP"
-     value="" />
+     name="AUTO_CCIP_AVMM_BRIDGE_AVST_TO_AVMM_SLAVE_0_AVALON_MASTER_ADDRESS_MAP"><![CDATA[<address-map><slave name='afu_regs.s1' start='0x0' end='0x40' datawidth='64' /><slave name='acl_irq_to_polling_slave_0.s1' start='0x100' end='0x104' datawidth='32' /><slave name='kernel_interface.ctrl' start='0x4000' end='0x8000' datawidth='32' /><slave name='ddr_board.ddr_board_address_span_extender_0.cntl' start='0xC800' end='0xC808' datawidth='64' /><slave name='pr_base_id.s' start='0xCF80' end='0xCF84' datawidth='32' /><slave name='version_id_0.s' start='0xCFC0' end='0xCFC4' datawidth='32' /><slave name='ddr_board.ddr_board_address_span_extender_0.windowed_slave' start='0x10000' end='0x20000' datawidth='512' /></address-map>]]></parameter>
   <parameter
      name="AUTO_CCIP_AVMM_BRIDGE_AVST_TO_AVMM_SLAVE_0_AVALON_MASTER_ADDRESS_WIDTH"
-     value="-1" />
+     value="18" />
   <parameter name="AUTO_DEVICE" value="10AX115N3F40E2SG" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="2" />
@@ -5494,6 +5519,13 @@
     <assignmentValueMap/>
 </assignmentDefinition>]]></parameter>
  </module>
+ <connection
+   kind="avalon"
+   version="17.0"
+   start="ccip_avmm_bridge_inst.ccip_avmm_bridge_avst_to_avmm_slave_0_avalon_master"
+   end="pipe_stage_host_ctrl.s0">
+  <parameter name="baseAddress" value="0x0000" />
+ </connection>
  <connection
    kind="avalon"
    version="17.0"

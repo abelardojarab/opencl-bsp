@@ -179,6 +179,16 @@ module system (
 .avst_mmio_rsp_valid        (avst_mmio_rsp_valid),        //                   .valid
 .avst_mmio_rsp_ready        (avst_mmio_rsp_ready),        //                   .ready
 
+        .tmp_waitrequest            (),            //                tmp.waitrequest
+        .tmp_readdata               (),               //                   .readdata
+        .tmp_readdatavalid          (),          //                   .readdatavalid
+        .tmp_writedata              (),              //                   .writedata
+        .tmp_address                (),                //                   .address
+        .tmp_write                  (1'b0),                  //                   .write
+        .tmp_read                   (1'b0),                   //                   .read
+        .tmp_burstcount             (),             //                   .burstcount
+        .tmp_byteenable             (),              //                   .byteenable
+
 	.kernel_clk_in_clk(kernel_clk)
 	);
 

@@ -202,8 +202,8 @@ module bsp_logic(
 		.AVMM_ADDR_WIDTH(48), 
 		.AVMM_DATA_WIDTH(512))
 	avmm_ccip_host_inst (
-		.clk            (Clk_400),            //   clk.clk
-		.reset        (SoftReset),         // reset.reset
+		.clk            (pClk),            //   clk.clk
+		.reset        (pck_cp2af_softReset),         // reset.reset
 		
 		.avst_rd_rsp_data(avst_host_rsp_data),
 		.avst_rd_rsp_valid(avst_host_rsp_valid),
@@ -213,12 +213,12 @@ module bsp_logic(
 		.avst_avcmd_valid(avst_host_cmd_valid),
 		.avst_avcmd_ready(avst_host_cmd_ready), 
 		
-		.c0TxAlmFull(cp2af_sRxPort.c0TxAlmFull),
-		.c1TxAlmFull(cp2af_sRxPort.c1TxAlmFull),
-		.c0rx(cp2af_sRxPort.c0),
-		//.c1rx(cp2af_sRxPort.c1),
-		.c0tx(af2cp_sTxPort.c0),
-		.c1tx(af2cp_sTxPort.c1)
+		.c0TxAlmFull(pck_cp2af_sRx.c0TxAlmFull),
+		.c1TxAlmFull(pck_cp2af_sRx.c1TxAlmFull),
+		.c0rx(pck_cp2af_sRx.c0),
+		//.c1rx(pck_cp2af_sRx.c1),
+		.c0tx(pck_af2cp_sTx.c0),
+		.c1tx(pck_af2cp_sTx.c1)
 	);
 	
 	localparam AVMM_ADDR_WIDTH = 18;
@@ -235,11 +235,11 @@ module bsp_logic(
 		.out_valid(avst_mmio_rsp_valid),
 		.out_ready(avst_mmio_rsp_ready),
 
-		.clk            (Clk_400),            //   clk.clk
-		.SoftReset        (SoftReset),         // reset.reset
+		.clk            (pClk),            //   clk.clk
+		.SoftReset        (pck_cp2af_softReset),         // reset.reset
 		
-		.ccip_c0_Rx_port(cp2af_sRxPort.c0),
-		.ccip_c2_Tx_port(af2cp_sTxPort.c2)
+		.ccip_c0_Rx_port(pck_cp2af_sRx.c0),
+		.ccip_c2_Tx_port(pck_af2cp_sTx.c2)
 	);
 
 
