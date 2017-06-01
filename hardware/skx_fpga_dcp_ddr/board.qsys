@@ -5672,6 +5672,11 @@
  <connection
    kind="reset"
    version="17.0"
+   start="global_reset_in.out_reset"
+   end="ddr_board.global_reset" />
+ <connection
+   kind="reset"
+   version="17.0"
    start="bridge_reset.out_reset"
    end="pipe_stage_host_ctrl.reset" />
  <connection
@@ -5704,11 +5709,6 @@
    version="17.0"
    start="por_reset_controller.reset_out"
    end="pr_base_id.clk_reset" />
- <connection
-   kind="reset"
-   version="17.0"
-   start="por_reset_controller.reset_out"
-   end="ddr_board.global_reset" />
  <connection
    kind="reset"
    version="17.0"
