@@ -1695,9 +1695,10 @@ int AOCL_MMD_CALL aocl_mmd_set_status_handler( int handle, aocl_mmd_status_handl
   return 0;
 }
 
-#define MEM_WINDOW_CRTL 0xc800
-#define MEM_WINDOW_MEM 0x10000
-#define MEM_WINDOW_SPAN (64*1024)
+#define MSGDMA_BBB_BASE	0x20000
+#define MEM_WINDOW_CRTL (MSGDMA_BBB_BASE+0x200)
+#define MEM_WINDOW_MEM (MSGDMA_BBB_BASE+0x1000)
+#define MEM_WINDOW_SPAN (4*1024)
 #define MEM_WINDOW_SPAN_MASK ((long)(MEM_WINDOW_SPAN-1))
 
 // Host to device-global-memory write
@@ -1862,6 +1863,8 @@ int AOCL_MMD_CALL aocl_mmd_open(const char *name)
     return -1;
    }
    
+   if(check_for_svm_env())
+   {
    unsigned long long device_ptr_out;
    cr_dsm_base =  aocl_mmd_shared_mem_alloc( 0, 256,  &device_ptr_out );
    
@@ -1883,7 +1886,7 @@ int AOCL_MMD_CALL aocl_mmd_open(const char *name)
    
    
    aocl_mmd_write(NULL,NULL, 8,&cci_config,0, QPI_ADDR_RANGE+NUM_RULES*3*8+8); 
-
+}
 
 
    unsigned long int version_id = 0; 
