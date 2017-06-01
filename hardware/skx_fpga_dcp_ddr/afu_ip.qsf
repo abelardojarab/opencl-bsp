@@ -90,6 +90,10 @@ set_global_assignment -name SDC_FILE ./hw/par/sdc_cci_mpf.sdc
 set_global_assignment -name SYSTEMVERILOG_FILE ./bsp_logic.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ./system.v
 set_global_assignment -name SYSTEMVERILOG_FILE ./ccip_std_afu.sv
+
+set_global_assignment -name SYSTEMVERILOG_FILE ./ccip_iface/avmm_ccip_host.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ./ccip_iface/ccip_avmm_mmio.sv
+
 set_global_assignment -name QIP_FILE ./board/board.qip
 
 set_global_assignment -name VERILOG_FILE ./ip/freeze_wrapper.v
