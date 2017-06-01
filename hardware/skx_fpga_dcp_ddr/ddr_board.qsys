@@ -18,23 +18,15 @@
          type = "int";
       }
    }
+   element csr_clk.out_clk
+   {
+      datum color
+      {
+         value = "-16711936";
+         type = "int";
+      }
+   }
    element ddr4a_cross_to_csr
-   {
-      datum _sortIndex
-      {
-         value = "12";
-         type = "int";
-      }
-   }
-   element ddr4a_cross_to_kernel
-   {
-      datum _sortIndex
-      {
-         value = "11";
-         type = "int";
-      }
-   }
-   element ddr4a_pipe_0
    {
       datum _sortIndex
       {
@@ -42,11 +34,27 @@
          type = "int";
       }
    }
+   element ddr4a_cross_to_kernel
+   {
+      datum _sortIndex
+      {
+         value = "8";
+         type = "int";
+      }
+   }
+   element ddr4a_pipe_0
+   {
+      datum _sortIndex
+      {
+         value = "6";
+         type = "int";
+      }
+   }
    element ddr4a_pipe_1_burst16
    {
       datum _sortIndex
       {
-         value = "10";
+         value = "7";
          type = "int";
       }
    }
@@ -54,7 +62,7 @@
    {
       datum _sortIndex
       {
-         value = "13";
+         value = "10";
          type = "int";
       }
    }
@@ -62,7 +70,7 @@
    {
       datum _sortIndex
       {
-         value = "14";
+         value = "11";
          type = "int";
       }
    }
@@ -78,7 +86,7 @@
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "16";
          type = "int";
       }
    }
@@ -94,7 +102,7 @@
    {
       datum _sortIndex
       {
-         value = "15";
+         value = "12";
          type = "int";
       }
    }
@@ -102,7 +110,7 @@
    {
       datum _sortIndex
       {
-         value = "16";
+         value = "13";
          type = "int";
       }
    }
@@ -111,6 +119,14 @@
       datum _sortIndex
       {
          value = "2";
+         type = "int";
+      }
+   }
+   element ddr_clk.out_clk
+   {
+      datum color
+      {
+         value = "-65485";
          type = "int";
       }
    }
@@ -130,6 +146,14 @@
          type = "int";
       }
    }
+   element kernel_clk.out_clk
+   {
+      datum color
+      {
+         value = "-16763905";
+         type = "int";
+      }
+   }
    element kernel_reset
    {
       datum _sortIndex
@@ -142,7 +166,7 @@
    {
       datum _sortIndex
       {
-         value = "6";
+         value = "14";
          type = "int";
       }
    }
@@ -150,7 +174,7 @@
    {
       datum _sortIndex
       {
-         value = "7";
+         value = "15";
          type = "int";
       }
    }
