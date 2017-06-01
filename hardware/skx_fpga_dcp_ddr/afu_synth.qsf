@@ -106,12 +106,9 @@ set_global_assignment -name QSYS_FILE board.qsys
 set_global_assignment -name IP_FILE ip/ddr_board/csr_clk.ip
 set_global_assignment -name IP_FILE ip/ddr_board/kernel_clk.ip
 set_global_assignment -name IP_FILE ip/ddr_board/ddr_clk.ip
-set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_0.ip
 set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_reset_bridge_0.ip
 set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_reset_bridge_1.ip
 set_global_assignment -name QSYS_FILE ddr_board.qsys
-set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_1.ip
-set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_address_span_extender_0.ip
 set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_acl_memory_bank_divider_0.ip
 
 set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_2.ip
@@ -134,3 +131,18 @@ set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bri
 set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_avst_to_avmm_master_0.ip
 set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_dc_fifo_1.ip
 set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_clock_bridge_3.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_clock_crossing_bridge_4.ip
+set_global_assignment -name QSYS_FILE msgdma_bbb/msgdma_bbb.qsys
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_pipe_stage_m.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/dma_core_dma_write_master.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_csr.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_mm_bridge_1.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_mm_bridge_0.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_pipe_stage_0.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/dma_core_pipe_stage_dma_read.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/dma_core_pipe_stage_dma_write.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_afu_id_avmm_slave_0.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/dma_core_dma_read_master.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/dma_core_modular_sgdma_dispatcher_0.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_address_span_extender_0.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_clk.ip

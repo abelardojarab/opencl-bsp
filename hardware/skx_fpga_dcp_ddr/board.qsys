@@ -114,6 +114,14 @@
          type = "String";
       }
    }
+   element ddr_board.msgdma_bbb_csr
+   {
+      datum baseAddress
+      {
+         value = "131072";
+         type = "String";
+      }
+   }
    element global_reset_in
    {
       datum _sortIndex
@@ -335,27 +343,6 @@
                 <consumedSystemInfos/>
             </value>
         </entry>
-        <entry>
-            <key>tmp</key>
-            <value>
-                <connectionPointName>tmp</connectionPointName>
-                <suppliedSystemInfos/>
-                <consumedSystemInfos>
-                    <entry>
-                        <key>ADDRESS_MAP</key>
-                        <value>&lt;address-map&gt;&lt;slave name='ccip_avmm_bridge_inst.ccip_avmm_bridge_avst_to_avmm_master_0_avmm' start='0x0' end='0x1000000000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
-                    </entry>
-                    <entry>
-                        <key>ADDRESS_WIDTH</key>
-                        <value>48</value>
-                    </entry>
-                    <entry>
-                        <key>MAX_SLAVE_DATA_WIDTH</key>
-                        <value>512</value>
-                    </entry>
-                </consumedSystemInfos>
-            </value>
-        </entry>
     </connPtSystemInfos>
 </systemInfosDefinition>]]></parameter>
  <parameter name="systemScripts" value="" />
@@ -452,11 +439,6 @@
  <interface name="mem_export_export" internal=".export" />
  <interface name="mem_export_irq_export" internal=".irq_export" />
  <interface name="psl_clk" internal="clk_200.in_clk" type="clock" dir="end" />
- <interface
-   name="tmp"
-   internal="ccip_avmm_bridge_inst.ccip_avmm_bridge_avst_to_avmm_master_0_avmm"
-   type="avalon"
-   dir="end" />
  <module
    name="acl_irq_to_polling_slave_0"
    kind="altera_generic_component"
@@ -1734,7 +1716,7 @@
    version="1.0"
    enabled="1">
   <parameter
-     name="AUTO_CCIP_AVMM_BRIDGE_AVST_TO_AVMM_SLAVE_0_AVALON_MASTER_ADDRESS_MAP"><![CDATA[<address-map><slave name='afu_regs.s1' start='0x0' end='0x40' datawidth='64' /><slave name='acl_irq_to_polling_slave_0.s1' start='0x100' end='0x104' datawidth='32' /><slave name='kernel_interface.ctrl' start='0x4000' end='0x8000' datawidth='32' /><slave name='ddr_board.ddr_board_address_span_extender_0.cntl' start='0xC800' end='0xC808' datawidth='64' /><slave name='pr_base_id.s' start='0xCF80' end='0xCF84' datawidth='32' /><slave name='version_id_0.s' start='0xCFC0' end='0xCFC4' datawidth='32' /><slave name='ddr_board.ddr_board_address_span_extender_0.windowed_slave' start='0x10000' end='0x20000' datawidth='512' /></address-map>]]></parameter>
+     name="AUTO_CCIP_AVMM_BRIDGE_AVST_TO_AVMM_SLAVE_0_AVALON_MASTER_ADDRESS_MAP"><![CDATA[<address-map><slave name='afu_regs.s1' start='0x0' end='0x40' datawidth='64' /><slave name='acl_irq_to_polling_slave_0.s1' start='0x100' end='0x104' datawidth='32' /><slave name='kernel_interface.ctrl' start='0x4000' end='0x8000' datawidth='32' /><slave name='pr_base_id.s' start='0xCF80' end='0xCF84' datawidth='32' /><slave name='version_id_0.s' start='0xCFC0' end='0xCFC4' datawidth='32' /><slave name='ddr_board.msgdma_bbb_inst.msgdma_bbb_afu_id_avmm_slave_0.afu_cfg_slave' start='0x20000' end='0x20040' datawidth='64' /><slave name='ddr_board.msgdma_bbb_inst.modular_sgdma_dispatcher_0.CSR' start='0x20040' end='0x20060' datawidth='32' /><slave name='ddr_board.msgdma_bbb_inst.modular_sgdma_dispatcher_0.Descriptor_Slave' start='0x20060' end='0x20080' datawidth='256' /><slave name='ddr_board.msgdma_bbb_inst.address_span_extender_0.cntl' start='0x20200' end='0x20208' datawidth='64' /><slave name='ddr_board.msgdma_bbb_inst.address_span_extender_0.windowed_slave' start='0x21000' end='0x22000' datawidth='512' /></address-map>]]></parameter>
   <parameter
      name="AUTO_CCIP_AVMM_BRIDGE_AVST_TO_AVMM_SLAVE_0_AVALON_MASTER_ADDRESS_WIDTH"
      value="18" />
@@ -2088,6 +2070,8 @@
   <parameter name="AUTO_EMIF_DDR4B_ADDRESS_MAP" value="" />
   <parameter name="AUTO_EMIF_DDR4B_ADDRESS_WIDTH" value="-1" />
   <parameter name="AUTO_GENERATION_ID" value="0" />
+  <parameter name="AUTO_HOST_MEM_ADDRESS_MAP"><![CDATA[<address-map><slave name='ccip_avmm_bridge_inst.avst_to_avmm_master_inst.avmm' start='0x0' end='0x1000000000000' datawidth='512' /></address-map>]]></parameter>
+  <parameter name="AUTO_HOST_MEM_ADDRESS_WIDTH" value="48" />
   <parameter name="AUTO_KERNEL_CLK_CLOCK_DOMAIN" value="6" />
   <parameter name="AUTO_KERNEL_CLK_CLOCK_RATE" value="0" />
   <parameter name="AUTO_KERNEL_CLK_RESET_DOMAIN" value="6" />
@@ -4143,7 +4127,7 @@
                     <consumedSystemInfos>
                         <entry>
                             <key>ADDRESS_WIDTH</key>
-                            <value>17</value>
+                            <value>18</value>
                         </entry>
                     </consumedSystemInfos>
                 </value>
@@ -5529,6 +5513,13 @@
  <connection
    kind="avalon"
    version="17.0"
+   start="ddr_board.host_mem"
+   end="ccip_avmm_bridge_inst.ccip_avmm_bridge_avst_to_avmm_master_0_avmm">
+  <parameter name="baseAddress" value="0x0000" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="17.0"
    start="pipe_stage_host_ctrl.m0"
    end="kernel_interface.ctrl">
   <parameter name="baseAddress" value="0x4000" />
@@ -5537,15 +5528,8 @@
    kind="avalon"
    version="17.0"
    start="pipe_stage_host_ctrl.m0"
-   end="ddr_board.memwindow_ctrl">
-  <parameter name="baseAddress" value="0xc800" />
- </connection>
- <connection
-   kind="avalon"
-   version="17.0"
-   start="pipe_stage_host_ctrl.m0"
-   end="ddr_board.memwindow_mem">
-  <parameter name="baseAddress" value="0x00010000" />
+   end="ddr_board.msgdma_bbb_csr">
+  <parameter name="baseAddress" value="0x00020000" />
  </connection>
  <connection
    kind="avalon"

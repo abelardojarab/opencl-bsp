@@ -283,15 +283,15 @@
                 <suppliedSystemInfos>
                     <entry>
                         <key>CLOCK_DOMAIN</key>
-                        <value>2</value>
+                        <value>5</value>
                     </entry>
                     <entry>
                         <key>CLOCK_RATE</key>
-                        <value>0</value>
+                        <value>266000000</value>
                     </entry>
                     <entry>
                         <key>RESET_DOMAIN</key>
-                        <value>2</value>
+                        <value>5</value>
                     </entry>
                 </suppliedSystemInfos>
                 <consumedSystemInfos/>
@@ -325,7 +325,7 @@
                 <suppliedSystemInfos>
                     <entry>
                         <key>ADDRESS_MAP</key>
-                        <value>&lt;address-map&gt;&lt;slave name='parent/ddr4a_mm_bridge.s0' start='0x0' end='0x100000000' datawidth='512' /&gt;&lt;slave name='parent/ddr4b_mm_bridge.s0' start='0x100000000' end='0x200000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
+                        <value>&lt;address-map&gt;&lt;slave name='parent/ddr_board_acl_memory_bank_divider_0.s' start='0x0' end='0x200000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
                     </entry>
                     <entry>
                         <key>ADDRESS_WIDTH</key>
@@ -8696,7 +8696,7 @@
                     <consumedSystemInfos>
                         <entry>
                             <key>ADDRESS_WIDTH</key>
-                            <value>33</value>
+                            <value>10</value>
                         </entry>
                     </consumedSystemInfos>
                 </value>

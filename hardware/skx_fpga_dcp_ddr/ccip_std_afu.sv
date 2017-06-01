@@ -323,11 +323,6 @@ wire		kernel_ddr4b_debugaccess;
 wire [5:0]	ddr4a_byte_address_bits;
 wire [5:0]	ddr4b_byte_address_bits;
 
-wire	[511:0]	kernel_ddr4a_writedata2;
-wire	[511:0]	kernel_ddr4b_writedata2;
-assign kernel_ddr4a_writedata2 =kernel_ddr4a_writedata;
-assign kernel_ddr4b_writedata2 =kernel_ddr4b_writedata;
-
     // ====================================================================
     //
     //  Instantiate a memory properties factory (MPF) between the external
@@ -344,7 +339,7 @@ assign kernel_ddr4b_writedata2 =kernel_ddr4b_writedata;
     // its feature chain.
     //
     localparam MPF_DFH_MMIO_ADDR = 'h1000;
-    //localparam MPF_DFH_MMIO_NEXT_ADDR = 'h20000;
+    localparam MPF_DFH_MMIO_NEXT_ADDR = 'h20000;
 
     //
     // MPF represents CCI as a SystemVerilog interface, derived from the
@@ -444,8 +439,8 @@ assign kernel_ddr4b_writedata2 =kernel_ddr4b_writedata;
         .ENABLE_PARTIAL_WRITES(0),
 
         // Address of the MPF feature header.  See comment above.
-        .DFH_MMIO_BASE_ADDR(MPF_DFH_MMIO_ADDR)/*,
-        .DFH_MMIO_NEXT_ADDR(MPF_DFH_MMIO_NEXT_ADDR)*/
+        .DFH_MMIO_BASE_ADDR(MPF_DFH_MMIO_ADDR),
+        .DFH_MMIO_NEXT_ADDR(MPF_DFH_MMIO_NEXT_ADDR)
         )
       mpf
        (
@@ -585,7 +580,7 @@ assign kernel_ddr4b_writedata2 =kernel_ddr4b_writedata;
 .kernel_ddr4a_readdata(kernel_ddr4a_readdata),
 .kernel_ddr4a_readdatavalid(kernel_ddr4a_readdatavalid),
 .kernel_ddr4a_burstcount(kernel_ddr4a_burstcount),
-.kernel_ddr4a_writedata(kernel_ddr4a_writedata2),
+.kernel_ddr4a_writedata(kernel_ddr4a_writedata),
 .kernel_ddr4a_address(kernel_ddr4a_address),
 .kernel_ddr4a_write(kernel_ddr4a_write),
 .kernel_ddr4a_read(kernel_ddr4a_read),
@@ -596,7 +591,7 @@ assign kernel_ddr4b_writedata2 =kernel_ddr4b_writedata;
 .kernel_ddr4b_readdata(kernel_ddr4b_readdata),
 .kernel_ddr4b_readdatavalid(kernel_ddr4b_readdatavalid),
 .kernel_ddr4b_burstcount(kernel_ddr4b_burstcount),
-.kernel_ddr4b_writedata(kernel_ddr4b_writedata2),
+.kernel_ddr4b_writedata(kernel_ddr4b_writedata),
 .kernel_ddr4b_address(kernel_ddr4b_address),
 .kernel_ddr4b_write(kernel_ddr4b_write),
 .kernel_ddr4b_read(kernel_ddr4b_read),

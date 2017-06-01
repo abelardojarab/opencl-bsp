@@ -17,6 +17,9 @@ find ip/kernel_system -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -nam
 find ddr_board -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -name "*.sv" | xargs cp -t ./sim_files
 find ip/ddr_board -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -name "*.sv" | xargs cp -t ./sim_files
 
+find msgdma_bbb -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -name "*.sv" | xargs cp -t ./sim_files
+find ip/msgdma_bbb -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -name "*.sv" | xargs cp -t ./sim_files
+
 find kernel_hdl -type f | xargs cp -t ./sim_files
 
 find ./ip/*.v | xargs cp -t ./sim_files
