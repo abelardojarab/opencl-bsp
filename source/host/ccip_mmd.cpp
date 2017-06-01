@@ -511,7 +511,7 @@ btInt CCIPMMD::open()
       //goto done_1;
 	  return -1;
    }*/
-#ifndef DISABLE_MPF
+if(check_for_svm_env()) {
    // Reuse Manifest and Configrecord for VTP service
    Manifest.Empty();
    ConfigRecord.Empty();
@@ -651,7 +651,7 @@ btInt CCIPMMD::open()
 	}
    m_WorkspaceSize = WORKSPACE_SIZE;
 
-#endif
+}
 
    //=============================
    // Now we have the NLB Service
@@ -671,9 +671,8 @@ btInt CCIPMMD::open()
 
       // AFU Reset clear VTP, too, so reinitialize that
       // NOTE: this interface is likely to change in future releases of AAL.
-#ifndef DISABLE_MPF	
+if(check_for_svm_env())
       m_pVTPService->vtpReset();
-#endif      
 
       btUnsigned32bitInt id = 0;
       m_pALIMMIOService->mmioRead32(0x8000 ,&id);
@@ -695,7 +694,7 @@ btInt CCIPMMD::open()
    if(m_pVCMAPService)
    {
    //if(getenv("USE_VCMAP")){
-#ifndef DISABLE_MPF	  
+if(check_for_svm_env()) {
       //m_pVCMAPService->vcmapSetMapAll(true);
       m_pVCMAPService->vcmapSetMode(true,true,12);
       
@@ -726,7 +725,7 @@ btInt CCIPMMD::open()
       m_pVCMAPService->vcmapSetFixedMapping(true, 15);
    
    }
-#endif   
+}
      // m_pVCMAPService->vcmapSetMapAll(true);
     //  m_pVCMAPService->vcmapSetFixedMapping(true, 21);
    }
