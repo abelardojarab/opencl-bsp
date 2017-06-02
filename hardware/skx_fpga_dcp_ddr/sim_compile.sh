@@ -25,6 +25,8 @@ find kernel_hdl -type f | xargs cp -t ./sim_files
 find ./ip/*.v | xargs cp -t ./sim_files
 find ./ip/*.sv | xargs cp -t  ./sim_files
 
+cp -rf mem_sim_model.sv ./sim_files/mem_sim_model.sv
+
 cp -rf ccip_std_afu.sv ./sim_files/ccip_std_afu.sv
 find *.sv  | xargs cp -t ./sim_files
 
