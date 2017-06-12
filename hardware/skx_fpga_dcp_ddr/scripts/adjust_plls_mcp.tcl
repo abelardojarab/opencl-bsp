@@ -363,9 +363,15 @@ set pll_setting [expr min($pll_setting,500) ]
 puts $clockfile "$pll_setting"
 close $clockfile
 
-# write  file for kernel freq
+# write  file for kernel freq metadata
+set clockfile   [open "pll_metadata.txt" w]
+set pll_1x_setting [expr int($k_fmax)]
+#set the max frequency to 300 because 2x clock cna't go higher than 600
+set pll_1x_setting [expr min($pll_1x_setting,300) ]
+set pll_2x_setting [expr int($pll_1x_setting * 2)]
+puts $clockfile "clock-frequency-low:$pll_1x_setting clock-frequency-high:$pll_2x_setting"
+close $clockfile
 
-														
 ##file rename -force user_clock.sdc user_clock_orig.sdc													
 ##
 ##set sdcfile   [open "user_clock.sdc" w]
