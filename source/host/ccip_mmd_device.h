@@ -8,9 +8,7 @@
 #include <unistd.h>
 
 #include <uuid/uuid.h>
-#include <fpga/enum.h>
-#include <fpga/access.h>
-#include <fpga/common.h>
+#include <fpga/fpga.h>
 
 #include "pkg_editor.h"
 #include "aocl_mmd.h"
