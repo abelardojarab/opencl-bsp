@@ -19,7 +19,7 @@ if [ "$FPGA_API_PATH" == "" ]; then
 	export FPGA_API_PATH=$FPGA_API_INST_PATH
 fi
 if [ "$FPGA_API_GIT_PATH" == "" ]; then
-	if [ $MINICLOUD ]; then
+	if [ "$ARC_SITE" == "" ]; then
 		FPGA_API_GIT_PATH=/storage/shared/tools/git/cpt_sys_sw-fpga-sw
 	else
 		FPGA_API_GIT_PATH=/swip_apps/avl_vm/git_sync/git/cpt_sys_sw-fpga-sw.git
