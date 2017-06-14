@@ -177,9 +177,10 @@ int CcipDevice::write_block(aocl_mmd_op_t op, int mmd_interface, const void *hos
 }
 
 //for DDR through MMIO
-#define MEM_WINDOW_CRTL 0xc800
-#define MEM_WINDOW_MEM 0x10000
-#define MEM_WINDOW_SPAN (64*1024)
+#define MSGDMA_BBB_BASE	0x20000
+#define MEM_WINDOW_CRTL (MSGDMA_BBB_BASE+0x200)
+#define MEM_WINDOW_MEM (MSGDMA_BBB_BASE+0x1000)
+#define MEM_WINDOW_SPAN (4*1024)
 #define MEM_WINDOW_SPAN_MASK ((long)(MEM_WINDOW_SPAN-1))
 
 int CcipDevice::read_memory(uint64_t *host_addr, size_t dev_addr, size_t size)
