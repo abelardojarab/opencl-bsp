@@ -37,7 +37,7 @@ export MPF_INSTALL_PATH=$BUILD_DIR/mpf
 export ASE_SRC_PATH=$FPGA_API_SRC_PATH/ase
 export ACDS_ARC_RESOURCES="acl/17.0,acds/17.0,qedition/pro,adapt"
 export SIM_ARC_RESOURCES="vcs,vcs-vcsmx-lic/vrtn-dev"
-export SW_BUILD_ARC_RESOURCES="gcc/4.8.2,python,cmake/3.7.2"
+export SW_BUILD_ARC_RESOURCES="gcc/4.8.2,python,cmake/3.7.2,boost"
 
 setup_arc_for_script() {
 	SCRIPT_ARGS="$@"
