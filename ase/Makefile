@@ -44,20 +44,58 @@
 
 include ase_sources.mk
 
-# Base directory
+###############################################################
+##                                                           ##
+##         ASE Platform value (selection method)             ##
+##                                                           ##
+## * ASE_PLATFORM_MCP_SKYLAKE:                               ##
+##       Sets ASE to emulate one SKX socket of Xeon-FPGA MCP ##
+## * ASE_PLATFORM_DCP:                                       ##
+##       Sets ASE to emulate a discrete PCIe attached FPGA   ##
+##                                                           ##
+## Operation:                                                ##
+## - MCP_SKYLAKE or DCP selection drives compiler macros     ##
+##   to the individual SV and C components - ASE_PLATFORM    ##
+##   will be used as the differentiating macro during the    ##
+##   compilation stage                                       ##
+## - This methos allows for newer platforms to be added as   ##
+##   ASE_PLATFORM, reduces accidental settings failure       ##
+##                                                           ##
+###############################################################
+ASE_PLATFORM ?= ASE_PLATFORM_MCP_SKYLAKE
+
+## Base directory
 ASE_BASEDIR = $(PWD)
 
-# ASE switches (these tend to increase log sizes)
+###############################################################
+# ASE switches (disabling logger and checker may speed up     #
+# simulation in assumption that protocol errors don't exist   #
+# in design                                                   #
+###############################################################
 ASE_DISABLE_LOGGER ?= 0
 ASE_DISABLE_CHECKER ?= 0
 
-# Enable Altera gates library
+#########################################################################
+#                 Enable Altera gates library in ASE                    #
+#########################################################################
+# Enable Altera Gates
 GLS_SIM = 1
+
+# ASE GLS_SIM path check test
 GLS_SAMPLE_LIB = $(QUARTUS_HOME)/eda/sim_lib/altera_primitives.v
 
-# Timescale
-TIMESCALE = 1ps/1ps
+# Gate level libraries to add to simulation
+GLS_VERILOG_OPT = $(QUARTUS_HOME)/eda/sim_lib/altera_primitives.v
+GLS_VERILOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/220model.v
+GLS_VERILOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/sgate.v
+GLS_VERILOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/altera_mf.v
+GLS_VERILOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/stratixv_hssi_atoms.v
+GLS_VERILOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/stratixv_pcie_hip_atoms.v
+GLS_VERILOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/altera_lnsim.sv
 
+#########################################################################
+#                       ASE location settings                           #
+#########################################################################
 # Work directory
 WORK = work
 
@@ -71,21 +109,25 @@ ASE_SCRIPT ?= $(ASE_SRCDIR)/ase_regress.sh
 
 #########################################################################
 #                          ASE HW/SW settings                           #
-#########################################################################
+########################################################################
+## Timescale
+TIMESCALE = 1ps/1ps
+
 ## ASE HW file setup
 ASEHW_FILE_LIST = \
-	$(ASE_SRCDIR)/hw/ccip_if_pkg.sv \
-	$(ASE_SRCDIR)/hw/ase_pkg.sv \
-	$(ASE_SRCDIR)/hw/outoforder_wrf_channel.sv \
-	$(ASE_SRCDIR)/hw/latency_pipe.sv \
-	$(ASE_SRCDIR)/hw/ccip_emulator.sv \
-	$(ASE_SRCDIR)/hw/ase_svfifo.sv \
-	$(ASE_SRCDIR)/hw/ccip_logger.sv \
-	$(ASE_SRCDIR)/hw/ccip_checker.sv \
-	$(ASE_SRCDIR)/hw/ase_top.sv \
+	$(ASE_SRCDIR)/rtl/ccip_if_pkg.sv \
+	$(ASE_SRCDIR)/rtl/ase_pkg.sv \
+	$(ASE_SRCDIR)/rtl/outoforder_wrf_channel.sv \
+	$(ASE_SRCDIR)/rtl/inorder_wrf_channel.sv \
+	$(ASE_SRCDIR)/rtl/latency_pipe.sv \
+	$(ASE_SRCDIR)/rtl/ccip_emulator.sv \
+	$(ASE_SRCDIR)/rtl/ase_svfifo.sv \
+	$(ASE_SRCDIR)/rtl/ccip_logger.sv \
+	$(ASE_SRCDIR)/rtl/ccip_checker.sv \
+	$(ASE_SRCDIR)/rtl/ase_top.sv \
 
 ## ASE HW include directory setup
-ASE_INCDIR = $(ASE_SRCDIR)/hw/+
+ASE_INCDIR = $(ASE_SRCDIR)/rtl/+
 
 ## ASE SW file setup
 ASESW_FILE_LIST = \
@@ -102,9 +144,8 @@ ASESW_FILE_LIST = \
 ## ASE top level module
 ASE_TOP = ase_top
 
-
 #########################################################################
-#                          Default options                              #
+#                            Build options                              #
 #########################################################################
 ## Choice of VCS or QUESTA ##
 SIMULATOR?=VCS
@@ -115,9 +156,9 @@ SNPS_COMMAND = $(shell command -v vcs)
 MENT_COMMAND = $(shell command -v vsim)
 
 ## C Compiler options
-CC_OPT = -g  -m64 -fPIC -D SIM_SIDE=1 -D SIMULATOR=$(SIMULATOR)
-CC_OPT+= -I $(ASE_SRCDIR)/sw/
-# CC_OPT+= -std=c11
+CC_OPT?=
+CC_OPT+= -g  -m64 -fPIC -D SIM_SIDE=1 -I $(ASE_SRCDIR)/sw/
+CC_OPT+= -D SIMULATOR=$(SIMULATOR) -D $(ASE_PLATFORM)
 CC_OPT+= -Wall -fstack-protector-all
 ifeq ($(SIMULATOR), VCS)
   CC_OPT+= -I $(VCS_HOME)/include/
@@ -126,11 +167,9 @@ ifeq ($(SIMULATOR), QUESTA)
   CC_OPT+= -I $(MTI_HOME)/include/
 endif
 
-
 ## Print information ##
  $(info SIMULATOR=$(SIMULATOR))
  $(info CC=$(CC))
-
 
 #########################################################################
 #                          Build Variables                              #
@@ -140,24 +179,23 @@ ASE_SHOBJ_NAME = ase_libs
 ASE_SHOBJ_SO = $(ASE_SHOBJ_NAME).so
 
 # -lrt option is required in order to use shared memory /dev/shm,
-# -message queues and pthreads
-ASE_LD_SWITCHES = -lrt -lpthread -lstdc++
-
+ASE_LD_SWITCHES = -lrt -lpthread -lstdc++ -luuid
 
 #########################################################################
 #                          VCS Build Switches                           #
 #########################################################################
 ## VHDL compile
-SNPS_VHDLAN_OPT = -nc -verbose -full64
+SNPS_VHDLAN_OPT?=
+SNPS_VHDLAN_OPT+= -nc -verbose -full64
 SNPS_VHDLAN_OPT+= -work $(WORK)
 
 ## Verilog compile
-SNPS_VLOGAN_OPT = -nc -V -full64 +v2k -sverilog +define+$(SIMULATOR)
+SNPS_VLOGAN_OPT?=
+SNPS_VLOGAN_OPT+= -nc -V -full64 +v2k -sverilog +define+$(SIMULATOR)
 SNPS_VLOGAN_OPT+= +incdir+$(DUT_INCDIR) +incdir+$(ASE_INCDIR)
 SNPS_VLOGAN_OPT+= +librescan -work $(WORK) -override_timescale=$(TIMESCALE)
 SNPS_VLOGAN_OPT+= +define+MMIO_RESPONSE_TIMEOUT=32768
-SNPS_VLOGAN_OPT+= +define+VENDOR_ALTERA +define+TOOL_QUARTUS +define+NUM_AFUS=1 +define+NLB400_MODE_0
-SNPS_VLOGAN_OPT+= +define+CCIP_IF_V0_1 +define+CCI_SIMULATION=1 +define+SIM_MODE=1
+SNPS_VLOGAN_OPT+= +define+$(ASE_PLATFORM)
 SNPS_VLOGAN_OPT+= +lint=all,noVCDE,noNS,NCEID,CAWM,TFIPC,IPDP,PCWM
 ifeq ($(ASE_DISABLE_LOGGER), 1)
   SNPS_VLOGAN_OPT+= +define+ASE_DISABLE_LOGGER=1
@@ -166,23 +204,19 @@ ifeq ($(ASE_DISABLE_CHECKER), 1)
   SNPS_VLOGAN_OPT+= +define+ASE_DISABLE_CHECKER=1
 endif
 ifeq ($(GLS_SIM), 1)
-  SNPS_VLOGAN_OPT+= $(QUARTUS_HOME)/eda/sim_lib/altera_primitives.v
-  SNPS_VLOGAN_OPT+= $(QUARTUS_HOME)/eda/sim_lib/220model.v
-  SNPS_VLOGAN_OPT+= $(QUARTUS_HOME)/eda/sim_lib/sgate.v
-  SNPS_VLOGAN_OPT+= $(QUARTUS_HOME)/eda/sim_lib/altera_mf.v
-  SNPS_VLOGAN_OPT+= $(QUARTUS_HOME)/eda/sim_lib/twentynm_atoms.v
-  SNPS_VLOGAN_OPT+= $(QUARTUS_HOME)/eda/sim_lib/altera_lnsim.sv
+  SNPS_VLOGAN_OPT+= $(GLS_VERILOG_OPT)
 endif
 
 ## VCS elaboration
-SNPS_VCS_OPT = -nc -V +vcs+lic+wait -full64 -debug_all -Mupdate -lca
+SNPS_VCS_OPT?=
+SNPS_VCS_OPT+= -nc -V +vcs+lic+wait -full64 -debug_all -Mupdate -lca
 SNPS_VCS_OPT+= -j 4
 SNPS_VCS_OPT+= -l vcs_elab.log +vhdllib+$(WORK) -Mlib=$(WORK) +lint=TFIPC-L
 SNPS_VCS_OPT+= -override_timescale=$(TIMESCALE) -o $(WORK)/ase_simv
 # SNPS_VCS_OPT+= -LDFLAGS="-m64"             #  !!! DO NOT EDIT !!!
 
 ## Simulation options
-VCS_SIM_OPT = -ucli -do $(ASE_SRCDIR)/vcs_run.tcl
+VCS_SIM_OPT+= -ucli -do $(ASE_SRCDIR)/vcs_run.tcl
 # VCS_SIM_OPT+= -l run.log
 VCS_SIM_OPT+= +ntb_random_seed=1234
 
@@ -191,30 +225,23 @@ VCS_SIM_OPT+= +ntb_random_seed=1234
 #                         Questa Build Switches                         #
 #########################################################################
 ## VHDL compile
-MENT_VCOM_OPT = -nologo -work $(WORK)
+MENT_VCOM_OPT?=
+MENT_VCOM_OPT+= -nologo -work $(WORK)
 
 ## VLOG compile
 # MENT_VLOG_OPT = -64
+MENT_VLOG_OPT?=
 MENT_VLOG_OPT+= -nologo +librescan -work $(WORK) +define+$(SIMULATOR) -novopt
-MENT_VLOG_OPT+= -dpiheader work/dpiheader.h
-MENT_VLOG_OPT+= +incdir+$(ASE_INCDIR)+$(DUT_INCDIR)+$(WORK)
-MENT_VLOG_OPT+= -sv  -timescale $(TIMESCALE) -l vlog.log
-# MENT_VLOG_OPT+= +define+VENDOR_ALTERA +define+TOOL_QUARTUS +define+NUM_AFUS=1 +define+NLB400_MODE_0
-MENT_VLOG_OPT+= +define+CCIP_IF_V0_1 +define+MPF_PLATFORM_BDX  +define+CCI_SIMULATION=1 +define+SIM_MODE=1
+MENT_VLOG_OPT+= -dpiheader work/dpiheader.h +incdir+$(ASE_INCDIR)+$(DUT_INCDIR)+$(WORK)
+MENT_VLOG_OPT+= -sv -timescale $(TIMESCALE) -l vlog.log
+MENT_VLOG_OPT+= +define+$(ASE_PLATFORM)
 ifeq ($(GLS_SIM), 1)
-  MENT_VLOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/altera_primitives.v
-  MENT_VLOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/220model.v
-  MENT_VLOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/sgate.v
-  MENT_VLOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/altera_mf.v
-  MENT_VLOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/stratixv_atoms.v
-#  MENT_VLOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/synopsys/stratixv_hssi_atoms_ncrypt.v
-  MENT_VLOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/stratixv_hssi_atoms.v
-  MENT_VLOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/stratixv_pcie_hip_atoms.v
-  MENT_VLOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/altera_lnsim.sv
+  MENT_VLOG_OPT+= $(GLS_VERILOG_OPT)
 endif
 
 ## VSIM elaboration, and run options
 # MENT_VSIM_OPT = -64
+MENT_VSIM_OPT?=
 MENT_VSIM_OPT+= -c -l run.log -dpioutoftheblue 1 -novopt
 MENT_VSIM_OPT+= -sv_lib $(ASE_SHOBJ_NAME) -do $(ASE_SRCDIR)/vsim_run.tcl
 MENT_VSIM_OPT+= -sv_seed 1234
@@ -229,6 +256,18 @@ all: check build
 
 # Check
 check: header
+# Check that only MCP_SKYLAKE or DCP is selected, not both or neither
+ifeq ($(ASE_PLATFORM), ASE_PLATFORM_MCP_SKYLAKE)
+	@echo "ASE platform set to MCP_SKYLAKE mode"
+else
+  ifeq ($(ASE_PLATFORM), ASE_PLATFORM_DCP)
+	@echo "ASE platform set to DCP mode"
+  else
+	@echo "ASE platform set to '$(ASE_PLATFORM)' -- this is an illegal value"
+	@echo "    Valid values - {ASE_PLATFORM_MCP_SKYLAKE, ASE_PLATFORM_DCP}"
+	exit 1
+  endif
+endif
 # Ensure GCC is available
 ifneq ($(CC), gcc)
 	@echo "#                                                          #"
@@ -255,7 +294,7 @@ ifeq ($(GLS_SIM), 1)
 	@echo "** ERROR **: env(QUARTUS_HOME) has not been set."
 	@echo "** ERROR **: GLS_SIM needs QUARTUS_HOME environment variable to be set."
     ifdef QUARTUS_ROOT
-	@echo "** ERROR **: env(QUARTUS_ROOT) is set up. Copy its contents to env(QUARTUS_HOME)."
+	@echo "** ERROR **: env(QUARTUS_ROOT) is set up. Please set env(QUARTUS_HOME) to same location."
 	@echo "** ERROR **: This makefile references libraries based on env(QUARTUS_HOME)."
     endif
   else
@@ -286,16 +325,14 @@ else
   endif
 endif
 
-
 # Print version number
 header:
 	@echo "#################################################################"
 	@echo "#                                                               #"
-	@echo "#         Xeon(R) + FPGA Accelerator Abstraction Layer          #"
+	@echo "#             Intel(R) Xeon(R) + FPGA OPAE Library              #"
 	@echo "#               AFU Simulation Environment (ASE)                #"
 	@echo "#                                                               #"
 	@echo "#################################################################"
-
 
 # Help information
 help: header
@@ -341,7 +378,6 @@ help: header
 	@echo "#                     |                                         #"
 	@echo "#################################################################"
 
-
 ## Build ASE Software objects and shared library ##
 sw_build:
 	make header
@@ -349,7 +385,6 @@ sw_build:
 	cd $(WORK) ; $(CC) $(CC_OPT) -c $(ASESW_FILE_LIST) || exit 1 ; cd -
 	cd $(WORK) ; $(CC) -g -shared -o $(ASE_SHOBJ_SO) `ls *.o` $(ASE_LD_SWITCHES) ; cd -
 	nm $(WORK)/$(ASE_SHOBJ_SO) > $(WORK)/$(ASE_SHOBJ_NAME).nm
-
 
 ## VCS build template ##
 vcs_build: sw_build
@@ -369,7 +404,6 @@ ifeq ($(CC), gcc)
 	vcs $(SNPS_VCS_OPT) $(ASE_TOP) $(WORK)/$(ASE_SHOBJ_SO) $(ASE_LD_SWITCHES)
 endif
 
-
 ## Questasim template ##
 questa_build: sw_build
 	@echo "############################################################"
@@ -386,7 +420,6 @@ ifdef DUT_VLOG_SRC_LIST
 	cd $(WORK) ; vlog $(MENT_VLOG_OPT) -f $(DUT_VLOG_SRC_LIST) -l vlog-afu.log ; cd -
 endif
 
-
 ## Build Simulator objects ##
 build:
 ifeq ($(SIMULATOR), VCS)
@@ -401,7 +434,6 @@ else
   endif
 endif
 
-
 ## Run ASE Simulator ##
 sim: check
 ifeq ($(SIMULATOR), VCS)
@@ -415,7 +447,6 @@ else
 	@echo "############################################################"
   endif
 endif
-
 
 # Open Wave file
 wave: check
@@ -442,4 +473,3 @@ clean: header
 
 distclean: header clean
 	./distclean.sh
-

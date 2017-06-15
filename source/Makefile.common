@@ -1,6 +1,6 @@
 # define shared variables in this package
 PACKAGE_NAME?= pcie385n
-MMD_LIB_NAME?= altera_qpi_mmd
+MMD_LIB_NAME?= altera_ccip_mmd
 
 # define OS related commands
 ACL_COMPILER:= gcc

@@ -6,4 +6,6 @@ SCRIPT_DIR_PATH="$(dirname $SCRIPT_PATH)"
 . $SCRIPT_DIR_PATH/bsp_common.sh
 
 export OPENCL_ASE_SIM=1
+setup_arc_for_script
+
 bash
