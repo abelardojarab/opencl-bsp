@@ -48,8 +48,8 @@ else
 		aocl binedit $2 get .acl.gbs $2.gbs
 	fi
 	
-	#TODO: Fix hack of calling adapt_test_util
-	adapt_test_util load_gbs $2.gbs
+	#TODO: Fix hack of calling sudo
+	sudo $FPGA_API_BUILD_PATH/bin/fpgaconf -v $2.gbs
 	RESULT=$?
 	rm -rf $2.gbs 
 	
