@@ -32,7 +32,7 @@ CcipDevice::CcipDevice(int dev_num, int unique_id):
 		return;
 	}
 
-	res = fpgaPropertiesSetGuid(filter, guid);
+	res = fpgaPropertiesSetGUID(filter, guid);
 	if(res != FPGA_OK) {
 		fprintf(stderr, "Error setting GUID\n");
 		return;
