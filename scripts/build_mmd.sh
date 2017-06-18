@@ -5,6 +5,9 @@ SCRIPT_PATH=`readlink -f ${BASH_SOURCE[0]}`
 SCRIPT_DIR_PATH="$(dirname $SCRIPT_PATH)"
 . $SCRIPT_DIR_PATH/bsp_common.sh
 
+#exit early and return error code if there is a problem
+set -e
+
 cd $ROOT_PROJECT_PATH/source
 make clean
 make
