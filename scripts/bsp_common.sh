@@ -25,6 +25,8 @@ if [ "$FPGA_API_GIT_PATH" == "" ]; then
 		FPGA_API_GIT_PATH=/swip_apps/avl_vm/git_sync/git/cpt_sys_sw-fpga-sw.git
 	fi
 fi
+export FPGA_API_USE_GIT_ARCHIVE=1
+export FPGA_API_GIT_BRANCH=develop
 
 export AOCL_BOARD_PACKAGE_ROOT=$ROOT_PROJECT_PATH
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ALTERAOCLSDKROOT/host/linux64/lib

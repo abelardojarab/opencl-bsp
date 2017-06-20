@@ -10,8 +10,14 @@ set -e
 
 ###clone FPGA_API_PATH
 rm -fr $FPGA_API_SRC_PATH
-git clone $FPGA_API_GIT_PATH -b develop $FPGA_API_SRC_PATH
-cd $FPGA_API_SRC_PATH
+if [ "$FPGA_API_USE_GIT_ARCHIVE" == "1" ]; then
+	echo "extracting fpga api from git archive..."
+	mkdir -p $FPGA_API_SRC_PATH
+	git archive --remote=$FPGA_API_GIT_PATH $FPGA_API_GIT_BRANCH | tar -x -C $FPGA_API_SRC_PATH
+	cd $FPGA_API_SRC_PATH
+else
+	git clone $FPGA_API_GIT_PATH -b $FPGA_API_GIT_BRANCH $FPGA_API_SRC_PATH
+fi
 
 #build and install fpga api sw
 rm -fr $FPGA_API_INST_PATH
