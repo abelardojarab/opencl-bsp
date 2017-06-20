@@ -36,5 +36,5 @@ make install
 
 if [ "$OPENCL_ASE_SIM" == "1" ]; then
 	#copy the ASE lib over the regular lib so that we don't have to relink our program
-	cp $FPGA_API_INST_PATH/lib/libfpga-ASE.so $FPGA_API_INST_PATH/lib/libfpga.so
+	cp $FPGA_API_INST_PATH/lib/libopae-c-ase.so $FPGA_API_INST_PATH/lib/libopae-c.so
 fi
