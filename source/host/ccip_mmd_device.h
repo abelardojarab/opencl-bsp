@@ -36,7 +36,8 @@
 #define MCP_OPENCL_AFU_ID "C000C966-0D82-4272-9AEF-FE5F84570612"
 #define DCP_OPENCL_SVM_AFU_ID "3A00972E-7AAC-41DE-BBD1-3901124E8CDA"
 #define DCP_OPENCL_DDR_AFU_ID "18B79FFA-2EE5-4AA0-96EF-4230DAFACB5F"
-
+#define MSGDMA_BBB_GUID		"d79c094c-7cf9-4cc1-94eb-7d79c7c01ca3"
+#define MSGDMA_BBB_SIZE		8192
 
 //debugging
 #ifdef DEBUG
@@ -98,6 +99,7 @@ class CcipDevice final
 	fpga_properties   filter;
 	fpga_token        afc_token;
 	fpga_dma_handle   dma_h;
+	uint64_t          msgdma_bbb_base_addr;
 
 	// Helper functions
 	int read_memory(uint64_t *host_addr, size_t dev_addr, size_t size);

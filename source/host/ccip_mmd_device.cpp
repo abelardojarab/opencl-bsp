@@ -1,4 +1,5 @@
 #include "ccip_mmd_device.h"
+#include "afu_bbb_util.h"
 
 CcipDevice::CcipDevice(int dev_num, int unique_id):
 	kernel_interrupt(NULL),
@@ -9,7 +10,8 @@ CcipDevice::CcipDevice(int dev_num, int unique_id):
 	afc_handle(NULL),
 	filter(NULL),
 	afc_token(NULL),
-	dma_h(NULL)
+	dma_h(NULL),
+	msgdma_bbb_base_addr(0)
 {
 
 	fpga_guid guid;
@@ -58,7 +60,6 @@ CcipDevice::CcipDevice(int dev_num, int unique_id):
 		return;
 	}
 
-
 	res = fpgaMapMMIO(afc_handle, 0, NULL);
 	if(res != FPGA_OK) {
 		fprintf(stderr, "Error mapping MMIO space: %d\n", res);
@@ -73,12 +74,20 @@ CcipDevice::CcipDevice(int dev_num, int unique_id):
 	}
 	AFU_RESET_DELAY();
 	
-   res = fpgaDmaOpen(afc_handle, &dma_h);
-   if(res != FPGA_OK) {
+	res = fpgaDmaOpen(afc_handle, &dma_h);
+	if(res != FPGA_OK) {
 		fprintf(stderr, "Error initializing DMA: %d\n", res);
 		return;
 	}
-
+	
+	//need base address for address span extender
+	uint64_t dfh_size = 0;
+	bool found_dfh = find_dfh_by_guid(afc_handle, MSGDMA_BBB_GUID, &msgdma_bbb_base_addr, &dfh_size);
+	if(!found_dfh || dfh_size != MSGDMA_BBB_SIZE) {
+		fprintf(stderr, "Error initializing DMA: %d\n", res);
+		return;
+	}
+	
 	initialized = true;
 }
 
@@ -193,9 +202,8 @@ int CcipDevice::write_block(aocl_mmd_op_t op, int mmd_interface, const void *hos
 }
 
 //for DDR through MMIO
-#define MSGDMA_BBB_BASE	0x20000
-#define MEM_WINDOW_CRTL (MSGDMA_BBB_BASE+0x200)
-#define MEM_WINDOW_MEM (MSGDMA_BBB_BASE+0x1000)
+#define MEM_WINDOW_CRTL (msgdma_bbb_base_addr+0x200)
+#define MEM_WINDOW_MEM (msgdma_bbb_base_addr+0x1000)
 #define MEM_WINDOW_SPAN (4*1024)
 #define MEM_WINDOW_SPAN_MASK ((long)(MEM_WINDOW_SPAN-1))
 
