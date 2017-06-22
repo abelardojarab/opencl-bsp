@@ -12,9 +12,3 @@ cd $ROOT_PROJECT_PATH/source
 make clean
 make
 
-if [ "$OPENCL_ASE_SIM" == "1" ]; then
-	#need to rebuild mmd for sim
-	cd $ROOT_PROJECT_PATH/source/host
-	make clean
-	make -f Makefile.sim
-fi
