@@ -40,6 +40,10 @@
 
 #include <opae/fpga.h>
 
+#ifdef __cplusplus 
+extern "C" {
+#endif
+
 /*
  * macro for checking return codes
  */
@@ -140,5 +144,9 @@ fpga_result fpgaDmaTransferAsync(fpga_dma_handle dma, uint64_t dst, uint64_t src
 * @returns         FPGA_OK on success, return code otherwise
 */
 fpga_result fpgaDmaClose(fpga_dma_handle dma);
+
+#ifdef __cplusplus 
+}
+#endif
 
 #endif // __FPGA_DMA_H__
