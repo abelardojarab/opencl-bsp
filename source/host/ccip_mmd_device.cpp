@@ -8,7 +8,8 @@ CcipDevice::CcipDevice(int dev_num, int unique_id):
 	initialized(false),
 	afc_handle(NULL),
 	filter(NULL),
-	afc_token(NULL)
+	afc_token(NULL),
+	dma_h(NULL)
 {
 
 	fpga_guid guid;
@@ -71,26 +72,41 @@ CcipDevice::CcipDevice(int dev_num, int unique_id):
 		return;
 	}
 	AFU_RESET_DELAY();
+	
+   res = fpgaDmaOpen(afc_handle, &dma_h);
+   if(res != FPGA_OK) {
+		fprintf(stderr, "Error initializing DMA: %d\n", res);
+		return;
+	}
 
 	initialized = true;
 }
 
 CcipDevice::~CcipDevice()
 {
-	fpga_result res = FPGA_OK;
+	int num_errors = 0;
+	
+	if(dma_h) {
+		if(fpgaDmaClose(dma_h) != FPGA_OK)
+			num_errors++;
+	}
+	
 	if(afc_handle) {
-		res = fpgaClose(afc_handle);
+		if(fpgaClose(afc_handle) != FPGA_OK)
+		num_errors++;
 	}
 
 	if(afc_token) {
-		res = fpgaDestroyToken(&afc_token);
+		if(fpgaDestroyToken(&afc_token) != FPGA_OK)
+		num_errors++;
 	}
 
 	if(filter) {
-		res = fpgaDestroyProperties(&filter);
+		if(fpgaDestroyProperties(&filter) != FPGA_OK)
+		num_errors++;
 	}
 
-	if(res != FPGA_OK) {
+	if(num_errors > 0) {
 		DEBUG_PRINT("Error freeing resources in destructor\n");
 	}
 

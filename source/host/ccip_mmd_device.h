@@ -12,6 +12,7 @@
 
 #include "pkg_editor.h"
 #include "aocl_mmd.h"
+#include "fpga_dma.h"
 
 // Tune delay for simulation or HW. Eventually delay
 // should be removed for HW, may still be needed for ASE simulation
@@ -96,6 +97,7 @@ class CcipDevice final
 	fpga_handle       afc_handle;
 	fpga_properties   filter;
 	fpga_token        afc_token;
+	fpga_dma_handle   dma_h;
 
 	// Helper functions
 	int read_memory(uint64_t *host_addr, size_t dev_addr, size_t size);
