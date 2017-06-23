@@ -1,6 +1,15 @@
 #include "ccip_mmd_device.h"
 #include "afu_bbb_util.h"
 
+//for DDR through MMIO
+#define MEM_WINDOW_CRTL 0x200
+#define MEM_WINDOW_MEM 0x1000
+#define MEM_WINDOW_SPAN (4*1024)
+#define MEM_WINDOW_SPAN_MASK ((long)(MEM_WINDOW_SPAN-1))
+
+#define MINIMUM_DMA_SIZE	256
+#define DMA_ALIGNMENT	64
+
 CcipDevice::CcipDevice(int dev_num, int unique_id):
 	kernel_interrupt(NULL),
 	kernel_interrupt_user_data(NULL),
@@ -201,15 +210,6 @@ int CcipDevice::write_block(aocl_mmd_op_t op, int mmd_interface, const void *hos
 	}
 }
 
-//for DDR through MMIO
-#define MEM_WINDOW_CRTL (msgdma_bbb_base_addr+0x200)
-#define MEM_WINDOW_MEM (msgdma_bbb_base_addr+0x1000)
-#define MEM_WINDOW_SPAN (4*1024)
-#define MEM_WINDOW_SPAN_MASK ((long)(MEM_WINDOW_SPAN-1))
-
-#define MINIMUM_DMA_SIZE	256
-#define DMA_ALIGNMENT	64
-
 int CcipDevice::read_memory(uint64_t *host_addr, size_t dev_addr, size_t size)
 {
 	int res;
@@ -244,7 +244,7 @@ int CcipDevice::read_memory_mmio(uint64_t *host_addr, size_t dev_addr, size_t si
 {
 	fpga_result res = FPGA_OK;
 	uint64_t cur_mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
-	res = fpgaWriteMMIO64(afc_handle, 0, MEM_WINDOW_CRTL, cur_mem_page);
+	res = fpgaWriteMMIO64(afc_handle, 0, msgdma_bbb_base_addr+MEM_WINDOW_CRTL, cur_mem_page);
 	if(res != FPGA_OK)
 		return res;
 	DCP_DEBUG_MEM("DCP DEBUG: set page %08lx\n", cur_mem_page);
@@ -252,13 +252,13 @@ int CcipDevice::read_memory_mmio(uint64_t *host_addr, size_t dev_addr, size_t si
 		uint64_t mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
 		if(mem_page != cur_mem_page) {
 			cur_mem_page = mem_page;
-			res = fpgaWriteMMIO64(afc_handle, 0, MEM_WINDOW_CRTL, cur_mem_page);
+			res = fpgaWriteMMIO64(afc_handle, 0, msgdma_bbb_base_addr+MEM_WINDOW_CRTL, cur_mem_page);
 			if(res != FPGA_OK)
 				return res;
 			DCP_DEBUG_MEM("DCP DEBUG: set page %08lx\n", cur_mem_page);
 		}
 		DCP_DEBUG_MEM("DCP DEBUG: read data %8p %08lx %16p\n", host_addr, dev_addr, host_addr);
-		res = fpgaReadMMIO64(afc_handle, 0, MEM_WINDOW_MEM+(dev_addr&MEM_WINDOW_SPAN_MASK), host_addr);
+		res = fpgaReadMMIO64(afc_handle, 0, (msgdma_bbb_base_addr+MEM_WINDOW_MEM)+(dev_addr&MEM_WINDOW_SPAN_MASK), host_addr);
 		if(res != FPGA_OK)
 			return res;
 
@@ -304,7 +304,7 @@ int CcipDevice::write_memory_mmio(const uint64_t *host_addr, size_t dev_addr, si
 {
 	fpga_result res = FPGA_OK;
 	uint64_t cur_mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
-	res = fpgaWriteMMIO64(afc_handle, 0, MEM_WINDOW_CRTL, cur_mem_page);
+	res = fpgaWriteMMIO64(afc_handle, 0, msgdma_bbb_base_addr+MEM_WINDOW_CRTL, cur_mem_page);
 	if(res != FPGA_OK)
 		return res;
 	DCP_DEBUG_MEM("DCP DEBUG: set page %08lx\n", cur_mem_page);
@@ -312,13 +312,13 @@ int CcipDevice::write_memory_mmio(const uint64_t *host_addr, size_t dev_addr, si
 		uint64_t mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
 		if(mem_page != cur_mem_page) {
 			cur_mem_page = mem_page;
-			res = fpgaWriteMMIO64(afc_handle, 0, MEM_WINDOW_CRTL, cur_mem_page);
+			res = fpgaWriteMMIO64(afc_handle, 0, msgdma_bbb_base_addr+MEM_WINDOW_CRTL, cur_mem_page);
 			if(res != FPGA_OK)
 				return res;
 			DCP_DEBUG_MEM("DCP DEBUG: set page %08lx\n", cur_mem_page);
 		}
 		DCP_DEBUG_MEM("DCP DEBUG: write data %8p %08lx %016lx\n", host_addr, dev_addr, *host_addr);
-		res = fpgaWriteMMIO64(afc_handle, 0, MEM_WINDOW_MEM+(dev_addr&MEM_WINDOW_SPAN_MASK), *host_addr);
+		res = fpgaWriteMMIO64(afc_handle, 0, (msgdma_bbb_base_addr+MEM_WINDOW_MEM)+(dev_addr&MEM_WINDOW_SPAN_MASK), *host_addr);
 		if(res != FPGA_OK)
 			return res;
 
@@ -329,11 +329,6 @@ int CcipDevice::write_memory_mmio(const uint64_t *host_addr, size_t dev_addr, si
 	DCP_DEBUG_MEM("DCP DEBUG: aocl_mmd_write done!\n");
 	return FPGA_OK;
 }
-
-#undef MEM_WINDOW_CRTL
-#undef MEM_WINDOW_MEM
-#undef MEM_WINDOW_SPAN
-#undef MEM_WINDOW_SPAN_MASK
 
 int CcipDevice::read_mmio(void *host_addr, size_t mmio_addr, size_t size)
 {
