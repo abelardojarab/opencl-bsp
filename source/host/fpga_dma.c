@@ -276,6 +276,10 @@ fpga_result fpgaDmaTransferSync(fpga_dma_handle dma_h, uint64_t dst, uint64_t sr
    else {
       return FPGA_NOT_SUPPORTED;
    }
+   
+#ifdef SIM
+   usleep(100000);
+#endif
 
 rel_buf:
    res = fpgaReleaseBuffer(afc_h, dma_buf_wsid);
