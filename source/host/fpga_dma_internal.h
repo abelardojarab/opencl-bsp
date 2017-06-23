@@ -65,9 +65,12 @@
 #define FPGA_DMA_BUF_SIZE (512*1024)
 
 // Convenience macros
-#define FPGA_DMA_DEBUG 0 //hack
-#define debug_print(fmt, ...) \
-  do { if (FPGA_DMA_DEBUG) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
+#ifdef FPGA_DMA_DEBUG
+  #define debug_print(fmt, ...) \
+          do { if (FPGA_DMA_DEBUG) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
+#else
+  #define debug_print(...)
+#endif
 
 typedef union {
    uint64_t reg;
