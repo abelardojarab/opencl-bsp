@@ -50,8 +50,7 @@ extern "C" {
 #define ON_ERR_GOTO(res, label, desc)\
   do {\
     if ((res) != FPGA_OK) {\
-      print_err((desc), (res));\
-      goto label;\
+    	goto label;\
     }\
   } while (0)
 
