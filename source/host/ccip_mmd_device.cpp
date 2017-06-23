@@ -276,7 +276,7 @@ int CcipDevice::write_memory(const uint64_t *host_addr, size_t dev_addr, size_t 
 	
 	//check size and alignment
 	if(size < MINIMUM_DMA_SIZE || (dev_addr % DMA_ALIGNMENT != 0))
-		res = write_memory_mmio(host_addr, dev_addr, size);
+		return write_memory_mmio(host_addr, dev_addr, size);
 	
 	size_t remainder = (size % DMA_ALIGNMENT);
 	size_t dma_size = size - remainder;
