@@ -272,6 +272,36 @@ int CcipDevice::read_memory_mmio(uint64_t *host_addr, size_t dev_addr, size_t si
 
 int CcipDevice::write_memory(const uint64_t *host_addr, size_t dev_addr, size_t size)
 {
+	int res = FPGA_OK;
+	
+	//check size and alignment
+	if(size < MINIMUM_DMA_SIZE || (dev_addr % DMA_ALIGNMENT != 0))
+		res = write_memory_mmio(host_addr, dev_addr, size);
+	
+	size_t remainder = (size % DMA_ALIGNMENT);
+	size_t dma_size = size - remainder;
+	
+	//TODO: make switch for MMIO
+	//res = write_memory_mmio(host_addr, dev_addr, dma_size);
+	res = fpgaDmaTransferSync(dma_h, dev_addr /*dst*/, (uint64_t)host_addr /*src*/, dma_size, HOST_TO_FPGA_MM);
+	if(res != FPGA_OK)
+		return res;
+	
+	if(remainder)
+		res = write_memory_mmio(host_addr+dma_size/8, dev_addr+dma_size, remainder);
+	
+	if(res != FPGA_OK)
+		return res;
+
+	DCP_DEBUG_MEM("DCP DEBUG: host_addr=%lx, dev_addr=%lx, size=%d\n", host_addr, dev_addr, size);
+	DCP_DEBUG_MEM("DCP DEBUG: remainder=%d, dma_size=%d, size=%d\n", remainder, dma_size, size);
+
+	DCP_DEBUG_MEM("DCP DEBUG: CcipDevice::write_memory done!\n");
+	return FPGA_OK;
+}
+
+int CcipDevice::write_memory_mmio(const uint64_t *host_addr, size_t dev_addr, size_t size)
+{
 	fpga_result res = FPGA_OK;
 	uint64_t cur_mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
 	res = fpgaWriteMMIO64(afc_handle, 0, MEM_WINDOW_CRTL, cur_mem_page);
