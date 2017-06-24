@@ -106,6 +106,8 @@ class CcipDevice final
 	int read_memory_mmio(uint64_t *host_addr, size_t dev_addr, size_t size);
 	int write_memory(const uint64_t *host_addr, size_t dev_addr, size_t size);
 	int write_memory_mmio(const uint64_t *host_addr, size_t dev_addr, size_t size);
+	int write_memory_mmio_unaligned(const uint64_t *host_addr, size_t dev_addr, size_t size);
+	int read_memory_mmio_unaligned(void *host_addr, size_t dev_addr, size_t size);
 	int read_mmio(void *host_addr, size_t dev_addr, size_t size);
 	int write_mmio(const void *host_addr, size_t dev_addr, size_t size);
 };

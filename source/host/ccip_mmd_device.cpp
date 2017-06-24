@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "ccip_mmd_device.h"
 #include "afu_bbb_util.h"
 
@@ -212,10 +214,33 @@ int CcipDevice::write_block(aocl_mmd_op_t op, int mmd_interface, const void *hos
 
 int CcipDevice::read_memory(uint64_t *host_addr, size_t dev_addr, size_t size)
 {
-	int res;
+	DCP_DEBUG_MEM("DCP DEBUG: read_memory %p %lx %ld\n", host_addr, dev_addr, size);
+	int res = FPGA_OK;
 	
-	//check size and alignment
-	if(size < MINIMUM_DMA_SIZE || (dev_addr % DMA_ALIGNMENT != 0))
+	//check for alignment
+	if(dev_addr % DMA_ALIGNMENT != 0)
+	{
+		//check for mmio alignment
+		uint64_t mmio_shift = dev_addr % 8;
+		if(mmio_shift != 0)
+		{
+			size_t unaligned_size = 8 - mmio_shift;
+			if(unaligned_size > size)
+				unaligned_size = size;
+			
+			read_memory_mmio_unaligned(host_addr, dev_addr, unaligned_size);
+			
+			if(size > unaligned_size)
+				res = read_memory((uint64_t *)(((char *)host_addr)+unaligned_size), dev_addr+unaligned_size, size-unaligned_size);
+			return res;
+		}
+		
+		//TODO: need to do a shift here
+		return read_memory_mmio(host_addr, dev_addr, size);
+	}
+	
+	//check size
+	if(size < MINIMUM_DMA_SIZE)
 		return read_memory_mmio(host_addr, dev_addr, size);
 	
 	size_t remainder = (size % DMA_ALIGNMENT);
@@ -240,9 +265,38 @@ int CcipDevice::read_memory(uint64_t *host_addr, size_t dev_addr, size_t size)
 	return FPGA_OK;
 }
 
+int CcipDevice::read_memory_mmio_unaligned(void *host_addr, size_t dev_addr, size_t size)
+{
+	DCP_DEBUG_MEM("DCP DEBUG: read_memory_mmio_unaligned %p %lx %ld\n", host_addr, dev_addr, size);
+	int res = FPGA_OK;
+	
+	uint64_t shift = dev_addr % 8;
+	
+	assert(size+shift <= 8);
+
+	uint64_t cur_mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
+	res = fpgaWriteMMIO64(afc_handle, 0, msgdma_bbb_base_addr+MEM_WINDOW_CRTL, cur_mem_page);
+	if(res != FPGA_OK)
+		return res;
+
+	uint64_t dev_aligned_addr = dev_addr - shift;
+	
+	//read data from device memory
+	uint64_t read_tmp;
+	res = fpgaReadMMIO64(afc_handle, 0, (msgdma_bbb_base_addr+MEM_WINDOW_MEM)+((dev_aligned_addr)&MEM_WINDOW_SPAN_MASK), &read_tmp);
+	if(res != FPGA_OK)
+		return res;
+	//overlay our data
+	memcpy(host_addr, ((char *)(&read_tmp))+shift, size);
+	
+	return FPGA_OK;
+}
+
 int CcipDevice::read_memory_mmio(uint64_t *host_addr, size_t dev_addr, size_t size)
 {
-	fpga_result res = FPGA_OK;
+	DCP_DEBUG_MEM("DCP DEBUG: read_memory_mmio %p %lx %ld\n", host_addr, dev_addr, size);
+
+	int res = FPGA_OK;
 	uint64_t cur_mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
 	res = fpgaWriteMMIO64(afc_handle, 0, msgdma_bbb_base_addr+MEM_WINDOW_CRTL, cur_mem_page);
 	if(res != FPGA_OK)
@@ -265,6 +319,14 @@ int CcipDevice::read_memory_mmio(uint64_t *host_addr, size_t dev_addr, size_t si
 		host_addr += 1;
 		dev_addr += 8;
 	}
+	
+		
+	if(size % 8 != 0)
+	{
+		res = read_memory_mmio_unaligned(host_addr, dev_addr, size%8);
+		if(res != FPGA_OK)
+			return res;
+	}
 
 	DCP_DEBUG_MEM("DCP DEBUG: CcipDevice::read_memory_mmio done!\n");
 	return FPGA_OK;
@@ -272,10 +334,34 @@ int CcipDevice::read_memory_mmio(uint64_t *host_addr, size_t dev_addr, size_t si
 
 int CcipDevice::write_memory(const uint64_t *host_addr, size_t dev_addr, size_t size)
 {
+	DCP_DEBUG_MEM("DCP DEBUG: write_memory %p %lx %ld\n", host_addr, dev_addr, size);
 	int res = FPGA_OK;
 	
-	//check size and alignment
-	if(size < MINIMUM_DMA_SIZE || (dev_addr % DMA_ALIGNMENT != 0))
+	//check for alignment
+	if(dev_addr % DMA_ALIGNMENT != 0)
+	{
+		//check for mmio alignment
+		uint64_t mmio_shift = dev_addr % 8;
+		if(mmio_shift != 0)
+		{
+			size_t unaligned_size = 8 - mmio_shift;
+			if(unaligned_size > size)
+				unaligned_size = size;
+			
+			DCP_DEBUG_MEM("DCP DEBUG: write_memory %ld %ld %ld\n", mmio_shift, unaligned_size, size);
+			write_memory_mmio_unaligned(host_addr, dev_addr, unaligned_size);
+			
+			if(size > unaligned_size)
+				res = write_memory((uint64_t *)(((char *)host_addr)+unaligned_size), dev_addr+unaligned_size, size-unaligned_size);
+			return res;
+		}
+		
+		//TODO: need to do a shift here
+		return write_memory_mmio(host_addr, dev_addr, size);
+	}
+	
+	//check size
+	if(size < MINIMUM_DMA_SIZE)
 		return write_memory_mmio(host_addr, dev_addr, size);
 	
 	size_t remainder = (size % DMA_ALIGNMENT);
@@ -288,7 +374,7 @@ int CcipDevice::write_memory(const uint64_t *host_addr, size_t dev_addr, size_t 
 		return res;
 	
 	if(remainder)
-		res = write_memory_mmio(host_addr+dma_size/8, dev_addr+dma_size, remainder);
+		res = write_memory(host_addr+dma_size/8, dev_addr+dma_size, remainder);
 	
 	if(res != FPGA_OK)
 		return res;
@@ -300,9 +386,43 @@ int CcipDevice::write_memory(const uint64_t *host_addr, size_t dev_addr, size_t 
 	return FPGA_OK;
 }
 
+int CcipDevice::write_memory_mmio_unaligned(const uint64_t *host_addr, size_t dev_addr, size_t size)
+{
+	DCP_DEBUG_MEM("DCP DEBUG: write_memory_mmio_unaligned %p %lx %ld\n", host_addr, dev_addr, size);
+	int res = FPGA_OK;
+	
+	uint64_t shift = dev_addr % 8;
+	
+	assert(size+shift <= 8);
+
+	uint64_t cur_mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
+	res = fpgaWriteMMIO64(afc_handle, 0, msgdma_bbb_base_addr+MEM_WINDOW_CRTL, cur_mem_page);
+	if(res != FPGA_OK)
+		return res;
+
+	uint64_t dev_aligned_addr = dev_addr - shift;
+	
+	//read data from device memory
+	uint64_t read_tmp;
+	res = fpgaReadMMIO64(afc_handle, 0, (msgdma_bbb_base_addr+MEM_WINDOW_MEM)+((dev_aligned_addr)&MEM_WINDOW_SPAN_MASK), &read_tmp);
+	if(res != FPGA_OK)
+		return res;
+	//overlay our data
+	memcpy(((char *)(&read_tmp))+shift, host_addr, size);
+	
+	//write back to device
+	res = fpgaWriteMMIO64(afc_handle, 0, (msgdma_bbb_base_addr+MEM_WINDOW_MEM)+(dev_aligned_addr&MEM_WINDOW_SPAN_MASK), read_tmp);
+	if(res != FPGA_OK)
+		return res;
+	
+	return FPGA_OK;
+}
+
 int CcipDevice::write_memory_mmio(const uint64_t *host_addr, size_t dev_addr, size_t size)
 {
-	fpga_result res = FPGA_OK;
+	DCP_DEBUG_MEM("DCP DEBUG: write_memory_mmio %p %lx %ld\n", host_addr, dev_addr, size);
+	
+	int res = FPGA_OK;
 	uint64_t cur_mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
 	res = fpgaWriteMMIO64(afc_handle, 0, msgdma_bbb_base_addr+MEM_WINDOW_CRTL, cur_mem_page);
 	if(res != FPGA_OK)
@@ -324,6 +444,13 @@ int CcipDevice::write_memory_mmio(const uint64_t *host_addr, size_t dev_addr, si
 
 		host_addr += 1;
 		dev_addr += 8;
+	}
+	
+	if(size % 8 != 0)
+	{
+		res = write_memory_mmio_unaligned(host_addr, dev_addr, size%8);
+		if(res != FPGA_OK)
+			return res;
 	}
 
 	DCP_DEBUG_MEM("DCP DEBUG: aocl_mmd_write done!\n");
