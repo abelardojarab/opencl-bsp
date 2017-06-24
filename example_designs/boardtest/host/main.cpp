@@ -377,11 +377,10 @@ int main(int argc, char *argv[]) {
 				while(feof(quartus_report) == 0) {
 					char w[80]; 
 					fscanf(quartus_report, "%s", &w);
-					if(strcmp(w, "Actual") == 0)
+					if(strcmp(w, "Kernel") == 0)
 						break;
 				}
 			if(!feof(quartus_report)) {
-					fscanf(quartus_report, "%s", &word);
 					fscanf(quartus_report, "%s", &word);
 					fscanf(quartus_report, "%f", &quartusFreq);
 			}
@@ -484,7 +483,6 @@ int main(int argc, char *argv[]) {
 		}
 		ret |= r;
 	}
-
 
 	if ( test_to_run == 0 || test_to_run == 6) {
 		printf("\n");
