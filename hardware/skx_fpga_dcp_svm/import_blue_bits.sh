@@ -56,7 +56,8 @@ copy_platform_file "$FULL_PLATFORM_PATH/../empty_afu/afu/interfaces/ccip_if_pkg.
 copy_platform_file "$FULL_PLATFORM_PATH/../empty_afu/afu/green_bs.sv" "./afu/green_bs.sv"
 copy_platform_file "$FULL_PLATFORM_PATH/../empty_afu/afu/interfaces/SCJIO.qsys"         "./afu/interfaces/SCJIO.qsys"
 
-rsync -rvua --delete "$FULL_PLATFORM_PATH/../empty_afu/design/" design
+rm -rf design
+tar zxf "$FULL_PLATFORM_PATH/../pr_design_artifacts.tar.gz"
 
 copy_platform_file_no_err "$FULL_PLATFORM_PATH/../fme-ifc-id.txt" "."
 
