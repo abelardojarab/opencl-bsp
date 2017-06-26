@@ -1,5 +1,5 @@
 # define shared variables in this package
-PACKAGE_NAME?= pcie385n
+PACKAGE_NAME?= a10_dcp
 MMD_LIB_NAME?= altera_ccip_mmd
 
 # define OS related commands
@@ -14,8 +14,11 @@ PS:= /
 # Pre-Special Character - used for cancel the backslash effect before any special characters (e.x. %) for Windows
 PSC:= 
 
+# recursive wildcard function
+rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 
-TOP_DEST_DIR ?= $(ROOT_PROJECT_PATH)/host
+#TOP_DEST_DIR ?= $(ALTERAOCLSDKROOT)$(PS)board$(PS)$(PACKAGE_NAME)
+TOP_DEST_DIR ?= $(ROOT_PROJECT_PATH)
 JUNGO_LICENSE?=
 ifneq ($(JUNGO_LICENSE),)
 CPPFLAGS:= $(CPPFLAGS) -DJUNGO_LICENSE=\"$(JUNGO_LICENSE)\"
@@ -63,13 +66,12 @@ ifeq ($(ACL_COMPILER),gcc)
 endif
 ifeq ($(ACL_COMPILER),msvc)
 	$(LINKER) $(LINKER_LIBDIRARGS) $(LINKER_ARGS) -MANIFEST -MANIFESTFILE:"$@.intermediate.manifest" -out:$@ $(OBJ_FILES) $(PREBUILT_OBJS) $(INCORPORATE_LIBS) $(LINK_LIBS)
-	$(MT) -nologo -verbose -manifest "$@.intermediate.manifest" -outputresource:"$(EXEFILE);1"
 endif
 
 
 $(DLLFILE) : $(DLLLIBFILE) $(OBJ_FILES)
 ifeq ($(ACL_COMPILER),gcc)
-	gcc -shared -Wl,-soname,$@ -o $@ $(OBJ_FILES) $(INCORPORATE_LIBS) $(PREBUILT_OBJS) $(LINKER_LIBDIRARGS) $(LINKER_ARGS)
+	$(LINKER) -shared -Wl,-soname,$@ -o $@ $(OBJ_FILES) $(INCORPORATE_LIBS) $(PREBUILT_OBJS) $(LINKER_LIBDIRARGS) $(LINKER_ARGS) $(LINK_LIBS)
 endif
 ifeq ($(ACL_COMPILER),msvc)
 	$(LINKER) $(LINKER_LIBDIRARGS) $(LINKER_ARGS) /DLL $(DLLEXPFILE) -out:$@ -pdb:$(DLLPDBFILE) $(OBJ_FILES) $(PREBUILT_OBJS) $(INCORPORATE_LIBS) $(LINK_LIBS)

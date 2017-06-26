@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
-<board_env version="13.0" name="jtag">
+<board_env version="17.0" name="jtag">
   <hardware dir="hardware" default="skx_fpga_dcp_ddr"></hardware>
   <platform name="linux64">
-    <linkflags>-L%a/linux64/lib -L%b/host/linux64/lib -L$FPGA_API_PATH/lib/ </linkflags>
-    <linklibs> -lalterahalmmd -laltera_ccip_mmd -lrt -lpthread -lopae-c -luuid
- </linklibs>
-    <utilbindir>%b/linux64/bin</utilbindir>
+    <mmdlib>%b/linux64/lib/libaltera_ccip_mmd.so</mmdlib>
+    <linkflags>-L%a/linux64/lib -L%b/linux64/lib -L$FPGA_API_PATH/lib/ </linkflags>
+    <linklibs> -lalterahalmmd -laltera_ccip_mmd -lrt -lpthread -lopae-c -luuid</linklibs>
+    <utilbindir>%b/linux64/libexec</utilbindir>
   </platform>
 
 </board_env>

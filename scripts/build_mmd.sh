@@ -12,3 +12,6 @@ cd $ROOT_PROJECT_PATH/source
 make clean
 make
 
+if [ "$OPENCL_ASE_SIM" == "1" ]; then
+	cp -f $AOCL_BOARD_PACKAGE_ROOT/ase/scripts/program $AOCL_BOARD_PACKAGE_ROOT/linux64/libexec/program
+fi

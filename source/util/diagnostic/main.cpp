@@ -1,15 +1,19 @@
-// (C) 1992-2014 Altera Corporation. All rights reserved.                         
-// Your use of Altera Corporation's design tools, logic functions and other       
+// (C) 1992-2017 Intel Corporation.                            
+// Intel, the Intel logo, Intel, MegaCore, NIOS II, Quartus and TalkBack words    
+// and logos are trademarks of Intel Corporation or its subsidiaries in the U.S.  
+// and/or other countries. Other marks and brands may be claimed as the property  
+// of others. See Trademarks on intel.com for full list of Intel trademarks or    
+// the Trademarks & Brands Names Database (if Intel) or See www.Intel.com/legal (if Altera) 
+// Your use of Intel Corporation's design tools, logic functions and other        
 // software and tools, and its AMPP partner logic functions, and any output       
 // files any of the foregoing (including device programming or simulation         
 // files), and any associated documentation or information are expressly subject  
 // to the terms and conditions of the Altera Program License Subscription         
-// Agreement, Altera MegaCore Function License Agreement, or other applicable     
+// Agreement, Intel MegaCore Function License Agreement, or other applicable      
 // license agreement, including, without limitation, that your use is for the     
-// sole purpose of programming logic devices manufactured by Altera and sold by   
-// Altera or its authorized distributors.  Please refer to the applicable         
+// sole purpose of programming logic devices manufactured by Intel and sold by    
+// Intel or its authorized distributors.  Please refer to the applicable          
 // agreement for further details.                                                 
-    
 
 
 /********
@@ -56,13 +60,21 @@
 #  include "wdc_lib_wrapper.h"
 #endif   // WINDOWS
 
+//#if defined(LINUX)
+//#  include "../../linux64/driver/hw_pcie_constants.h"
+//#endif   // LINU
+// Branding/Naming the BSP
+#define ACL_BOARD_PKG_NAME                          "a10_dcp"
+#define ACL_VENDOR_NAME                             "Intel(R) Corporation"
+#define ACL_BOARD_NAME                              "Arria 10 DCP Platform"
+
 
 // WARNING: host runs out of events if MAXNUMBYTES is much greater than
 // MINNUMBYTES!!!
 #define INT_KB (1024)
 #define INT_MB (1024 * 1024)
 #define INT_GB (1024 * 1024 * 1024)
-#define DEFAULT_MAXNUMBYTES (8ULL * INT_MB)
+#define DEFAULT_MAXNUMBYTES (256ULL * INT_MB)
 #define DEFAULT_MINNUMBYTES (512ULL * INT_KB)
 
 bool check_results(unsigned int * buf, unsigned int * output, unsigned n)
@@ -83,7 +95,7 @@ bool check_results(unsigned int * buf, unsigned int * output, unsigned n)
 #define MMD_STRING_RETURN_SIZE 1024
 int general_basic_tests()
 {
-/*#if defined(WINDOWS)
+#if defined(WINDOWS)
    const char *license = JUNGO_LICENSE;
    DWORD status        = WDC_DriverOpen( WDC_DRV_OPEN_DEFAULT, license );
    if(status == WD_STATUS_SUCCESS) {
@@ -96,25 +108,22 @@ int general_basic_tests()
    }
 #endif   // WINDOWS
 #if defined(LINUX)
-   if ( system("cat /proc/modules | grep \"aclpci_drv\" > /dev/null") ) {
+   if ( system("cat /proc/modules | grep \"aclpci_" ACL_BOARD_PKG_NAME "_drv\" > /dev/null") ) {
       printf("\nUnable to find the kernel mode driver.\n");
       printf("\nPlease make sure you have properly installed the driver. To install the driver, run\n");
       printf("      aocl install\n");
       return -1;
    }
-#endif   // LINUX*/
+#endif   // LINUX
 
-   printf("\nVerified that the kernel mode driver is installed on the host machine.\n\n");
    return 0;
 }
 
-int scan_all_devices()
+int scan_devices ( const char * device_name )
 {
    static char vendor_name[MMD_STRING_RETURN_SIZE];
    aocl_mmd_get_offline_info(AOCL_MMD_VENDOR_NAME, sizeof(vendor_name), vendor_name, NULL);
-   printf("Using board package from vendor: %s\n", vendor_name);
-
-   printf("Querying information for all supported devices that are installed on the host machine ... \n\n");
+   printf("Vendor: %s\n", vendor_name);
 
    // create a output string stream for information of the list of devices
    // this information will be output to stdout at the end to form a nice looking list
@@ -133,11 +142,13 @@ int scan_all_devices()
    int         num_active_boards = 0;
    float       temperature;
    for(dev_name = strtok(boards_name, ";"); dev_name != NULL; dev_name = strtok(NULL, ";")) {
+      if ( device_name != NULL && strcmp(dev_name,device_name) != 0 ) continue;
+
       handle = aocl_mmd_open(dev_name);
 
       // print out the first row of the table when needed
       if( handle != -1 && !first_row_printed) {
-         o_list_stream << "\nDevice Name   Status   Information\n\n";
+         o_list_stream << "\nPhys Dev Name  Status   Information\n";
          first_row_printed = 1;
       }
 
@@ -154,6 +165,7 @@ int scan_all_devices()
 
       // found a working supported device
       num_active_boards++;
+      o_list_stream << "\n";
       aocl_mmd_get_info(handle,AOCL_MMD_BOARD_NAME, sizeof(board_name), board_name, NULL);
       o_list_stream << std::left << std::setw(14) << dev_name << "Passed   " << board_name << "\n";
 
@@ -162,21 +174,15 @@ int scan_all_devices()
 
       aocl_mmd_get_info(handle, AOCL_MMD_TEMPERATURE, sizeof(float), &temperature,NULL);
       o_list_stream << "                       FPGA temperature = " << temperature << " degrees C.\n";
-      o_list_stream << "\n";
-      
-      
-      /*
-      for( int i =0;  i < 16;i++){
-        int num = 0;
-        aocl_mmd_read(handle, 0, 4, &num, 0, i*4);
-        printf(" Read at %d is %x\n", i*4, num);
-      }*/
    }
 
    if(num_active_boards > 0) {
-      o_list_stream << "\nFound " << num_active_boards 
-                    << " active device(s) installed on the host machine. To perform a full diagnostic on a specific device, please run\n";
-      o_list_stream << "      aocl diagnose <device_name>\n";
+      if ( device_name == NULL)
+      {
+         o_list_stream << "\nFound " << num_active_boards 
+            << " active device(s) installed on the host machine. To perform a full diagnostic on a specific device, please run\n";
+         o_list_stream << "      aocl diagnose <device_name>\n";
+      }
    } else {
       o_list_stream << "\nFound no active device installed on the host machine.\n";
       o_list_stream << "\nPlease make sure to: \n";
@@ -193,41 +199,184 @@ int scan_all_devices()
 
    return num_active_boards > 0 ? 0 : 1;
 }
-#undef MMD_STRING_RETURN_SIZE
 
 int main (int argc, char *argv[])
 {
-   unsigned dev_num = 0;
+   char * device_name = NULL;
+   bool probe = false;
+   
+   bool use_polling = true;
+   bool os_windows = false;
+#if defined(WINDOWS)
+   const char *msi_env = getenv("ACL_PCIE_DMA_USE_MSI");
+   os_windows = true;
+   if (msi_env)
+      use_polling = false;
+#endif
 
-   if( general_basic_tests() != 0 ){
-      printf("\nDIAGNOSTIC_FAILED\n");
-      return 0;
+   for ( int i = 1 ; i < argc; i ++ ) {
+     if (strcmp(argv[i],"-probe") == 0) 
+       probe = true;
+     else 
+       device_name=argv[i];
    }
 
-   // if no specific device name is provided
-   // we scan all the device installed on the host machine
-   if (argc < 2) {
-      if( scan_all_devices() == 0 ){
+
+   // Run driver check only if not run in -probe <no-arg> mode
+   if( !(probe && device_name == NULL) ){
+     if( general_basic_tests() != 0 ){
+       printf("\nDIAGNOSTIC_FAILED\n");
+       return -1;
+     }
+   }
+
+   // we scan all the device installed on the host machine and print
+   // preliminary information about all or just the one specified
+   if ( (!probe && device_name == NULL) || (probe && device_name != NULL) ) {
+      if( scan_devices(device_name) == 0 ){
          printf("\nDIAGNOSTIC_PASSED\n");
       } else {
          printf("\nDIAGNOSTIC_FAILED\n");
+         return -1;
       }
       return 0;
    }
 
-   // get device number provided in the argument
-   if (sscanf(argv[1],"acl%d",&dev_num) != 1) {
-      printf("Unable to open the device %s.\n", argv[1]);
-      printf("Please make sure you have provided a proper <device_name> (e.g. acl0 to acl15).\n");
+
+   // get all supported board names from MMD
+   //   if probing all device just print them and exit
+   //   if diagnosing a particular device, check if it exists
+   char boards_name[MMD_STRING_RETURN_SIZE];
+   aocl_mmd_get_offline_info(AOCL_MMD_BOARD_NAMES, sizeof(boards_name), boards_name, NULL);
+   char *dev_name;
+   bool device_exists = false;
+   for(dev_name = strtok(boards_name, ";"); dev_name != NULL; dev_name = strtok(NULL, ";")) {
+      if ( probe )
+         printf("%s\n",dev_name);
+      else
+         device_exists |= ( strcmp(dev_name,argv[1]) == 0 );
+   }
+
+   // If probing all devices we're done here
+   if ( probe )
       return 0;
+
+   // Full diagnosis of a particular device begins here
+
+   // get device number provided in the argument
+   if ( !device_exists ) {
+      printf("Unable to open the device %s.\n", argv[1]);
+      printf("Please make sure you have provided a proper <device_name>.\n");
+      printf("  Expected device names = %s\n", boards_name);
+      return -1;
    }
 
 
+   srand ( unsigned(time(NULL)) );
+
+   int maxbytes = int((argc>=3) ? atoi(argv[2]) : DEFAULT_MAXNUMBYTES);
+   unsigned maxints = unsigned(maxbytes/sizeof(int));
+
+
+   unsigned iterations=1;
+   for (unsigned i=maxbytes/DEFAULT_MINNUMBYTES; i>>1 ; i=i>>1)
+     iterations++;
+
+   struct speed *readspeed = new struct speed[iterations];
+   struct speed *writespeed = new struct speed[iterations];
 
    bool result=true;
 
+   unsigned int *buf = (unsigned int*) acl_util_aligned_malloc (maxints * sizeof(unsigned int));
+   unsigned int *output = (unsigned int*) acl_util_aligned_malloc (maxints * sizeof(unsigned int));
+  
+   // Create sequence: 0 rand1 ~2 rand2 4 ...
+   for (unsigned j=0; j<maxints; j++)
+     if (j%2==0)
+       buf[j]=(j&2) ? ~j : j;
+     else
+       buf[j]=unsigned(rand()*rand());
 
-   ocl_device_init(dev_num,0);
+   unsigned dev_num = 0;  // Assume only one CL device
+
+   ocl_device_init(dev_num,maxbytes);
+
+   int block_bytes=DEFAULT_MINNUMBYTES;
+
+   // Warm up
+   ocl_writespeed((char*)buf,block_bytes,maxbytes);
+   ocl_readspeed((char*)output,block_bytes,maxbytes);
+
+   for (unsigned i=0; i<iterations; i++, block_bytes*=2)
+   {
+     printf("Transferring %d KBs in %d %d KB blocks ...",maxbytes/1024,maxbytes/block_bytes,block_bytes/1024);
+     writespeed[i] = ocl_writespeed((char*)buf,block_bytes,maxbytes);
+     readspeed[i] = ocl_readspeed((char*)output,block_bytes,maxbytes);
+     result &= check_results(buf,output,maxints);
+     printf(" %.2f MB/s\n",(writespeed[i].fastest > readspeed[i].fastest) ? writespeed[i].fastest : readspeed[i].fastest);
+   }
+   
+   printf("\nAs a reference:\n");
+   printf("PCIe Gen1 peak speed: 250MB/s/lane\n");
+   printf("PCIe Gen2 peak speed: 500MB/s/lane\n");
+   printf("PCIe Gen3 peak speed: 985MB/s/lane\n");
+
+   printf("\n");
+   printf("Writing %d KBs with block size (in bytes) below:\n",maxbytes/1024);
+
+   printf("\nBlock_Size Avg    Max    Min    End-End (MB/s)\n");
+
+   float write_topspeed = 0;
+   block_bytes=DEFAULT_MINNUMBYTES;
+   for (unsigned i=0; i<iterations; i++, block_bytes*=2)
+   {
+     printf("%8d %.2f %.2f %.2f %.2f\n", block_bytes, 
+         writespeed[i].average,
+         writespeed[i].fastest,
+         writespeed[i].slowest,
+         writespeed[i].total);
+
+     if (writespeed[i].fastest > write_topspeed)
+       write_topspeed = writespeed[i].fastest;
+     if (writespeed[i].total > write_topspeed)
+       write_topspeed = writespeed[i].total;
+   }
+
+   float read_topspeed = 0;
+   block_bytes=DEFAULT_MINNUMBYTES;
+
+   printf("\n");
+
+   printf("Reading %d KBs with block size (in bytes) below:\n",maxbytes/1024);
+   printf("\nBlock_Size Avg    Max    Min    End-End (MB/s)\n");
+   for (unsigned i=0; i<iterations; i++, block_bytes*=2)
+   {
+     printf("%8d %.2f %.2f %.2f %.2f\n", block_bytes, 
+         readspeed[i].average,
+         readspeed[i].fastest,
+         readspeed[i].slowest,
+         readspeed[i].total);
+
+     if (readspeed[i].fastest > read_topspeed)
+       read_topspeed = readspeed[i].fastest;
+     if (readspeed[i].total > read_topspeed)
+       read_topspeed = readspeed[i].total;
+   }
+
+   printf("\nWrite top speed = %.2f MB/s\n",write_topspeed);
+   printf("Read top speed = %.2f MB/s\n",read_topspeed);
+   printf("Throughput = %.2f MB/s\n",(read_topspeed+write_topspeed)/2);
+   
+   if (use_polling && os_windows) {
+      printf("\nUsing polling for DMA transfers.\n");
+      printf("Bandwidth is higher at the cost of CPU utilization\n");
+      printf("When using interrupts for DMA, bandwidth is limited by the maximum number of interrupts per second that the driver can process.\n");
+      printf("To use interrupts for DMA Set environment variable 'ACL_PCIE_DMA_USE_MSI'.\n");
+   } else if (os_windows) {
+      printf("\nUsing MSI interrupts for DMA transfers.\n");
+      printf("Bandwidth will be limited by the maximum number of interrupts per second that the driver can process.\n");
+      printf("Remove environment variable 'ACL_PCIE_DMA_USE_MSI' for better DMA performance.\n");
+   }
 
 
    if (result)
@@ -235,7 +384,10 @@ int main (int argc, char *argv[])
    else
      printf("\nDIAGNOSTIC_FAILED\n");
 
+   acl_util_aligned_free (buf);
+   acl_util_aligned_free (output);
 
 
    return (result) ? 0 : -1;
 }
+#undef MMD_STRING_RETURN_SIZE

@@ -1,15 +1,19 @@
-// (C) 1992-2014 Altera Corporation. All rights reserved.                         
-// Your use of Altera Corporation's design tools, logic functions and other       
+// (C) 1992-2017 Intel Corporation.                            
+// Intel, the Intel logo, Intel, MegaCore, NIOS II, Quartus and TalkBack words    
+// and logos are trademarks of Intel Corporation or its subsidiaries in the U.S.  
+// and/or other countries. Other marks and brands may be claimed as the property  
+// of others. See Trademarks on intel.com for full list of Intel trademarks or    
+// the Trademarks & Brands Names Database (if Intel) or See www.Intel.com/legal (if Altera) 
+// Your use of Intel Corporation's design tools, logic functions and other        
 // software and tools, and its AMPP partner logic functions, and any output       
 // files any of the foregoing (including device programming or simulation         
 // files), and any associated documentation or information are expressly subject  
 // to the terms and conditions of the Altera Program License Subscription         
-// Agreement, Altera MegaCore Function License Agreement, or other applicable     
+// Agreement, Intel MegaCore Function License Agreement, or other applicable      
 // license agreement, including, without limitation, that your use is for the     
-// sole purpose of programming logic devices manufactured by Altera and sold by   
-// Altera or its authorized distributors.  Please refer to the applicable         
+// sole purpose of programming logic devices manufactured by Intel and sold by    
+// Intel or its authorized distributors.  Please refer to the applicable          
 // agreement for further details.                                                 
-    
 
 
 #include <stdio.h>
@@ -81,8 +85,7 @@ void ocl_device_init( unsigned dev_num, int maxbytes )
 
   cl_uint num_platforms=0;
   cl_uint num_devices;
-#define MAX_DEVICES 16
-  cl_device_id device_list[MAX_DEVICES];
+  cl_device_id *device_list = NULL;
 
   // get the platform ID
   status = clGetPlatformIDs(0, NULL, &num_platforms);
@@ -96,16 +99,29 @@ void ocl_device_init( unsigned dev_num, int maxbytes )
   clGetPlatformInfo(platform,CL_PLATFORM_NAME,256,platform_name,NULL);
   printf("Using platform: %s\n",platform_name);
 
-  printf("CL device ID = %ld \n", (long int)device_list[0]);
-  // get the device ID
-  status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, MAX_DEVICES, &device_list[0], &num_devices);
+  // get the number of devices available
+  status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, 0, NULL, &num_devices);
   if(status != CL_SUCCESS) dump_error("Failed clGetDeviceIDs.", status);
-  if(dev_num >= num_devices || dev_num >= MAX_DEVICES) {
+  
+  // Allocate buffer for the number of devices
+  device_list = (cl_device_id *) malloc(num_devices * sizeof(cl_device_id));
+  if (device_list == NULL) dump_error("Failed to allocate buffer for devices.", status);
+
+  // get the device ID
+  status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, num_devices, device_list, NULL);
+  if(status != CL_SUCCESS) {
+    free(device_list);
+    dump_error("Failed clGetDeviceIDs.", status);
+  }
+  if(dev_num >= num_devices) {
     printf("Can't open device #%d\n", dev_num);
+    free(device_list);
     freeResources();
     exit(-1);
   }
   device = device_list[dev_num];
+  
+  free(device_list);
 
   status = clGetDeviceInfo(device, CL_DEVICE_NAME, sizeof(buf), (void*)&buf, NULL);
   printf("Using Device with name: %s\n",buf);
@@ -120,6 +136,12 @@ void ocl_device_init( unsigned dev_num, int maxbytes )
   queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
   if(status != CL_SUCCESS) dump_error("Failed clCreateCommandQueue.", status);
 
+  if (ocl_test_all_global_memory() != 0 )
+    dump_error("Error: Global memory test failed\n", 0);
+
+  // create the input buffer
+  kernel_input = clCreateBuffer(context, CL_MEM_READ_WRITE, (size_t)maxbytes, NULL, &status);
+  if(status != CL_SUCCESS) dump_error("Failed clCreateBuffer.", status);
 }
 
 int ocl_test_all_global_memory( )
@@ -129,6 +151,7 @@ int ocl_test_all_global_memory( )
   cl_ulong max_alloc_size;
   const cl_ulong MB = 1024*1024;
   const cl_ulong MAX_HOST_CHUNK = 1024 * MB;
+  const cl_ulong MINIMUM_HOST_CHUNK = 128 * MB;
 
   // 1. Get maximum size buffer
   status = clGetDeviceInfo(device, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(max_buffer_size), (void*)&max_buffer_size, NULL);
@@ -181,10 +204,22 @@ int ocl_test_all_global_memory( )
   double max_bw = 0;
   double min_bw = INFINITY;
   cl_ulong *hostbuf = (cl_ulong*) acl_util_aligned_malloc(MAX_HOST_CHUNK);
+  cl_ulong aligned_buf_size = MAX_HOST_CHUNK;
+  
+  while((hostbuf == NULL) & (aligned_buf_size > MINIMUM_HOST_CHUNK)) {
+    aligned_buf_size = aligned_buf_size/2;
+    hostbuf = (cl_ulong*) acl_util_aligned_malloc((size_t)aligned_buf_size);
+  }
+  if (hostbuf == NULL) {
+    printf("Insufficient host memory for %lu Byte aligned buffer allocation\n", (long unsigned) aligned_buf_size);
+    assert(hostbuf != NULL);
+  }
+  printf("Allocated %lu Bytes host buffer for large transfers\n", (long unsigned) aligned_buf_size);
+
   while(bytes_rem > 0) {
     cl_event e;
     cl_ulong chunk = bytes_rem;
-    if(chunk > MAX_HOST_CHUNK) chunk = MAX_HOST_CHUNK;
+    if(chunk > aligned_buf_size) chunk = aligned_buf_size;
     for(cl_ulong i=0; i<chunk/sizeof(cl_ulong); ++i) {
       hostbuf[i] = offset + i;
     }
@@ -216,7 +251,7 @@ int ocl_test_all_global_memory( )
   while(bytes_rem > 0) {
     cl_event e;
     cl_ulong chunk = bytes_rem;
-    if(chunk > MAX_HOST_CHUNK) chunk = MAX_HOST_CHUNK;
+    if(chunk > aligned_buf_size) chunk = aligned_buf_size;
     status = clEnqueueReadBuffer(queue, mem, CL_TRUE, offset, chunk, (void*)hostbuf, 0, NULL, &e);
     assert(status==CL_SUCCESS);
 

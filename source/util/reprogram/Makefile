@@ -14,7 +14,7 @@ PERVASIVE_DEPENDENCIES = ../../include/aocl_mmd.h
 
 MT = 
 
-EXEFILE = diagnose
+EXEFILE = program 
 
 OBJ_EXT = o
 OBJS = $(patsubst %.cpp,%.$(OBJ_EXT),$(wildcard *.cpp))
@@ -31,3 +31,4 @@ TARGET_FILES = $(EXEFILE)
 SUB_DIRS =
 
 include $(CUR_REL_PATH)/Makefile.common
+

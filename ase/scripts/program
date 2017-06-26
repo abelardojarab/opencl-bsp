@@ -19,7 +19,7 @@ if [ "$OPENCL_ASE_SIM" == "1" ]; then
 	
 	rm -fr ./ase
 	cp -r $ASE_SRC_PATH ./ase
-	cp -rf $AOCL_BOARD_PACKAGE_ROOT/ase/* ./ase
+	cp -rf $AOCL_BOARD_PACKAGE_ROOT/ase/patch/* ./ase
 	cd ase
 	
 	mkdir dummy_rtl_dir

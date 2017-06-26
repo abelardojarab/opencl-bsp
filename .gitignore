@@ -5,8 +5,9 @@ build/
 example_designs/mem_bandwidth/bin/
 example_designs/mem_bandwidth/simulation.tar.gz
 example_designs/mem_bandwidth/temp_simulation/
-host/linux64/lib/*.so*
+linux64/lib/
+linux64/libexec/diagnose
+linux64/libexec/program
 ase/mpf_src
-linux64/bin/diagnostic
 *.pyc
 
