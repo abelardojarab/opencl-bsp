@@ -221,14 +221,14 @@ int main (int argc, char *argv[])
        device_name=argv[i];
    }
 
-
-   // Run driver check only if not run in -probe <no-arg> mode
-   if( !(probe && device_name == NULL) ){
-     if( general_basic_tests() != 0 ){
-       printf("\nDIAGNOSTIC_FAILED\n");
-       return -1;
-     }
-   }
+   //Disable driver check for DCP
+   //// Run driver check only if not run in -probe <no-arg> mode
+   //if( !(probe && device_name == NULL) ){
+   //  if( general_basic_tests() != 0 ){
+   //    printf("\nDIAGNOSTIC_FAILED\n");
+   //    return -1;
+   //  }
+   //}
 
    // we scan all the device installed on the host machine and print
    // preliminary information about all or just the one specified
