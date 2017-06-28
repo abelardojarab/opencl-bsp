@@ -57,6 +57,8 @@ extern "C" {
 #define ACL_PKG_SECTION_PCIE_DEV_ID    ".acl.pcie.dev_id"
 #define ACL_PKG_SECTION_BASE_PERIPH_HASH    ".acl.base_revision.periph.hash"
 #define ACL_PKG_SECTION_ADJUST_PLLS_OUTPUT ".acl.quartus_report"
+#define ACL_PKG_SECTION_KERNEL_ARG_INFO_XML ".acl.kernel_arg_info.xml"
+#define ACL_PKG_SECTION_FAST_COMPILE ".acl.fast_compile"
 
 /* Minimum alignment in memory. */
 #define ACL_PKG_MIN_SECTION_ALIGNMENT  128
@@ -101,6 +103,14 @@ struct acl_pkg_file *acl_pkg_open_file_from_memory (char *pkg_image, size_t pkg_
  * section is stored into *size_ret. The size does NOT include NULL terminator, just like strlen().
  */
 int acl_pkg_section_exists (const struct acl_pkg_file *pkg, const char *sect_name, size_t* size_ret);
+
+/* Return list of ALL (useful) section names in the package. 
+ * The buffer must be pre-allocated by the caller upto max_len bytes.
+ * Each section name is separated by '\n'
+ * Returns 1 on success, 0 on failure.
+ */
+int acl_pkg_section_names (const struct acl_pkg_file *pkg, char *buf, size_t max_len);
+
 
 /* Add a new section with specified content.
  * If a section with such name already exists, nothing is done. 

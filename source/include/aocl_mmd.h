@@ -1,18 +1,22 @@
 #ifndef AOCL_MMD_H
 #define AOCL_MMD_H
 
-/* (C) 1992-2014 Altera Corporation. All rights reserved.                          */
-/* Your use of Altera Corporation's design tools, logic functions and other        */
+/* (C) 1992-2017 Intel Corporation.                             */
+/* Intel, the Intel logo, Intel, MegaCore, NIOS II, Quartus and TalkBack words     */
+/* and logos are trademarks of Intel Corporation or its subsidiaries in the U.S.   */
+/* and/or other countries. Other marks and brands may be claimed as the property   */
+/* of others. See Trademarks on intel.com for full list of Intel trademarks or     */
+/* the Trademarks & Brands Names Database (if Intel) or See www.Intel.com/legal (if Altera)  */
+/* Your use of Intel Corporation's design tools, logic functions and other         */
 /* software and tools, and its AMPP partner logic functions, and any output        */
 /* files any of the foregoing (including device programming or simulation          */
 /* files), and any associated documentation or information are expressly subject   */
 /* to the terms and conditions of the Altera Program License Subscription          */
-/* Agreement, Altera MegaCore Function License Agreement, or other applicable      */
+/* Agreement, Intel MegaCore Function License Agreement, or other applicable       */
 /* license agreement, including, without limitation, that your use is for the      */
-/* sole purpose of programming logic devices manufactured by Altera and sold by    */
-/* Altera or its authorized distributors.  Please refer to the applicable          */
+/* sole purpose of programming logic devices manufactured by Intel and sold by     */
+/* Intel or its authorized distributors.  Please refer to the applicable           */
 /* agreement for further details.                                                  */
-    
 
 
 #ifdef __cplusplus
@@ -42,6 +46,14 @@ extern "C" {
 #define AOCL_MMD_CALL   __declspec(dllimport)
 #else
 #define AOCL_MMD_CALL
+#endif
+#endif
+
+#ifndef WEAK
+#if defined(_WIN32)
+#define WEAK 
+#else
+#define WEAK  __attribute__((weak))
 #endif
 #endif
 
@@ -170,14 +182,14 @@ AOCL_MMD_CALL int aocl_mmd_get_offline_info(
     aocl_mmd_offline_info_t requested_info_id,
     size_t param_value_size,
     void* param_value,
-    size_t* param_size_ret );
+    size_t* param_size_ret ) WEAK;
 
 AOCL_MMD_CALL int aocl_mmd_get_info(
     int handle,
     aocl_mmd_info_t requested_info_id,
     size_t param_value_size,
     void* param_value,
-    size_t* param_size_ret );
+    size_t* param_size_ret ) WEAK;
 
 /* Open and initialize the named device.  
  *
@@ -193,12 +205,12 @@ AOCL_MMD_CALL int aocl_mmd_get_info(
  * runtime will proceed to open other known devices, hence the MMD mustn't
  * exit the application if an open call fails.
  */
-AOCL_MMD_CALL int aocl_mmd_open(const char *name); 
+AOCL_MMD_CALL int aocl_mmd_open(const char *name) WEAK; 
 
 /* Close an opened device, by its handle.
  * Returns: 0 on success, negative values on error. 
  */
-AOCL_MMD_CALL int aocl_mmd_close(int handle);
+AOCL_MMD_CALL int aocl_mmd_close(int handle) WEAK;
 
 /* Set the interrupt handler for the opened device.
  * The interrupt handler is called whenever the client needs to be notified
@@ -214,7 +226,7 @@ AOCL_MMD_CALL int aocl_mmd_close(int handle);
  *
  * Returns: 0 if successful, negative on error
  */
-AOCL_MMD_CALL int aocl_mmd_set_interrupt_handler( int handle, aocl_mmd_interrupt_handler_fn fn, void* user_data );
+AOCL_MMD_CALL int aocl_mmd_set_interrupt_handler( int handle, aocl_mmd_interrupt_handler_fn fn, void* user_data ) WEAK;
 
 /* Set the operation status handler for the opened device.
  * The operation status handler is called with
@@ -228,7 +240,7 @@ AOCL_MMD_CALL int aocl_mmd_set_interrupt_handler( int handle, aocl_mmd_interrupt
  *
  * Returns: 0 if successful, negative on error
  */
-AOCL_MMD_CALL int aocl_mmd_set_status_handler( int handle, aocl_mmd_status_handler_fn fn, void* user_data );
+AOCL_MMD_CALL int aocl_mmd_set_status_handler( int handle, aocl_mmd_status_handler_fn fn, void* user_data ) WEAK;
 
 /* If AOCL_MMD_USES_YIELD is 1, this function is called when the host is idle
  * and hence possibly waiting for events to be processed by the device.  
@@ -241,7 +253,7 @@ AOCL_MMD_CALL int aocl_mmd_set_status_handler( int handle, aocl_mmd_status_handl
  *
  * NOTE: yield may be called continuously as long as it reports that it has useful work
  */
-AOCL_MMD_CALL int aocl_mmd_yield(int handle);
+AOCL_MMD_CALL int aocl_mmd_yield(int handle) WEAK;
 
 /* Read, write and copy operations on a single interface.
  * If op is NULL
@@ -262,7 +274,7 @@ AOCL_MMD_CALL int aocl_mmd_yield(int handle);
  *
  *   dst - the host buffer being written to
  *
- *   interface - the handle to the interface being accessed.  E.g. To
+ *   mmd_interface - the handle to the interface being accessed.  E.g. To
  *   access global memory this handle will be whatever is returned by
  *   aocl_mmd_get_info when called with AOCL_MMD_MEMORY_INTERFACE.
  *
@@ -277,18 +289,18 @@ AOCL_MMD_CALL int aocl_mmd_read(
       aocl_mmd_op_t op,
       size_t len,
       void* dst,
-      int interface, size_t offset );
+      int mmd_interface, size_t offset ) WEAK;
 AOCL_MMD_CALL int aocl_mmd_write(
       int handle,
       aocl_mmd_op_t op,
       size_t len,
       const void* src,
-      int interface, size_t offset );
+      int mmd_interface, size_t offset ) WEAK;
 AOCL_MMD_CALL int aocl_mmd_copy(
       int handle,
       aocl_mmd_op_t op,
       size_t len,
-      int interface, size_t src_offset, size_t dst_offset );
+      int mmd_interface, size_t src_offset, size_t dst_offset ) WEAK;
 
 /* Reprogram the device 
  *
@@ -310,7 +322,7 @@ AOCL_MMD_CALL int aocl_mmd_copy(
  * Returns: the new non-negative integer handle for the board, otherwise a 
  * negative value to indicate error.
  */
-AOCL_MMD_CALL int aocl_mmd_reprogram( int handle, void * user_data , size_t size);
+AOCL_MMD_CALL int aocl_mmd_reprogram( int handle, void * user_data , size_t size) WEAK;
 
 /* Shared memory allocator
  * Allocates memory that is shared between the host and the FPGA.  The 
@@ -331,7 +343,7 @@ AOCL_MMD_CALL int aocl_mmd_reprogram( int handle, void * user_data , size_t size
  * Returns: The pointer value to be used by the host to access the shared
  * memory if successful, otherwise NULL.
  */
-AOCL_MMD_CALL void * aocl_mmd_shared_mem_alloc( int handle, size_t size, unsigned long long *device_ptr_out );
+AOCL_MMD_CALL void * aocl_mmd_shared_mem_alloc( int handle, size_t size, unsigned long long *device_ptr_out ) WEAK;
 
 /* Shared memory de-allocator
  * Frees previously allocated shared memory.  If shared memory is not supported,
@@ -343,7 +355,7 @@ AOCL_MMD_CALL void * aocl_mmd_shared_mem_alloc( int handle, size_t size, unsigne
  *   size     - the size of the shared memory to free. Must match the size
  *              originally passed to aocl_mmd_shared_mem_alloc
  */
-AOCL_MMD_CALL void aocl_mmd_shared_mem_free ( int handle, void* host_ptr, size_t size );
+AOCL_MMD_CALL void aocl_mmd_shared_mem_free ( int handle, void* host_ptr, size_t size ) WEAK;
 
 #ifdef __cplusplus
 }
