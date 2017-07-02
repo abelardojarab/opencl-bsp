@@ -32,7 +32,6 @@ export AOCL_BOARD_PACKAGE_ROOT=$ROOT_PROJECT_PATH
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ALTERAOCLSDKROOT/host/linux64/lib
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$AOCL_BOARD_PACKAGE_ROOT/linux64/lib
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$FPGA_API_PATH/lib
-export CL_CONTEXT_COMPILER_MODE_ALTERA=3
 export QUARTUS_HOME=$QUARTUS_ROOTDIR
 export ASE_WORKDIR=./temp_simulation/ase/work/
 export MPF_INSTALL_PATH=$BUILD_DIR/mpf
@@ -40,6 +39,10 @@ export ASE_SRC_PATH=$FPGA_API_SRC_PATH/ase
 export ACDS_ARC_RESOURCES="acl/17.0,acds/17.0,qedition/pro,adapt"
 export SIM_ARC_RESOURCES="vcs,vcs-vcsmx-lic/vrtn-dev"
 export SW_BUILD_ARC_RESOURCES="gcc/4.8.2,python,cmake/3.7.2,boost"
+
+if [ "$OPENCL_ASE_SIM" == "1" ]; then
+	export CL_CONTEXT_COMPILER_MODE_ALTERA=3
+fi
 
 setup_arc_for_script() {
 	SCRIPT_ARGS="$@"

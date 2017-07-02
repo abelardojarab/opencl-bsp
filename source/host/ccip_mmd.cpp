@@ -29,13 +29,29 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <zlib.h>
+
+#include <sstream> 
 
 #include "aocl_mmd.h"
 #include "ccip_mmd_device.h"
+#include "zlib_inflate.h"
+#include "fpgaconf.h"
+
+#define ACL_DCP_ERROR_IF(COND,NEXT,...) \
+   do { if ( COND )  { \
+      printf("\nMMD ERROR: " __VA_ARGS__); fflush(stdout); NEXT; } \
+   } while(0)
+
+#define ACL_PKG_SECTION_DCP_GBS_GZ	".acl.gbs.gz"
+
+//since we only support 1 device at a time, we always return 1 as the handle
+#define AOCL_INVALID_HANDLE 	-1
+#define AOCL_DEFAULT_HANDLE 	1
 
 // TODO: create map or some other data structure that supports multiple devices
 // and replace all uses of ccip_dev_global with appropriate lookup function
-CcipDevice *ccip_dev_global;
+CcipDevice *ccip_dev_global = NULL;
 
 // static helper functions
 static bool check_for_svm_env();
@@ -54,9 +70,50 @@ AOCL_MMD_CALL void aocl_mmd_shared_mem_free ( int handle, void* host_ptr, size_t
 
 int AOCL_MMD_CALL aocl_mmd_reprogram(int handle, void *data, size_t data_size)
 {
-	printf("aocl_mmd_reprogram is not implemented\n");
-	exit(1);
-	return 0;
+	DCP_DEBUG_MEM("\n+ aocl_mmd_reprogram: handle=%d data=%p data_size=%d\n", handle, data, data_size);
+	
+	struct acl_pkg_file *pkg = acl_pkg_open_file_from_memory( (char*)data, data_size, ACL_PKG_SHOW_ERROR );
+	ACL_DCP_ERROR_IF(pkg == NULL, return AOCL_INVALID_HANDLE, "cannot open file from memory using pkg editor.\n");
+	
+	size_t acl_gbs_gz_len = 0;
+	char *acl_gbs_gz_contents = NULL;
+	if(acl_pkg_section_exists( pkg, ACL_PKG_SECTION_DCP_GBS_GZ, &acl_gbs_gz_len ) &&
+		acl_pkg_read_section_transient(pkg, ACL_PKG_SECTION_DCP_GBS_GZ, &acl_gbs_gz_contents))
+	{
+		void *gbs_data = NULL;
+		size_t gbs_data_size = 0;
+		int ret = inf(acl_gbs_gz_contents, acl_gbs_gz_len, &gbs_data, &gbs_data_size);
+		ACL_DCP_ERROR_IF(ret != Z_OK, return AOCL_INVALID_HANDLE, "aocl_mmd_reprogram error: GBS decompression failed!\n");
+		
+		if(ccip_dev_global)
+		{
+			delete ccip_dev_global;
+			ccip_dev_global = NULL;
+		}
+		
+		//this will need to match input device handle
+		find_fpga_target target = {-1, -1, -1, -1};
+		fpga_token fpga_dev;
+		int num_found = find_fpga(target, &fpga_dev);
+		ACL_DCP_ERROR_IF(num_found == 0, return AOCL_INVALID_HANDLE, "FPGA device not found for reconfiguration!\n");
+		
+		//Do config
+		int programming_result = program_gbs_bitstream(fpga_dev, (uint8_t *)gbs_data, gbs_data_size);
+
+		//clean up
+		fpgaDestroyToken(&fpga_dev);
+		
+		if(gbs_data)
+			free(gbs_data);
+		
+		if ( pkg ) acl_pkg_close_file(pkg);
+		
+		ACL_DCP_ERROR_IF(programming_result != FPGA_OK, return AOCL_INVALID_HANDLE, "FPGA programming failed!\n");
+
+		return aocl_mmd_open("acl0");
+	}
+
+	return AOCL_INVALID_HANDLE;
 }
 
 int AOCL_MMD_CALL aocl_mmd_yield(int handle)
@@ -139,7 +196,14 @@ int aocl_mmd_get_info(
 	DEBUG_PRINT("called aocl_mmd_get_info\n");
 	switch(requested_info_id)
 	{
-		case AOCL_MMD_BOARD_NAME:            RESULT_STR("SKX DCP FPGA OpenCL BSP"); break;
+		case AOCL_MMD_BOARD_NAME:            
+		{
+			std::ostringstream board_name;
+			//TODO: fix this for multiboard support
+			board_name << "SKX DCP FPGA OpenCL BSP" << " (" << "acl0" << ")";
+			RESULT_STR(board_name.str().c_str()); 
+			break;
+		}
 		case AOCL_MMD_NUM_KERNEL_INTERFACES: RESULT_INT(1); break;
 		case AOCL_MMD_KERNEL_INTERFACES:
 						     RESULT_INT(AOCL_MMD_KERNEL); break;
@@ -224,22 +288,24 @@ int AOCL_MMD_CALL aocl_mmd_open(const char *name)
 {
 	DEBUG_PRINT("Opening device: %s\n", name);
 
-	int unique_id = 1; // TODO: generate an acutal unique ID
-	int dev_num   = 1; // TODO: parse name to determine actual dev num
-	CcipDevice *ccip_dev = new CcipDevice(dev_num, unique_id);
+	CcipDevice *ccip_dev = new CcipDevice();
 
 	if(ccip_dev->is_initialized()) {
 		ccip_dev_global = ccip_dev;
 	} else {
 		delete ccip_dev;
+		return AOCL_INVALID_HANDLE;
 	}
 
-	return 1;   // TODO: return an actual unique ID for handle
+	return AOCL_DEFAULT_HANDLE;   // TODO: return an actual unique ID for handle
 }
 
 int AOCL_MMD_CALL  aocl_mmd_close(int handle)
 {
-	printf("aocl_mmd_close is not implemented\n");
-	exit(1);
+	if(ccip_dev_global)
+	{
+		delete ccip_dev_global;
+		ccip_dev_global = NULL;
+	}
 	return 0;
 }

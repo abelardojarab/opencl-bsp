@@ -65,7 +65,7 @@ enum {
 class CcipDevice final
 {
 	public:
-	CcipDevice(int dev_num, int unique_id);
+	CcipDevice();
 	~CcipDevice();
 
 	bool is_initialized() { return initialized; }
@@ -95,6 +95,7 @@ class CcipDevice final
 	void *event_update_user_data;
 
 	bool initialized;
+	bool mmio_is_mapped;
 	fpga_handle       afc_handle;
 	fpga_properties   filter;
 	fpga_token        afc_token;

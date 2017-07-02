@@ -12,12 +12,15 @@
 #define MINIMUM_DMA_SIZE	256
 #define DMA_ALIGNMENT	64
 
-CcipDevice::CcipDevice(int dev_num, int unique_id):
+//#define DISABLE_DMA
+
+CcipDevice::CcipDevice():
 	kernel_interrupt(NULL),
 	kernel_interrupt_user_data(NULL),
 	event_update(NULL),
 	event_update_user_data(NULL),
 	initialized(false),
+	mmio_is_mapped(false),
 	afc_handle(NULL),
 	filter(NULL),
 	afc_token(NULL),
@@ -76,6 +79,7 @@ CcipDevice::CcipDevice(int dev_num, int unique_id):
 		fprintf(stderr, "Error mapping MMIO space: %d\n", res);
 		return;
 	}
+	mmio_is_mapped = true;
 
 	/* Reset AFC */
 	res = fpgaReset(afc_handle);
@@ -85,11 +89,13 @@ CcipDevice::CcipDevice(int dev_num, int unique_id):
 	}
 	AFU_RESET_DELAY();
 	
+	#ifndef DISABLE_DMA
 	res = fpgaDmaOpen(afc_handle, &dma_h);
 	if(res != FPGA_OK) {
 		fprintf(stderr, "Error initializing DMA: %d\n", res);
 		return;
 	}
+	#endif
 	
 	//need base address for address span extender
 	uint64_t dfh_size = 0;
@@ -105,25 +111,30 @@ CcipDevice::CcipDevice(int dev_num, int unique_id):
 CcipDevice::~CcipDevice()
 {
 	int num_errors = 0;
-	
 	if(dma_h) {
 		if(fpgaDmaClose(dma_h) != FPGA_OK)
+			num_errors++;
+	}
+
+	if(mmio_is_mapped)
+	{
+		if(fpgaUnmapMMIO(afc_handle, 0))
 			num_errors++;
 	}
 	
 	if(afc_handle) {
 		if(fpgaClose(afc_handle) != FPGA_OK)
-		num_errors++;
+			num_errors++;
 	}
-
+	
 	if(afc_token) {
 		if(fpgaDestroyToken(&afc_token) != FPGA_OK)
-		num_errors++;
+			num_errors++;
 	}
 
 	if(filter) {
 		if(fpgaDestroyProperties(&filter) != FPGA_OK)
-		num_errors++;
+			num_errors++;
 	}
 
 	if(num_errors > 0) {
@@ -246,9 +257,11 @@ int CcipDevice::read_memory(uint64_t *host_addr, size_t dev_addr, size_t size)
 	size_t remainder = (size % DMA_ALIGNMENT);
 	size_t dma_size = size - remainder;
 	
-	//TODO: make switch for MMIO
-	//res = read_memory_mmio(host_addr, dev_addr, dma_size);
+	#ifdef DISABLE_DMA
+	res = read_memory_mmio(host_addr, dev_addr, dma_size);
+	#else
 	res = fpgaDmaTransferSync(dma_h, (uint64_t)host_addr /*dst*/, dev_addr /*src*/, dma_size, FPGA_TO_HOST_MM);
+	#endif
 	if(res != FPGA_OK)
 		return res;
 	
@@ -368,8 +381,11 @@ int CcipDevice::write_memory(const uint64_t *host_addr, size_t dev_addr, size_t 
 	size_t dma_size = size - remainder;
 	
 	//TODO: make switch for MMIO
-	//res = write_memory_mmio(host_addr, dev_addr, dma_size);
+	#ifdef DISABLE_DMA
+	res = write_memory_mmio(host_addr, dev_addr, dma_size);
+	#else
 	res = fpgaDmaTransferSync(dma_h, dev_addr /*dst*/, (uint64_t)host_addr /*src*/, dma_size, HOST_TO_FPGA_MM);
+	#endif
 	if(res != FPGA_OK)
 		return res;
 	
