@@ -56,6 +56,55 @@ CcipDevice *ccip_dev_global = NULL;
 // static helper functions
 static bool check_for_svm_env();
 
+//HACK: needed for reprogram to know if opencl image is loaded
+//opencl runtime gets confused if there is no opencl image loaded
+bool ccip_mmd_is_fpga_configured_with_opencl()
+{
+	fpga_guid guid;
+	fpga_result res = FPGA_OK;
+	uint32_t num_matches = 0;
+	fpga_properties   filter;
+	fpga_token        afc_token;
+
+	if (uuid_parse(DCP_OPENCL_DDR_AFU_ID, guid) < 0) {
+		fprintf(stderr, "Error parsing guid '%s'\n", DCP_OPENCL_DDR_AFU_ID);
+		return false;
+	}
+
+	res = fpgaGetProperties(NULL, &filter);
+	if(res != FPGA_OK) {
+		fprintf(stderr, "Error creating properties object\n");
+		return false;
+	}
+
+	res = fpgaPropertiesSetObjectType(filter, FPGA_AFC);
+	if(res != FPGA_OK) {
+		fprintf(stderr, "Error setting object type\n");
+		return false;
+	}
+
+	res = fpgaPropertiesSetGUID(filter, guid);
+	if(res != FPGA_OK) {
+		fprintf(stderr, "Error setting GUID\n");
+		return false;
+	}
+
+	//TODO: Add selection via BDF / device ID
+	res = fpgaEnumerate(&filter, 1, &afc_token, 1, &num_matches);
+	if(res != FPGA_OK) {
+		fprintf(stderr, "Error enumerating AFCs: %d\n", res);
+		return false;
+	}
+
+	if(afc_token)
+		fpgaDestroyToken(&afc_token);
+	
+	if(filter)
+		fpgaDestroyProperties(&filter);
+	
+	return (num_matches >= 1);
+}
+
 AOCL_MMD_CALL void * aocl_mmd_shared_mem_alloc( int handle, size_t size, unsigned long long *device_ptr_out )
 {
 	printf("aocl_mmd_shared_mem_alloc is not implemented\n");
@@ -73,12 +122,26 @@ int AOCL_MMD_CALL aocl_mmd_reprogram(int handle, void *data, size_t data_size)
 	DCP_DEBUG_MEM("\n+ aocl_mmd_reprogram: handle=%d data=%p data_size=%d\n", handle, data, data_size);
 	
 	struct acl_pkg_file *pkg = acl_pkg_open_file_from_memory( (char*)data, data_size, ACL_PKG_SHOW_ERROR );
+	struct acl_pkg_file *fpga_bin_pkg = NULL;
+	struct acl_pkg_file *search_pkg = pkg;
 	ACL_DCP_ERROR_IF(pkg == NULL, return AOCL_INVALID_HANDLE, "cannot open file from memory using pkg editor.\n");
 	
+	//need to handle aocx files directly for calling this API directly instead
+	//of through the OpenCL runtime
+	size_t fpga_bin_len = 0;
+	char *fpga_bin_contents = NULL;
+	if(acl_pkg_section_exists( pkg, ACL_PKG_SECTION_FPGA_BIN, &fpga_bin_len ) &&
+		acl_pkg_read_section_transient(pkg, ACL_PKG_SECTION_FPGA_BIN, &fpga_bin_contents))
+	{
+		fpga_bin_pkg = acl_pkg_open_file_from_memory( (char*)fpga_bin_contents, fpga_bin_len, ACL_PKG_SHOW_ERROR );
+		search_pkg = fpga_bin_pkg;
+	}
+	
+	//check for compressed GBS and attempt to load it
 	size_t acl_gbs_gz_len = 0;
 	char *acl_gbs_gz_contents = NULL;
-	if(acl_pkg_section_exists( pkg, ACL_PKG_SECTION_DCP_GBS_GZ, &acl_gbs_gz_len ) &&
-		acl_pkg_read_section_transient(pkg, ACL_PKG_SECTION_DCP_GBS_GZ, &acl_gbs_gz_contents))
+	if(acl_pkg_section_exists( search_pkg, ACL_PKG_SECTION_DCP_GBS_GZ, &acl_gbs_gz_len ) &&
+		acl_pkg_read_section_transient(search_pkg, ACL_PKG_SECTION_DCP_GBS_GZ, &acl_gbs_gz_contents))
 	{
 		void *gbs_data = NULL;
 		size_t gbs_data_size = 0;
@@ -107,6 +170,7 @@ int AOCL_MMD_CALL aocl_mmd_reprogram(int handle, void *data, size_t data_size)
 			free(gbs_data);
 		
 		if ( pkg ) acl_pkg_close_file(pkg);
+		if ( fpga_bin_pkg ) acl_pkg_close_file(fpga_bin_pkg);
 		
 		ACL_DCP_ERROR_IF(programming_result != FPGA_OK, return AOCL_INVALID_HANDLE, "FPGA programming failed!\n");
 

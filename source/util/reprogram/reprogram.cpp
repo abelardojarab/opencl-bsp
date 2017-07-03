@@ -20,8 +20,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "aocl_mmd.h"
 // ACL specific includes
 #include "board.h"
+
+//HACK: needed for reprogram to know if opencl image is loaded
+//opencl runtime gets confused if there is no opencl image loaded
+bool ccip_mmd_is_fpga_configured_with_opencl();
 
 // ACL runtime configuration
 static cl_platform_id platform;
@@ -149,6 +154,19 @@ int main(int argc, char ** argv){
    {
      printf("Error: Failed to find aocx\n");
      exit(-1);
+   }
+   
+   if(!ccip_mmd_is_fpga_configured_with_opencl())
+   {
+   	   int result = aocl_mmd_reprogram(1, aocx_file, aocx_filesize);
+   	   if(result < 1)
+   	   {
+			dump_error("Failed aocl_mmd_reprogram.", result);
+			return 1;
+   	   }
+   	   
+       printf("Program succeed. \n");
+   	   return 0;
    }
 
    // get the platform ID
