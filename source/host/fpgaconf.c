@@ -45,8 +45,6 @@
 #include <stdbool.h>
 
 #include "opae/fpga.h"
-#include "bitstream_int.h"
-#include "bitstream-tools.h"
 
 #include "fpgaconf.h"
 
@@ -67,9 +65,6 @@
 struct bitstream_info {
 	uint8_t *data;
 	size_t data_len;
-	uint8_t *rbf_data;
-	size_t rbf_len;
-	fpga_guid interface_id;
 };
 
 /*
@@ -87,72 +82,6 @@ void print_msg(unsigned int verbosity, const char *s)
 {
 	if (FPGACONF_VERBOSITY >= verbosity)
 		printf("%s\n", s);
-}
-
-/*
- * Check for bitstream header and fill out bistream_info fields
- */
-#define MAGIC 0x1d1f8680
-#define MAGIC_SIZE 4
-#define HEADER_SIZE 20
-int parse_metadata(struct bitstream_info *info)
-{
-	int i = 0;
-
-	if (!info)
-		return -EINVAL;
-
-	if (info->data_len < HEADER_SIZE) {
-		fprintf(stderr, "File too small to be GBS\n");
-		return -1;
-	}
-
-	if (((uint32_t *)info->data)[0] != MAGIC) {
-		fprintf(stderr, "No valid GBS header\n");
-		return -1;
-	}
-
-	/* reverse byte order when reading GBS */
-	for (i=0; i < sizeof(info->interface_id); i++)
-		info->interface_id[i] =
-			info->data[MAGIC_SIZE+sizeof(info->interface_id)-1-i];
-
-	info->rbf_data = &info->data[HEADER_SIZE];
-	info->rbf_len = info->data_len - HEADER_SIZE;
-
-	return 0;
-}
-
-/*
- * Read bitstream from file and populate bitstream_info structure
- */
-//TODO: remove this check when MCP bitstreams conform to new
-//metadata spec.
-int read_bitstream(struct bitstream_info *info, bool skip_header_checks)
-{
-	int ret;
-
-	if(check_bitstream_guid(info->data) == FPGA_OK) {
-		skip_header_checks = true;
-
-		if(get_bitstream_ifc_id(info->data, &(info->interface_id))
-			!= FPGA_OK) {
-			fprintf(stderr, "Invalid metadata in the bitstream\n");
-			return -1;
-		}
-	}
-
-	if(!skip_header_checks) {
-		//TODO: remove
-		printf("CMR: got here!\n");
-		/* populate remaining bitstream_info fields */
-		ret = parse_metadata(info);
-		if (ret < 0)
-			return -1;
-	}
-
-	return 0;
-
 }
 
 /*
@@ -243,15 +172,8 @@ int program_gbs_bitstream(fpga_token fpga, uint8_t *gbs_data, size_t gbs_len)
 	struct bitstream_info info;
 	uint32_t slot_num = 0; /* currently, we don't support multiple slots */
 
-	/* allocate memory and read bitstream data */
-	print_msg(1, "Reading bitstream");
 	info.data = gbs_data;
 	info.data_len = gbs_len;
-	res = read_bitstream(&info, false);
-	if (res < 0) {
-		retval = 2;
-		goto out_exit;
-	}
 
 	/* program bitstream */
 	print_msg(1, "Programming bitstream");
