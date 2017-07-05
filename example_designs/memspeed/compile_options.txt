@@ -1,0 +1,3 @@
+use these options for compiling:
+	aoc --no-interleaving default --duplicate-ring
+
