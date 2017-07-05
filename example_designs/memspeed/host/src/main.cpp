@@ -39,6 +39,8 @@ static cl_mem ddatain, ddataout;
 // input and output vectors
 static unsigned *hdatain, *hdataout;
 
+void cleanup() {}
+
 static void initializeVector(unsigned* vector, int size) {
   for (int i = 0; i < size; ++i) {
     vector[i] = rand();
@@ -125,7 +127,7 @@ int main() {
   }
 
   // create the input buffer
-  ddatain = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_CHANNEL_1_INTELFPGA, sizeof(unsigned) * vectorSize, NULL, &status);
+  ddatain = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_BANK_1_ALTERA, sizeof(unsigned) * vectorSize, NULL, &status);
   if(status != CL_SUCCESS) {
     dump_error("Failed clCreateBuffer.", status);
     freeResources();
@@ -133,7 +135,7 @@ int main() {
   }
 
   // create the input buffer
-  ddataout = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_CHANNEL_2_INTELFPGA, sizeof(unsigned) * vectorSize, NULL, &status);
+  ddataout = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_BANK_2_ALTERA, sizeof(unsigned) * vectorSize, NULL, &status);
   if(status != CL_SUCCESS) {
     dump_error("Failed clCreateBuffer.", status);
     freeResources();
