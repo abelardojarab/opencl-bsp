@@ -6,18 +6,9 @@ SCRIPT_DIR_PATH="$(dirname $SCRIPT_PATH)"
 
 . $SCRIPT_DIR_PATH/bsp_common.sh
 
-ARC_RESOURCES_NEEDED="vcs,vcs-vcsmx-lic/vrtn-dev,gcc/4.8.2,$ACDS_ARC_RESOURCES,python"
-SCRIPT_ARGS="$@"
-
-#check for opencl aoc command, and get resources if needed
-which aoc &> /dev/null
-if [ "$?" != "0" ]; then
-	echo warning: missing aoc command, using ARC
-	arc shell $ARC_RESOURCES_NEEDED -- $SCRIPT_PATH $SCRIPT_ARGS
-	exit $?
-fi
-
 export OPENCL_ASE_SIM=1
+setup_arc_for_script $@
+
 $SCRIPT_DIR_PATH/setup_packages.sh
 cd $ROOT_PROJECT_PATH/example_designs/vector_add_int
 rm -fr bin/vector_add_int
