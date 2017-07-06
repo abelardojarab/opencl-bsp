@@ -56,6 +56,10 @@ copy_platform_file "$FULL_PLATFORM_PATH/../empty_afu/afu/interfaces/ccip_if_pkg.
 copy_platform_file "$FULL_PLATFORM_PATH/../empty_afu/afu/green_bs.sv" "./afu/green_bs.sv"
 copy_platform_file "$FULL_PLATFORM_PATH/../empty_afu/afu/interfaces/SCJIO.qsys"         "./afu/interfaces/SCJIO.qsys"
 
+#add packager to opencl bsp to make bsp easier to use
+mkdir -p "tools"
+copy_platform_file "$ADAPT_DEST_ROOT/tools/packager/packager.pyz"         "./tools/packager.pyz"
+
 rm -rf design
 tar zxf "$FULL_PLATFORM_PATH/../pr_design_artifacts.tar.gz"
 

@@ -1,11 +1,24 @@
 #!/bin/bash
 
-if [ "$OPENCL_ASE_SIM" == "1" ]; then
-	sh sim_compile.sh
-	exit $?
+ADAPT_PACKAGER_BIN=$ADAPT_DEST_ROOT/bin/packager
+if [ "$ADAPT_DEST_ROOT" == "" ]; then
+	ADAPT_PACKAGER_BIN=./tools/packager.pyz
 fi
 
+#test packager bin
 FLOW_SUCCESS=1
+$ADAPT_PACKAGER_BIN > /dev/null
+FLOW_SUCCESS=$?
+if [ $FLOW_SUCCESS != 0 ]; then
+	echo "ERROR: packager tool failed to run.  Check installation.  Aborting compilation!"
+	exit 1
+fi
+
+#check for bypass/alternative flows
+if [ "$DCP_BYPASS_OPENCL_RUN_SCRIPT" != "" ]; then
+	sh $DCP_BYPASS_OPENCL_RUN_SCRIPT
+	exit $?
+fi
 
 # Copy Blue bitstream library 
 # ===========================
@@ -23,7 +36,6 @@ else
 	fi
 fi
 
-#HACK for design directory
 #need to design directory with timing files so that they are the same as blue 
 #bits
 rsync -rvua design/ ../design
@@ -62,7 +74,7 @@ if [ -f "$PLL_METADATA_FILE" ]; then
 fi
 
 rm -f afu.gbs
-$ADAPT_DEST_ROOT/bin/packager create-gbs \
+$ADAPT_PACKAGER_BIN create-gbs \
 	--rbf ./output_files/afu_fit.green_region.rbf \
 	--gbs ./output_files/afu_fit.gbs \
 	--afu-json opencl_afu.json \
@@ -75,7 +87,7 @@ rm -rf fpga.bin
 gzip -9c ./output_files/afu_fit.gbs > afu_fit.gbs.gz
 aocl binedit fpga.bin create
 aocl binedit fpga.bin add .acl.gbs.gz ./afu_fit.gbs.gz
-#TODO: remove pll.txt after swtich to new aal/OPAE
+#TODO: remove pll.txt after old flows removed
 aocl binedit fpga.bin add .acl.pll ./pll.txt
 
 if [ -f afu_quartus_report.txt ]; then
@@ -92,6 +104,5 @@ echo "==========================================================================
 echo "SKX-P PR AFU compilation complete"
 echo "*** DEFAULT (uClk_usr, uClk_usrDiv2) is (312.5 MHz, 156.25 MHz) ****"
 echo "AFU gbs file located at output_files/afu_fit.gbs"
-echo "Use this gbs file with aliconfafu utility to load PR bitstream"
 echo "==========================================================================="
 echo ""

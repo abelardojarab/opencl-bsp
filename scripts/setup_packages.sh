@@ -22,7 +22,7 @@ fi
 #fi
 
 #check for MMD
-if [ ! -f "$AOCL_BOARD_PACKAGE_ROOT/host/linux64/lib/libaltera_ccip_mmd.so" ]; then
+if [ ! -f "$AOCL_BOARD_PACKAGE_ROOT/linux64/lib/libaltera_ccip_mmd.so" ]; then
   echo "MMD does not exist.  need to build"
   sh $SCRIPT_DIR_PATH/build_mmd.sh
 fi

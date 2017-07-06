@@ -8,6 +8,7 @@ COMMON_SCRIPT_DIR_PATH="$(dirname $COMMON_SCRIPT_PATH)"
 export ROOT_PROJECT_PATH="$(dirname $COMMON_SCRIPT_DIR_PATH)"
 
 BUILD_DIR=$ROOT_PROJECT_PATH/build
+RELEASE_BUILD_DIR=$ROOT_PROJECT_PATH/release_build
 PACKAGE_DIR_PATH=$ROOT_PROJECT_PATH/packages
 
 FPGA_API_SRC_PATH=$BUILD_DIR/fpga_api_src
@@ -42,6 +43,7 @@ export SW_BUILD_ARC_RESOURCES="gcc/4.8.2,python,cmake/3.7.2,boost"
 
 if [ "$OPENCL_ASE_SIM" == "1" ]; then
 	export CL_CONTEXT_COMPILER_MODE_ALTERA=3
+	export DCP_BYPASS_OPENCL_RUN_SCRIPT="sim_compile.sh"
 fi
 
 setup_arc_for_script() {
