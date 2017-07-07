@@ -21,8 +21,8 @@ PACKAGE_TEST_DIR=$RELEASE_BUILD_DIR/test_pkg
 BSP_DIR_NAME=dcp_opencl_bsp
 REPO_VERSION_FILE=$RELEASE_BUILD_DIR/repo_version.txt
 
-#use a stable FPGA api release
-export FPGA_API_GIT_BRANCH=release/0.3.0
+#use a stable OPAE release
+export OPAE_GIT_BRANCH=release/0.3.0
 
 ##############################################################################
 

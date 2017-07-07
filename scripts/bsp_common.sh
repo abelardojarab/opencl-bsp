@@ -11,32 +11,31 @@ BUILD_DIR=$ROOT_PROJECT_PATH/build
 RELEASE_BUILD_DIR=$ROOT_PROJECT_PATH/release_build
 PACKAGE_DIR_PATH=$ROOT_PROJECT_PATH/packages
 
-FPGA_API_SRC_PATH=$BUILD_DIR/fpga_api_src
-FPGA_API_INST_PATH=$BUILD_DIR/fpga_api_inst
+OPAE_SRC_PATH=$BUILD_DIR/opae_src
+OPAE_LOCAL_INST_PATH=$BUILD_DIR/opae_inst
+OPAE_BUILD_PATH=$BUILD_DIR/opae_build
 
-#TODO: don't export FPGA_API_BUILD_PATH once fpgaconf util is available with install
-export FPGA_API_BUILD_PATH=$BUILD_DIR/fpga_api_build
-if [ "$FPGA_API_PATH" == "" ]; then
-	export FPGA_API_PATH=$FPGA_API_INST_PATH
+if [ "$OPAE_INSTALL_PATH" == "" ]; then
+	export OPAE_INSTALL_PATH=$OPAE_LOCAL_INST_PATH
 fi
-if [ "$FPGA_API_GIT_PATH" == "" ]; then
+if [ "$OPAE_GIT_PATH" == "" ]; then
 	if [ "$ARC_SITE" == "" ]; then
-		FPGA_API_GIT_PATH=/storage/shared/tools/git/cpt_sys_sw-fpga-sw
+		OPAE_GIT_PATH=/storage/shared/tools/git/cpt_sys_sw-fpga-sw
 	else
-		FPGA_API_GIT_PATH=/swip_apps/avl_vm/git_sync/git/cpt_sys_sw-fpga-sw.git
+		OPAE_GIT_PATH=/swip_apps/avl_vm/git_sync/git/cpt_sys_sw-fpga-sw.git
 	fi
 fi
-export FPGA_API_USE_GIT_ARCHIVE=1
-export FPGA_API_GIT_BRANCH=develop
+export OPAE_USE_GIT_ARCHIVE=1
+export OPAE_GIT_BRANCH=develop
 
 export AOCL_BOARD_PACKAGE_ROOT=$ROOT_PROJECT_PATH
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ALTERAOCLSDKROOT/host/linux64/lib
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$AOCL_BOARD_PACKAGE_ROOT/linux64/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$FPGA_API_PATH/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$OPAE_INSTALL_PATH/lib
 export QUARTUS_HOME=$QUARTUS_ROOTDIR
 export ASE_WORKDIR=./temp_simulation/ase/work/
 export MPF_INSTALL_PATH=$BUILD_DIR/mpf
-export ASE_SRC_PATH=$FPGA_API_SRC_PATH/ase
+export ASE_SRC_PATH=$OPAE_SRC_PATH/ase
 export ACDS_ARC_RESOURCES="acl/17.0,acds/17.0,qedition/pro,adapt"
 export SIM_ARC_RESOURCES="vcs,vcs-vcsmx-lic/vrtn-dev"
 export SW_BUILD_ARC_RESOURCES="gcc/4.8.2,python,cmake/3.7.2,boost"

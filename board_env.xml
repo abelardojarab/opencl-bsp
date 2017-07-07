@@ -3,7 +3,7 @@
   <hardware dir="hardware" default="skx_fpga_dcp_ddr"></hardware>
   <platform name="linux64">
     <mmdlib>%b/linux64/lib/libaltera_ccip_mmd.so</mmdlib>
-    <linkflags>-L%a/linux64/lib -L%b/linux64/lib -L$FPGA_API_PATH/lib/ </linkflags>
+    <linkflags>-L%a/linux64/lib -L%b/linux64/lib -L$OPAE_INSTALL_PATH/lib/ </linkflags>
     <linklibs> -lalterahalmmd -laltera_ccip_mmd -lrt -lpthread -lopae-c -luuid</linklibs>
     <utilbindir>%b/linux64/libexec</utilbindir>
   </platform>

@@ -6,7 +6,7 @@ CXXFLAGS = -fPIC -m64
 LINKER = g++
 LINKER_LIBDIRARGS = -L$(TOP_DEST_DIR)/linux64/lib -L$(ALTERAOCLSDKROOT)/host/linux64/lib
 LINKER_ARGS = -fPIC -Wl,--no-undefined -m64
-LINK_LIBS = -L$(FPGA_API_PATH)/lib -lalteracl -lelf -lalterahalmmd -l$(MMD_LIB_NAME) -lopae-c -luuid
+LINK_LIBS = -L$(OPAE_INSTALL_PATH)/lib -lalteracl -lelf -lalterahalmmd -l$(MMD_LIB_NAME) -lopae-c -luuid
 INCORPORATE_LIBS = 
 PREBUILT_OBJS = 
 

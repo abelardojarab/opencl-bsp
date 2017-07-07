@@ -8,10 +8,10 @@ SCRIPT_DIR_PATH="$(dirname $SCRIPT_PATH)"
 #exit early and return error code if there is a problem
 set -e
 
-#check for FPGA API
-if [ ! -d "$FPGA_API_PATH" ]; then
-  echo "FPGA_API_PATH does not exist.  need to build"
-  sh $SCRIPT_DIR_PATH/build_fpga_api.sh
+#check for OPAE
+if [ ! -d "$OPAE_INSTALL_PATH" ]; then
+  echo "OPAE_INSTALL_PATH does not exist.  need to build"
+  sh $SCRIPT_DIR_PATH/build_opae.sh
 fi
 
 #TODO: reenable MPF build
