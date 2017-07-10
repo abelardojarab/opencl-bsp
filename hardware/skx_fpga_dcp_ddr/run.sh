@@ -2,7 +2,7 @@
 
 ADAPT_PACKAGER_BIN=$ADAPT_DEST_ROOT/bin/packager
 if [ "$ADAPT_DEST_ROOT" == "" ]; then
-	ADAPT_PACKAGER_BIN=./tools/packager.pyz
+	ADAPT_PACKAGER_BIN="python ./tools/packager.pyz"
 fi
 
 #test packager bin
