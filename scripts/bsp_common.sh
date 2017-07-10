@@ -26,7 +26,9 @@ if [ "$OPAE_GIT_PATH" == "" ]; then
 	fi
 fi
 export OPAE_USE_GIT_ARCHIVE=1
-export OPAE_GIT_BRANCH=develop
+if [ "$OPAE_GIT_BRANCH" == "" ]; then
+	export OPAE_GIT_BRANCH=develop
+fi
 
 export AOCL_BOARD_PACKAGE_ROOT=$ROOT_PROJECT_PATH
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ALTERAOCLSDKROOT/host/linux64/lib
