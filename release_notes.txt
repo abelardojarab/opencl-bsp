@@ -1,0 +1,156 @@
+date 07/07/17
+
+This is an internal release of OpenCL DCP for testing for the July 31st release.  This is not the final release.  Please DO NOT REDISTRIBUTE to anyone without permission from DCP management(David Munday)!  This package is designed to be an add-on to the June 30th, 2017 DCP pre-alpha release.  You must have that installed to use this package.
+
+
+DCP OpenCL overview
+	DCP bsp does not support SVM(Shared virtual memory)
+		this is an MCP feature
+	2 memory banks 4GB each, ddr4 266MHz
+	combined total 8GB 34GByte/s bandwidth read or write
+	DCP OpenCL uses standard opencl API calls
+		Standard OpenCL FPGA application do not need any changes
+	DCP OpenCL is very similiar to regular OpenCL PCIe FPGA card
+	uses OPAE library and driver
+	No need to use OPAE/DCP rtl tools.  All DCP specific functionality is built into BSP and runs automatically for you during opencl compilation
+	DCP OpenCL can be used with virtualization
+
+filelist:
+	dcp_1_0_pre_alpha.tar.gz
+		DCP 1.0 pre-alpha release
+
+	dcp_1_0_pre_alpha_docs.zip
+		DCP 1.0 pre-alpha docs
+
+	dcp_opencl_bsp_8587e2f_070617_222923.tar.gz
+		DCP 1.0 OpenCL BSP - internal release for pre-alpha
+
+	exm_opencl_hello_world_x64_linux.tgz
+	exm_opencl_vector_add_x64_linux.tgz
+		OpenCL example designs from altera.com that were tested with DCP
+
+1.  HW Requirements
+	Intel Xeon processor
+	64 gigabytes (GB) of RAM(large designs may require more)
+	A PCI Express* x8 Slot
+	25 GB of hard drive space
+	CentOS 7.3 with the default Linux kernel 3.10
+
+2.  software for FPGA/opencl compilation:
+	do not use 17.0 service packs for Quartus or opencl
+	Quartus Prime Pro Edition 17.0 build 290
+	Intel FPGA SDK for OpenCL Pro Edition	build 290
+
+3.  software for opencl runtime
+	system packages
+		sudo yum -y install cmake autoconf automake libxml2 libxml2-devel json-c-devel boost ncurses ncurses-devel ncurses-libs boost-devel libuuid-devel
+		sudo yum -y install epel-release
+		sudo yum -y install dkms
+	OPAE driver
+		opae-intel-fpga-drv-0.3.0.x86_64.rpm
+	OPAE software library
+		opae-src-0.3.0.tar.gz
+	Intel FPGA Runtime Environment for OpenCL Linux x86-64 RPM
+		aocl-rte-17.0.0-1.x86_64.rpm
+
+4.  DCP pre alpha limitations:
+	timing may fail in some cases
+		static timing closure for BSP is not locked down for DCP pre-alpha BSP
+		DCP blue bits timing is not final
+	must do "aocl program acl0 kernel.aocx" first
+		OpenCL runtime must be able to find BSP in FPGA or it will not run
+		"aocl program" has a special flow to force load aocx binary when there is a non-OpenCL green bit stream loaded
+		opencl programming/operation will work normally after this
+	multi-DCP board configurations are not supported by DCP OpenCL runtime/MMD
+	DMA performce is not optimal right now
+	host channels are not supported
+	Windows OS is not supported for runtime or aocx compilation
+	OpenCL can be used with virtualization but if using a VF(virtual function) reprogramming is not supported
+	To Use OpenCL with a VF:
+		set "export CL_CONTEXT_COMPILER_MODE_ALTERA=3" to disable reconfiguration
+		make sure you program the FPGA before enabling VF 
+	To use OpenCL with a PF:
+		no limitations
+
+6.  DCP internel release issues to be addressed before August 31st:
+	need to do more aoc compile testing on cent 7
+	more qor testing
+	board.xml resources counts are not accurate
+	board names may change
+	BSP will be ported to inspur card
+	add more helpful error message to flash/install/uninstall
+	may add more helpful info in diagnose for troubleshooting
+	virtualization with VF is not tested yet
+
+Quick start:
+
+1.  Setting up BSP for AOCX compilation
+	cd /path/to/put/bsp/
+	tar xzf dcp_opencl_bsp_*.tar.gz
+	export AOCL_BOARD_PACKAGE_ROOT=/path/to/put/bsp/dcp_opencl_bsp
+	#internal users can use ARC to compile
+	arc shell acds/17.0/linux64,qedition/pro,python,adapt/17.0,acl/17.0
+
+	aoc --board skx_fpga_dcp_ddr vector_add.cl
+
+2.  Running OpenCL host appliactions with DCP and OPAE sw
+#refer to DCP Quick Start Guide for flashing bluebits and make sure nlb0 test works
+
+#Here are specific instructions on getting runtime software running with opencl on DCP
+#Some of these instructions are specific to opencl
+#install needed system packages
+sudo yum -y install cmake autoconf automake libxml2 libxml2-devel json-c-devel boost ncurses ncurses-devel ncurses-libs boost-devel libuuid-devel
+sudo yum -y install epel-release
+sudo yum -y install dkms
+sudo rpm -i $DCP_LOC/sw/opae-intel-fpga-drv-0.3.0.x86_64.rpm
+
+#setup opae
+cd sw_install_location
+tar xzf $DCP_LOC/sw/opae-src-0.3.0-*.tar.gz
+export OPAE_LOC=`pwd`/opae-0.3.0
+mkdir build && cd build
+cmake .. -DINTEL_FPGA_API_VER_MAJOR=0 -DINTEL_FPGA_API_VER_MINOR=3 -DINTEL_FPGA_API_VER_REV=0 -DBUILD_ASE=ON
+make -j4
+
+#setup mem limits for DMA.
+#needed for opencl and not part of OPAE docs
+rm -f /etc/security/limits.d/99-opae_memlock.conf
+echo "*                hard    memlock         unlimited" >> /etc/security/limits.d/99-opae_memlock.conf
+echo "*                soft    memlock         unlimited" >> /etc/security/limits.d/99-opae_memlock.conf
+#reboot after these changes
+sudo shutdown -r now
+
+#setup huge pages.  must be done after every reboot
+sudo bash -c \"echo 20 > /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages\"
+
+#setup permissions for device.  must be done after every reboot  
+#needed for opencl and not part of OPAE docs
+sudo chmod 666 /dev/intel-fpga-port.*
+sudo chmod 666 /sys/class/fpga/intel-fpga-dev.*/intel-fpga-port.*/userclk_freqcmd
+sudo chmod 666 /sys/class/fpga/intel-fpga-dev.*/intel-fpga-port.*/userclk_freqcntrcmd
+sudo chmod 666 /sys/class/fpga/intel-fpga-dev.*/intel-fpga-port.*/errors/clear
+sudo chmod 666 /dev/intel-fpga-fme.*
+
+#setup opencl
+sudo rpm -i /path_to_opencl_rte_rpm//aocl-rte-17.0.0-1.x86_64.rpm
+mkdir bsp_install_location
+tar xzf /path_to_bsp_package/dcp_opencl_bsp_*.tar.gz
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$OPAE_LOC/build/lib
+export AOCL_BOARD_PACKAGE_ROOT=bsp_install_location/dcp_opencl_bsp
+export OPAE_INSTALL_PATH=$OPAE_LOC/build/
+source /opt/altera/aocl-rte/init_opencl.sh
+
+#run first opencl programming and diagnose
+aocl program acl0 hello_world.aocx
+aocl diagnose
+aocl diagnose acl0
+
+#download vector add from altera.com and run it
+tar xzf path_to_download/exm_opencl_vector_add_x64_linux.tgz
+cp path_to_aocx_file/vector_add.aocx /vector_add/bin
+cd vector_add
+make
+cd bin
+./host
+
