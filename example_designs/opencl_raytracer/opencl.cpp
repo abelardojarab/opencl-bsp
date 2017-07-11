@@ -356,7 +356,7 @@ std::string getPlatformName(cl_platform_id pid) {
 bool isAlteraPlatform(cl_platform_id pid) {
   std::string name = getPlatformName(pid);
   
-  if(strstr(name.c_str(), "Altera"))
+  if(strstr(name.c_str(), "Intel"))
     return true;
   
   return false;
