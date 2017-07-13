@@ -1,4 +1,4 @@
-date 07/07/17
+date 07/03/17
 
 This is an internal release of OpenCL DCP for testing for the July 31st release.  This is not the final release.  Please DO NOT REDISTRIBUTE to anyone without permission from DCP management(David Munday)!  This package is designed to be an add-on to the June 30th, 2017 DCP pre-alpha release.  You must have that installed to use this package.
 
@@ -96,6 +96,8 @@ Quick start:
 2.  Running OpenCL host appliactions with DCP and OPAE sw
 #refer to DCP Quick Start Guide for flashing bluebits and make sure nlb0 test works
 
+##Please make sure that the board has been flashed with the BBS.  Driver won't work without it.
+
 #Here are specific instructions on getting runtime software running with opencl on DCP
 #Some of these instructions are specific to opencl
 #install needed system packages
@@ -121,7 +123,7 @@ echo "*                soft    memlock         unlimited" >> /etc/security/limit
 sudo shutdown -r now
 
 #setup huge pages.  must be done after every reboot
-sudo bash -c \"echo 20 > /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages\"
+sudo bash -c "echo 20 > /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages"
 
 #setup permissions for device.  must be done after every reboot  
 #needed for opencl and not part of OPAE docs
