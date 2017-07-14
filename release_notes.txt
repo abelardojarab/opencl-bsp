@@ -73,15 +73,24 @@ filelist:
 		no limitations
 
 6.  DCP internel release issues to be addressed before August 31st:
-	need to do more aoc compile testing on cent 7
 	more qor testing
-	board.xml resources counts are not accurate
 	board names may change
 	BSP will be ported to inspur card
 	add more helpful error message to flash/install/uninstall
 	may add more helpful info in diagnose for troubleshooting
-	virtualization with VF is not tested yet
 
+8.  troubleshooting
+	make sure aocl diagnose works!
+		if you see something like this "Error initializing DMA: 1"
+		that means permissions for DMA buffers are not setup correctly
+	
+9.  updates
+	7-14-17
+		board.xml resources counts are updated
+		fixed bandwidth/timing issue with DMA
+		fixed packager issue with cent7
+		virtualization with VF has been tested yet
+	
 Quick start:
 
 1.  Setting up BSP for AOCX compilation
