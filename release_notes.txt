@@ -1,4 +1,4 @@
-date 07/03/17
+date 07/14/17
 
 This is an internal release of OpenCL DCP for testing for the July 31st release.  This is not the final release.  Please DO NOT REDISTRIBUTE to anyone without permission from DCP management(David Munday)!  This package is designed to be an add-on to the June 30th, 2017 DCP pre-alpha release.  You must have that installed to use this package.
 
@@ -22,7 +22,7 @@ filelist:
 	dcp_1_0_pre_alpha_docs.zip
 		DCP 1.0 pre-alpha docs
 
-	dcp_opencl_bsp_8587e2f_070617_222923.tar.gz
+	dcp_opencl_bsp_*.tar.gz
 		DCP 1.0 OpenCL BSP - internal release for pre-alpha
 
 	exm_opencl_hello_world_x64_linux.tgz
@@ -89,7 +89,7 @@ filelist:
 		board.xml resources counts are updated
 		fixed bandwidth/timing issue with DMA
 		fixed packager issue with cent7
-		virtualization with VF has been tested yet
+		virtualization with VF has been tested
 	
 Quick start:
 
