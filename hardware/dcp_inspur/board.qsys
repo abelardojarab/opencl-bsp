@@ -229,7 +229,7 @@
 }
 ]]></parameter>
  <parameter name="clockCrossingAdapter" value="FIFO" />
- <parameter name="device" value="10AX115N3F40E2SG" />
+ <parameter name="device" value="10AX115H3F34E2SG" />
  <parameter name="deviceFamily" value="Arria 10" />
  <parameter name="deviceSpeedGrade" value="2" />
  <parameter name="fabricMode" value="QSYS" />
@@ -1573,7 +1573,7 @@
   <parameter
      name="AUTO_CCIP_AVMM_BRIDGE_AVST_TO_AVMM_SLAVE_0_AVALON_MASTER_ADDRESS_WIDTH"
      value="18" />
-  <parameter name="AUTO_DEVICE" value="10AX115N3F40E2SG" />
+  <parameter name="AUTO_DEVICE" value="10AX115H3F34E2SG" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="2" />
   <parameter name="AUTO_GENERATION_ID" value="0" />
@@ -2238,7 +2238,7 @@
   <parameter name="AUTO_DDR4B_CLK_CLOCK_DOMAIN" value="4" />
   <parameter name="AUTO_DDR4B_CLK_CLOCK_RATE" value="266" />
   <parameter name="AUTO_DDR4B_CLK_RESET_DOMAIN" value="4" />
-  <parameter name="AUTO_DEVICE" value="10AX115N3F40E2SG" />
+  <parameter name="AUTO_DEVICE" value="10AX115H3F34E2SG" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="2" />
   <parameter name="AUTO_EMIF_DDR4A_ADDRESS_MAP" value="" />
