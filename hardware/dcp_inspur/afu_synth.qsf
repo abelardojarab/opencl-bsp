@@ -50,8 +50,9 @@ set_global_assignment -name OPTIMIZATION_MODE "HIGH PERFORMANCE EFFORT"
 
 # Analysis & Synthesis Assignments
 # ================================
+set_global_assignment -name TOP_LEVEL_ENTITY green_bs
 set_global_assignment -name FAMILY "Arria 10"
-set_global_assignment -name DEVICE 10AX115N3F40E2SG
+set_global_assignment -name DEVICE 10AX115H3F34E2SG
 set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
 set_global_assignment -name VERILOG_SHOW_LMF_MAPPING_MESSAGES OFF
 set_global_assignment -name ALLOW_ANY_RAM_SIZE_FOR_RECOGNITION ON
@@ -61,6 +62,13 @@ set_global_assignment -name ADD_PASS_THROUGH_LOGIC_TO_INFERRED_RAMS OFF
 set_global_assignment -name USE_HIGH_SPEED_ADDER ON
 set_global_assignment -name MUX_RESTRUCTURE ON
 set_global_assignment -name LAST_QUARTUS_VERSION "17.0.0 Pro Edition"
+set_global_assignment -name VERILOG_MACRO "INCLUDE_DDR4=<None>"
+set_global_assignment -name VERILOG_MACRO "DDR_ADDR_WIDTH=27"
+
+
+# Fileset
+# ===============================
+
 
 set_global_assignment -name REVISION_TYPE PR_SYN
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
@@ -70,13 +78,11 @@ set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 
 set_global_assignment -name SDC_FILE dcp_bbs.sdc
-
-# Fileset
-# ===============================
-set_global_assignment -name VERILOG_MACRO "INCLUDE_DDR4=<None>"
-set_global_assignment -name TOP_LEVEL_ENTITY green_bs
-set_global_assignment -name SYSTEMVERILOG_FILE ./afu/interfaces/ccip_if_pkg.sv
+set_global_assignment -name SEARCH_PATH ./afu/interfaces
+set_global_assignment -name SYSTEMVERILOG_FILE ./afu/interfaces/fpga_defines.vh
 set_global_assignment -name SYSTEMVERILOG_FILE ./afu/interfaces/vendor_defines.vh
+set_global_assignment -name SYSTEMVERILOG_FILE ./afu/interfaces/ccip_interface_reg.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ./afu/interfaces/ccip_if_pkg.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ./afu/green_bs.sv
 set_global_assignment -name QSYS_FILE ./afu/interfaces/SCJIO.qsys
 

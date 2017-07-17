@@ -59,7 +59,7 @@ set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
 
 # Fitter Assignments
 # ==================
-set_global_assignment -name DEVICE 10AX115N3F40E2SG
+set_global_assignment -name DEVICE 10AX115H3F34E2SG
 set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 4
 #set_global_assignment -name AUTO_RESERVE_CLKUSR_FOR_CALIBRATION OFF
 set_global_assignment -name SEED 8
@@ -79,13 +79,14 @@ set_global_assignment -name VCCERAM_USER_VOLTAGE 0.95V
 
 set_global_assignment -name ENABLE_BOOT_SEL_PIN OFF
 
-set_global_assignment -name SDC_FILE dcp_bbs.sdc
-set_global_assignment -name SDC_FILE user_clock.sdc
 
 set_global_assignment -name REVISION_TYPE PR_IMPL
 set_global_assignment -name POWER_AUTO_COMPUTE_TJ ON
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+
+set_global_assignment -name SDC_FILE dcp_bbs.sdc
+set_global_assignment -name SDC_FILE user_clock.sdc
 
 # AFU + MPF IPs
 source afu_ip.qsf
