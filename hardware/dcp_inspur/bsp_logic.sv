@@ -48,7 +48,8 @@ module bsp_logic(
 	output		acl_internal_snoop_valid,
 	input		acl_internal_snoop_ready,
   
-  	input		ddr_clk_clk,
+  	input		ddr4a_clk_clk,
+  	input		ddr4b_clk_clk,
 	
 	input		emif_ddr4a_waitrequest,
 	input	[511:0]	emif_ddr4a_readdata,
@@ -149,7 +150,8 @@ module bsp_logic(
 		.acl_internal_snoop_valid(acl_internal_snoop_valid),
 		.acl_internal_snoop_ready(acl_internal_snoop_ready),
 		
-		.ddr_clk_clk(ddr_clk_clk),
+		.ddr4a_clk_clk(ddr4a_clk_clk),
+		.ddr4b_clk_clk(ddr4b_clk_clk),
 		
 		.emif_ddr4a_waitrequest(emif_ddr4a_waitrequest),
 		.emif_ddr4a_readdata(emif_ddr4a_readdata),
