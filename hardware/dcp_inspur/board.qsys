@@ -42,14 +42,6 @@
          type = "String";
       }
    }
-   element board_clock_bridge_0
-   {
-      datum _sortIndex
-      {
-         value = "16";
-         type = "int";
-      }
-   }
    element bridge_reset
    {
       datum _sortIndex
@@ -87,6 +79,22 @@
       datum _sortIndex
       {
          value = "11";
+         type = "int";
+      }
+   }
+   element ddr4a_clk_bridge
+   {
+      datum _sortIndex
+      {
+         value = "16";
+         type = "int";
+      }
+   }
+   element ddr4b_clock_bridge
+   {
+      datum _sortIndex
+      {
+         value = "17";
          type = "int";
       }
    }
@@ -297,11 +305,11 @@
                 <consumedSystemInfos>
                     <entry>
                         <key>ADDRESS_MAP</key>
-                        <value>&lt;address-map&gt;&lt;slave name='ddr_board.kernel_ddr4a' start='0x0' end='0x100000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
+                        <value>&lt;address-map&gt;&lt;slave name='ddr_board.kernel_ddr4a' start='0x0' end='0x200000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
                     </entry>
                     <entry>
                         <key>ADDRESS_WIDTH</key>
-                        <value>32</value>
+                        <value>33</value>
                     </entry>
                     <entry>
                         <key>MAX_SLAVE_DATA_WIDTH</key>
@@ -318,11 +326,11 @@
                 <consumedSystemInfos>
                     <entry>
                         <key>ADDRESS_MAP</key>
-                        <value>&lt;address-map&gt;&lt;slave name='ddr_board.kernel_ddr4b' start='0x0' end='0x100000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
+                        <value>&lt;address-map&gt;&lt;slave name='ddr_board.kernel_ddr4b' start='0x0' end='0x200000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
                     </entry>
                     <entry>
                         <key>ADDRESS_WIDTH</key>
-                        <value>32</value>
+                        <value>33</value>
                     </entry>
                     <entry>
                         <key>MAX_SLAVE_DATA_WIDTH</key>
@@ -382,8 +390,13 @@
    dir="end" />
  <interface name="clk_400" internal="clk_400.in_clk" type="clock" dir="end" />
  <interface
-   name="ddr_clk"
-   internal="board_clock_bridge_0.in_clk"
+   name="ddr4a_clk"
+   internal="ddr4a_clk_bridge.in_clk"
+   type="clock"
+   dir="end" />
+ <interface
+   name="ddr4b_clk"
+   internal="ddr4b_clock_bridge.in_clk"
    type="clock"
    dir="end" />
  <interface
@@ -1377,166 +1390,6 @@
 </assignmentDefinition>]]></parameter>
  </module>
  <module
-   name="board_clock_bridge_0"
-   kind="altera_generic_component"
-   version="1.0"
-   enabled="1">
-  <parameter name="componentDefinition"><![CDATA[<componentDefinition>
-    <boundary>
-        <interfaces>
-            <interface>
-                <name>in_clk</name>
-                <type>clock</type>
-                <isStart>false</isStart>
-                <ports>
-                    <port>
-                        <name>in_clk</name>
-                        <role>clk</role>
-                        <direction>Input</direction>
-                        <width>1</width>
-                        <lowerBound>0</lowerBound>
-                        <vhdlType>STD_LOGIC</vhdlType>
-                    </port>
-                </ports>
-                <assignments>
-                    <assignmentValueMap/>
-                </assignments>
-                <parameters>
-                    <parameterValueMap>
-                        <entry>
-                            <key>clockRate</key>
-                            <value>0</value>
-                        </entry>
-                        <entry>
-                            <key>externallyDriven</key>
-                            <value>false</value>
-                        </entry>
-                        <entry>
-                            <key>ptfSchematicName</key>
-                        </entry>
-                    </parameterValueMap>
-                </parameters>
-            </interface>
-            <interface>
-                <name>out_clk</name>
-                <type>clock</type>
-                <isStart>true</isStart>
-                <ports>
-                    <port>
-                        <name>out_clk</name>
-                        <role>clk</role>
-                        <direction>Output</direction>
-                        <width>1</width>
-                        <lowerBound>0</lowerBound>
-                        <vhdlType>STD_LOGIC</vhdlType>
-                    </port>
-                </ports>
-                <assignments>
-                    <assignmentValueMap/>
-                </assignments>
-                <parameters>
-                    <parameterValueMap>
-                        <entry>
-                            <key>associatedDirectClock</key>
-                            <value>in_clk</value>
-                        </entry>
-                        <entry>
-                            <key>clockRate</key>
-                            <value>266</value>
-                        </entry>
-                        <entry>
-                            <key>clockRateKnown</key>
-                            <value>true</value>
-                        </entry>
-                        <entry>
-                            <key>externallyDriven</key>
-                            <value>false</value>
-                        </entry>
-                        <entry>
-                            <key>ptfSchematicName</key>
-                        </entry>
-                    </parameterValueMap>
-                </parameters>
-            </interface>
-        </interfaces>
-    </boundary>
-    <originalModuleInfo>
-        <className>altera_clock_bridge</className>
-        <version>17.0</version>
-        <displayName>Clock Bridge</displayName>
-    </originalModuleInfo>
-    <systemInfoParameterDescriptors>
-        <descriptors>
-            <descriptor>
-                <parameterDefaultValue>0</parameterDefaultValue>
-                <parameterName>DERIVED_CLOCK_RATE</parameterName>
-                <parameterType>java.lang.Long</parameterType>
-                <systemInfoArgs>in_clk</systemInfoArgs>
-                <systemInfotype>CLOCK_RATE</systemInfotype>
-            </descriptor>
-        </descriptors>
-    </systemInfoParameterDescriptors>
-    <systemInfos>
-        <connPtSystemInfos>
-            <entry>
-                <key>in_clk</key>
-                <value>
-                    <connectionPointName>in_clk</connectionPointName>
-                    <suppliedSystemInfos/>
-                    <consumedSystemInfos>
-                        <entry>
-                            <key>CLOCK_RATE</key>
-                            <value>0</value>
-                        </entry>
-                    </consumedSystemInfos>
-                </value>
-            </entry>
-            <entry>
-                <key>out_clk</key>
-                <value>
-                    <connectionPointName>out_clk</connectionPointName>
-                    <suppliedSystemInfos>
-                        <entry>
-                            <key>CLOCK_RATE</key>
-                            <value>266</value>
-                        </entry>
-                    </suppliedSystemInfos>
-                    <consumedSystemInfos/>
-                </value>
-            </entry>
-        </connPtSystemInfos>
-    </systemInfos>
-</componentDefinition>]]></parameter>
-  <parameter name="generationInfoDefinition"><![CDATA[<generationInfoDefinition>
-    <hdlLibraryName>board_clock_bridge_0</hdlLibraryName>
-    <fileSets>
-        <fileSet>
-            <fileSetName>board_clock_bridge_0</fileSetName>
-            <fileSetFixedName>board_clock_bridge_0</fileSetFixedName>
-            <fileSetKind>QUARTUS_SYNTH</fileSetKind>
-            <fileSetFiles/>
-        </fileSet>
-        <fileSet>
-            <fileSetName>board_clock_bridge_0</fileSetName>
-            <fileSetFixedName>board_clock_bridge_0</fileSetFixedName>
-            <fileSetKind>SIM_VERILOG</fileSetKind>
-            <fileSetFiles/>
-        </fileSet>
-        <fileSet>
-            <fileSetName>board_clock_bridge_0</fileSetName>
-            <fileSetFixedName>board_clock_bridge_0</fileSetFixedName>
-            <fileSetKind>SIM_VHDL</fileSetKind>
-            <fileSetFiles/>
-        </fileSet>
-    </fileSets>
-</generationInfoDefinition>]]></parameter>
-  <parameter name="hlsFile" value="" />
-  <parameter name="logicalView">ip/board/board_clock_bridge_0.ip</parameter>
-  <parameter name="moduleAssignmentDefinition"><![CDATA[<assignmentDefinition>
-    <assignmentValueMap/>
-</assignmentDefinition>]]></parameter>
- </module>
- <module
    name="bridge_reset"
    kind="altera_generic_component"
    version="1.0"
@@ -1727,9 +1580,9 @@
   <parameter name="AUTO_HOST_CLK_CLOCK_DOMAIN" value="3" />
   <parameter name="AUTO_HOST_CLK_CLOCK_RATE" value="266" />
   <parameter name="AUTO_HOST_CLK_RESET_DOMAIN" value="3" />
-  <parameter name="AUTO_MMIO_CLK_CLOCK_DOMAIN" value="8" />
+  <parameter name="AUTO_MMIO_CLK_CLOCK_DOMAIN" value="9" />
   <parameter name="AUTO_MMIO_CLK_CLOCK_RATE" value="200000000" />
-  <parameter name="AUTO_MMIO_CLK_RESET_DOMAIN" value="8" />
+  <parameter name="AUTO_MMIO_CLK_RESET_DOMAIN" value="9" />
   <parameter name="AUTO_PCLK400_CLOCK_DOMAIN" value="2" />
   <parameter name="AUTO_PCLK400_CLOCK_RATE" value="400000000" />
   <parameter name="AUTO_PCLK400_RESET_DOMAIN" value="2" />
@@ -2055,13 +1908,336 @@
     <assignmentValueMap/>
 </assignmentDefinition>]]></parameter>
  </module>
+ <module
+   name="ddr4a_clk_bridge"
+   kind="altera_generic_component"
+   version="1.0"
+   enabled="1">
+  <parameter name="componentDefinition"><![CDATA[<componentDefinition>
+    <boundary>
+        <interfaces>
+            <interface>
+                <name>in_clk</name>
+                <type>clock</type>
+                <isStart>false</isStart>
+                <ports>
+                    <port>
+                        <name>in_clk</name>
+                        <role>clk</role>
+                        <direction>Input</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                </ports>
+                <assignments>
+                    <assignmentValueMap/>
+                </assignments>
+                <parameters>
+                    <parameterValueMap>
+                        <entry>
+                            <key>clockRate</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>externallyDriven</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>ptfSchematicName</key>
+                        </entry>
+                    </parameterValueMap>
+                </parameters>
+            </interface>
+            <interface>
+                <name>out_clk</name>
+                <type>clock</type>
+                <isStart>true</isStart>
+                <ports>
+                    <port>
+                        <name>out_clk</name>
+                        <role>clk</role>
+                        <direction>Output</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                </ports>
+                <assignments>
+                    <assignmentValueMap/>
+                </assignments>
+                <parameters>
+                    <parameterValueMap>
+                        <entry>
+                            <key>associatedDirectClock</key>
+                            <value>in_clk</value>
+                        </entry>
+                        <entry>
+                            <key>clockRate</key>
+                            <value>266</value>
+                        </entry>
+                        <entry>
+                            <key>clockRateKnown</key>
+                            <value>true</value>
+                        </entry>
+                        <entry>
+                            <key>externallyDriven</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>ptfSchematicName</key>
+                        </entry>
+                    </parameterValueMap>
+                </parameters>
+            </interface>
+        </interfaces>
+    </boundary>
+    <originalModuleInfo>
+        <className>altera_clock_bridge</className>
+        <version>17.0</version>
+        <displayName>Clock Bridge</displayName>
+    </originalModuleInfo>
+    <systemInfoParameterDescriptors>
+        <descriptors>
+            <descriptor>
+                <parameterDefaultValue>0</parameterDefaultValue>
+                <parameterName>DERIVED_CLOCK_RATE</parameterName>
+                <parameterType>java.lang.Long</parameterType>
+                <systemInfoArgs>in_clk</systemInfoArgs>
+                <systemInfotype>CLOCK_RATE</systemInfotype>
+            </descriptor>
+        </descriptors>
+    </systemInfoParameterDescriptors>
+    <systemInfos>
+        <connPtSystemInfos>
+            <entry>
+                <key>in_clk</key>
+                <value>
+                    <connectionPointName>in_clk</connectionPointName>
+                    <suppliedSystemInfos/>
+                    <consumedSystemInfos>
+                        <entry>
+                            <key>CLOCK_RATE</key>
+                            <value>0</value>
+                        </entry>
+                    </consumedSystemInfos>
+                </value>
+            </entry>
+            <entry>
+                <key>out_clk</key>
+                <value>
+                    <connectionPointName>out_clk</connectionPointName>
+                    <suppliedSystemInfos>
+                        <entry>
+                            <key>CLOCK_RATE</key>
+                            <value>266</value>
+                        </entry>
+                    </suppliedSystemInfos>
+                    <consumedSystemInfos/>
+                </value>
+            </entry>
+        </connPtSystemInfos>
+    </systemInfos>
+</componentDefinition>]]></parameter>
+  <parameter name="generationInfoDefinition"><![CDATA[<generationInfoDefinition>
+    <hdlLibraryName>board_clock_bridge_0</hdlLibraryName>
+    <fileSets>
+        <fileSet>
+            <fileSetName>board_clock_bridge_0</fileSetName>
+            <fileSetFixedName>board_clock_bridge_0</fileSetFixedName>
+            <fileSetKind>QUARTUS_SYNTH</fileSetKind>
+            <fileSetFiles/>
+        </fileSet>
+        <fileSet>
+            <fileSetName>board_clock_bridge_0</fileSetName>
+            <fileSetFixedName>board_clock_bridge_0</fileSetFixedName>
+            <fileSetKind>SIM_VERILOG</fileSetKind>
+            <fileSetFiles/>
+        </fileSet>
+        <fileSet>
+            <fileSetName>board_clock_bridge_0</fileSetName>
+            <fileSetFixedName>board_clock_bridge_0</fileSetFixedName>
+            <fileSetKind>SIM_VHDL</fileSetKind>
+            <fileSetFiles/>
+        </fileSet>
+    </fileSets>
+</generationInfoDefinition>]]></parameter>
+  <parameter name="hlsFile" value="" />
+  <parameter name="logicalView">ip/board/board_clock_bridge_0.ip</parameter>
+  <parameter name="moduleAssignmentDefinition"><![CDATA[<assignmentDefinition>
+    <assignmentValueMap/>
+</assignmentDefinition>]]></parameter>
+ </module>
+ <module
+   name="ddr4b_clock_bridge"
+   kind="altera_generic_component"
+   version="1.0"
+   enabled="1">
+  <parameter name="componentDefinition"><![CDATA[<componentDefinition>
+    <boundary>
+        <interfaces>
+            <interface>
+                <name>in_clk</name>
+                <type>clock</type>
+                <isStart>false</isStart>
+                <ports>
+                    <port>
+                        <name>in_clk</name>
+                        <role>clk</role>
+                        <direction>Input</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                </ports>
+                <assignments>
+                    <assignmentValueMap/>
+                </assignments>
+                <parameters>
+                    <parameterValueMap>
+                        <entry>
+                            <key>clockRate</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>externallyDriven</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>ptfSchematicName</key>
+                        </entry>
+                    </parameterValueMap>
+                </parameters>
+            </interface>
+            <interface>
+                <name>out_clk</name>
+                <type>clock</type>
+                <isStart>true</isStart>
+                <ports>
+                    <port>
+                        <name>out_clk</name>
+                        <role>clk</role>
+                        <direction>Output</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                </ports>
+                <assignments>
+                    <assignmentValueMap/>
+                </assignments>
+                <parameters>
+                    <parameterValueMap>
+                        <entry>
+                            <key>associatedDirectClock</key>
+                            <value>in_clk</value>
+                        </entry>
+                        <entry>
+                            <key>clockRate</key>
+                            <value>266</value>
+                        </entry>
+                        <entry>
+                            <key>clockRateKnown</key>
+                            <value>true</value>
+                        </entry>
+                        <entry>
+                            <key>externallyDriven</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>ptfSchematicName</key>
+                        </entry>
+                    </parameterValueMap>
+                </parameters>
+            </interface>
+        </interfaces>
+    </boundary>
+    <originalModuleInfo>
+        <className>altera_clock_bridge</className>
+        <version>17.0</version>
+        <displayName>Clock Bridge</displayName>
+    </originalModuleInfo>
+    <systemInfoParameterDescriptors>
+        <descriptors>
+            <descriptor>
+                <parameterDefaultValue>0</parameterDefaultValue>
+                <parameterName>DERIVED_CLOCK_RATE</parameterName>
+                <parameterType>java.lang.Long</parameterType>
+                <systemInfoArgs>in_clk</systemInfoArgs>
+                <systemInfotype>CLOCK_RATE</systemInfotype>
+            </descriptor>
+        </descriptors>
+    </systemInfoParameterDescriptors>
+    <systemInfos>
+        <connPtSystemInfos>
+            <entry>
+                <key>in_clk</key>
+                <value>
+                    <connectionPointName>in_clk</connectionPointName>
+                    <suppliedSystemInfos/>
+                    <consumedSystemInfos>
+                        <entry>
+                            <key>CLOCK_RATE</key>
+                            <value>0</value>
+                        </entry>
+                    </consumedSystemInfos>
+                </value>
+            </entry>
+            <entry>
+                <key>out_clk</key>
+                <value>
+                    <connectionPointName>out_clk</connectionPointName>
+                    <suppliedSystemInfos>
+                        <entry>
+                            <key>CLOCK_RATE</key>
+                            <value>266</value>
+                        </entry>
+                    </suppliedSystemInfos>
+                    <consumedSystemInfos/>
+                </value>
+            </entry>
+        </connPtSystemInfos>
+    </systemInfos>
+</componentDefinition>]]></parameter>
+  <parameter name="generationInfoDefinition"><![CDATA[<generationInfoDefinition>
+    <hdlLibraryName>board_clock_bridge_1</hdlLibraryName>
+    <fileSets>
+        <fileSet>
+            <fileSetName>board_clock_bridge_1</fileSetName>
+            <fileSetFixedName>board_clock_bridge_1</fileSetFixedName>
+            <fileSetKind>QUARTUS_SYNTH</fileSetKind>
+            <fileSetFiles/>
+        </fileSet>
+        <fileSet>
+            <fileSetName>board_clock_bridge_1</fileSetName>
+            <fileSetFixedName>board_clock_bridge_1</fileSetFixedName>
+            <fileSetKind>SIM_VERILOG</fileSetKind>
+            <fileSetFiles/>
+        </fileSet>
+        <fileSet>
+            <fileSetName>board_clock_bridge_1</fileSetName>
+            <fileSetFixedName>board_clock_bridge_1</fileSetFixedName>
+            <fileSetKind>SIM_VHDL</fileSetKind>
+            <fileSetFiles/>
+        </fileSet>
+    </fileSets>
+</generationInfoDefinition>]]></parameter>
+  <parameter name="hlsFile" value="" />
+  <parameter name="logicalView">ip/board/board_clock_bridge_1.ip</parameter>
+  <parameter name="moduleAssignmentDefinition"><![CDATA[<assignmentDefinition>
+    <assignmentValueMap/>
+</assignmentDefinition>]]></parameter>
+ </module>
  <module name="ddr_board" kind="ddr_board" version="1.0" enabled="1">
-  <parameter name="AUTO_CSR_CLK_CLOCK_DOMAIN" value="8" />
+  <parameter name="AUTO_CSR_CLK_CLOCK_DOMAIN" value="9" />
   <parameter name="AUTO_CSR_CLK_CLOCK_RATE" value="200000000" />
-  <parameter name="AUTO_CSR_CLK_RESET_DOMAIN" value="8" />
-  <parameter name="AUTO_DDR_CLK_CLOCK_DOMAIN" value="3" />
-  <parameter name="AUTO_DDR_CLK_CLOCK_RATE" value="266" />
-  <parameter name="AUTO_DDR_CLK_RESET_DOMAIN" value="3" />
+  <parameter name="AUTO_CSR_CLK_RESET_DOMAIN" value="9" />
+  <parameter name="AUTO_DDR4A_CLK_CLOCK_DOMAIN" value="3" />
+  <parameter name="AUTO_DDR4A_CLK_CLOCK_RATE" value="266" />
+  <parameter name="AUTO_DDR4A_CLK_RESET_DOMAIN" value="3" />
+  <parameter name="AUTO_DDR4B_CLK_CLOCK_DOMAIN" value="4" />
+  <parameter name="AUTO_DDR4B_CLK_CLOCK_RATE" value="266" />
+  <parameter name="AUTO_DDR4B_CLK_RESET_DOMAIN" value="4" />
   <parameter name="AUTO_DEVICE" value="10AX115N3F40E2SG" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="2" />
@@ -2072,9 +2248,9 @@
   <parameter name="AUTO_GENERATION_ID" value="0" />
   <parameter name="AUTO_HOST_MEM_ADDRESS_MAP"><![CDATA[<address-map><slave name='ccip_avmm_bridge_inst.avst_to_avmm_master_inst.avmm' start='0x0' end='0x1000000000000' datawidth='512' /></address-map>]]></parameter>
   <parameter name="AUTO_HOST_MEM_ADDRESS_WIDTH" value="48" />
-  <parameter name="AUTO_KERNEL_CLK_CLOCK_DOMAIN" value="6" />
+  <parameter name="AUTO_KERNEL_CLK_CLOCK_DOMAIN" value="7" />
   <parameter name="AUTO_KERNEL_CLK_CLOCK_RATE" value="0" />
-  <parameter name="AUTO_KERNEL_CLK_RESET_DOMAIN" value="6" />
+  <parameter name="AUTO_KERNEL_CLK_RESET_DOMAIN" value="7" />
   <parameter name="AUTO_UNIQUE_ID" value="board_ddr_board" />
  </module>
  <module
@@ -5617,12 +5793,17 @@
  <connection
    kind="clock"
    version="17.0"
-   start="board_clock_bridge_0.out_clk"
-   end="ddr_board.ddr_clk" />
+   start="ddr4a_clk_bridge.out_clk"
+   end="ddr_board.ddr4a_clk" />
  <connection
    kind="clock"
    version="17.0"
-   start="board_clock_bridge_0.out_clk"
+   start="ddr4b_clock_bridge.out_clk"
+   end="ddr_board.ddr4b_clk" />
+ <connection
+   kind="clock"
+   version="17.0"
+   start="ddr4a_clk_bridge.out_clk"
    end="ccip_avmm_bridge_inst.host_clk" />
  <connection
    kind="clock"

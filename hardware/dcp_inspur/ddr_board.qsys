@@ -26,11 +26,27 @@
          type = "int";
       }
    }
+   element ddr4a_clk_bridge
+   {
+      datum _sortIndex
+      {
+         value = "2";
+         type = "int";
+      }
+   }
+   element ddr4a_clk_bridge.out_clk
+   {
+      datum color
+      {
+         value = "-65485";
+         type = "int";
+      }
+   }
    element ddr4a_cross_to_kernel
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "9";
          type = "int";
       }
    }
@@ -38,7 +54,7 @@
    {
       datum _sortIndex
       {
-         value = "6";
+         value = "7";
          type = "int";
       }
    }
@@ -46,7 +62,23 @@
    {
       datum _sortIndex
       {
-         value = "7";
+         value = "8";
+         type = "int";
+      }
+   }
+   element ddr4b_clk_bridge
+   {
+      datum _sortIndex
+      {
+         value = "3";
+         type = "int";
+      }
+   }
+   element ddr4b_clk_bridge.out_clk
+   {
+      datum color
+      {
+         value = "-3407668";
          type = "int";
       }
    }
@@ -54,7 +86,7 @@
    {
       datum _sortIndex
       {
-         value = "10";
+         value = "11";
          type = "int";
       }
    }
@@ -62,7 +94,7 @@
    {
       datum _sortIndex
       {
-         value = "11";
+         value = "12";
          type = "int";
       }
    }
@@ -70,7 +102,7 @@
    {
       datum _sortIndex
       {
-         value = "5";
+         value = "6";
          type = "int";
       }
    }
@@ -90,39 +122,7 @@
          type = "int";
       }
    }
-   element ddr_board_clock_bridge_0
-   {
-      datum _sortIndex
-      {
-         value = "4";
-         type = "int";
-      }
-   }
    element ddr_board_mm_bridge_0
-   {
-      datum _sortIndex
-      {
-         value = "13";
-         type = "int";
-      }
-   }
-   element ddr_board_mm_bridge_1
-   {
-      datum _sortIndex
-      {
-         value = "9";
-         type = "int";
-      }
-   }
-   element ddr_board_mm_clock_crossing_bridge_2
-   {
-      datum _sortIndex
-      {
-         value = "12";
-         type = "int";
-      }
-   }
-   element ddr_board_mm_clock_crossing_bridge_4
    {
       datum _sortIndex
       {
@@ -130,19 +130,35 @@
          type = "int";
       }
    }
-   element ddr_clk
+   element ddr_board_mm_bridge_1
    {
       datum _sortIndex
       {
-         value = "2";
+         value = "10";
          type = "int";
       }
    }
-   element ddr_clk.out_clk
+   element ddr_board_mm_clock_crossing_bridge_1
    {
-      datum color
+      datum _sortIndex
       {
-         value = "-65485";
+         value = "13";
+         type = "int";
+      }
+   }
+   element ddr_board_mm_clock_crossing_bridge_2
+   {
+      datum _sortIndex
+      {
+         value = "14";
+         type = "int";
+      }
+   }
+   element ddr_board_mm_clock_crossing_bridge_4
+   {
+      datum _sortIndex
+      {
+         value = "17";
          type = "int";
       }
    }
@@ -150,7 +166,7 @@
    {
       datum _sortIndex
       {
-         value = "3";
+         value = "4";
          type = "int";
       }
    }
@@ -174,7 +190,7 @@
    {
       datum _sortIndex
       {
-         value = "4";
+         value = "5";
          type = "int";
       }
    }
@@ -182,7 +198,7 @@
    {
       datum _sortIndex
       {
-         value = "14";
+         value = "16";
          type = "int";
       }
    }
@@ -245,7 +261,7 @@
                 <suppliedSystemInfos>
                     <entry>
                         <key>CLOCK_DOMAIN</key>
-                        <value>6</value>
+                        <value>7</value>
                     </entry>
                     <entry>
                         <key>CLOCK_RATE</key>
@@ -253,7 +269,7 @@
                     </entry>
                     <entry>
                         <key>RESET_DOMAIN</key>
-                        <value>6</value>
+                        <value>7</value>
                     </entry>
                 </suppliedSystemInfos>
                 <consumedSystemInfos/>
@@ -267,11 +283,11 @@
                 <consumedSystemInfos>
                     <entry>
                         <key>ADDRESS_MAP</key>
-                        <value>&lt;address-map&gt;&lt;slave name='ddr4a_pipe_0.s0' start='0x0' end='0x100000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
+                        <value>&lt;address-map&gt;&lt;slave name='ddr4a_pipe_0.s0' start='0x0' end='0x200000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
                     </entry>
                     <entry>
                         <key>ADDRESS_WIDTH</key>
-                        <value>32</value>
+                        <value>33</value>
                     </entry>
                     <entry>
                         <key>MAX_SLAVE_DATA_WIDTH</key>
@@ -288,11 +304,11 @@
                 <consumedSystemInfos>
                     <entry>
                         <key>ADDRESS_MAP</key>
-                        <value>&lt;address-map&gt;&lt;slave name='ddr4b_pipe_0.s0' start='0x0' end='0x100000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
+                        <value>&lt;address-map&gt;&lt;slave name='ddr4b_pipe_0.s0' start='0x0' end='0x200000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
                     </entry>
                     <entry>
                         <key>ADDRESS_WIDTH</key>
-                        <value>32</value>
+                        <value>33</value>
                     </entry>
                     <entry>
                         <key>MAX_SLAVE_DATA_WIDTH</key>
@@ -340,7 +356,16 @@
    type="avalon_streaming"
    dir="start" />
  <interface name="csr_clk" internal="csr_clk.in_clk" type="clock" dir="end" />
- <interface name="ddr_clk" internal="ddr_clk.in_clk" type="clock" dir="end" />
+ <interface
+   name="ddr4a_clk"
+   internal="ddr4a_clk_bridge.in_clk"
+   type="clock"
+   dir="end" />
+ <interface
+   name="ddr4b_clk"
+   internal="ddr4b_clk_bridge.in_clk"
+   type="clock"
+   dir="end" />
  <interface
    name="emif_ddr4a"
    internal="ddr4a_pipe_0.m0"
@@ -543,6 +568,166 @@
 </assignmentDefinition>]]></parameter>
  </module>
  <module
+   name="ddr4a_clk_bridge"
+   kind="altera_generic_component"
+   version="1.0"
+   enabled="1">
+  <parameter name="componentDefinition"><![CDATA[<componentDefinition>
+    <boundary>
+        <interfaces>
+            <interface>
+                <name>in_clk</name>
+                <type>clock</type>
+                <isStart>false</isStart>
+                <ports>
+                    <port>
+                        <name>in_clk</name>
+                        <role>clk</role>
+                        <direction>Input</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                </ports>
+                <assignments>
+                    <assignmentValueMap/>
+                </assignments>
+                <parameters>
+                    <parameterValueMap>
+                        <entry>
+                            <key>clockRate</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>externallyDriven</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>ptfSchematicName</key>
+                        </entry>
+                    </parameterValueMap>
+                </parameters>
+            </interface>
+            <interface>
+                <name>out_clk</name>
+                <type>clock</type>
+                <isStart>true</isStart>
+                <ports>
+                    <port>
+                        <name>out_clk</name>
+                        <role>clk</role>
+                        <direction>Output</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                </ports>
+                <assignments>
+                    <assignmentValueMap/>
+                </assignments>
+                <parameters>
+                    <parameterValueMap>
+                        <entry>
+                            <key>associatedDirectClock</key>
+                            <value>in_clk</value>
+                        </entry>
+                        <entry>
+                            <key>clockRate</key>
+                            <value>266000000</value>
+                        </entry>
+                        <entry>
+                            <key>clockRateKnown</key>
+                            <value>true</value>
+                        </entry>
+                        <entry>
+                            <key>externallyDriven</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>ptfSchematicName</key>
+                        </entry>
+                    </parameterValueMap>
+                </parameters>
+            </interface>
+        </interfaces>
+    </boundary>
+    <originalModuleInfo>
+        <className>altera_clock_bridge</className>
+        <version>17.0</version>
+        <displayName>Clock Bridge</displayName>
+    </originalModuleInfo>
+    <systemInfoParameterDescriptors>
+        <descriptors>
+            <descriptor>
+                <parameterDefaultValue>0</parameterDefaultValue>
+                <parameterName>DERIVED_CLOCK_RATE</parameterName>
+                <parameterType>java.lang.Long</parameterType>
+                <systemInfoArgs>in_clk</systemInfoArgs>
+                <systemInfotype>CLOCK_RATE</systemInfotype>
+            </descriptor>
+        </descriptors>
+    </systemInfoParameterDescriptors>
+    <systemInfos>
+        <connPtSystemInfos>
+            <entry>
+                <key>in_clk</key>
+                <value>
+                    <connectionPointName>in_clk</connectionPointName>
+                    <suppliedSystemInfos/>
+                    <consumedSystemInfos>
+                        <entry>
+                            <key>CLOCK_RATE</key>
+                            <value>0</value>
+                        </entry>
+                    </consumedSystemInfos>
+                </value>
+            </entry>
+            <entry>
+                <key>out_clk</key>
+                <value>
+                    <connectionPointName>out_clk</connectionPointName>
+                    <suppliedSystemInfos>
+                        <entry>
+                            <key>CLOCK_RATE</key>
+                            <value>266000000</value>
+                        </entry>
+                    </suppliedSystemInfos>
+                    <consumedSystemInfos/>
+                </value>
+            </entry>
+        </connPtSystemInfos>
+    </systemInfos>
+</componentDefinition>]]></parameter>
+  <parameter name="generationInfoDefinition"><![CDATA[<generationInfoDefinition>
+    <hdlLibraryName>ddr_clk</hdlLibraryName>
+    <fileSets>
+        <fileSet>
+            <fileSetName>ddr_clk</fileSetName>
+            <fileSetFixedName>ddr_clk</fileSetFixedName>
+            <fileSetKind>QUARTUS_SYNTH</fileSetKind>
+            <fileSetFiles/>
+        </fileSet>
+        <fileSet>
+            <fileSetName>ddr_clk</fileSetName>
+            <fileSetFixedName>ddr_clk</fileSetFixedName>
+            <fileSetKind>SIM_VERILOG</fileSetKind>
+            <fileSetFiles/>
+        </fileSet>
+        <fileSet>
+            <fileSetName>ddr_clk</fileSetName>
+            <fileSetFixedName>ddr_clk</fileSetFixedName>
+            <fileSetKind>SIM_VHDL</fileSetKind>
+            <fileSetFiles/>
+        </fileSet>
+    </fileSets>
+</generationInfoDefinition>]]></parameter>
+  <parameter name="hlsFile" value="" />
+  <parameter name="logicalView">ip/ddr_board/ddr_clk.ip</parameter>
+  <parameter name="moduleAssignmentDefinition"><![CDATA[<assignmentDefinition>
+    <assignmentValueMap/>
+</assignmentDefinition>]]></parameter>
+ </module>
+ <module
    name="ddr4a_cross_to_kernel"
    kind="altera_generic_component"
    version="1.0"
@@ -599,7 +784,7 @@
                         <name>m0_address</name>
                         <role>address</role>
                         <direction>Output</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -891,7 +1076,7 @@
                         <name>s0_address</name>
                         <role>address</role>
                         <direction>Input</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -960,7 +1145,7 @@
                         </entry>
                         <entry>
                             <key>addressSpan</key>
-                            <value>4294967296</value>
+                            <value>8589934592</value>
                         </entry>
                         <entry>
                             <key>addressUnits</key>
@@ -1208,7 +1393,7 @@
                     <consumedSystemInfos>
                         <entry>
                             <key>ADDRESS_WIDTH</key>
-                            <value>32</value>
+                            <value>33</value>
                         </entry>
                     </consumedSystemInfos>
                 </value>
@@ -1353,7 +1538,7 @@
                         <name>m0_address</name>
                         <role>address</role>
                         <direction>Output</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -1612,7 +1797,7 @@
                         <name>s0_address</name>
                         <role>address</role>
                         <direction>Input</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -1681,7 +1866,7 @@
                         </entry>
                         <entry>
                             <key>addressSpan</key>
-                            <value>4294967296</value>
+                            <value>8589934592</value>
                         </entry>
                         <entry>
                             <key>addressUnits</key>
@@ -2011,7 +2196,7 @@
                         <name>m0_address</name>
                         <role>address</role>
                         <direction>Output</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -2270,7 +2455,7 @@
                         <name>s0_address</name>
                         <role>address</role>
                         <direction>Input</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -2339,7 +2524,7 @@
                         </entry>
                         <entry>
                             <key>addressSpan</key>
-                            <value>4294967296</value>
+                            <value>8589934592</value>
                         </entry>
                         <entry>
                             <key>addressUnits</key>
@@ -2524,7 +2709,7 @@
                     <consumedSystemInfos>
                         <entry>
                             <key>ADDRESS_WIDTH</key>
-                            <value>32</value>
+                            <value>33</value>
                         </entry>
                     </consumedSystemInfos>
                 </value>
@@ -2575,6 +2760,166 @@
 </generationInfoDefinition>]]></parameter>
   <parameter name="hlsFile" value="" />
   <parameter name="logicalView">ip/ddr_board/ddr_board_mm_bridge_3.ip</parameter>
+  <parameter name="moduleAssignmentDefinition"><![CDATA[<assignmentDefinition>
+    <assignmentValueMap/>
+</assignmentDefinition>]]></parameter>
+ </module>
+ <module
+   name="ddr4b_clk_bridge"
+   kind="altera_generic_component"
+   version="1.0"
+   enabled="1">
+  <parameter name="componentDefinition"><![CDATA[<componentDefinition>
+    <boundary>
+        <interfaces>
+            <interface>
+                <name>in_clk</name>
+                <type>clock</type>
+                <isStart>false</isStart>
+                <ports>
+                    <port>
+                        <name>in_clk</name>
+                        <role>clk</role>
+                        <direction>Input</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                </ports>
+                <assignments>
+                    <assignmentValueMap/>
+                </assignments>
+                <parameters>
+                    <parameterValueMap>
+                        <entry>
+                            <key>clockRate</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>externallyDriven</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>ptfSchematicName</key>
+                        </entry>
+                    </parameterValueMap>
+                </parameters>
+            </interface>
+            <interface>
+                <name>out_clk</name>
+                <type>clock</type>
+                <isStart>true</isStart>
+                <ports>
+                    <port>
+                        <name>out_clk</name>
+                        <role>clk</role>
+                        <direction>Output</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                </ports>
+                <assignments>
+                    <assignmentValueMap/>
+                </assignments>
+                <parameters>
+                    <parameterValueMap>
+                        <entry>
+                            <key>associatedDirectClock</key>
+                            <value>in_clk</value>
+                        </entry>
+                        <entry>
+                            <key>clockRate</key>
+                            <value>266</value>
+                        </entry>
+                        <entry>
+                            <key>clockRateKnown</key>
+                            <value>true</value>
+                        </entry>
+                        <entry>
+                            <key>externallyDriven</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>ptfSchematicName</key>
+                        </entry>
+                    </parameterValueMap>
+                </parameters>
+            </interface>
+        </interfaces>
+    </boundary>
+    <originalModuleInfo>
+        <className>altera_clock_bridge</className>
+        <version>17.0</version>
+        <displayName>Clock Bridge</displayName>
+    </originalModuleInfo>
+    <systemInfoParameterDescriptors>
+        <descriptors>
+            <descriptor>
+                <parameterDefaultValue>0</parameterDefaultValue>
+                <parameterName>DERIVED_CLOCK_RATE</parameterName>
+                <parameterType>java.lang.Long</parameterType>
+                <systemInfoArgs>in_clk</systemInfoArgs>
+                <systemInfotype>CLOCK_RATE</systemInfotype>
+            </descriptor>
+        </descriptors>
+    </systemInfoParameterDescriptors>
+    <systemInfos>
+        <connPtSystemInfos>
+            <entry>
+                <key>in_clk</key>
+                <value>
+                    <connectionPointName>in_clk</connectionPointName>
+                    <suppliedSystemInfos/>
+                    <consumedSystemInfos>
+                        <entry>
+                            <key>CLOCK_RATE</key>
+                            <value>0</value>
+                        </entry>
+                    </consumedSystemInfos>
+                </value>
+            </entry>
+            <entry>
+                <key>out_clk</key>
+                <value>
+                    <connectionPointName>out_clk</connectionPointName>
+                    <suppliedSystemInfos>
+                        <entry>
+                            <key>CLOCK_RATE</key>
+                            <value>266</value>
+                        </entry>
+                    </suppliedSystemInfos>
+                    <consumedSystemInfos/>
+                </value>
+            </entry>
+        </connPtSystemInfos>
+    </systemInfos>
+</componentDefinition>]]></parameter>
+  <parameter name="generationInfoDefinition"><![CDATA[<generationInfoDefinition>
+    <hdlLibraryName>ddr_board_clock_bridge_0</hdlLibraryName>
+    <fileSets>
+        <fileSet>
+            <fileSetName>ddr_board_clock_bridge_0</fileSetName>
+            <fileSetFixedName>ddr_board_clock_bridge_0</fileSetFixedName>
+            <fileSetKind>QUARTUS_SYNTH</fileSetKind>
+            <fileSetFiles/>
+        </fileSet>
+        <fileSet>
+            <fileSetName>ddr_board_clock_bridge_0</fileSetName>
+            <fileSetFixedName>ddr_board_clock_bridge_0</fileSetFixedName>
+            <fileSetKind>SIM_VERILOG</fileSetKind>
+            <fileSetFiles/>
+        </fileSet>
+        <fileSet>
+            <fileSetName>ddr_board_clock_bridge_0</fileSetName>
+            <fileSetFixedName>ddr_board_clock_bridge_0</fileSetFixedName>
+            <fileSetKind>SIM_VHDL</fileSetKind>
+            <fileSetFiles/>
+        </fileSet>
+    </fileSets>
+</generationInfoDefinition>]]></parameter>
+  <parameter name="hlsFile" value="" />
+  <parameter name="logicalView">ip/ddr_board/ddr_board_clock_bridge_0.ip</parameter>
   <parameter name="moduleAssignmentDefinition"><![CDATA[<assignmentDefinition>
     <assignmentValueMap/>
 </assignmentDefinition>]]></parameter>
@@ -2669,7 +3014,7 @@
                         <name>m0_address</name>
                         <role>address</role>
                         <direction>Output</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -2928,7 +3273,7 @@
                         <name>s0_address</name>
                         <role>address</role>
                         <direction>Input</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -2997,7 +3342,7 @@
                         </entry>
                         <entry>
                             <key>addressSpan</key>
-                            <value>4294967296</value>
+                            <value>8589934592</value>
                         </entry>
                         <entry>
                             <key>addressUnits</key>
@@ -3327,7 +3672,7 @@
                         <name>m0_address</name>
                         <role>address</role>
                         <direction>Output</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -3586,7 +3931,7 @@
                         <name>s0_address</name>
                         <role>address</role>
                         <direction>Input</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -3655,7 +4000,7 @@
                         </entry>
                         <entry>
                             <key>addressSpan</key>
-                            <value>4294967296</value>
+                            <value>8589934592</value>
                         </entry>
                         <entry>
                             <key>addressUnits</key>
@@ -3840,7 +4185,7 @@
                     <consumedSystemInfos>
                         <entry>
                             <key>ADDRESS_WIDTH</key>
-                            <value>32</value>
+                            <value>33</value>
                         </entry>
                     </consumedSystemInfos>
                 </value>
@@ -3944,7 +4289,7 @@
                         <name>acl_bsp_snoop_data</name>
                         <role>data</role>
                         <direction>Output</direction>
-                        <width>33</width>
+                        <width>34</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -3984,7 +4329,7 @@
                         </entry>
                         <entry>
                             <key>dataBitsPerSymbol</key>
-                            <value>33</value>
+                            <value>34</value>
                         </entry>
                         <entry>
                             <key>emptyWithinPacket</key>
@@ -4033,7 +4378,7 @@
                         <name>bank1_address</name>
                         <role>address</role>
                         <direction>Output</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -4254,7 +4599,7 @@
                         <name>bank2_address</name>
                         <role>address</role>
                         <direction>Output</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -4492,7 +4837,7 @@
                     <parameterValueMap>
                         <entry>
                             <key>clockRate</key>
-                            <value>200000000</value>
+                            <value>266000000</value>
                         </entry>
                         <entry>
                             <key>externallyDriven</key>
@@ -4684,7 +5029,7 @@
                         <name>s_address</name>
                         <role>address</role>
                         <direction>Input</direction>
-                        <width>27</width>
+                        <width>28</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -4721,7 +5066,7 @@
                         </entry>
                         <entry>
                             <key>addressSpan</key>
-                            <value>8589934592</value>
+                            <value>17179869184</value>
                         </entry>
                         <entry>
                             <key>addressUnits</key>
@@ -4979,7 +5324,7 @@
                     <consumedSystemInfos>
                         <entry>
                             <key>CLOCK_DOMAIN</key>
-                            <value>4</value>
+                            <value>5</value>
                         </entry>
                         <entry>
                             <key>CLOCK_RATE</key>
@@ -4987,7 +5332,7 @@
                         </entry>
                         <entry>
                             <key>RESET_DOMAIN</key>
-                            <value>4</value>
+                            <value>5</value>
                         </entry>
                     </consumedSystemInfos>
                 </value>
@@ -4999,11 +5344,11 @@
                     <suppliedSystemInfos>
                         <entry>
                             <key>ADDRESS_MAP</key>
-                            <value>&lt;address-map&gt;&lt;slave name='s' start='0x0' end='0x200000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
+                            <value>&lt;address-map&gt;&lt;slave name='s' start='0x0' end='0x400000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
                         </entry>
                         <entry>
                             <key>ADDRESS_WIDTH</key>
-                            <value>33</value>
+                            <value>34</value>
                         </entry>
                         <entry>
                             <key>MAX_SLAVE_DATA_WIDTH</key>
@@ -5135,7 +5480,7 @@
                         <name>m0_address</name>
                         <role>address</role>
                         <direction>Output</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -5394,7 +5739,7 @@
                         <name>s0_address</name>
                         <role>address</role>
                         <direction>Input</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -5463,7 +5808,7 @@
                         </entry>
                         <entry>
                             <key>addressSpan</key>
-                            <value>4294967296</value>
+                            <value>8589934592</value>
                         </entry>
                         <entry>
                             <key>addressUnits</key>
@@ -5648,7 +5993,7 @@
                     <consumedSystemInfos>
                         <entry>
                             <key>ADDRESS_WIDTH</key>
-                            <value>32</value>
+                            <value>33</value>
                         </entry>
                     </consumedSystemInfos>
                 </value>
@@ -5793,7 +6138,7 @@
                         <name>m0_address</name>
                         <role>address</role>
                         <direction>Output</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -6052,7 +6397,7 @@
                         <name>s0_address</name>
                         <role>address</role>
                         <direction>Input</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -6121,7 +6466,7 @@
                         </entry>
                         <entry>
                             <key>addressSpan</key>
-                            <value>4294967296</value>
+                            <value>8589934592</value>
                         </entry>
                         <entry>
                             <key>addressUnits</key>
@@ -6306,7 +6651,7 @@
                     <consumedSystemInfos>
                         <entry>
                             <key>ADDRESS_WIDTH</key>
-                            <value>32</value>
+                            <value>33</value>
                         </entry>
                     </consumedSystemInfos>
                 </value>
@@ -6362,7 +6707,7 @@
 </assignmentDefinition>]]></parameter>
  </module>
  <module
-   name="ddr_board_mm_clock_crossing_bridge_2"
+   name="ddr_board_mm_clock_crossing_bridge_1"
    kind="altera_generic_component"
    version="1.0"
    enabled="1">
@@ -6418,7 +6763,7 @@
                         <name>m0_address</name>
                         <role>address</role>
                         <direction>Output</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -6710,7 +7055,7 @@
                         <name>s0_address</name>
                         <role>address</role>
                         <direction>Input</direction>
-                        <width>32</width>
+                        <width>33</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -6779,7 +7124,728 @@
                         </entry>
                         <entry>
                             <key>addressSpan</key>
-                            <value>4294967296</value>
+                            <value>8589934592</value>
+                        </entry>
+                        <entry>
+                            <key>addressUnits</key>
+                            <value>SYMBOLS</value>
+                        </entry>
+                        <entry>
+                            <key>alwaysBurstMaxBurst</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>associatedClock</key>
+                            <value>s0_clk</value>
+                        </entry>
+                        <entry>
+                            <key>associatedReset</key>
+                            <value>s0_reset</value>
+                        </entry>
+                        <entry>
+                            <key>bitsPerSymbol</key>
+                            <value>8</value>
+                        </entry>
+                        <entry>
+                            <key>bridgedAddressOffset</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>bridgesToMaster</key>
+                            <value>ddr_board_mm_clock_crossing_bridge_1.m0</value>
+                        </entry>
+                        <entry>
+                            <key>burstOnBurstBoundariesOnly</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>burstcountUnits</key>
+                            <value>WORDS</value>
+                        </entry>
+                        <entry>
+                            <key>constantBurstBehavior</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>explicitAddressSpan</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>holdTime</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>interleaveBursts</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>isBigEndian</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>isFlash</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>isMemoryDevice</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>isNonVolatileStorage</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>linewrapBursts</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>maximumPendingReadTransactions</key>
+                            <value>128</value>
+                        </entry>
+                        <entry>
+                            <key>maximumPendingWriteTransactions</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>minimumReadLatency</key>
+                            <value>1</value>
+                        </entry>
+                        <entry>
+                            <key>minimumResponseLatency</key>
+                            <value>1</value>
+                        </entry>
+                        <entry>
+                            <key>minimumUninterruptedRunLength</key>
+                            <value>1</value>
+                        </entry>
+                        <entry>
+                            <key>prSafe</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>printableDevice</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>readLatency</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>readWaitStates</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>readWaitTime</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>registerIncomingSignals</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>registerOutgoingSignals</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>setupTime</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>timingUnits</key>
+                            <value>Cycles</value>
+                        </entry>
+                        <entry>
+                            <key>transparentBridge</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>waitrequestAllowance</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>wellBehavedWaitrequest</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>writeLatency</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>writeWaitStates</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>writeWaitTime</key>
+                            <value>0</value>
+                        </entry>
+                    </parameterValueMap>
+                </parameters>
+            </interface>
+            <interface>
+                <name>s0_clk</name>
+                <type>clock</type>
+                <isStart>false</isStart>
+                <ports>
+                    <port>
+                        <name>s0_clk</name>
+                        <role>clk</role>
+                        <direction>Input</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                </ports>
+                <assignments>
+                    <assignmentValueMap/>
+                </assignments>
+                <parameters>
+                    <parameterValueMap>
+                        <entry>
+                            <key>clockRate</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>externallyDriven</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>ptfSchematicName</key>
+                        </entry>
+                    </parameterValueMap>
+                </parameters>
+            </interface>
+            <interface>
+                <name>s0_reset</name>
+                <type>reset</type>
+                <isStart>false</isStart>
+                <ports>
+                    <port>
+                        <name>s0_reset</name>
+                        <role>reset</role>
+                        <direction>Input</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                </ports>
+                <assignments>
+                    <assignmentValueMap/>
+                </assignments>
+                <parameters>
+                    <parameterValueMap>
+                        <entry>
+                            <key>associatedClock</key>
+                            <value>s0_clk</value>
+                        </entry>
+                        <entry>
+                            <key>synchronousEdges</key>
+                            <value>DEASSERT</value>
+                        </entry>
+                    </parameterValueMap>
+                </parameters>
+            </interface>
+        </interfaces>
+    </boundary>
+    <originalModuleInfo>
+        <className>altera_avalon_mm_clock_crossing_bridge</className>
+        <version>17.0</version>
+        <displayName>Avalon-MM Clock Crossing Bridge</displayName>
+    </originalModuleInfo>
+    <systemInfoParameterDescriptors>
+        <descriptors>
+            <descriptor>
+                <parameterDefaultValue>10</parameterDefaultValue>
+                <parameterName>SYSINFO_ADDR_WIDTH</parameterName>
+                <parameterType>java.lang.Integer</parameterType>
+                <systemInfoArgs>m0</systemInfoArgs>
+                <systemInfotype>ADDRESS_WIDTH</systemInfotype>
+            </descriptor>
+        </descriptors>
+    </systemInfoParameterDescriptors>
+    <systemInfos>
+        <connPtSystemInfos>
+            <entry>
+                <key>m0</key>
+                <value>
+                    <connectionPointName>m0</connectionPointName>
+                    <suppliedSystemInfos/>
+                    <consumedSystemInfos>
+                        <entry>
+                            <key>ADDRESS_WIDTH</key>
+                            <value>33</value>
+                        </entry>
+                    </consumedSystemInfos>
+                </value>
+            </entry>
+            <entry>
+                <key>s0</key>
+                <value>
+                    <connectionPointName>s0</connectionPointName>
+                    <suppliedSystemInfos>
+                        <entry>
+                            <key>ADDRESS_MAP</key>
+                        </entry>
+                        <entry>
+                            <key>ADDRESS_WIDTH</key>
+                        </entry>
+                        <entry>
+                            <key>MAX_SLAVE_DATA_WIDTH</key>
+                        </entry>
+                    </suppliedSystemInfos>
+                    <consumedSystemInfos/>
+                </value>
+            </entry>
+        </connPtSystemInfos>
+    </systemInfos>
+</componentDefinition>]]></parameter>
+  <parameter name="generationInfoDefinition"><![CDATA[<generationInfoDefinition>
+    <hdlLibraryName>ddr_board_mm_clock_crossing_bridge_1</hdlLibraryName>
+    <fileSets>
+        <fileSet>
+            <fileSetName>ddr_board_mm_clock_crossing_bridge_1</fileSetName>
+            <fileSetFixedName>ddr_board_mm_clock_crossing_bridge_1</fileSetFixedName>
+            <fileSetKind>QUARTUS_SYNTH</fileSetKind>
+            <fileSetFiles/>
+        </fileSet>
+        <fileSet>
+            <fileSetName>ddr_board_mm_clock_crossing_bridge_1</fileSetName>
+            <fileSetFixedName>ddr_board_mm_clock_crossing_bridge_1</fileSetFixedName>
+            <fileSetKind>SIM_VERILOG</fileSetKind>
+            <fileSetFiles/>
+        </fileSet>
+        <fileSet>
+            <fileSetName>ddr_board_mm_clock_crossing_bridge_1</fileSetName>
+            <fileSetFixedName>ddr_board_mm_clock_crossing_bridge_1</fileSetFixedName>
+            <fileSetKind>SIM_VHDL</fileSetKind>
+            <fileSetFiles/>
+        </fileSet>
+    </fileSets>
+</generationInfoDefinition>]]></parameter>
+  <parameter name="hlsFile" value="" />
+  <parameter name="logicalView">ip/ddr_board/ddr_board_mm_clock_crossing_bridge_1.ip</parameter>
+  <parameter name="moduleAssignmentDefinition"><![CDATA[<assignmentDefinition>
+    <assignmentValueMap/>
+</assignmentDefinition>]]></parameter>
+ </module>
+ <module
+   name="ddr_board_mm_clock_crossing_bridge_2"
+   kind="altera_generic_component"
+   version="1.0"
+   enabled="1">
+  <parameter name="componentDefinition"><![CDATA[<componentDefinition>
+    <boundary>
+        <interfaces>
+            <interface>
+                <name>m0</name>
+                <type>avalon</type>
+                <isStart>true</isStart>
+                <ports>
+                    <port>
+                        <name>m0_waitrequest</name>
+                        <role>waitrequest</role>
+                        <direction>Input</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                    <port>
+                        <name>m0_readdata</name>
+                        <role>readdata</role>
+                        <direction>Input</direction>
+                        <width>512</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                    </port>
+                    <port>
+                        <name>m0_readdatavalid</name>
+                        <role>readdatavalid</role>
+                        <direction>Input</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                    <port>
+                        <name>m0_burstcount</name>
+                        <role>burstcount</role>
+                        <direction>Output</direction>
+                        <width>5</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                    </port>
+                    <port>
+                        <name>m0_writedata</name>
+                        <role>writedata</role>
+                        <direction>Output</direction>
+                        <width>512</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                    </port>
+                    <port>
+                        <name>m0_address</name>
+                        <role>address</role>
+                        <direction>Output</direction>
+                        <width>33</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                    </port>
+                    <port>
+                        <name>m0_write</name>
+                        <role>write</role>
+                        <direction>Output</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                    <port>
+                        <name>m0_read</name>
+                        <role>read</role>
+                        <direction>Output</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                    <port>
+                        <name>m0_byteenable</name>
+                        <role>byteenable</role>
+                        <direction>Output</direction>
+                        <width>64</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                    </port>
+                    <port>
+                        <name>m0_debugaccess</name>
+                        <role>debugaccess</role>
+                        <direction>Output</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                </ports>
+                <assignments>
+                    <assignmentValueMap/>
+                </assignments>
+                <parameters>
+                    <parameterValueMap>
+                        <entry>
+                            <key>adaptsTo</key>
+                        </entry>
+                        <entry>
+                            <key>addressGroup</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>addressUnits</key>
+                            <value>SYMBOLS</value>
+                        </entry>
+                        <entry>
+                            <key>alwaysBurstMaxBurst</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>associatedClock</key>
+                            <value>m0_clk</value>
+                        </entry>
+                        <entry>
+                            <key>associatedReset</key>
+                            <value>m0_reset</value>
+                        </entry>
+                        <entry>
+                            <key>bitsPerSymbol</key>
+                            <value>8</value>
+                        </entry>
+                        <entry>
+                            <key>burstOnBurstBoundariesOnly</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>burstcountUnits</key>
+                            <value>WORDS</value>
+                        </entry>
+                        <entry>
+                            <key>constantBurstBehavior</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>dBSBigEndian</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>doStreamReads</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>doStreamWrites</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>holdTime</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>interleaveBursts</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>isAsynchronous</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>isBigEndian</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>isReadable</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>isWriteable</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>linewrapBursts</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>maxAddressWidth</key>
+                            <value>32</value>
+                        </entry>
+                        <entry>
+                            <key>maximumPendingReadTransactions</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>maximumPendingWriteTransactions</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>minimumReadLatency</key>
+                            <value>1</value>
+                        </entry>
+                        <entry>
+                            <key>minimumResponseLatency</key>
+                            <value>1</value>
+                        </entry>
+                        <entry>
+                            <key>prSafe</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>readLatency</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>readWaitTime</key>
+                            <value>1</value>
+                        </entry>
+                        <entry>
+                            <key>registerIncomingSignals</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>registerOutgoingSignals</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>setupTime</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>timingUnits</key>
+                            <value>Cycles</value>
+                        </entry>
+                        <entry>
+                            <key>waitrequestAllowance</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>writeWaitTime</key>
+                            <value>0</value>
+                        </entry>
+                    </parameterValueMap>
+                </parameters>
+            </interface>
+            <interface>
+                <name>m0_clk</name>
+                <type>clock</type>
+                <isStart>false</isStart>
+                <ports>
+                    <port>
+                        <name>m0_clk</name>
+                        <role>clk</role>
+                        <direction>Input</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                </ports>
+                <assignments>
+                    <assignmentValueMap/>
+                </assignments>
+                <parameters>
+                    <parameterValueMap>
+                        <entry>
+                            <key>clockRate</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>externallyDriven</key>
+                            <value>false</value>
+                        </entry>
+                        <entry>
+                            <key>ptfSchematicName</key>
+                        </entry>
+                    </parameterValueMap>
+                </parameters>
+            </interface>
+            <interface>
+                <name>m0_reset</name>
+                <type>reset</type>
+                <isStart>false</isStart>
+                <ports>
+                    <port>
+                        <name>m0_reset</name>
+                        <role>reset</role>
+                        <direction>Input</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                </ports>
+                <assignments>
+                    <assignmentValueMap/>
+                </assignments>
+                <parameters>
+                    <parameterValueMap>
+                        <entry>
+                            <key>associatedClock</key>
+                            <value>m0_clk</value>
+                        </entry>
+                        <entry>
+                            <key>synchronousEdges</key>
+                            <value>DEASSERT</value>
+                        </entry>
+                    </parameterValueMap>
+                </parameters>
+            </interface>
+            <interface>
+                <name>s0</name>
+                <type>avalon</type>
+                <isStart>false</isStart>
+                <ports>
+                    <port>
+                        <name>s0_waitrequest</name>
+                        <role>waitrequest</role>
+                        <direction>Output</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                    <port>
+                        <name>s0_readdata</name>
+                        <role>readdata</role>
+                        <direction>Output</direction>
+                        <width>512</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                    </port>
+                    <port>
+                        <name>s0_readdatavalid</name>
+                        <role>readdatavalid</role>
+                        <direction>Output</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                    <port>
+                        <name>s0_burstcount</name>
+                        <role>burstcount</role>
+                        <direction>Input</direction>
+                        <width>5</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                    </port>
+                    <port>
+                        <name>s0_writedata</name>
+                        <role>writedata</role>
+                        <direction>Input</direction>
+                        <width>512</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                    </port>
+                    <port>
+                        <name>s0_address</name>
+                        <role>address</role>
+                        <direction>Input</direction>
+                        <width>33</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                    </port>
+                    <port>
+                        <name>s0_write</name>
+                        <role>write</role>
+                        <direction>Input</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                    <port>
+                        <name>s0_read</name>
+                        <role>read</role>
+                        <direction>Input</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                    <port>
+                        <name>s0_byteenable</name>
+                        <role>byteenable</role>
+                        <direction>Input</direction>
+                        <width>64</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                    </port>
+                    <port>
+                        <name>s0_debugaccess</name>
+                        <role>debugaccess</role>
+                        <direction>Input</direction>
+                        <width>1</width>
+                        <lowerBound>0</lowerBound>
+                        <vhdlType>STD_LOGIC</vhdlType>
+                    </port>
+                </ports>
+                <assignments>
+                    <assignmentValueMap>
+                        <entry>
+                            <key>embeddedsw.configuration.isFlash</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>embeddedsw.configuration.isMemoryDevice</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>embeddedsw.configuration.isNonVolatileStorage</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>embeddedsw.configuration.isPrintableDevice</key>
+                            <value>0</value>
+                        </entry>
+                    </assignmentValueMap>
+                </assignments>
+                <parameters>
+                    <parameterValueMap>
+                        <entry>
+                            <key>addressAlignment</key>
+                            <value>DYNAMIC</value>
+                        </entry>
+                        <entry>
+                            <key>addressGroup</key>
+                            <value>0</value>
+                        </entry>
+                        <entry>
+                            <key>addressSpan</key>
+                            <value>8589934592</value>
                         </entry>
                         <entry>
                             <key>addressUnits</key>
@@ -7027,7 +8093,7 @@
                     <consumedSystemInfos>
                         <entry>
                             <key>ADDRESS_WIDTH</key>
-                            <value>32</value>
+                            <value>33</value>
                         </entry>
                     </consumedSystemInfos>
                 </value>
@@ -7804,166 +8870,6 @@
 </assignmentDefinition>]]></parameter>
  </module>
  <module
-   name="ddr_clk"
-   kind="altera_generic_component"
-   version="1.0"
-   enabled="1">
-  <parameter name="componentDefinition"><![CDATA[<componentDefinition>
-    <boundary>
-        <interfaces>
-            <interface>
-                <name>in_clk</name>
-                <type>clock</type>
-                <isStart>false</isStart>
-                <ports>
-                    <port>
-                        <name>in_clk</name>
-                        <role>clk</role>
-                        <direction>Input</direction>
-                        <width>1</width>
-                        <lowerBound>0</lowerBound>
-                        <vhdlType>STD_LOGIC</vhdlType>
-                    </port>
-                </ports>
-                <assignments>
-                    <assignmentValueMap/>
-                </assignments>
-                <parameters>
-                    <parameterValueMap>
-                        <entry>
-                            <key>clockRate</key>
-                            <value>0</value>
-                        </entry>
-                        <entry>
-                            <key>externallyDriven</key>
-                            <value>false</value>
-                        </entry>
-                        <entry>
-                            <key>ptfSchematicName</key>
-                        </entry>
-                    </parameterValueMap>
-                </parameters>
-            </interface>
-            <interface>
-                <name>out_clk</name>
-                <type>clock</type>
-                <isStart>true</isStart>
-                <ports>
-                    <port>
-                        <name>out_clk</name>
-                        <role>clk</role>
-                        <direction>Output</direction>
-                        <width>1</width>
-                        <lowerBound>0</lowerBound>
-                        <vhdlType>STD_LOGIC</vhdlType>
-                    </port>
-                </ports>
-                <assignments>
-                    <assignmentValueMap/>
-                </assignments>
-                <parameters>
-                    <parameterValueMap>
-                        <entry>
-                            <key>associatedDirectClock</key>
-                            <value>in_clk</value>
-                        </entry>
-                        <entry>
-                            <key>clockRate</key>
-                            <value>266000000</value>
-                        </entry>
-                        <entry>
-                            <key>clockRateKnown</key>
-                            <value>true</value>
-                        </entry>
-                        <entry>
-                            <key>externallyDriven</key>
-                            <value>false</value>
-                        </entry>
-                        <entry>
-                            <key>ptfSchematicName</key>
-                        </entry>
-                    </parameterValueMap>
-                </parameters>
-            </interface>
-        </interfaces>
-    </boundary>
-    <originalModuleInfo>
-        <className>altera_clock_bridge</className>
-        <version>17.0</version>
-        <displayName>Clock Bridge</displayName>
-    </originalModuleInfo>
-    <systemInfoParameterDescriptors>
-        <descriptors>
-            <descriptor>
-                <parameterDefaultValue>0</parameterDefaultValue>
-                <parameterName>DERIVED_CLOCK_RATE</parameterName>
-                <parameterType>java.lang.Long</parameterType>
-                <systemInfoArgs>in_clk</systemInfoArgs>
-                <systemInfotype>CLOCK_RATE</systemInfotype>
-            </descriptor>
-        </descriptors>
-    </systemInfoParameterDescriptors>
-    <systemInfos>
-        <connPtSystemInfos>
-            <entry>
-                <key>in_clk</key>
-                <value>
-                    <connectionPointName>in_clk</connectionPointName>
-                    <suppliedSystemInfos/>
-                    <consumedSystemInfos>
-                        <entry>
-                            <key>CLOCK_RATE</key>
-                            <value>0</value>
-                        </entry>
-                    </consumedSystemInfos>
-                </value>
-            </entry>
-            <entry>
-                <key>out_clk</key>
-                <value>
-                    <connectionPointName>out_clk</connectionPointName>
-                    <suppliedSystemInfos>
-                        <entry>
-                            <key>CLOCK_RATE</key>
-                            <value>266000000</value>
-                        </entry>
-                    </suppliedSystemInfos>
-                    <consumedSystemInfos/>
-                </value>
-            </entry>
-        </connPtSystemInfos>
-    </systemInfos>
-</componentDefinition>]]></parameter>
-  <parameter name="generationInfoDefinition"><![CDATA[<generationInfoDefinition>
-    <hdlLibraryName>ddr_clk</hdlLibraryName>
-    <fileSets>
-        <fileSet>
-            <fileSetName>ddr_clk</fileSetName>
-            <fileSetFixedName>ddr_clk</fileSetFixedName>
-            <fileSetKind>QUARTUS_SYNTH</fileSetKind>
-            <fileSetFiles/>
-        </fileSet>
-        <fileSet>
-            <fileSetName>ddr_clk</fileSetName>
-            <fileSetFixedName>ddr_clk</fileSetFixedName>
-            <fileSetKind>SIM_VERILOG</fileSetKind>
-            <fileSetFiles/>
-        </fileSet>
-        <fileSet>
-            <fileSetName>ddr_clk</fileSetName>
-            <fileSetFixedName>ddr_clk</fileSetFixedName>
-            <fileSetKind>SIM_VHDL</fileSetKind>
-            <fileSetFiles/>
-        </fileSet>
-    </fileSets>
-</generationInfoDefinition>]]></parameter>
-  <parameter name="hlsFile" value="" />
-  <parameter name="logicalView">ip/ddr_board/ddr_clk.ip</parameter>
-  <parameter name="moduleAssignmentDefinition"><![CDATA[<assignmentDefinition>
-    <assignmentValueMap/>
-</assignmentDefinition>]]></parameter>
- </module>
- <module
    name="global_reset"
    kind="altera_generic_component"
    version="1.0"
@@ -8481,8 +9387,8 @@
   <parameter name="AUTO_GENERATION_ID" value="0" />
   <parameter name="AUTO_HOST_ADDRESS_MAP"><![CDATA[<address-map><slave name='parent/ccip_avmm_bridge_inst.avst_to_avmm_master_inst.avmm' start='0x0' end='0x1000000000000' datawidth='512' /></address-map>]]></parameter>
   <parameter name="AUTO_HOST_ADDRESS_WIDTH" value="48" />
-  <parameter name="AUTO_MEM_ADDRESS_MAP"><![CDATA[<address-map><slave name='ddr_board_acl_memory_bank_divider_0.s' start='0x0' end='0x200000000' datawidth='512' /></address-map>]]></parameter>
-  <parameter name="AUTO_MEM_ADDRESS_WIDTH" value="33" />
+  <parameter name="AUTO_MEM_ADDRESS_MAP"><![CDATA[<address-map><slave name='ddr_board_acl_memory_bank_divider_0.s' start='0x0' end='0x400000000' datawidth='512' /></address-map>]]></parameter>
+  <parameter name="AUTO_MEM_ADDRESS_WIDTH" value="34" />
   <parameter name="AUTO_UNIQUE_ID">ddr_board_msgdma_bbb_inst</parameter>
  </module>
  <connection
@@ -8537,15 +9443,22 @@
  <connection
    kind="avalon"
    version="17.0"
-   start="ddr_board_mm_bridge_0.m0"
-   end="ddr4b_pipe_1_burst16.s0">
+   start="ddr_board_mm_bridge_1.m0"
+   end="ddr4a_pipe_1_burst16.s0">
   <parameter name="baseAddress" value="0x0000" />
  </connection>
  <connection
    kind="avalon"
    version="17.0"
-   start="ddr_board_mm_bridge_1.m0"
-   end="ddr4a_pipe_1_burst16.s0">
+   start="ddr_board_mm_bridge_0.m0"
+   end="ddr_board_mm_clock_crossing_bridge_1.s0">
+  <parameter name="baseAddress" value="0x0000" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="17.0"
+   start="ddr_board_mm_clock_crossing_bridge_1.m0"
+   end="ddr4b_pipe_1_burst16.s0">
   <parameter name="baseAddress" value="0x0000" />
  </connection>
  <connection
@@ -8568,43 +9481,43 @@
  <connection
    kind="clock"
    version="17.0"
-   start="ddr_clk.out_clk"
+   start="ddr4a_clk_bridge.out_clk"
    end="ddr4a_pipe_0.clk" />
  <connection
    kind="clock"
    version="17.0"
-   start="ddr_clk.out_clk"
+   start="ddr4a_clk_bridge.out_clk"
    end="ddr4a_pipe_1_burst16.clk" />
  <connection
    kind="clock"
    version="17.0"
-   start="ddr_clk.out_clk"
-   end="ddr4b_pipe_0.clk" />
- <connection
-   kind="clock"
-   version="17.0"
-   start="ddr_clk.out_clk"
-   end="ddr4b_pipe_1_burst16.clk" />
- <connection
-   kind="clock"
-   version="17.0"
-   start="ddr_clk.out_clk"
+   start="ddr4a_clk_bridge.out_clk"
    end="msgdma_bbb_inst.clk" />
  <connection
    kind="clock"
    version="17.0"
-   start="ddr_clk.out_clk"
+   start="ddr4a_clk_bridge.out_clk"
    end="ddr_board_acl_memory_bank_divider_0.clk" />
  <connection
    kind="clock"
    version="17.0"
-   start="ddr_clk.out_clk"
+   start="ddr4a_clk_bridge.out_clk"
    end="ddr_board_mm_bridge_0.clk" />
  <connection
    kind="clock"
    version="17.0"
-   start="ddr_clk.out_clk"
+   start="ddr4a_clk_bridge.out_clk"
    end="ddr_board_mm_bridge_1.clk" />
+ <connection
+   kind="clock"
+   version="17.0"
+   start="ddr4b_clk_bridge.out_clk"
+   end="ddr4b_pipe_0.clk" />
+ <connection
+   kind="clock"
+   version="17.0"
+   start="ddr4b_clk_bridge.out_clk"
+   end="ddr4b_pipe_1_burst16.clk" />
  <connection
    kind="clock"
    version="17.0"
@@ -8613,18 +9526,23 @@
  <connection
    kind="clock"
    version="17.0"
-   start="ddr_clk.out_clk"
+   start="ddr4a_clk_bridge.out_clk"
    end="ddr4a_cross_to_kernel.m0_clk" />
  <connection
    kind="clock"
    version="17.0"
-   start="ddr_clk.out_clk"
+   start="ddr4a_clk_bridge.out_clk"
+   end="ddr_board_mm_clock_crossing_bridge_4.m0_clk" />
+ <connection
+   kind="clock"
+   version="17.0"
+   start="ddr4b_clk_bridge.out_clk"
    end="ddr_board_mm_clock_crossing_bridge_2.m0_clk" />
  <connection
    kind="clock"
    version="17.0"
-   start="ddr_clk.out_clk"
-   end="ddr_board_mm_clock_crossing_bridge_4.m0_clk" />
+   start="ddr4b_clk_bridge.out_clk"
+   end="ddr_board_mm_clock_crossing_bridge_1.m0_clk" />
  <connection
    kind="clock"
    version="17.0"
@@ -8640,6 +9558,11 @@
    version="17.0"
    start="csr_clk.out_clk"
    end="ddr_board_mm_clock_crossing_bridge_4.s0_clk" />
+ <connection
+   kind="clock"
+   version="17.0"
+   start="ddr4a_clk_bridge.out_clk"
+   end="ddr_board_mm_clock_crossing_bridge_1.s0_clk" />
  <connection
    kind="reset"
    version="17.0"
@@ -8660,6 +9583,11 @@
    version="17.0"
    start="global_reset.out_reset"
    end="ddr_board_mm_clock_crossing_bridge_4.m0_reset" />
+ <connection
+   kind="reset"
+   version="17.0"
+   start="global_reset.out_reset"
+   end="ddr_board_mm_clock_crossing_bridge_1.m0_reset" />
  <connection
    kind="reset"
    version="17.0"
@@ -8715,6 +9643,11 @@
    version="17.0"
    start="global_reset.out_reset"
    end="ddr_board_mm_clock_crossing_bridge_4.s0_reset" />
+ <connection
+   kind="reset"
+   version="17.0"
+   start="global_reset.out_reset"
+   end="ddr_board_mm_clock_crossing_bridge_1.s0_reset" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.enableEccProtection" value="FALSE" />
  <interconnectRequirement for="$system" name="qsys_mm.insertDefaultSlave" value="FALSE" />

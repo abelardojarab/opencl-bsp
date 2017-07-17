@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <spirit:component xmlns:altera="http://www.altera.com/XMLSchema/IPXact/extensions" xmlns:spirit="http://www.spiritconsortium.org/XMLSchema/SPIRIT/1685-2009">
   <spirit:vendor>Intel Corporation</spirit:vendor>
-  <spirit:library>ddr_board_mm_clock_crossing_bridge_0</spirit:library>
-  <spirit:name>ddr_board_mm_clock_crossing_bridge_0</spirit:name>
+  <spirit:library>ddr_board_mm_clock_crossing_bridge_1</spirit:library>
+  <spirit:name>ddr_board_mm_clock_crossing_bridge_1</spirit:name>
   <spirit:version>17.0</spirit:version>
   <spirit:busInterfaces>
     <spirit:busInterface>
@@ -458,7 +458,7 @@
         <spirit:parameter>
           <spirit:name>bridgesToMaster</spirit:name>
           <spirit:displayName>Bridges to master</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="bridgesToMaster">ddr_board_mm_clock_crossing_bridge_0.m0</spirit:value>
+          <spirit:value spirit:format="string" spirit:id="bridgesToMaster">ddr_board_mm_clock_crossing_bridge_1.m0</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>burstOnBurstBoundariesOnly</spirit:name>
@@ -1044,7 +1044,7 @@
   <spirit:vendorExtensions>
     <altera:entity_info>
       <spirit:vendor>Intel Corporation</spirit:vendor>
-      <spirit:library>ddr_board_mm_clock_crossing_bridge_0</spirit:library>
+      <spirit:library>ddr_board_mm_clock_crossing_bridge_1</spirit:library>
       <spirit:name>altera_avalon_mm_clock_crossing_bridge</spirit:name>
       <spirit:version>17.0</spirit:version>
     </altera:entity_info>
@@ -1595,7 +1595,7 @@
                     </entry>
                     <entry>
                         <key>bridgesToMaster</key>
-                        <value>ddr_board_mm_clock_crossing_bridge_0.m0</value>
+                        <value>ddr_board_mm_clock_crossing_bridge_1.m0</value>
                     </entry>
                     <entry>
                         <key>burstOnBurstBoundariesOnly</key>
@@ -1832,7 +1832,7 @@
       </spirit:parameters>
     </altera:altera_system_parameters>
     <altera:altera_interface_boundary>
-      <altera:interface_mapping altera:name="m0" altera:internal="ddr_board_mm_clock_crossing_bridge_0.m0" altera:type="avalon" altera:dir="start">
+      <altera:interface_mapping altera:name="m0" altera:internal="ddr_board_mm_clock_crossing_bridge_1.m0" altera:type="avalon" altera:dir="start">
         <altera:port_mapping altera:name="m0_address" altera:internal="m0_address"></altera:port_mapping>
         <altera:port_mapping altera:name="m0_burstcount" altera:internal="m0_burstcount"></altera:port_mapping>
         <altera:port_mapping altera:name="m0_byteenable" altera:internal="m0_byteenable"></altera:port_mapping>
@@ -1844,13 +1844,13 @@
         <altera:port_mapping altera:name="m0_write" altera:internal="m0_write"></altera:port_mapping>
         <altera:port_mapping altera:name="m0_writedata" altera:internal="m0_writedata"></altera:port_mapping>
       </altera:interface_mapping>
-      <altera:interface_mapping altera:name="m0_clk" altera:internal="ddr_board_mm_clock_crossing_bridge_0.m0_clk" altera:type="clock" altera:dir="end">
+      <altera:interface_mapping altera:name="m0_clk" altera:internal="ddr_board_mm_clock_crossing_bridge_1.m0_clk" altera:type="clock" altera:dir="end">
         <altera:port_mapping altera:name="m0_clk" altera:internal="m0_clk"></altera:port_mapping>
       </altera:interface_mapping>
-      <altera:interface_mapping altera:name="m0_reset" altera:internal="ddr_board_mm_clock_crossing_bridge_0.m0_reset" altera:type="reset" altera:dir="end">
+      <altera:interface_mapping altera:name="m0_reset" altera:internal="ddr_board_mm_clock_crossing_bridge_1.m0_reset" altera:type="reset" altera:dir="end">
         <altera:port_mapping altera:name="m0_reset" altera:internal="m0_reset"></altera:port_mapping>
       </altera:interface_mapping>
-      <altera:interface_mapping altera:name="s0" altera:internal="ddr_board_mm_clock_crossing_bridge_0.s0" altera:type="avalon" altera:dir="end">
+      <altera:interface_mapping altera:name="s0" altera:internal="ddr_board_mm_clock_crossing_bridge_1.s0" altera:type="avalon" altera:dir="end">
         <altera:port_mapping altera:name="s0_address" altera:internal="s0_address"></altera:port_mapping>
         <altera:port_mapping altera:name="s0_burstcount" altera:internal="s0_burstcount"></altera:port_mapping>
         <altera:port_mapping altera:name="s0_byteenable" altera:internal="s0_byteenable"></altera:port_mapping>
@@ -1862,10 +1862,10 @@
         <altera:port_mapping altera:name="s0_write" altera:internal="s0_write"></altera:port_mapping>
         <altera:port_mapping altera:name="s0_writedata" altera:internal="s0_writedata"></altera:port_mapping>
       </altera:interface_mapping>
-      <altera:interface_mapping altera:name="s0_clk" altera:internal="ddr_board_mm_clock_crossing_bridge_0.s0_clk" altera:type="clock" altera:dir="end">
+      <altera:interface_mapping altera:name="s0_clk" altera:internal="ddr_board_mm_clock_crossing_bridge_1.s0_clk" altera:type="clock" altera:dir="end">
         <altera:port_mapping altera:name="s0_clk" altera:internal="s0_clk"></altera:port_mapping>
       </altera:interface_mapping>
-      <altera:interface_mapping altera:name="s0_reset" altera:internal="ddr_board_mm_clock_crossing_bridge_0.s0_reset" altera:type="reset" altera:dir="end">
+      <altera:interface_mapping altera:name="s0_reset" altera:internal="ddr_board_mm_clock_crossing_bridge_1.s0_reset" altera:type="reset" altera:dir="end">
         <altera:port_mapping altera:name="s0_reset" altera:internal="s0_reset"></altera:port_mapping>
       </altera:interface_mapping>
     </altera:altera_interface_boundary>

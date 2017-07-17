@@ -86,7 +86,7 @@
         <spirit:parameter>
           <spirit:name>dataBitsPerSymbol</spirit:name>
           <spirit:displayName>Data bits per symbol</spirit:displayName>
-          <spirit:value spirit:format="long" spirit:id="dataBitsPerSymbol">33</spirit:value>
+          <spirit:value spirit:format="long" spirit:id="dataBitsPerSymbol">34</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>emptyWithinPacket</spirit:name>
@@ -655,7 +655,7 @@
         <spirit:parameter>
           <spirit:name>clockRate</spirit:name>
           <spirit:displayName>Clock rate</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="clockRate">200000000</spirit:value>
+          <spirit:value spirit:format="string" spirit:id="clockRate">266000000</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>externallyDriven</spirit:name>
@@ -887,7 +887,7 @@
         <spirit:parameter>
           <spirit:name>addressSpan</spirit:name>
           <spirit:displayName>Address span</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="addressSpan">8589934592</spirit:value>
+          <spirit:value spirit:format="string" spirit:id="addressSpan">17179869184</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>addressUnits</spirit:name>
@@ -1138,7 +1138,7 @@
           <spirit:direction>out</spirit:direction>
           <spirit:vector>
             <spirit:left>0</spirit:left>
-            <spirit:right>32</spirit:right>
+            <spirit:right>33</spirit:right>
           </spirit:vector>
           <spirit:wireTypeDefs>
             <spirit:wireTypeDef>
@@ -1178,7 +1178,7 @@
           <spirit:direction>out</spirit:direction>
           <spirit:vector>
             <spirit:left>0</spirit:left>
-            <spirit:right>31</spirit:right>
+            <spirit:right>32</spirit:right>
           </spirit:vector>
           <spirit:wireTypeDefs>
             <spirit:wireTypeDef>
@@ -1306,7 +1306,7 @@
           <spirit:direction>out</spirit:direction>
           <spirit:vector>
             <spirit:left>0</spirit:left>
-            <spirit:right>31</spirit:right>
+            <spirit:right>32</spirit:right>
           </spirit:vector>
           <spirit:wireTypeDefs>
             <spirit:wireTypeDef>
@@ -1594,7 +1594,7 @@
           <spirit:direction>in</spirit:direction>
           <spirit:vector>
             <spirit:left>0</spirit:left>
-            <spirit:right>26</spirit:right>
+            <spirit:right>27</spirit:right>
           </spirit:vector>
           <spirit:wireTypeDefs>
             <spirit:wireTypeDef>
@@ -1643,7 +1643,7 @@
         <spirit:parameter>
           <spirit:name>ADDRESS_WIDTH</spirit:name>
           <spirit:displayName>Address Width (total addressable)</spirit:displayName>
-          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">33</spirit:value>
+          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">34</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>BURST_SIZE</spirit:name>
@@ -1673,17 +1673,17 @@
         <spirit:parameter>
           <spirit:name>AUTO_CLK_CLOCK_RATE</spirit:name>
           <spirit:displayName>Auto CLOCK_RATE</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="AUTO_CLK_CLOCK_RATE">200000000</spirit:value>
+          <spirit:value spirit:format="string" spirit:id="AUTO_CLK_CLOCK_RATE">266000000</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>AUTO_CLK_CLOCK_DOMAIN</spirit:name>
           <spirit:displayName>Auto CLOCK_DOMAIN</spirit:displayName>
-          <spirit:value spirit:format="long" spirit:id="AUTO_CLK_CLOCK_DOMAIN">1</spirit:value>
+          <spirit:value spirit:format="long" spirit:id="AUTO_CLK_CLOCK_DOMAIN">2</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>AUTO_CLK_RESET_DOMAIN</spirit:name>
           <spirit:displayName>Auto RESET_DOMAIN</spirit:displayName>
-          <spirit:value spirit:format="long" spirit:id="AUTO_CLK_RESET_DOMAIN">1</spirit:value>
+          <spirit:value spirit:format="long" spirit:id="AUTO_CLK_RESET_DOMAIN">2</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>AUTO_KERNEL_CLK_CLOCK_RATE</spirit:name>
@@ -1693,12 +1693,12 @@
         <spirit:parameter>
           <spirit:name>AUTO_KERNEL_CLK_CLOCK_DOMAIN</spirit:name>
           <spirit:displayName>Auto CLOCK_DOMAIN</spirit:displayName>
-          <spirit:value spirit:format="long" spirit:id="AUTO_KERNEL_CLK_CLOCK_DOMAIN">4</spirit:value>
+          <spirit:value spirit:format="long" spirit:id="AUTO_KERNEL_CLK_CLOCK_DOMAIN">5</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>AUTO_KERNEL_CLK_RESET_DOMAIN</spirit:name>
           <spirit:displayName>Auto RESET_DOMAIN</spirit:displayName>
-          <spirit:value spirit:format="long" spirit:id="AUTO_KERNEL_CLK_RESET_DOMAIN">4</spirit:value>
+          <spirit:value spirit:format="long" spirit:id="AUTO_KERNEL_CLK_RESET_DOMAIN">5</spirit:value>
         </spirit:parameter>
       </spirit:parameters>
     </altera:altera_module_parameters>
@@ -1778,7 +1778,7 @@
                     <name>acl_bsp_snoop_data</name>
                     <role>data</role>
                     <direction>Output</direction>
-                    <width>33</width>
+                    <width>34</width>
                     <lowerBound>0</lowerBound>
                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                 </port>
@@ -1818,7 +1818,7 @@
                     </entry>
                     <entry>
                         <key>dataBitsPerSymbol</key>
-                        <value>33</value>
+                        <value>34</value>
                     </entry>
                     <entry>
                         <key>emptyWithinPacket</key>
@@ -1867,7 +1867,7 @@
                     <name>bank1_address</name>
                     <role>address</role>
                     <direction>Output</direction>
-                    <width>32</width>
+                    <width>33</width>
                     <lowerBound>0</lowerBound>
                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                 </port>
@@ -2088,7 +2088,7 @@
                     <name>bank2_address</name>
                     <role>address</role>
                     <direction>Output</direction>
-                    <width>32</width>
+                    <width>33</width>
                     <lowerBound>0</lowerBound>
                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                 </port>
@@ -2326,7 +2326,7 @@
                 <parameterValueMap>
                     <entry>
                         <key>clockRate</key>
-                        <value>200000000</value>
+                        <value>266000000</value>
                     </entry>
                     <entry>
                         <key>externallyDriven</key>
@@ -2518,7 +2518,7 @@
                     <name>s_address</name>
                     <role>address</role>
                     <direction>Input</direction>
-                    <width>27</width>
+                    <width>28</width>
                     <lowerBound>0</lowerBound>
                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                 </port>
@@ -2555,7 +2555,7 @@
                     </entry>
                     <entry>
                         <key>addressSpan</key>
-                        <value>8589934592</value>
+                        <value>17179869184</value>
                     </entry>
                     <entry>
                         <key>addressUnits</key>
@@ -2726,15 +2726,15 @@
                 <suppliedSystemInfos>
                     <entry>
                         <key>CLOCK_DOMAIN</key>
-                        <value>1</value>
+                        <value>2</value>
                     </entry>
                     <entry>
                         <key>CLOCK_RATE</key>
-                        <value>200000000</value>
+                        <value>266000000</value>
                     </entry>
                     <entry>
                         <key>RESET_DOMAIN</key>
-                        <value>1</value>
+                        <value>2</value>
                     </entry>
                 </suppliedSystemInfos>
                 <consumedSystemInfos/>
@@ -2747,7 +2747,7 @@
                 <suppliedSystemInfos>
                     <entry>
                         <key>CLOCK_DOMAIN</key>
-                        <value>4</value>
+                        <value>5</value>
                     </entry>
                     <entry>
                         <key>CLOCK_RATE</key>
@@ -2755,7 +2755,7 @@
                     </entry>
                     <entry>
                         <key>RESET_DOMAIN</key>
-                        <value>4</value>
+                        <value>5</value>
                     </entry>
                 </suppliedSystemInfos>
                 <consumedSystemInfos/>
@@ -2769,11 +2769,11 @@
                 <consumedSystemInfos>
                     <entry>
                         <key>ADDRESS_MAP</key>
-                        <value>&lt;address-map&gt;&lt;slave name='s' start='0x0' end='0x200000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
+                        <value>&lt;address-map&gt;&lt;slave name='s' start='0x0' end='0x400000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
                     </entry>
                     <entry>
                         <key>ADDRESS_WIDTH</key>
-                        <value>33</value>
+                        <value>34</value>
                     </entry>
                     <entry>
                         <key>MAX_SLAVE_DATA_WIDTH</key>
