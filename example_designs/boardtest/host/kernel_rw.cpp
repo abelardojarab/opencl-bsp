@@ -97,6 +97,9 @@ int memRW(
 		}
 		printf("Launching kernel %s ...\n", kernel_name[k]);
 		cl_ulong maxAlloc_size = get_max_mem_alloc_size(context, queue, device);
+		#define MAX_MEM_SIZE (8l*1024l*1024l*1024l)
+		if(maxAlloc_size > MAX_MEM_SIZE)
+			maxAlloc_size /= 2;
 		if (maxAlloc_size == 0) return 1;
 		vectorSize = maxAlloc_size / sizeof(unsigned);
 		size_t vectorSize_bytes = vectorSize * sizeof(unsigned);

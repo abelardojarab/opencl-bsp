@@ -107,6 +107,9 @@ int memspeed (
 	size_t vectorSize;
 	// determine the size of bytes transferred
 	cl_ulong maxAlloc_size  = get_max_mem_alloc_size(context, queue, device);
+	#define MAX_MEM_SIZE (8l*1024l*1024l*1024l)
+	if(maxAlloc_size > MAX_MEM_SIZE)
+		maxAlloc_size /= 2;
 	if(maxAlloc_size == 0) return 1; 
 	total_bytes_used = maxAlloc_size / 4;
 	// check the sizes of the memory banks using board_spec
