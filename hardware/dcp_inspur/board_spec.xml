@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<board version="17.0" name="skx_fpga_dcp_ddr">
+<board version="17.0" name="dcp_inspur">
 
 
   <compile name="green_top" project="dcp" revision="afu_fit" qsys_file="none" generic_kernel="1">
@@ -24,8 +24,8 @@
 
   <!-- DDR4-2133 -->
   <global_mem name="DDR" max_bandwidth="34133" interleaved_bytes="1024" config_addr="0x018">
-    <interface name="board" port="kernel_ddr4a" type="slave" width="512" maxburst="16" address="0x00000000" size="0x100000000" latency="240" addpipe="1"/>
-    <interface name="board" port="kernel_ddr4b" type="slave" width="512" maxburst="16" address="0x100000000" size="0x100000000" latency="240" addpipe="1"/>
+    <interface name="board" port="kernel_ddr4a" type="slave" width="512" maxburst="16" address="0x00000000" size="0x200000000" latency="240" addpipe="1"/>
+    <interface name="board" port="kernel_ddr4b" type="slave" width="512" maxburst="16" address="0x200000000" size="0x200000000" latency="240" addpipe="1"/>
   </global_mem>
     
   <host>
@@ -35,7 +35,7 @@
   <interfaces>
     <interface name="board" port="kernel_cra" type="master" width="64" misc="0"/>
     <interface name="board" port="kernel_irq" type="irq" width="1"/>
-    <interface name="board" port="acl_internal_snoop" type="streamsource" enable="SNOOPENABLE" width="33" clock="board.kernel_clk"/>
+    <interface name="board" port="acl_internal_snoop" type="streamsource" enable="SNOOPENABLE" width="34" clock="board.kernel_clk"/>
     <kernel_clk_reset clk="board.kernel_clk" clk2x="board.kernel_clk2x" reset="board.kernel_reset"/>
   </interfaces>
 </board>

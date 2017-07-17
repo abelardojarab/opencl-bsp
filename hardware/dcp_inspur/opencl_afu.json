@@ -10,7 +10,7 @@
       "afc-clusters":
          [
             {
-               "name": "skx_fpga_dcp_ddr",
+               "name": "dcp_inspur",
                "total-contexts": 1,
                "afc-type-uuid": "18b79ffa-2ee5-4aa0-96ef-4230dafacb5f"
             }
