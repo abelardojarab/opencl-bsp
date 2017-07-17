@@ -48,7 +48,7 @@ module freeze_wrapper(
   input   [7:0]  	board_kernel_cra_byteenable,
   input         	board_kernel_cra_debugaccess,
   
-   	input	[32:0]	acl_internal_snoop_data,
+   	input	[`DDR_ADDR_WIDTH+6:0]	acl_internal_snoop_data,
 	input		acl_internal_snoop_valid,
 	output		acl_internal_snoop_ready,
   
@@ -58,7 +58,7 @@ module freeze_wrapper(
 	input		kernel_ddr4a_readdatavalid,
 	output	[4:0]	kernel_ddr4a_burstcount,
 	output	[511:0]	kernel_ddr4a_writedata,
-	output	[31:0]	kernel_ddr4a_address,
+	output	[`DDR_ADDR_WIDTH+6-1:0]	kernel_ddr4a_address,
 	output		kernel_ddr4a_write,
 	output		kernel_ddr4a_read,
 	output	[63:0]	kernel_ddr4a_byteenable,
@@ -69,7 +69,7 @@ module freeze_wrapper(
 	input		kernel_ddr4b_readdatavalid,
 	output	[4:0]	kernel_ddr4b_burstcount,
 	output	[511:0]	kernel_ddr4b_writedata,
-	output	[31:0]	kernel_ddr4b_address,
+	output	[`DDR_ADDR_WIDTH+6-1:0]	kernel_ddr4b_address,
 	output		kernel_ddr4b_write,
 	output		kernel_ddr4b_read,
 	output	[63:0]	kernel_ddr4b_byteenable,

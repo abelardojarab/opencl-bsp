@@ -46,7 +46,7 @@ module ccip_std_afu(
   pck_cp2af_error,           // CCI-P Protocol Error Detected
   
 `ifdef INCLUDE_DDR4
-  DDR4_USERCLK,
+  DDR4a_USERCLK,
   DDR4a_waitrequest,
   DDR4a_readdata,
   DDR4a_readdatavalid,
@@ -56,6 +56,7 @@ module ccip_std_afu(
   DDR4a_write,
   DDR4a_read,
   DDR4a_byteenable,
+  DDR4b_USERCLK,
   DDR4b_waitrequest,
   DDR4b_readdata,
   DDR4b_readdatavalid,
@@ -80,22 +81,23 @@ module ccip_std_afu(
   input           wire [1:0]       pck_cp2af_pwrState;       // CCI-P AFU Power State
   input           wire             pck_cp2af_error;          // CCI-P Protocol Error Detected
 `ifdef INCLUDE_DDR4 
-  input   wire                          DDR4_USERCLK;
+  input   wire                          DDR4a_USERCLK;
   input   wire                          DDR4a_waitrequest;
   input   wire [511:0]                  DDR4a_readdata;
   input   wire                          DDR4a_readdatavalid;
   output  wire [6:0]                    DDR4a_burstcount;
   output  wire [511:0]                  DDR4a_writedata;
-  output  wire [25:0]                   DDR4a_address;
+  output  wire [`DDR_ADDR_WIDTH-1:0]                   DDR4a_address;
   output  wire                          DDR4a_write;
   output  wire                          DDR4a_read;
   output  wire [63:0]                   DDR4a_byteenable;
+  input   wire                          DDR4b_USERCLK;
   input   wire                          DDR4b_waitrequest;
   input   wire [511:0]                  DDR4b_readdata;
   input   wire                          DDR4b_readdatavalid;
   output  wire [6:0]                    DDR4b_burstcount;
   output  wire [511:0]                  DDR4b_writedata;
-  output  wire [25:0]                   DDR4b_address;
+  output  wire [`DDR_ADDR_WIDTH-1:0]                   DDR4b_address;
   output  wire                          DDR4b_write;
   output  wire                          DDR4b_read;
   output  wire [63:0]                   DDR4b_byteenable;
@@ -108,7 +110,7 @@ module ccip_std_afu(
 	wire          DDR4a_readdatavalid;
 	wire [6:0]   DDR4a_burstcount;
 	wire [511:0] DDR4a_writedata;
-	wire [25:0]  DDR4a_address;
+	wire [`DDR_ADDR_WIDTH-1:0]  DDR4a_address;
 	wire         DDR4a_write;
 	wire         DDR4a_read;
 	wire [63:0]  DDR4a_byteenable;
@@ -117,19 +119,27 @@ module ccip_std_afu(
 	wire          DDR4b_readdatavalid;
 	wire [6:0]   DDR4b_burstcount;
 	wire [511:0] DDR4b_writedata;
-	wire [25:0]  DDR4b_address;
+	wire [`DDR_ADDR_WIDTH-1:0]  DDR4b_address;
 	wire [63:0]  DDR4b_byteenable;
 	wire         DDR4b_write;
 	wire         DDR4b_read;
 	
 	`timescale 1 ps / 1 ps
-	reg          DDR4_USERCLK = 0;  
+	reg          DDR4a_USERCLK = 0;  
 	always begin
-		#1875 DDR4_USERCLK = ~DDR4_USERCLK;
+		#1875 DDR4a_USERCLK = ~DDR4a_USERCLK;
 	end
 	
-	mem_sim_model ddr4a_inst(
-		.clk(DDR4_USERCLK),
+	reg          DDR4b_USERCLK = 0;  
+	always begin
+		#1700 DDR4b_USERCLK = ~DDR4b_USERCLK;
+	end
+	
+	mem_sim_model #(
+		.AVMM_ADDR_WIDTH(`DDR_ADDR_WIDTH)
+		)
+		ddr4a_inst(
+		.clk(DDR4a_USERCLK),
 		.reset(SoftReset),
 		.avmm_waitrequest(DDR4a_waitrequest),
 		.avmm_readdata(DDR4a_readdata),
@@ -142,8 +152,11 @@ module ccip_std_afu(
 		.avmm_byteenable(DDR4a_byteenable)
 	);
 	
-	mem_sim_model ddr4b_inst(
-		.clk(DDR4_USERCLK),
+	mem_sim_model #(
+		.AVMM_ADDR_WIDTH(`DDR_ADDR_WIDTH)
+		)
+		ddr4b_inst(
+		.clk(DDR4b_USERCLK),
 		.reset(SoftReset),
 		.avmm_waitrequest(DDR4b_waitrequest),
 		.avmm_readdata(DDR4b_readdata),
@@ -180,7 +193,7 @@ module ccip_std_afu(
 	wire          rst_controller_reset_out_reset;                  // rst_controller:reset_out -> [irq_mapper:reset, mm_interconnect_0:board_global_reset_reset_bridge_in_reset_reset, mm_interconnect_0:board_qpi_slave_translator_reset_reset_bridge_in_reset_reset]
   
 
-wire	[32:0]	acl_internal_snoop_data;
+wire	[`DDR_ADDR_WIDTH+6:0]	acl_internal_snoop_data;
 wire		acl_internal_snoop_valid;
 wire		acl_internal_snoop_ready;  
   
@@ -189,7 +202,7 @@ wire	[511:0]	kernel_ddr4a_readdata;
 wire		kernel_ddr4a_readdatavalid;
 wire	[4:0]	kernel_ddr4a_burstcount;
 wire	[511:0]	kernel_ddr4a_writedata;
-wire	[31:0]	kernel_ddr4a_address;
+wire	[`DDR_ADDR_WIDTH+6-1:0]	kernel_ddr4a_address;
 wire		kernel_ddr4a_write;
 wire		kernel_ddr4a_read;
 wire	[63:0]	kernel_ddr4a_byteenable;
@@ -199,7 +212,7 @@ wire	[511:0]	kernel_ddr4b_readdata;
 wire		kernel_ddr4b_readdatavalid;
 wire	[4:0]	kernel_ddr4b_burstcount;
 wire	[511:0]	kernel_ddr4b_writedata;
-wire	[31:0]	kernel_ddr4b_address;
+wire	[`DDR_ADDR_WIDTH+6-1:0]	kernel_ddr4b_address;
 wire		kernel_ddr4b_write;
 wire		kernel_ddr4b_read;
 wire	[63:0]	kernel_ddr4b_byteenable;
@@ -437,7 +450,8 @@ wire [5:0]	ddr4b_byte_address_bits;
 .acl_internal_snoop_valid(acl_internal_snoop_valid),
 .acl_internal_snoop_ready(acl_internal_snoop_ready),
 
-.ddr_clk_clk(DDR4_USERCLK),
+.ddr4a_clk_clk(DDR4a_USERCLK),
+.ddr4b_clk_clk(DDR4b_USERCLK),
 
 .emif_ddr4a_waitrequest(DDR4a_waitrequest),
 .emif_ddr4a_readdata(DDR4a_readdata),

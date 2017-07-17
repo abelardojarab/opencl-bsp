@@ -23,7 +23,8 @@ set pClkDiv2_name "u0|dcp_iopll|dcp_iopll|clk1x"
 set pClkDiv4_name "SYS_RefClk"
 set uClk_usr_name "fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|outclk1"
 set uClk_usrDiv2_name "fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|outclk0"
-set DDR4_USERCLK_name "mem|ddr4a|ddr4a_core_usr_clk"
+set DDR4a_USERCLK_name "mem|ddr4a|ddr4a_core_usr_clk"
+set DDR4b_USERCLK_name "mem|ddr4b|ddr4b_core_usr_clk"
 
 set jitter_compensation 0.01
 
@@ -243,7 +244,8 @@ set pClkDiv2_fmax [ lindex [ get_fmax_from_report $pClkDiv2_name 1 $jitter_compe
 set pClkDiv4_fmax [ lindex [ get_fmax_from_report $pClkDiv4_name 1 $jitter_compensation] 0 ]
 set uClk_usr_fmax [ lindex [ get_fmax_from_report $uClk_usr_name 1 $jitter_compensation] 0 ]
 set uClk_usrDiv2_fmax [ lindex [ get_fmax_from_report $uClk_usrDiv2_name 1 $jitter_compensation] 0 ]
-set DDR4_USERCLK_fmax [ lindex [ get_fmax_from_report $DDR4_USERCLK_name 1 $jitter_compensation] 0 ]
+set DDR4a_USERCLK_fmax [ lindex [ get_fmax_from_report $DDR4a_USERCLK_name 1 $jitter_compensation] 0 ]
+set DDR4b_USERCLK_fmax [ lindex [ get_fmax_from_report $DDR4b_USERCLK_name 1 $jitter_compensation] 0 ]
 
 design::unload_design
 
@@ -286,7 +288,8 @@ puts $outfile "pClkDiv2 fmax: $pClkDiv2_fmax"
 puts $outfile "pClkDiv4 fmax: $pClkDiv4_fmax"
 puts $outfile "uClk_usr fmax: $uClk_usr_fmax"
 puts $outfile "uClk_usrDiv2 fmax: $uClk_usrDiv2_fmax"
-puts $outfile "DDR4_USERCLK fmax: $DDR4_USERCLK_fmax"
+puts $outfile "DDR4a_USERCLK fmax: $DDR4a_USERCLK_fmax"
+puts $outfile "DDR4b_USERCLK fmax: $DDR4b_USERCLK_fmax"
 
 close $outfile
 # End little report
