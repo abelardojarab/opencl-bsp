@@ -56,12 +56,16 @@ git log -n 1 >> $REPO_VERSION_FILE
 
 #setup bsp dir
 cp -R $ROOT_PROJECT_PATH/board_env.xml $RELEASE_BUILD_DIR/$BSP_DIR_NAME/
+sed -i -e "s/skx_fpga_dcp_ddr/$BSP_BOARD_TARGET/" $RELEASE_BUILD_DIR/$BSP_DIR_NAME/board_env.xml 
+
 cp -R $ROOT_PROJECT_PATH/linux64 $RELEASE_BUILD_DIR/$BSP_DIR_NAME/
 mkdir -p $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/
 cp -R $ROOT_PROJECT_PATH/hardware/$BSP_BOARD_TARGET $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/
 cd $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/$BSP_BOARD_TARGET/
 sh import_blue_bits.sh
 rm $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/$BSP_BOARD_TARGET/*.sh
+rm -fr $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/$BSP_BOARD_TARGET/extra_sim_files
+rm -f $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/$BSP_BOARD_TARGET/mem_sim_model.sv
 cp -R $ROOT_PROJECT_PATH/hardware/$BSP_BOARD_TARGET/run.sh $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/$BSP_BOARD_TARGET
 
 #tar it up
