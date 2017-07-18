@@ -21,6 +21,14 @@ PACKAGE_TEST_DIR=$RELEASE_BUILD_DIR/test_pkg
 BSP_DIR_NAME=dcp_opencl_bsp
 REPO_VERSION_FILE=$RELEASE_BUILD_DIR/repo_version.txt
 
+if [ "$1" != "" ]; then
+	export BSP_BOARD_TARGET=$1
+fi
+
+if [ "$BSP_BOARD_TARGET" == "" ]; then
+	export BSP_BOARD_TARGET=skx_fpga_dcp_ddr
+fi
+
 #use a stable OPAE release
 export OPAE_GIT_BRANCH=release/0.3.0
 
@@ -31,6 +39,8 @@ export OPAE_GIT_BRANCH=release/0.3.0
 rm -fr $RELEASE_BUILD_DIR
 
 $SCRIPT_DIR_PATH/setup_packages.sh
+
+echo "Building Release packager for '$BSP_BOARD_TARGET'"
 
 #setup release dir
 mkdir $RELEASE_BUILD_DIR
@@ -48,11 +58,11 @@ git log -n 1 >> $REPO_VERSION_FILE
 cp -R $ROOT_PROJECT_PATH/board_env.xml $RELEASE_BUILD_DIR/$BSP_DIR_NAME/
 cp -R $ROOT_PROJECT_PATH/linux64 $RELEASE_BUILD_DIR/$BSP_DIR_NAME/
 mkdir -p $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/
-cp -R $ROOT_PROJECT_PATH/hardware/skx_fpga_dcp_ddr $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/
-cd $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/skx_fpga_dcp_ddr/
+cp -R $ROOT_PROJECT_PATH/hardware/$BSP_BOARD_TARGET $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/
+cd $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/$BSP_BOARD_TARGET/
 sh import_blue_bits.sh
-rm $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/skx_fpga_dcp_ddr/*.sh
-cp -R $ROOT_PROJECT_PATH/hardware/skx_fpga_dcp_ddr/run.sh $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/skx_fpga_dcp_ddr
+rm $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/$BSP_BOARD_TARGET/*.sh
+cp -R $ROOT_PROJECT_PATH/hardware/$BSP_BOARD_TARGET/run.sh $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/$BSP_BOARD_TARGET
 
 #tar it up
 cd $RELEASE_BUILD_DIR
