@@ -1,6 +1,3 @@
-#ifndef AOCL_MMD_H
-#define AOCL_MMD_H
-
 /* (C) 1992-2017 Intel Corporation.                             */
 /* Intel, the Intel logo, Intel, MegaCore, NIOS II, Quartus and TalkBack words     */
 /* and logos are trademarks of Intel Corporation or its subsidiaries in the U.S.   */
@@ -18,6 +15,8 @@
 /* Intel or its authorized distributors.  Please refer to the applicable           */
 /* agreement for further details.                                                  */
 
+#ifndef AOCL_MMD_H
+#define AOCL_MMD_H
 
 #ifdef __cplusplus
 extern "C" {

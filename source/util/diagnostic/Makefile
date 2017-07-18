@@ -1,3 +1,15 @@
+# (C) 2017 Intel Corporation. All rights reserved.
+# Your use of Intel Corporation's design tools, logic functions and other
+# software and tools, and its AMPP partner logic functions, and any output
+# files any of the foregoing (including device programming or simulation
+# files), and any associated documentation or information are expressly subject
+# to the terms and conditions of the Intel Program License Subscription
+# Agreement, Intel MegaCore Function License Agreement, or other applicable
+# license agreement, including, without limitation, that your use is for the
+# sole purpose of programming logic devices manufactured by Intel and sold by
+# Intel or its authorized distributors.  Please refer to the applicable
+# agreement for further details.
+
 ECHO = @
 CXX = g++ -o 
 CPPFLAGS = -DOPTION3=1 -DACL_USE_DMA=1 -DACL_COMPILER_IS_MSVC=0 -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -D__USE_XOPEN2K8 -Werror -DACL_HAS_STDLIB_STDIO -DACL_HOST_RUNTIME_IS_STATIC=0 -DACL_OPENCL_HOST_SYS=linux -DACL_OPENCL_HOST_BIT=64 -DACL_TARGET_SYS=linux -DACL_TARGET_BIT=64 -DLINUX -I. -I../../include -I$(ALTERAOCLSDKROOT)/host/include
