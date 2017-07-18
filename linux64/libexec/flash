@@ -13,7 +13,7 @@
 # agreement for further details.
 
 echo "\
-ERROR: install not implemented.  Please refer to DCP Quick Start User Guide for
+ERROR: flash not implemented.  Please refer to DCP Quick Start User Guide for
 installation instructions.
 "
 exit 1
