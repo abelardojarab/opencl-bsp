@@ -1,0 +1,19 @@
+{
+   "version": 1,
+   "platform-name" : "DCP",
+   "afu-image": {
+      "clock-frequency-high": 312,
+      "clock-frequency-low": 156,
+      "magic-no": 488605312,
+      "interface-uuid": "01234567-89AB-CDEF-0123-456789ABCDEF",
+      "power": 0,
+      "afc-clusters":
+         [
+            {
+               "name": "skx_fpga_dcp_ddr",
+               "total-contexts": 1,
+               "afc-type-uuid": "18b79ffa-2ee5-4aa0-96ef-4230dafacb5f"
+            }
+         ]
+   }
+}
