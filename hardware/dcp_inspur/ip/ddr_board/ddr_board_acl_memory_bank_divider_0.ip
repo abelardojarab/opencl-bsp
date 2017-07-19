@@ -1663,7 +1663,7 @@
         <spirit:parameter>
           <spirit:name>AUTO_DEVICE</spirit:name>
           <spirit:displayName>Auto DEVICE</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="AUTO_DEVICE">10AX115N3F40E2SG</spirit:value>
+          <spirit:value spirit:format="string" spirit:id="AUTO_DEVICE">10AX115H3F34E2SG</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>AUTO_DEVICE_SPEEDGRADE</spirit:name>
@@ -1707,7 +1707,7 @@
         <spirit:parameter>
           <spirit:name>device</spirit:name>
           <spirit:displayName>Device</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="device">10AX115N3F40E2SG</spirit:value>
+          <spirit:value spirit:format="string" spirit:id="device">10AX115H3F34E2SG</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>deviceFamily</spirit:name>

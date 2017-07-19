@@ -205,7 +205,7 @@
 }
 ]]></parameter>
  <parameter name="clockCrossingAdapter" value="HANDSHAKE" />
- <parameter name="device" value="10AX115N3F40E2SG" />
+ <parameter name="device" value="10AX115H3F34E2SG" />
  <parameter name="deviceFamily" value="Arria 10" />
  <parameter name="deviceSpeedGrade" value="2" />
  <parameter name="fabricMode" value="QSYS" />
@@ -5464,7 +5464,7 @@
                         <name>m0_burstcount</name>
                         <role>burstcount</role>
                         <direction>Output</direction>
-                        <width>1</width>
+                        <width>5</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -5723,7 +5723,7 @@
                         <name>s0_burstcount</name>
                         <role>burstcount</role>
                         <direction>Input</direction>
-                        <width>1</width>
+                        <width>5</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -6122,7 +6122,7 @@
                         <name>m0_burstcount</name>
                         <role>burstcount</role>
                         <direction>Output</direction>
-                        <width>1</width>
+                        <width>5</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -6381,7 +6381,7 @@
                         <name>s0_burstcount</name>
                         <role>burstcount</role>
                         <direction>Input</direction>
-                        <width>1</width>
+                        <width>5</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -9381,7 +9381,7 @@
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="2" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="266000000" />
   <parameter name="AUTO_CLK_RESET_DOMAIN" value="2" />
-  <parameter name="AUTO_DEVICE" value="10AX115N3F40E2SG" />
+  <parameter name="AUTO_DEVICE" value="10AX115H3F34E2SG" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="2" />
   <parameter name="AUTO_GENERATION_ID" value="0" />
