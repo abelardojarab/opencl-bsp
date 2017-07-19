@@ -28,7 +28,7 @@
         <spirit:parameter>
           <spirit:name>clockRate</spirit:name>
           <spirit:displayName>Clock rate</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="clockRate">100000000</spirit:value>
+          <spirit:value spirit:format="string" spirit:id="clockRate">266000000</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>clockRateKnown</spirit:name>
@@ -65,7 +65,7 @@
         <spirit:parameter>
           <spirit:name>clockRate</spirit:name>
           <spirit:displayName>Clock rate</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="clockRate">100000000</spirit:value>
+          <spirit:value spirit:format="string" spirit:id="clockRate">266000000</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>externallyDriven</spirit:name>
@@ -248,7 +248,7 @@
         <spirit:parameter>
           <spirit:name>inputClockFrequency</spirit:name>
           <spirit:displayName>inputClockFrequency</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="inputClockFrequency">0</spirit:value>
+          <spirit:value spirit:format="string" spirit:id="inputClockFrequency">266000000</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>resetSynchronousEdges</spirit:name>
@@ -325,7 +325,7 @@
                     </entry>
                     <entry>
                         <key>clockRate</key>
-                        <value>100000000</value>
+                        <value>266000000</value>
                     </entry>
                     <entry>
                         <key>clockRateKnown</key>
@@ -367,7 +367,7 @@
                 <parameterValueMap>
                     <entry>
                         <key>clockRate</key>
-                        <value>100000000</value>
+                        <value>266000000</value>
                     </entry>
                     <entry>
                         <key>externallyDriven</key>
@@ -472,7 +472,7 @@
                 <consumedSystemInfos>
                     <entry>
                         <key>CLOCK_RATE</key>
-                        <value>100000000</value>
+                        <value>266000000</value>
                     </entry>
                 </consumedSystemInfos>
             </value>
@@ -484,7 +484,7 @@
                 <suppliedSystemInfos>
                     <entry>
                         <key>CLOCK_RATE</key>
-                        <value>0</value>
+                        <value>266000000</value>
                     </entry>
                 </suppliedSystemInfos>
                 <consumedSystemInfos/>

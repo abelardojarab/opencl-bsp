@@ -283,7 +283,7 @@
                 <suppliedSystemInfos>
                     <entry>
                         <key>CLOCK_DOMAIN</key>
-                        <value>5</value>
+                        <value>2</value>
                     </entry>
                     <entry>
                         <key>CLOCK_RATE</key>
@@ -291,7 +291,7 @@
                     </entry>
                     <entry>
                         <key>RESET_DOMAIN</key>
-                        <value>5</value>
+                        <value>2</value>
                     </entry>
                 </suppliedSystemInfos>
                 <consumedSystemInfos/>
@@ -1300,7 +1300,7 @@
                         </entry>
                         <entry>
                             <key>clockRate</key>
-                            <value>100000000</value>
+                            <value>266000000</value>
                         </entry>
                         <entry>
                             <key>clockRateKnown</key>
@@ -1342,7 +1342,7 @@
                     <parameterValueMap>
                         <entry>
                             <key>clockRate</key>
-                            <value>100000000</value>
+                            <value>266000000</value>
                         </entry>
                         <entry>
                             <key>externallyDriven</key>
@@ -1453,7 +1453,7 @@
                     <suppliedSystemInfos>
                         <entry>
                             <key>CLOCK_RATE</key>
-                            <value>100000000</value>
+                            <value>266000000</value>
                         </entry>
                     </suppliedSystemInfos>
                     <consumedSystemInfos/>
@@ -1467,7 +1467,7 @@
                     <consumedSystemInfos>
                         <entry>
                             <key>CLOCK_RATE</key>
-                            <value>0</value>
+                            <value>266000000</value>
                         </entry>
                     </consumedSystemInfos>
                 </value>
@@ -8696,7 +8696,7 @@
                     <consumedSystemInfos>
                         <entry>
                             <key>ADDRESS_WIDTH</key>
-                            <value>10</value>
+                            <value>33</value>
                         </entry>
                     </consumedSystemInfos>
                 </value>
