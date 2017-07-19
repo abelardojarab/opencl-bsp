@@ -74,8 +74,6 @@ module system (
   	output	[32:0]	acl_internal_snoop_data,
 	output		acl_internal_snoop_valid,
 	input		acl_internal_snoop_ready,
-  
-  	input		ddr_clk_clk,
 	
 	input		emif_ddr4a_waitrequest,
 	input	[511:0]	emif_ddr4a_readdata,
@@ -104,24 +102,25 @@ module system (
 	output		kernel_ddr4a_readdatavalid,
 	input	[4:0]	kernel_ddr4a_burstcount,
 	input	[511:0]	kernel_ddr4a_writedata,
-	input	[31:0]	kernel_ddr4a_address,
+	input	[`KERNEL_DDR_ADDRESS_BITS-1:0]	kernel_ddr4a_address,
 	input		kernel_ddr4a_write,
 	input		kernel_ddr4a_read,
 	input	[63:0]	kernel_ddr4a_byteenable,
 	input		kernel_ddr4a_debugaccess,
-	
+`ifndef DISABLE_2BANK
 	output		kernel_ddr4b_waitrequest,
 	output	[511:0]	kernel_ddr4b_readdata,
 	output		kernel_ddr4b_readdatavalid,
 	input	[4:0]	kernel_ddr4b_burstcount,
 	input	[511:0]	kernel_ddr4b_writedata,
-	input	[31:0]	kernel_ddr4b_address,
+	input	[`KERNEL_DDR_ADDRESS_BITS-1:0]	kernel_ddr4b_address,
 	input		kernel_ddr4b_write,
 	input		kernel_ddr4b_read,
 	input	[63:0]	kernel_ddr4b_byteenable,
-	input		kernel_ddr4b_debugaccess
-  
-	);
+	input		kernel_ddr4b_debugaccess,
+`endif
+input		ddr_clk_clk
+	);  	
 
 
 	
@@ -184,6 +183,7 @@ module system (
 .kernel_ddr4a_byteenable(kernel_ddr4a_byteenable),
 .kernel_ddr4a_debugaccess(kernel_ddr4a_debugaccess),
 
+`ifndef DISABLE_2BANK
 .kernel_ddr4b_waitrequest(kernel_ddr4b_waitrequest),
 .kernel_ddr4b_readdata(kernel_ddr4b_readdata),
 .kernel_ddr4b_readdatavalid(kernel_ddr4b_readdatavalid),
@@ -194,6 +194,7 @@ module system (
 .kernel_ddr4b_read(kernel_ddr4b_read),
 .kernel_ddr4b_byteenable(kernel_ddr4b_byteenable),
 .kernel_ddr4b_debugaccess(kernel_ddr4b_debugaccess),
+`endif
 
 .avst_host_cmd_data         (avst_host_cmd_data ),         //      avst_host_cmd.data
 .avst_host_cmd_valid        (avst_host_cmd_valid),        //                   .valid

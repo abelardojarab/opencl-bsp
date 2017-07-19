@@ -189,22 +189,23 @@ wire	[511:0]	kernel_ddr4a_readdata;
 wire		kernel_ddr4a_readdatavalid;
 wire	[4:0]	kernel_ddr4a_burstcount;
 wire	[511:0]	kernel_ddr4a_writedata;
-wire	[31:0]	kernel_ddr4a_address;
+wire	[`KERNEL_DDR_ADDRESS_BITS-1:0]	kernel_ddr4a_address;
 wire		kernel_ddr4a_write;
 wire		kernel_ddr4a_read;
 wire	[63:0]	kernel_ddr4a_byteenable;
 wire		kernel_ddr4a_debugaccess;
+`ifdef DISABLE_2BANK
 wire		kernel_ddr4b_waitrequest;
 wire	[511:0]	kernel_ddr4b_readdata;
 wire		kernel_ddr4b_readdatavalid;
 wire	[4:0]	kernel_ddr4b_burstcount;
 wire	[511:0]	kernel_ddr4b_writedata;
-wire	[31:0]	kernel_ddr4b_address;
+wire	[`KERNEL_DDR_ADDRESS_BITS-1:0]	kernel_ddr4b_address;
 wire		kernel_ddr4b_write;
 wire		kernel_ddr4b_read;
 wire	[63:0]	kernel_ddr4b_byteenable;
 wire		kernel_ddr4b_debugaccess;
-  
+`endif
 wire [5:0]	ddr4a_byte_address_bits;
 wire [5:0]	ddr4b_byte_address_bits;
 
@@ -472,6 +473,7 @@ wire [5:0]	ddr4b_byte_address_bits;
 .kernel_ddr4a_byteenable(kernel_ddr4a_byteenable),
 .kernel_ddr4a_debugaccess(kernel_ddr4a_debugaccess),
 
+`ifndef DISABLE_2BANK
 .kernel_ddr4b_waitrequest(kernel_ddr4b_waitrequest),
 .kernel_ddr4b_readdata(kernel_ddr4b_readdata),
 .kernel_ddr4b_readdatavalid(kernel_ddr4b_readdatavalid),
@@ -482,7 +484,7 @@ wire [5:0]	ddr4b_byte_address_bits;
 .kernel_ddr4b_read(kernel_ddr4b_read),
 .kernel_ddr4b_byteenable(kernel_ddr4b_byteenable),
 .kernel_ddr4b_debugaccess(kernel_ddr4b_debugaccess),
-		
+`endif
 		.kernel_clk(uClk_usrDiv2)
 	);
   
@@ -518,8 +520,10 @@ wire [5:0]	ddr4b_byte_address_bits;
 .kernel_ddr4a_write(kernel_ddr4a_write),
 .kernel_ddr4a_read(kernel_ddr4a_read),
 .kernel_ddr4a_byteenable(kernel_ddr4a_byteenable),
-.kernel_ddr4a_debugaccess(kernel_ddr4a_debugaccess),
+.kernel_ddr4a_debugaccess(kernel_ddr4a_debugaccess)
 
+`ifndef DISABLE_2BANK
+,
 .kernel_ddr4b_waitrequest(kernel_ddr4b_waitrequest),
 .kernel_ddr4b_readdata(kernel_ddr4b_readdata),
 .kernel_ddr4b_readdatavalid(kernel_ddr4b_readdatavalid),
@@ -530,6 +534,7 @@ wire [5:0]	ddr4b_byte_address_bits;
 .kernel_ddr4b_read(kernel_ddr4b_read),
 .kernel_ddr4b_byteenable(kernel_ddr4b_byteenable),
 .kernel_ddr4b_debugaccess(kernel_ddr4b_debugaccess)
+`endif
 	);
 
 endmodule

@@ -33,7 +33,6 @@
 // kernel_system introduces boundary ports that are not used, and in PR, it gets preserved
 
 module kernel_wrapper(
-  input	          clock_reset_clk,
   input	          clock_reset2x_clk,
   input        	  clock_reset_reset_reset_n,
   output          kernel_irq_irq,
@@ -57,29 +56,30 @@ module kernel_wrapper(
 	input		kernel_ddr4a_readdatavalid,
 	output	[4:0]	kernel_ddr4a_burstcount,
 	output	[511:0]	kernel_ddr4a_writedata,
-	output	[31:0]	kernel_ddr4a_address,
+	output	[`KERNEL_DDR_ADDRESS_BITS-1:0]	kernel_ddr4a_address,
 	output		kernel_ddr4a_write,
 	output		kernel_ddr4a_read,
 	output	[63:0]	kernel_ddr4a_byteenable,
 	output		kernel_ddr4a_debugaccess,
-	
+`ifndef DISABLE_2BANK
 	input		kernel_ddr4b_waitrequest,
 	input	[511:0]	kernel_ddr4b_readdata,
 	input		kernel_ddr4b_readdatavalid,
 	output	[4:0]	kernel_ddr4b_burstcount,
 	output	[511:0]	kernel_ddr4b_writedata,
-	output	[31:0]	kernel_ddr4b_address,
+	output	[`KERNEL_DDR_ADDRESS_BITS-1:0]	kernel_ddr4b_address,
 	output		kernel_ddr4b_write,
 	output		kernel_ddr4b_read,
 	output	[63:0]	kernel_ddr4b_byteenable,
-	output		kernel_ddr4b_debugaccess
+	output		kernel_ddr4b_debugaccess,
+`endif
+  input	          clock_reset_clk
 );
 
 //=======================================================
 //  kernel_system instantiation
 //=======================================================
 kernel_system kernel_system_inst (
-  .clock_reset_clk(clock_reset_clk),
   .clock_reset2x_clk(clock_reset2x_clk),
   .clock_reset_reset_reset_n(clock_reset_reset_reset_n),
   .kernel_irq_irq(kernel_irq_irq),
@@ -109,7 +109,7 @@ kernel_system kernel_system_inst (
   .kernel_ddr4a_read(kernel_ddr4a_read),
   .kernel_ddr4a_byteenable(kernel_ddr4a_byteenable),
   .kernel_ddr4a_debugaccess(),
-
+`ifndef DISABLE_2BANK
   .kernel_ddr4b_waitrequest(kernel_ddr4b_waitrequest),
   .kernel_ddr4b_readdata(kernel_ddr4b_readdata),
   .kernel_ddr4b_readdatavalid(kernel_ddr4b_readdatavalid),
@@ -119,7 +119,9 @@ kernel_system kernel_system_inst (
   .kernel_ddr4b_write(kernel_ddr4b_write),
   .kernel_ddr4b_read(kernel_ddr4b_read),
   .kernel_ddr4b_byteenable(kernel_ddr4b_byteenable),
-  .kernel_ddr4b_debugaccess()
+  .kernel_ddr4b_debugaccess(),
+`endif
+  .clock_reset_clk(clock_reset_clk)
 );
 
 endmodule

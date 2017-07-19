@@ -77,23 +77,23 @@ module bsp_logic(
 	output		kernel_ddr4a_readdatavalid,
 	input	[4:0]	kernel_ddr4a_burstcount,
 	input	[511:0]	kernel_ddr4a_writedata,
-	input	[31:0]	kernel_ddr4a_address,
+	input	[`KERNEL_DDR_ADDRESS_BITS-1:0]	kernel_ddr4a_address,
 	input		kernel_ddr4a_write,
 	input		kernel_ddr4a_read,
 	input	[63:0]	kernel_ddr4a_byteenable,
 	input		kernel_ddr4a_debugaccess,
-	
+`ifndef DISABLE_2BANK
 	output		kernel_ddr4b_waitrequest,
 	output	[511:0]	kernel_ddr4b_readdata,
 	output		kernel_ddr4b_readdatavalid,
 	input	[4:0]	kernel_ddr4b_burstcount,
 	input	[511:0]	kernel_ddr4b_writedata,
-	input	[31:0]	kernel_ddr4b_address,
+	input	[`KERNEL_DDR_ADDRESS_BITS-1:0]	kernel_ddr4b_address,
 	input		kernel_ddr4b_write,
 	input		kernel_ddr4b_read,
 	input	[63:0]	kernel_ddr4b_byteenable,
 	input		kernel_ddr4b_debugaccess,
-	
+`endif
   input kernel_clk
 );
 
@@ -183,7 +183,7 @@ module bsp_logic(
 		.kernel_ddr4a_read(kernel_ddr4a_read),
 		.kernel_ddr4a_byteenable(kernel_ddr4a_byteenable),
 		.kernel_ddr4a_debugaccess(kernel_ddr4a_debugaccess),
-		
+`ifndef DISABLE_2BANK
 		.kernel_ddr4b_waitrequest(kernel_ddr4b_waitrequest),
 		.kernel_ddr4b_readdata(kernel_ddr4b_readdata),
 		.kernel_ddr4b_readdatavalid(kernel_ddr4b_readdatavalid),
@@ -194,7 +194,7 @@ module bsp_logic(
 		.kernel_ddr4b_read(kernel_ddr4b_read),
 		.kernel_ddr4b_byteenable(kernel_ddr4b_byteenable),
 		.kernel_ddr4b_debugaccess(kernel_ddr4b_debugaccess),
-		
+`endif		
 		.kernel_clk(kernel_clk)
     );
     

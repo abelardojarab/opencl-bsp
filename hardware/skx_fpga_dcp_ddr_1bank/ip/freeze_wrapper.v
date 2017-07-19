@@ -33,7 +33,7 @@ module freeze_wrapper(
   input			freeze,
 
   //////// board ports //////////
-  input	          board_kernel_clk_clk,
+  
   input	          board_kernel_clk2x_clk,
   input        		board_kernel_reset_reset_n,
   output [0:0]   	board_kernel_irq_irq,
@@ -52,28 +52,30 @@ module freeze_wrapper(
 	input		acl_internal_snoop_valid,
 	output		acl_internal_snoop_ready,
   
-  
   	input		kernel_ddr4a_waitrequest,
 	input	[511:0]	kernel_ddr4a_readdata,
 	input		kernel_ddr4a_readdatavalid,
 	output	[4:0]	kernel_ddr4a_burstcount,
 	output	[511:0]	kernel_ddr4a_writedata,
-	output	[31:0]	kernel_ddr4a_address,
+	output	[`KERNEL_DDR_ADDRESS_BITS-1:0]	kernel_ddr4a_address,
 	output		kernel_ddr4a_write,
 	output		kernel_ddr4a_read,
 	output	[63:0]	kernel_ddr4a_byteenable,
 	output		kernel_ddr4a_debugaccess,
 	
+`ifndef DISABLE_2BANK
 	input		kernel_ddr4b_waitrequest,
 	input	[511:0]	kernel_ddr4b_readdata,
 	input		kernel_ddr4b_readdatavalid,
 	output	[4:0]	kernel_ddr4b_burstcount,
 	output	[511:0]	kernel_ddr4b_writedata,
-	output	[31:0]	kernel_ddr4b_address,
+	output	[`KERNEL_DDR_ADDRESS_BITS-1:0]	kernel_ddr4b_address,
 	output		kernel_ddr4b_write,
 	output		kernel_ddr4b_read,
 	output	[63:0]	kernel_ddr4b_byteenable,
-	output		kernel_ddr4b_debugaccess
+	output		kernel_ddr4b_debugaccess,
+`endif
+	input	          board_kernel_clk_clk
 );
 
 reg  [7:0]    kernel_reset_count;                            // counter to release RESETn and FREEZE in the proper sequence
@@ -87,8 +89,10 @@ wire         	kernel_system_kernel_cra_waitrequest;
 wire         	kernel_system_kernel_cra_readdatavalid;
 wire         	freeze_kernel_ddr4a_read;
 wire         	freeze_kernel_ddr4a_write;
+`ifndef DISABLE_2BANK
 wire         	freeze_kernel_ddr4b_read;
 wire         	freeze_kernel_ddr4b_write;
+`endif
 wire			freeze_acl_internal_snoop_ready;
 
 
@@ -149,14 +153,18 @@ assign board_kernel_cra_waitrequest    	= pr_freeze_reg ? 1'b1:kernel_system_ker
 assign board_kernel_cra_readdatavalid   = pr_freeze_reg ? 1'b0:kernel_system_kernel_cra_readdatavalid;
 assign kernel_ddr4a_read			          = pr_freeze_reg ? 1'b0:freeze_kernel_ddr4a_read;
 assign kernel_ddr4a_write			          = pr_freeze_reg ? 1'b0:freeze_kernel_ddr4a_write;
+`ifndef DISABLE_2BANK
 assign kernel_ddr4b_read			          = pr_freeze_reg ? 1'b0:freeze_kernel_ddr4b_read;
 assign kernel_ddr4b_write			          = pr_freeze_reg ? 1'b0:freeze_kernel_ddr4b_write;
+`endif
 assign acl_internal_snoop_ready  = pr_freeze_reg ?   1'b0:freeze_acl_internal_snoop_ready;
 
 
 // Signals not used
 assign kernel_ddr4a_debugaccess			    = 1'b0;
+`ifndef DISABLE_2BANK
 assign kernel_ddr4b_debugaccess			    = 1'b0;
+`endif
 
 //=======================================================
 //  kernel_system instantiation
@@ -189,8 +197,10 @@ kernel_wrapper kernel_wrapper_inst (
 .kernel_ddr4a_address(kernel_ddr4a_address),
 .kernel_ddr4a_write(freeze_kernel_ddr4a_write),
 .kernel_ddr4a_read(freeze_kernel_ddr4a_read),
-.kernel_ddr4a_byteenable(kernel_ddr4a_byteenable),
+.kernel_ddr4a_byteenable(kernel_ddr4a_byteenable)
 
+`ifndef DISABLE_2BANK
+,
 .kernel_ddr4b_waitrequest(kernel_ddr4b_waitrequest),
 .kernel_ddr4b_readdata(kernel_ddr4b_readdata),
 .kernel_ddr4b_readdatavalid(kernel_ddr4b_readdatavalid),
@@ -200,6 +210,7 @@ kernel_wrapper kernel_wrapper_inst (
 .kernel_ddr4b_write(freeze_kernel_ddr4b_write),
 .kernel_ddr4b_read(freeze_kernel_ddr4b_read),
 .kernel_ddr4b_byteenable(kernel_ddr4b_byteenable)
+`endif
 
 );
 

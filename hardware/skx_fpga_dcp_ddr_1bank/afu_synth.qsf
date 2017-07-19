@@ -73,7 +73,9 @@ set_global_assignment -name SDC_FILE dcp_bbs.sdc
 
 # Fileset
 # ===============================
-set_global_assignment -name VERILOG_MACRO "INCLUDE_DDR4=<None>"
+set_global_assignment -name VERILOG_MACRO "INCLUDE_DDR4=1"
+set_global_assignment -name VERILOG_MACRO "KERNEL_DDR_ADDRESS_BITS=33"
+set_global_assignment -name VERILOG_MACRO "DISABLE_2BANK=1"
 set_global_assignment -name TOP_LEVEL_ENTITY green_bs
 set_global_assignment -name SYSTEMVERILOG_FILE ./afu/interfaces/ccip_if_pkg.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ./afu/interfaces/vendor_defines.vh
