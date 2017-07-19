@@ -6162,7 +6162,7 @@
                         <name>m0_burstcount</name>
                         <role>burstcount</role>
                         <direction>Output</direction>
-                        <width>1</width>
+                        <width>5</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
@@ -6421,7 +6421,7 @@
                         <name>s0_burstcount</name>
                         <role>burstcount</role>
                         <direction>Input</direction>
-                        <width>1</width>
+                        <width>5</width>
                         <lowerBound>0</lowerBound>
                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                     </port>
