@@ -252,21 +252,6 @@
             </value>
         </entry>
         <entry>
-            <key>emif_ddr4b</key>
-            <value>
-                <connectionPointName>emif_ddr4b</connectionPointName>
-                <suppliedSystemInfos>
-                    <entry>
-                        <key>ADDRESS_MAP</key>
-                    </entry>
-                    <entry>
-                        <key>ADDRESS_WIDTH</key>
-                    </entry>
-                </suppliedSystemInfos>
-                <consumedSystemInfos/>
-            </value>
-        </entry>
-        <entry>
             <key>kernel_clk</key>
             <value>
                 <connectionPointName>kernel_clk</connectionPointName>
@@ -297,32 +282,11 @@
                 <consumedSystemInfos>
                     <entry>
                         <key>ADDRESS_MAP</key>
-                        <value>&lt;address-map&gt;&lt;slave name='ddr_board.kernel_ddr4a' start='0x0' end='0x100000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
+                        <value>&lt;address-map&gt;&lt;slave name='ddr_board.kernel_ddr4a' start='0x0' end='0x200000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
                     </entry>
                     <entry>
                         <key>ADDRESS_WIDTH</key>
-                        <value>32</value>
-                    </entry>
-                    <entry>
-                        <key>MAX_SLAVE_DATA_WIDTH</key>
-                        <value>512</value>
-                    </entry>
-                </consumedSystemInfos>
-            </value>
-        </entry>
-        <entry>
-            <key>kernel_ddr4b</key>
-            <value>
-                <connectionPointName>kernel_ddr4b</connectionPointName>
-                <suppliedSystemInfos/>
-                <consumedSystemInfos>
-                    <entry>
-                        <key>ADDRESS_MAP</key>
-                        <value>&lt;address-map&gt;&lt;slave name='ddr_board.kernel_ddr4b' start='0x0' end='0x100000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
-                    </entry>
-                    <entry>
-                        <key>ADDRESS_WIDTH</key>
-                        <value>32</value>
+                        <value>33</value>
                     </entry>
                     <entry>
                         <key>MAX_SLAVE_DATA_WIDTH</key>
@@ -391,11 +355,7 @@
    internal="ddr_board.emif_ddr4a"
    type="avalon"
    dir="start" />
- <interface
-   name="emif_ddr4b"
-   internal="ddr_board.emif_ddr4b"
-   type="avalon"
-   dir="start" />
+ <interface name="emif_ddr4b" internal="ddr_board.emif_ddr4b" />
  <interface
    name="global_reset"
    internal="global_reset_in.in_reset"
@@ -421,11 +381,7 @@
    internal="ddr_board.kernel_ddr4a"
    type="avalon"
    dir="end" />
- <interface
-   name="kernel_ddr4b"
-   internal="ddr_board.kernel_ddr4b"
-   type="avalon"
-   dir="end" />
+ <interface name="kernel_ddr4b" internal="ddr_board.kernel_ddr4b" />
  <interface
    name="kernel_irq"
    internal="kernel_interface.kernel_irq_from_kernel"
@@ -2067,8 +2023,6 @@
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="2" />
   <parameter name="AUTO_EMIF_DDR4A_ADDRESS_MAP" value="" />
   <parameter name="AUTO_EMIF_DDR4A_ADDRESS_WIDTH" value="-1" />
-  <parameter name="AUTO_EMIF_DDR4B_ADDRESS_MAP" value="" />
-  <parameter name="AUTO_EMIF_DDR4B_ADDRESS_WIDTH" value="-1" />
   <parameter name="AUTO_GENERATION_ID" value="0" />
   <parameter name="AUTO_HOST_MEM_ADDRESS_MAP"><![CDATA[<address-map><slave name='ccip_avmm_bridge_inst.avst_to_avmm_master_inst.avmm' start='0x0' end='0x1000000000000' datawidth='512' /></address-map>]]></parameter>
   <parameter name="AUTO_HOST_MEM_ADDRESS_WIDTH" value="48" />
