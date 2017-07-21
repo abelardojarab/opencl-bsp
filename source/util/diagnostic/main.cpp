@@ -77,6 +77,9 @@
 #define DEFAULT_MAXNUMBYTES (256ULL * INT_MB)
 #define DEFAULT_MINNUMBYTES (512ULL * INT_KB)
 
+bool ccip_mmd_dma_setup_check();
+bool ccip_mmd_check_fme_driver_for_pr();
+
 bool check_results(unsigned int * buf, unsigned int * output, unsigned n)
 {
   bool result=true;
@@ -229,6 +232,19 @@ int main (int argc, char *argv[])
    //    return -1;
    //  }
    //}
+   //For DCP, do check for device files and permissions
+	if(!ccip_mmd_dma_setup_check())
+	{
+		printf("\nBASIC DCP DRIVER CHECK FAILED\n");
+		printf("\nDIAGNOSTIC_FAILED\n");
+		return -1;
+	}
+	
+	if(!ccip_mmd_check_fme_driver_for_pr())
+	{
+		printf("\nWARNING: DCP PR device files are not available.\n");
+		printf("\nWARNING: 'aocl program' is not available.\n");
+	}
 
    // we scan all the device installed on the host machine and print
    // preliminary information about all or just the one specified

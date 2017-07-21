@@ -1,4 +1,5 @@
 /* (C) 1992-2017 Intel Corporation.                             */
+/* (C) 1992-2017 Intel Corporation.                             */
 /* Intel, the Intel logo, Intel, MegaCore, NIOS II, Quartus and TalkBack words     */
 /* and logos are trademarks of Intel Corporation or its subsidiaries in the U.S.   */
 /* and/or other countries. Other marks and brands may be claimed as the property   */
@@ -13,7 +14,7 @@
 /* license agreement, including, without limitation, that your use is for the      */
 /* sole purpose of programming logic devices manufactured by Intel and sold by     */
 /* Intel or its authorized distributors.  Please refer to the applicable           */
-/* agreement for further details.                
+/* agreement for further details.                                                  */
 
 /* Editor for Altera OpenCL package files
  *

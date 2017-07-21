@@ -28,6 +28,7 @@
 #include "ccip_mmd_device.h"
 #include "zlib_inflate.h"
 #include "fpgaconf.h"
+#include "test_perm.h"
 
 #define ACL_DCP_ERROR_IF(COND,NEXT,...) \
    do { if ( COND )  { \
@@ -163,6 +164,11 @@ int AOCL_MMD_CALL aocl_mmd_reprogram(int handle, void *data, size_t data_size)
 		if ( pkg ) acl_pkg_close_file(pkg);
 		if ( fpga_bin_pkg ) acl_pkg_close_file(fpga_bin_pkg);
 		
+		if(programming_result != FPGA_OK)
+		{
+			ccip_mmd_dma_setup_check();
+			ccip_mmd_check_fme_driver_for_pr();
+		}
 		ACL_DCP_ERROR_IF(programming_result != FPGA_OK, return AOCL_INVALID_HANDLE, "FPGA programming failed!\n");
 
 		return aocl_mmd_open("acl0");
@@ -349,6 +355,8 @@ int AOCL_MMD_CALL aocl_mmd_open(const char *name)
 		ccip_dev_global = ccip_dev;
 	} else {
 		delete ccip_dev;
+		ccip_mmd_dma_setup_check();
+		ccip_mmd_check_limit_conf();
 		return AOCL_INVALID_HANDLE;
 	}
 
