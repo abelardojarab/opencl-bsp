@@ -554,12 +554,15 @@ int CcipDevice::write_mmio(const void *host_addr, size_t mmio_addr, size_t size)
 
 	const uint32_t *host_addr32 = reinterpret_cast<const uint32_t *>(host_addr64);
 	while(size > 0) {
-		res = fpgaWriteMMIO32(afc_handle, 0, mmio_addr, *host_addr32);
+		uint32_t tmp_data32 = 0;
+		size_t chunk_size = (size >= 4) ? 4 : size;
+		memcpy(&tmp_data32, host_addr32, chunk_size);
+		res = fpgaWriteMMIO32(afc_handle, 0, mmio_addr, tmp_data32);
 		if(res != FPGA_OK)
 			return res;
 		host_addr32 += 1;
-		mmio_addr += 4;
-		size -= 4;
+		mmio_addr += chunk_size;
+		size -= chunk_size;
 	}
 
 	return res;
