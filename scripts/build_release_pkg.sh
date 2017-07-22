@@ -56,6 +56,7 @@ git log -n 1 >> $REPO_VERSION_FILE
 
 #setup bsp dir
 cp -R $ROOT_PROJECT_PATH/board_env.xml $RELEASE_BUILD_DIR/$BSP_DIR_NAME/
+#cp -R $ROOT_PROJECT_PATH/readme.txt $RELEASE_BUILD_DIR/$BSP_DIR_NAME/
 sed -i -e "s/skx_fpga_dcp_ddr/$BSP_BOARD_TARGET/" $RELEASE_BUILD_DIR/$BSP_DIR_NAME/board_env.xml 
 
 cp -R $ROOT_PROJECT_PATH/linux64 $RELEASE_BUILD_DIR/$BSP_DIR_NAME/
