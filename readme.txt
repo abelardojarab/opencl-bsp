@@ -46,6 +46,8 @@ a.  Setting up BSP for AOCX compilation
 	export AOCL_BOARD_PACKAGE_ROOT=/path/to/put/bsp/dcp_OpenCL_bsp
 	aoc --list-boards
 	#make sure you see at least 1 DCP board in the list
+	#to use arc to compile, get these resources
+	arc shell acl/17.0,acds/17.0,qedition/pro,adapt/17.1,python
 
 	aoc vector_add.cl
 	#you can also use '--board bsp_board_name' to specify a specific board variant
