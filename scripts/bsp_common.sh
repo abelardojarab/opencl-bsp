@@ -27,7 +27,8 @@ if [ "$OPAE_GIT_PATH" == "" ]; then
 fi
 export OPAE_USE_GIT_ARCHIVE=1
 if [ "$OPAE_GIT_BRANCH" == "" ]; then
-	export OPAE_GIT_BRANCH=develop
+	#export OPAE_GIT_BRANCH=develop
+	export OPAE_GIT_BRANCH=0.3.0
 fi
 
 export AOCL_BOARD_PACKAGE_ROOT=$ROOT_PROJECT_PATH

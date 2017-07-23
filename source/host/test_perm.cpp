@@ -114,6 +114,9 @@ static bool verbose_test_perm_glob(const char *file)
 
 bool ccip_mmd_check_huge_pages()
 {
+#ifdef SIM
+	return true;
+#else
 	long num_pages = 0;
 	num_pages = get_num_pages_setting();
 	
@@ -127,10 +130,14 @@ bool ccip_mmd_check_huge_pages()
 		return false;
 	}
 	//printf("get_num_pages_setting() = %d\n", get_num_pages_setting());
+#endif
 }
 
 bool ccip_mmd_check_limit_conf()
 {
+#ifdef SIM
+	return true;
+#else
 	bool result = test_exists(MEMLOCK_CONF_PATH);
 	if(!result)
 	{
@@ -139,6 +146,7 @@ bool ccip_mmd_check_limit_conf()
 	}
 	
 	return result;
+#endif
 }
 
 static bool check_device_file(const char *dev_file)
@@ -158,7 +166,11 @@ static bool check_device_file(const char *dev_file)
 
 bool ccip_mmd_check_afu_driver()
 {
+#ifdef SIM
+	return true;
+#else
 	return check_device_file(FPGA_PORT_DEV);
+#endif
 }
 
 bool ccip_mmd_dma_setup_check()
@@ -172,6 +184,9 @@ bool ccip_mmd_dma_setup_check()
 
 bool ccip_mmd_check_fme_driver_for_pr()
 {
+#ifdef SIM
+	return true;
+#else
 	size_t num_dev = sizeof(FPGA_FME_PR_DEV_LIST)/sizeof(FPGA_FME_PR_DEV_LIST[0]);
 	
 	for(size_t i = 0; i < num_dev; i++)
@@ -181,4 +196,5 @@ bool ccip_mmd_check_fme_driver_for_pr()
 			return false;
 	}
 	return true;
+#endif
 }
