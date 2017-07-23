@@ -15,21 +15,7 @@ This is an internal release of OpenCL DCP for testing for the July 31st release.
 	No need to use OPAE/DCP rtl tools.  All DCP specific functionality is built into BSP and runs automatically for you during opencl compilation
 	DCP OpenCL can be used with virtualization
 
-3.  filelist:
-	dcp_1_0_pre_alpha.tar.gz
-		DCP 1.0 pre-alpha release
-
-	dcp_1_0_pre_alpha_docs.zip
-		DCP 1.0 pre-alpha docs
-
-	dcp_opencl_bsp_*.tar.gz
-		DCP 1.0 OpenCL BSP - internal release for pre-alpha
-
-	exm_opencl_hello_world_x64_linux.tgz
-	exm_opencl_vector_add_x64_linux.tgz
-		OpenCL example designs from altera.com that were tested with DCP
-
-4.  DCP pre alpha limitations:
+3.  DCP pre alpha limitations:
 	timing may fail in some cases
 		static timing closure for BSP is not locked down for DCP pre-alpha BSP
 		DCP blue bits timing is not final
@@ -48,15 +34,10 @@ This is an internal release of OpenCL DCP for testing for the July 31st release.
 	To use OpenCL with a PF:
 		no limitations
 
-5.  DCP internel release issues to be addressed before August 31st:
-	more qor testing
-	board names may change
-	BSP will be ported to inspur card
-		inspur board name is "dcp_inspur"
-		
-6.  updates
+4.  updates
 	7-21-17
 		removed some unneccessary adapters in bsp
+		updated resource counts in board xml
 		added better errors messages in bsp for troubleshooting
 		added permissions script in bsp to help setup driver
 		added copyright headers to all source code and scripts
