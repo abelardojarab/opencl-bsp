@@ -60,7 +60,7 @@ CcipDevice::CcipDevice():
 		return;
 	}
 
-	res = fpgaPropertiesSetObjectType(filter, FPGA_AFC);
+	res = fpgaPropertiesSetObjectType(filter, FPGA_ACCELERATOR);
 	if(res != FPGA_OK) {
 		fprintf(stderr, "Error setting object type\n");
 		return;

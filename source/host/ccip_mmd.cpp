@@ -69,7 +69,7 @@ bool ccip_mmd_is_fpga_configured_with_opencl()
 		return false;
 	}
 
-	res = fpgaPropertiesSetObjectType(filter, FPGA_AFC);
+	res = fpgaPropertiesSetObjectType(filter, FPGA_ACCELERATOR);
 	if(res != FPGA_OK) {
 		fprintf(stderr, "Error setting object type\n");
 		return false;

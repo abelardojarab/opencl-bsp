@@ -85,7 +85,7 @@ int find_fpga(struct find_fpga_target target, fpga_token *fpga)
 	res = fpgaGetProperties(NULL, &filter);
 	ON_ERR_GOTO(res, out_err, "creating properties object");
 
-	res = fpgaPropertiesSetObjectType(filter, FPGA_FPGA);
+	res = fpgaPropertiesSetObjectType(filter, FPGA_DEVICE);
 	ON_ERR_GOTO(res, out_destroy, "setting object type");
 
 	if (-1 != target.bus) {
