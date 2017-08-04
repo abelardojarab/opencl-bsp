@@ -30,7 +30,7 @@ if [ "$BSP_BOARD_TARGET" == "" ]; then
 fi
 
 #use a stable OPAE release
-export OPAE_GIT_BRANCH=release/0.3.0
+export OPAE_GIT_BRANCH=release/0.9.0
 
 ##############################################################################
 
