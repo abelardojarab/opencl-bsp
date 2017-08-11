@@ -46,7 +46,7 @@ module ccip_std_afu(
   pck_cp2af_error,           // CCI-P Protocol Error Detected
   
 `ifdef INCLUDE_DDR4
-  DDR4_USERCLK,
+  DDR4a_USERCLK,
   DDR4a_waitrequest,
   DDR4a_readdata,
   DDR4a_readdatavalid,
@@ -56,6 +56,7 @@ module ccip_std_afu(
   DDR4a_write,
   DDR4a_read,
   DDR4a_byteenable,
+  DDR4b_USERCLK,
   DDR4b_waitrequest,
   DDR4b_readdata,
   DDR4b_readdatavalid,
@@ -80,7 +81,7 @@ module ccip_std_afu(
   input           wire [1:0]       pck_cp2af_pwrState;       // CCI-P AFU Power State
   input           wire             pck_cp2af_error;          // CCI-P Protocol Error Detected
 `ifdef INCLUDE_DDR4 
-  input   wire                          DDR4_USERCLK;
+  input   wire                          DDR4a_USERCLK;
   input   wire                          DDR4a_waitrequest;
   input   wire [511:0]                  DDR4a_readdata;
   input   wire                          DDR4a_readdatavalid;
@@ -90,6 +91,7 @@ module ccip_std_afu(
   output  wire                          DDR4a_write;
   output  wire                          DDR4a_read;
   output  wire [63:0]                   DDR4a_byteenable;
+  input   wire                          DDR4b_USERCLK;
   input   wire                          DDR4b_waitrequest;
   input   wire [511:0]                  DDR4b_readdata;
   input   wire                          DDR4b_readdatavalid;
@@ -123,13 +125,14 @@ module ccip_std_afu(
 	wire         DDR4b_read;
 	
 	`timescale 1 ps / 1 ps
-	reg          DDR4_USERCLK = 0;  
+	reg          DDR4a_USERCLK = 0;
+	reg          DDR4b_USERCLK = 0;  
 	always begin
-		#1875 DDR4_USERCLK = ~DDR4_USERCLK;
+		#1875 DDR4a_USERCLK = ~DDR4a_USERCLK;
 	end
 	
 	mem_sim_model ddr4a_inst(
-		.clk(DDR4_USERCLK),
+		.clk(DDR4a_USERCLK),
 		.reset(SoftReset),
 		.avmm_waitrequest(DDR4a_waitrequest),
 		.avmm_readdata(DDR4a_readdata),
@@ -143,7 +146,7 @@ module ccip_std_afu(
 	);
 	
 	mem_sim_model ddr4b_inst(
-		.clk(DDR4_USERCLK),
+		.clk(DDR4a_USERCLK),
 		.reset(SoftReset),
 		.avmm_waitrequest(DDR4b_waitrequest),
 		.avmm_readdata(DDR4b_readdata),
@@ -437,7 +440,7 @@ wire [5:0]	ddr4b_byte_address_bits;
 .acl_internal_snoop_valid(acl_internal_snoop_valid),
 .acl_internal_snoop_ready(acl_internal_snoop_ready),
 
-.ddr_clk_clk(DDR4_USERCLK),
+.ddr_clk_clk(DDR4a_USERCLK),
 
 .emif_ddr4a_waitrequest(DDR4a_waitrequest),
 .emif_ddr4a_readdata(DDR4a_readdata),
