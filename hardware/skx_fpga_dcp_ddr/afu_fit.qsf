@@ -87,6 +87,78 @@ set_global_assignment -name POWER_AUTO_COMPUTE_TJ ON
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 
+
+# Fileset
+# ===============================
+set_global_assignment -name VERILOG_MACRO "INCLUDE_DDR4=<None>"
+set_global_assignment -name SYSTEMVERILOG_FILE ./afu/interfaces/ccip_if_pkg.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ./afu/interfaces/vendor_defines.vh
+set_global_assignment -name SYSTEMVERILOG_FILE ./afu/green_bs.sv
+set_global_assignment -name QSYS_FILE ./afu/interfaces/SCJIO.qsys
+
+# AFU  section - User AFU RTL goes here
+# =============================================
+# 
 # AFU + MPF IPs
 source afu_ip.qsf
 
+
+set_global_assignment -name IP_FILE ip/board/board_afu_regs.ip
+set_global_assignment -name IP_FILE ip/board/board_bridge_reset.ip
+set_global_assignment -name IP_FILE ip/board/board_acl_irq_to_polling_slave_0.ip
+set_global_assignment -name IP_FILE ip/board/board_global_reset_in.ip
+set_global_assignment -name IP_FILE ip/board/board_clk_200.ip
+set_global_assignment -name IP_FILE ip/board/board_clk_400.ip
+set_global_assignment -name IP_FILE ip/board/board_kernel_interface.ip
+set_global_assignment -name IP_FILE ip/board/board_kernel_clk_in.ip
+set_global_assignment -name IP_FILE ip/board/board_kernel_clk_export.ip
+set_global_assignment -name IP_FILE ip/board/board_por_reset_counter.ip
+set_global_assignment -name IP_FILE ip/board/board_pr_base_id.ip
+set_global_assignment -name IP_FILE ip/board/board_por_reset_controller.ip
+set_global_assignment -name IP_FILE ip/board/board_pipe_stage_host_ctrl.ip
+set_global_assignment -name IP_FILE ip/board/board_version_id_0.ip
+
+set_global_assignment -name QSYS_FILE board.qsys
+set_global_assignment -name IP_FILE ip/ddr_board/csr_clk.ip
+set_global_assignment -name IP_FILE ip/ddr_board/kernel_clk.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_clk.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_reset_bridge_0.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_reset_bridge_1.ip
+set_global_assignment -name QSYS_FILE ddr_board.qsys
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_acl_memory_bank_divider_0.ip
+
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_2.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_3.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_clock_crossing_bridge_0.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_4.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_5.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_clock_crossing_bridge_2.ip
+set_global_assignment -name IP_FILE ip/board/board_clock_bridge_0.ip
+set_global_assignment -name QSYS_FILE ccip_iface/ccip_avmm_bridge.qsys
+set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_avst_to_avmm_slave_0.ip
+set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_reset_bridge_0.ip
+set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_clock_bridge_0.ip
+set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_dc_fifo_3.ip
+set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_dc_fifo_2.ip
+set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_dc_fifo_0.ip
+set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_clock_bridge_2.ip
+set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_avst_to_avmm_master_0.ip
+set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_dc_fifo_1.ip
+set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_clock_bridge_3.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_clock_crossing_bridge_4.ip
+set_global_assignment -name QSYS_FILE msgdma_bbb/msgdma_bbb.qsys
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_pipe_stage_m.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/dma_core_dma_write_master.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_csr.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_mm_bridge_1.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_mm_bridge_0.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_pipe_stage_0.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/dma_core_pipe_stage_dma_read.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/dma_core_pipe_stage_dma_write.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_afu_id_avmm_slave_0.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/dma_core_dma_read_master.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/dma_core_modular_sgdma_dispatcher_0.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_address_span_extender_0.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_clk.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_0.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_1.ip
