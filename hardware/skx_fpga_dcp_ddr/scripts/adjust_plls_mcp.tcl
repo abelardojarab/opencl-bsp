@@ -369,42 +369,53 @@ close $outfile
 # write  file for kernel freq
 set clockfile   [open "pll.txt" w]
 set pll_setting [expr int($k_fmax * 2)]
-set pll_setting [expr min($pll_setting,500) ]
+if { $fmax2 < 10000} {
+set pll_setting [expr min($pll_setting,600) ]
+}
 puts $clockfile "$pll_setting"
 close $clockfile
 
 # write  file for kernel freq metadata
 set clockfile   [open "pll_metadata.txt" w]
 set pll_1x_setting [expr int($k_fmax)]
-#set the max frequency to 300 because 2x clock cna't go higher than 600
-set pll_1x_setting [expr min($pll_1x_setting,300) ]
-set pll_2x_setting [expr int($pll_1x_setting * 2)]
+if { $fmax2 < 10000} {
+	#set the max frequency to 300 because 2x clock can't go higher than 600
+	set pll_1x_setting [expr min($pll_1x_setting,300) ]
+	set pll_2x_setting [expr int($pll_1x_setting * 2)]
+} else {
+	set pll_1x_setting [expr int($pll_1x_setting) ]
+	set pll_2x_setting [expr int($pll_1x_setting * 2)]
+}
+
 puts $clockfile "clock-frequency-low:$pll_1x_setting clock-frequency-high:$pll_2x_setting"
 close $clockfile
 
-##file rename -force user_clock.sdc user_clock_orig.sdc													
-##
-##set sdcfile   [open "user_clock.sdc" w]
-##set period [expr 1000 / $k_fmax]
-##puts $sdcfile "create_clock -name {uClk_usrDiv2} -period $period \[get_pins {inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk[0]}\]"
-##set period2 [expr 500 / $k_fmax]
-##puts $sdcfile "create_clock -name {uClk_usr} -period $period2 \[get_pins {inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk[1]}\]"
-##close $sdcfile
-##
-##
-##
-### Force sta timing netlist to be rebuilt
-##file delete [glob -nocomplain db/$revision_name.sta_cmp.*.tdb]
-##file delete [glob -nocomplain qdb/_compiler/$revision_name/root_partition/*/final/1/*cache*]
-##file delete [glob -nocomplain qdb/_compiler/$revision_name/root_partition/*/final/1/timing_netlist*]
-##
-### Re-run STA
-##set sdk_root [string map {"\\" "/"} $::env(ALTERAOCLSDKROOT)]
-##post_message "Launching STA with report script $sdk_root/ip/board/bsp/failing_clocks.tcl"
-##if {[catch {execute_module -tool sta -args "--report_script=$sdk_root/ip/board/bsp/failing_clocks.tcl"} result]} {
-##  post_message -type error "Error! $result"
-##  exit 2
-##}
+file rename -force user_clock.sdc user_clock_orig.sdc													
+
+set sdcfile   [open "user_clock.sdc" w]
+#kernel clk 1x / uClk_usrDiv2
+set period [expr 1000 / $k_fmax]
+puts $sdcfile "create_clock -name {fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|outclk0} -period $period \[get_pins {fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk\[0\]}\]"
+#kernel clk 2x / uClk_usr
+set period2 [expr 500 / $k_fmax]
+puts $sdcfile "create_clock -name {fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|outclk1} -period $period2 \[get_pins {fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk\[1\]}\]"
+close $sdcfile
+
+
+
+# Force sta timing netlist to be rebuilt
+file delete [glob -nocomplain db/$revision_name.sta_cmp.*.tdb]
+file delete [glob -nocomplain qdb/_compiler/$revision_name/root_partition/*/final/1/*cache*]
+file delete [glob -nocomplain qdb/_compiler/$revision_name/root_partition/*/final/1/timing_netlist*]
+
+# Re-run STA
+set sdk_root [string map {"\\" "/"} $::env(ALTERAOCLSDKROOT)]
+post_message "Launching STA with report script $sdk_root/ip/board/bsp/failing_clocks.tcl"
+if {[catch {execute_module -tool sta -args "--report_script=$sdk_root/ip/board/bsp/failing_clocks.tcl"} result]} {
+  post_message -type error "Error! Timing failed $result"
+  #TODO: this needs to return error in the future
+  #exit 2
+}
 
 design::unload_design
 project_close
