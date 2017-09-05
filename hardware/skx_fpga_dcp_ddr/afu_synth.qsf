@@ -112,7 +112,6 @@ set_global_assignment -name IP_FILE ip/board/board_pipe_stage_host_ctrl.ip
 set_global_assignment -name IP_FILE ip/board/board_version_id_0.ip
 
 set_global_assignment -name QSYS_FILE board.qsys
-set_global_assignment -name IP_FILE ip/ddr_board/csr_clk.ip
 set_global_assignment -name IP_FILE ip/ddr_board/kernel_clk.ip
 set_global_assignment -name IP_FILE ip/ddr_board/ddr_clk.ip
 set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_reset_bridge_0.ip
@@ -155,3 +154,7 @@ set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_address_
 set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_clk.ip
 set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_0.ip
 set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_1.ip
+set_global_assignment -name IP_FILE ip/board/board_clock_bridge_1.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_clock_bridge_0.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_clock_bridge_1.ip
+set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_clock_crossing_bridge_1.ip

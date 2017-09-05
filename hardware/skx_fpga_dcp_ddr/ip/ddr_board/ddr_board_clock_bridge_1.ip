@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <spirit:component xmlns:altera="http://www.altera.com/XMLSchema/IPXact/extensions" xmlns:spirit="http://www.spiritconsortium.org/XMLSchema/SPIRIT/1685-2009">
   <spirit:vendor>Intel Corporation</spirit:vendor>
-  <spirit:library>csr_clk</spirit:library>
-  <spirit:name>csr_clk</spirit:name>
+  <spirit:library>ddr_board_clock_bridge_1</spirit:library>
+  <spirit:name>ddr_board_clock_bridge_1</spirit:name>
   <spirit:version>17.0</spirit:version>
   <spirit:busInterfaces>
     <spirit:busInterface>
@@ -60,7 +60,7 @@
         <spirit:parameter>
           <spirit:name>clockRate</spirit:name>
           <spirit:displayName>Clock rate</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="clockRate">200000000</spirit:value>
+          <spirit:value spirit:format="string" spirit:id="clockRate">266000000</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>clockRateKnown</spirit:name>
@@ -121,7 +121,7 @@
   <spirit:vendorExtensions>
     <altera:entity_info>
       <spirit:vendor>Intel Corporation</spirit:vendor>
-      <spirit:library>csr_clk</spirit:library>
+      <spirit:library>ddr_board_clock_bridge_1</spirit:library>
       <spirit:name>altera_clock_bridge</spirit:name>
       <spirit:version>17.0</spirit:version>
     </altera:entity_info>
@@ -135,7 +135,7 @@
         <spirit:parameter>
           <spirit:name>EXPLICIT_CLOCK_RATE</spirit:name>
           <spirit:displayName>Explicit clock rate</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="EXPLICIT_CLOCK_RATE">200000000</spirit:value>
+          <spirit:value spirit:format="string" spirit:id="EXPLICIT_CLOCK_RATE">266000000</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>NUM_CLOCK_OUTPUTS</spirit:name>
@@ -237,7 +237,7 @@
                     </entry>
                     <entry>
                         <key>clockRate</key>
-                        <value>200000000</value>
+                        <value>266000000</value>
                     </entry>
                     <entry>
                         <key>clockRateKnown</key>
@@ -282,7 +282,7 @@
                 <consumedSystemInfos>
                     <entry>
                         <key>CLOCK_RATE</key>
-                        <value>200000000</value>
+                        <value>266000000</value>
                     </entry>
                 </consumedSystemInfos>
             </value>
@@ -293,10 +293,10 @@
       </spirit:parameters>
     </altera:altera_system_parameters>
     <altera:altera_interface_boundary>
-      <altera:interface_mapping altera:name="in_clk" altera:internal="csr_clk.in_clk" altera:type="clock" altera:dir="end">
+      <altera:interface_mapping altera:name="in_clk" altera:internal="ddr_board_clock_bridge_1.in_clk" altera:type="clock" altera:dir="end">
         <altera:port_mapping altera:name="in_clk" altera:internal="in_clk"></altera:port_mapping>
       </altera:interface_mapping>
-      <altera:interface_mapping altera:name="out_clk" altera:internal="csr_clk.out_clk" altera:type="clock" altera:dir="start">
+      <altera:interface_mapping altera:name="out_clk" altera:internal="ddr_board_clock_bridge_1.out_clk" altera:type="clock" altera:dir="start">
         <altera:port_mapping altera:name="out_clk" altera:internal="out_clk"></altera:port_mapping>
       </altera:interface_mapping>
     </altera:altera_interface_boundary>

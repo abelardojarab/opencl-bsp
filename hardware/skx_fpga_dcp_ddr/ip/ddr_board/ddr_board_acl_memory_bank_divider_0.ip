@@ -655,7 +655,7 @@
         <spirit:parameter>
           <spirit:name>clockRate</spirit:name>
           <spirit:displayName>Clock rate</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="clockRate">266000000</spirit:value>
+          <spirit:value spirit:format="string" spirit:id="clockRate">200000000</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>externallyDriven</spirit:name>
@@ -1673,17 +1673,17 @@
         <spirit:parameter>
           <spirit:name>AUTO_CLK_CLOCK_RATE</spirit:name>
           <spirit:displayName>Auto CLOCK_RATE</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="AUTO_CLK_CLOCK_RATE">266000000</spirit:value>
+          <spirit:value spirit:format="string" spirit:id="AUTO_CLK_CLOCK_RATE">200000000</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>AUTO_CLK_CLOCK_DOMAIN</spirit:name>
           <spirit:displayName>Auto CLOCK_DOMAIN</spirit:displayName>
-          <spirit:value spirit:format="long" spirit:id="AUTO_CLK_CLOCK_DOMAIN">2</spirit:value>
+          <spirit:value spirit:format="long" spirit:id="AUTO_CLK_CLOCK_DOMAIN">4</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>AUTO_CLK_RESET_DOMAIN</spirit:name>
           <spirit:displayName>Auto RESET_DOMAIN</spirit:displayName>
-          <spirit:value spirit:format="long" spirit:id="AUTO_CLK_RESET_DOMAIN">2</spirit:value>
+          <spirit:value spirit:format="long" spirit:id="AUTO_CLK_RESET_DOMAIN">4</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>AUTO_KERNEL_CLK_CLOCK_RATE</spirit:name>
@@ -1693,12 +1693,12 @@
         <spirit:parameter>
           <spirit:name>AUTO_KERNEL_CLK_CLOCK_DOMAIN</spirit:name>
           <spirit:displayName>Auto CLOCK_DOMAIN</spirit:displayName>
-          <spirit:value spirit:format="long" spirit:id="AUTO_KERNEL_CLK_CLOCK_DOMAIN">4</spirit:value>
+          <spirit:value spirit:format="long" spirit:id="AUTO_KERNEL_CLK_CLOCK_DOMAIN">5</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>AUTO_KERNEL_CLK_RESET_DOMAIN</spirit:name>
           <spirit:displayName>Auto RESET_DOMAIN</spirit:displayName>
-          <spirit:value spirit:format="long" spirit:id="AUTO_KERNEL_CLK_RESET_DOMAIN">4</spirit:value>
+          <spirit:value spirit:format="long" spirit:id="AUTO_KERNEL_CLK_RESET_DOMAIN">5</spirit:value>
         </spirit:parameter>
       </spirit:parameters>
     </altera:altera_module_parameters>
@@ -2326,7 +2326,7 @@
                 <parameterValueMap>
                     <entry>
                         <key>clockRate</key>
-                        <value>266000000</value>
+                        <value>200000000</value>
                     </entry>
                     <entry>
                         <key>externallyDriven</key>
@@ -2726,15 +2726,15 @@
                 <suppliedSystemInfos>
                     <entry>
                         <key>CLOCK_DOMAIN</key>
-                        <value>2</value>
+                        <value>4</value>
                     </entry>
                     <entry>
                         <key>CLOCK_RATE</key>
-                        <value>266000000</value>
+                        <value>200000000</value>
                     </entry>
                     <entry>
                         <key>RESET_DOMAIN</key>
-                        <value>2</value>
+                        <value>4</value>
                     </entry>
                 </suppliedSystemInfos>
                 <consumedSystemInfos/>
@@ -2747,7 +2747,7 @@
                 <suppliedSystemInfos>
                     <entry>
                         <key>CLOCK_DOMAIN</key>
-                        <value>4</value>
+                        <value>5</value>
                     </entry>
                     <entry>
                         <key>CLOCK_RATE</key>
@@ -2755,7 +2755,7 @@
                     </entry>
                     <entry>
                         <key>RESET_DOMAIN</key>
-                        <value>4</value>
+                        <value>5</value>
                     </entry>
                 </suppliedSystemInfos>
                 <consumedSystemInfos/>

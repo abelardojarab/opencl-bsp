@@ -48,7 +48,8 @@ module bsp_logic(
 	output		acl_internal_snoop_valid,
 	input		acl_internal_snoop_ready,
   
-  	input		ddr_clk_clk,
+  	input emif_ddr4a_clk,
+  	input emif_ddr4b_clk,
 	
 	input		emif_ddr4a_waitrequest,
 	input	[511:0]	emif_ddr4a_readdata,
@@ -97,16 +98,24 @@ module bsp_logic(
   input kernel_clk
 );
 
-	wire	[560:0]	avst_host_cmd_data;
+	localparam AVMM_ADDR_WIDTH = 18;
+	localparam AVMM_DATA_WIDTH = 64;
+	localparam AVMM_BYTE_ENABLE_WIDTH=(AVMM_DATA_WIDTH/8);
+	
+	localparam AVMM_HOST_ADDR_WIDTH = 48;
+	localparam AVMM_HOST_DATA_WIDTH = 512;
+    localparam AVMM_HOST_BURST_WIDTH = 3;
+
+	wire	[AVMM_HOST_DATA_WIDTH+AVMM_HOST_ADDR_WIDTH+AVMM_HOST_BURST_WIDTH+1-1:0]	avst_host_cmd_data;
 	wire		avst_host_cmd_valid;
 	wire		avst_host_cmd_ready;
-	wire	[511:0]	avst_host_rsp_data;
+	wire	[AVMM_HOST_DATA_WIDTH-1:0]	avst_host_rsp_data;
 	wire		avst_host_rsp_valid;
 	wire		avst_host_rsp_ready;
-	wire	[83:0]	avst_mmio_cmd_data;
+	wire	[AVMM_ADDR_WIDTH+AVMM_DATA_WIDTH+2-1:0]	avst_mmio_cmd_data;
 	wire		avst_mmio_cmd_valid;
 	wire		avst_mmio_cmd_ready;
-	wire	[63:0]	avst_mmio_rsp_data;
+	wire	[AVMM_DATA_WIDTH-1:0]	avst_mmio_rsp_data;
 	wire		avst_mmio_rsp_valid;
 	wire		avst_mmio_rsp_ready;
 
@@ -149,7 +158,8 @@ module bsp_logic(
 		.acl_internal_snoop_valid(acl_internal_snoop_valid),
 		.acl_internal_snoop_ready(acl_internal_snoop_ready),
 		
-		.ddr_clk_clk(ddr_clk_clk),
+		.emif_ddr4a_clk(emif_ddr4a_clk),
+		.emif_ddr4b_clk(emif_ddr4b_clk),
 		
 		.emif_ddr4a_waitrequest(emif_ddr4a_waitrequest),
 		.emif_ddr4a_readdata(emif_ddr4a_readdata),
@@ -199,8 +209,9 @@ module bsp_logic(
     );
     
     	avmm_ccip_host #(
-		.AVMM_ADDR_WIDTH(48), 
-		.AVMM_DATA_WIDTH(512))
+		.AVMM_ADDR_WIDTH(AVMM_HOST_ADDR_WIDTH), 
+		.AVMM_DATA_WIDTH(AVMM_HOST_DATA_WIDTH),
+        .AVMM_BURST_WIDTH(AVMM_HOST_BURST_WIDTH))
 	avmm_ccip_host_inst (
 		.clk            (pClk),            //   clk.clk
 		.reset        (pck_cp2af_softReset),         // reset.reset
@@ -220,10 +231,6 @@ module bsp_logic(
 		.c0tx(pck_af2cp_sTx.c0),
 		.c1tx(pck_af2cp_sTx.c1)
 	);
-	
-	localparam AVMM_ADDR_WIDTH = 18;
-	localparam AVMM_DATA_WIDTH = 64;
-	localparam AVMM_BYTE_ENABLE_WIDTH=(AVMM_DATA_WIDTH/8);
 	
 	ccip_avmm_mmio #(AVMM_ADDR_WIDTH, AVMM_DATA_WIDTH)
 	ccip_avmm_mmio_inst (

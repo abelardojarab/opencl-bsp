@@ -125,10 +125,14 @@ module ccip_std_afu(
 	wire         DDR4b_read;
 	
 	`timescale 1 ps / 1 ps
-	reg          DDR4a_USERCLK = 0;
-	reg          DDR4b_USERCLK = 0;  
+	reg          DDR4a_USERCLK = 0;  
 	always begin
 		#1875 DDR4a_USERCLK = ~DDR4a_USERCLK;
+	end
+	
+	reg          DDR4b_USERCLK = 0;  
+	always begin
+		#1800 DDR4b_USERCLK = ~DDR4b_USERCLK;
 	end
 	
 	mem_sim_model ddr4a_inst(
@@ -146,7 +150,7 @@ module ccip_std_afu(
 	);
 	
 	mem_sim_model ddr4b_inst(
-		.clk(DDR4a_USERCLK),
+		.clk(DDR4b_USERCLK),
 		.reset(SoftReset),
 		.avmm_waitrequest(DDR4b_waitrequest),
 		.avmm_readdata(DDR4b_readdata),
@@ -158,7 +162,6 @@ module ccip_std_afu(
 		.avmm_read(DDR4b_read),
 		.avmm_byteenable(DDR4b_byteenable)
 	);
-	
 `endif
   // Interface structures
   input           t_if_ccip_Rx     pck_cp2af_sRx;           // CCI-P Rx Port
@@ -440,7 +443,8 @@ wire [5:0]	ddr4b_byte_address_bits;
 .acl_internal_snoop_valid(acl_internal_snoop_valid),
 .acl_internal_snoop_ready(acl_internal_snoop_ready),
 
-.ddr_clk_clk(DDR4a_USERCLK),
+.emif_ddr4a_clk(DDR4a_USERCLK),
+.emif_ddr4b_clk(DDR4b_USERCLK),
 
 .emif_ddr4a_waitrequest(DDR4a_waitrequest),
 .emif_ddr4a_readdata(DDR4a_readdata),
