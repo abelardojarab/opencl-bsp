@@ -120,7 +120,7 @@ module bsp_logic(
 	wire		avst_mmio_rsp_ready;
 
     system u0 (
-		.global_reset_reset_n (~pck_cp2af_softReset ), //  global_reset.reset_n
+		.global_reset_reset ( pck_cp2af_softReset ), //  global_reset.reset_n
 		.clk_400_clk           (pClk ),
 		.clk_200_clk           (pClkDiv2 ),
 		

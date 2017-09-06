@@ -49,7 +49,7 @@ module system (
 	
 		input  wire         clk_200_clk,           //      clk_200.clk
 		input  wire         clk_400_clk,           //      clk_400.clk
-		input  wire         global_reset_reset_n,  // global_reset.reset_n
+		input  wire         global_reset_reset,  // global_reset.reset_n
     input wire         kernel_clk,
   
   // kernel interface
@@ -128,7 +128,7 @@ module system (
   board board_inst (
     .clk_400_clk                        (clk_400_clk),                                     //      clk_400.clk
    
-    .global_reset_reset_n               (global_reset_reset_n),                            // global_reset.reset_n
+    .global_reset_reset               (global_reset_reset),                            // global_reset.reset_n
     .kernel_clk_clk                     (board_kernel_clk_clk),                            //   kernel_clk.clk
     .kernel_cra_waitrequest             (board_kernel_cra_waitrequest),                    //   kernel_cra.waitrequest
     .kernel_cra_readdata                (board_kernel_cra_readdata),                       //             .readdata
@@ -142,7 +142,7 @@ module system (
     .kernel_cra_debugaccess             (board_kernel_cra_debugaccess),                    //             .debugaccess
     .kernel_irq_irq                     (board_kernel_irq_irq),                            //   kernel_irq.irq
     .kernel_reset_reset_n               (board_kernel_reset_reset_n),                        // kernel_reset.reset_n
-    .psl_clk_clk                        (clk_200_clk),                                     //      psl_clk.clk
+    .clk_200_clk                        (clk_200_clk),                                     //      psl_clk.clk
     
 .acl_internal_snoop_data(acl_internal_snoop_data),
 .acl_internal_snoop_valid(acl_internal_snoop_valid),

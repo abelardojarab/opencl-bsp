@@ -226,6 +226,18 @@
  <parameter name="systemInfos"><![CDATA[<systemInfosDefinition>
     <connPtSystemInfos>
         <entry>
+            <key>clk_200</key>
+            <value>
+                <connectionPointName>clk_200</connectionPointName>
+                <suppliedSystemInfos>
+                    <entry>
+                        <key>CLOCK_RATE</key>
+                    </entry>
+                </suppliedSystemInfos>
+                <consumedSystemInfos/>
+            </value>
+        </entry>
+        <entry>
             <key>emif_ddr4a</key>
             <value>
                 <connectionPointName>emif_ddr4a</connectionPointName>
@@ -427,7 +439,7 @@
    dir="start" />
  <interface name="mem_export_export" internal=".export" />
  <interface name="mem_export_irq_export" internal=".irq_export" />
- <interface name="psl_clk" internal="clk_200.in_clk" type="clock" dir="end" />
+ <interface name="clk_200" internal="clk_200.in_clk" type="clock" dir="end" />
  <module
    name="acl_irq_to_polling_slave_0"
    kind="altera_generic_component"
@@ -1553,15 +1565,15 @@
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="2" />
   <parameter name="AUTO_GENERATION_ID" value="0" />
-  <parameter name="AUTO_HOST_CLK_CLOCK_DOMAIN" value="8" />
+  <parameter name="AUTO_HOST_CLK_CLOCK_DOMAIN" value="1" />
   <parameter name="AUTO_HOST_CLK_CLOCK_RATE" value="200000000" />
-  <parameter name="AUTO_HOST_CLK_RESET_DOMAIN" value="8" />
-  <parameter name="AUTO_MMIO_CLK_CLOCK_DOMAIN" value="8" />
+  <parameter name="AUTO_HOST_CLK_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_MMIO_CLK_CLOCK_DOMAIN" value="1" />
   <parameter name="AUTO_MMIO_CLK_CLOCK_RATE" value="200000000" />
-  <parameter name="AUTO_MMIO_CLK_RESET_DOMAIN" value="8" />
-  <parameter name="AUTO_PCLK400_CLOCK_DOMAIN" value="1" />
+  <parameter name="AUTO_MMIO_CLK_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_PCLK400_CLOCK_DOMAIN" value="2" />
   <parameter name="AUTO_PCLK400_CLOCK_RATE" value="400000000" />
-  <parameter name="AUTO_PCLK400_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_PCLK400_RESET_DOMAIN" value="2" />
   <parameter name="AUTO_UNIQUE_ID">board_ccip_avmm_bridge_inst</parameter>
  </module>
  <module
@@ -1885,12 +1897,12 @@
 </assignmentDefinition>]]></parameter>
  </module>
  <module name="ddr_board" kind="ddr_board" version="1.0" enabled="1">
-  <parameter name="AUTO_DDR_CLK_A_CLOCK_DOMAIN" value="2" />
+  <parameter name="AUTO_DDR_CLK_A_CLOCK_DOMAIN" value="3" />
   <parameter name="AUTO_DDR_CLK_A_CLOCK_RATE" value="266000000" />
-  <parameter name="AUTO_DDR_CLK_A_RESET_DOMAIN" value="2" />
-  <parameter name="AUTO_DDR_CLK_B_CLOCK_DOMAIN" value="3" />
+  <parameter name="AUTO_DDR_CLK_A_RESET_DOMAIN" value="3" />
+  <parameter name="AUTO_DDR_CLK_B_CLOCK_DOMAIN" value="4" />
   <parameter name="AUTO_DDR_CLK_B_CLOCK_RATE" value="266000000" />
-  <parameter name="AUTO_DDR_CLK_B_RESET_DOMAIN" value="3" />
+  <parameter name="AUTO_DDR_CLK_B_RESET_DOMAIN" value="4" />
   <parameter name="AUTO_DEVICE" value="10AX115N3F40E2SG" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="2" />
@@ -1899,14 +1911,14 @@
   <parameter name="AUTO_EMIF_DDR4B_ADDRESS_MAP" value="" />
   <parameter name="AUTO_EMIF_DDR4B_ADDRESS_WIDTH" value="-1" />
   <parameter name="AUTO_GENERATION_ID" value="0" />
-  <parameter name="AUTO_HOST_CLK_CLOCK_DOMAIN" value="8" />
+  <parameter name="AUTO_HOST_CLK_CLOCK_DOMAIN" value="1" />
   <parameter name="AUTO_HOST_CLK_CLOCK_RATE" value="200000000" />
-  <parameter name="AUTO_HOST_CLK_RESET_DOMAIN" value="8" />
+  <parameter name="AUTO_HOST_CLK_RESET_DOMAIN" value="1" />
   <parameter name="AUTO_HOST_MEM_ADDRESS_MAP"><![CDATA[<address-map><slave name='ccip_avmm_bridge_inst.avst_to_avmm_master_inst.avmm' start='0x0' end='0x1000000000000' datawidth='512' /></address-map>]]></parameter>
   <parameter name="AUTO_HOST_MEM_ADDRESS_WIDTH" value="48" />
-  <parameter name="AUTO_KERNEL_CLK_CLOCK_DOMAIN" value="6" />
+  <parameter name="AUTO_KERNEL_CLK_CLOCK_DOMAIN" value="7" />
   <parameter name="AUTO_KERNEL_CLK_CLOCK_RATE" value="0" />
-  <parameter name="AUTO_KERNEL_CLK_RESET_DOMAIN" value="6" />
+  <parameter name="AUTO_KERNEL_CLK_RESET_DOMAIN" value="7" />
   <parameter name="AUTO_UNIQUE_ID" value="board_ddr_board" />
  </module>
  <module
@@ -2276,8 +2288,8 @@
                 <isStart>false</isStart>
                 <ports>
                     <port>
-                        <name>in_reset_n</name>
-                        <role>reset_n</role>
+                        <name>in_reset</name>
+                        <role>reset</role>
                         <direction>Input</direction>
                         <width>1</width>
                         <lowerBound>0</lowerBound>
@@ -2306,8 +2318,8 @@
                 <isStart>true</isStart>
                 <ports>
                     <port>
-                        <name>out_reset_n</name>
-                        <role>reset_n</role>
+                        <name>out_reset</name>
+                        <role>reset</role>
                         <direction>Output</direction>
                         <width>1</width>
                         <lowerBound>0</lowerBound>
