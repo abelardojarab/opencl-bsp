@@ -66,7 +66,7 @@ vhdlan  -nc -full64 -work twentynm_hip $QUARTUS_HOME/eda/sim_lib/twentynm_hip_co
 vhdlan  -nc -full64 -work twentynm_hip $QUARTUS_HOME/eda/sim_lib/twentynm_hip_atoms.vhd 
 
 set -e
-make
+make OPAE_BASEDIR=$OPAE_INSTALL_PATH/../opae_src
 cp $KDIR/*.hex ./work/
 make sim&
 

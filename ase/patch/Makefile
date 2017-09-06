@@ -62,10 +62,7 @@ include ase_sources.mk
 ##   ASE_PLATFORM, reduces accidental settings failure       ##
 ##                                                           ##
 ###############################################################
-ASE_PLATFORM ?= ASE_PLATFORM_MCP_SKYLAKE
-
-## Base directory
-ASE_BASEDIR = $(PWD)
+ASE_PLATFORM?=ASE_PLATFORM_MCP_SKYLAKE
 
 ###############################################################
 # ASE switches (disabling logger and checker may speed up     #
@@ -93,6 +90,17 @@ GLS_VERILOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/stratixv_hssi_atoms.v
 GLS_VERILOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/stratixv_pcie_hip_atoms.v
 GLS_VERILOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/altera_lnsim.sv
 
+# add required files for local memory model
+ifeq ($(ASE_PLATFORM), ASE_PLATFORM_DCP)
+GLS_VERILOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/twentynm_atoms.v
+ifeq ($(SIMULATOR), VCS)
+  GLS_VERILOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/synopsys/twentynm_atoms_ncrypt.v
+endif
+ifeq ($(SIMULATOR), QUESTA)
+  GLS_VERILOG_OPT+= $(QUARTUS_HOME)/eda/sim_lib/mentor/twentynm_atoms_ncrypt.v
+endif
+endif
+
 #########################################################################
 #                       ASE location settings                           #
 #########################################################################
@@ -101,11 +109,15 @@ WORK = work
 
 # ASE Source directory
 ASE_SRCDIR = $(shell pwd)
-ASE_WORKDIR = $(ASE_SRCDIR)/$(WORK)
+OPAE_BASEDIR ?= $(ASE_SRCDIR)/../
+ASE_WORKDIR = $(PWD)/$(WORK)
 
 # Configuration & regression file inputs
-ASE_CONFIG ?= $(ASE_SRCDIR)/ase.cfg
-ASE_SCRIPT ?= $(ASE_SRCDIR)/ase_regress.sh
+ASE_CONFIG ?= $(PWD)/ase.cfg
+ASE_SCRIPT ?= $(PWD)/ase_regress.sh
+
+# Configuration for DCP Memory Model
+ASE_MEM_SRC = $(ASE_SRCDIR)/rtl/device_models/dcp_emif_model
 
 #########################################################################
 #                          ASE HW/SW settings                           #
@@ -114,20 +126,13 @@ ASE_SCRIPT ?= $(ASE_SRCDIR)/ase_regress.sh
 TIMESCALE = 1ps/1ps
 
 ## ASE HW file setup
-ASEHW_FILE_LIST = \
-	$(ASE_SRCDIR)/rtl/ccip_if_pkg.sv \
-	$(ASE_SRCDIR)/rtl/ase_pkg.sv \
-	$(ASE_SRCDIR)/rtl/outoforder_wrf_channel.sv \
-	$(ASE_SRCDIR)/rtl/inorder_wrf_channel.sv \
-	$(ASE_SRCDIR)/rtl/latency_pipe.sv \
-	$(ASE_SRCDIR)/rtl/ccip_emulator.sv \
-	$(ASE_SRCDIR)/rtl/ase_svfifo.sv \
-	$(ASE_SRCDIR)/rtl/ccip_logger.sv \
-	$(ASE_SRCDIR)/rtl/ccip_checker.sv \
-	$(ASE_SRCDIR)/rtl/ase_top.sv \
+ASEHW_FILE_LIST = -F $(ASE_SRCDIR)/rtl/sources.txt
 
-## ASE HW include directory setup
-ASE_INCDIR = $(ASE_SRCDIR)/rtl/+
+## ASE platform-specific HW
+ASE_PLATFORM_FILE_LIST ?=
+ifeq ($(ASE_PLATFORM), ASE_PLATFORM_DCP)
+  ASE_PLATFORM_FILE_LIST += -F $(ASE_MEM_SRC)/sources.txt
+endif
 
 ## ASE SW file setup
 ASESW_FILE_LIST = \
@@ -140,6 +145,9 @@ ASESW_FILE_LIST = \
 	$(ASE_SRCDIR)/sw/error_report.c \
 	$(ASE_SRCDIR)/sw/linked_list_ops.c \
 	$(ASE_SRCDIR)/sw/randomness_control.c \
+
+## Safe string sources
+SAFESTR_SRC_LIST = $(wildcard ${OPAE_BASEDIR}/safe_string/*.c)
 
 ## ASE top level module
 ASE_TOP = ase_top
@@ -155,9 +163,20 @@ CC=gcc
 SNPS_COMMAND = $(shell command -v vcs)
 MENT_COMMAND = $(shell command -v vsim)
 
+## For ModelSim figure out whether it is the 32 bit starter edition
+CC_INT_SIZE=-m64
+ifeq ($(SIMULATOR), QUESTA)
+  ifdef MENT_COMMAND
+    MENT_VERSION=$(shell vsim -version)
+    ifneq (,$(findstring STARTER EDITION, $(MENT_VERSION)))
+      CC_INT_SIZE=-m32
+    endif
+  endif
+endif
+
 ## C Compiler options
 CC_OPT?=
-CC_OPT+= -g  -m64 -fPIC -D SIM_SIDE=1 -I $(ASE_SRCDIR)/sw/
+CC_OPT+= -g $(CC_INT_SIZE) -fPIC -D SIM_SIDE=1 -I $(ASE_SRCDIR)/sw/ -I $(OPAE_BASEDIR)/common/include/
 CC_OPT+= -D SIMULATOR=$(SIMULATOR) -D $(ASE_PLATFORM)
 CC_OPT+= -Wall -fstack-protector-all
 ifeq ($(SIMULATOR), VCS)
@@ -179,7 +198,8 @@ ASE_SHOBJ_NAME = ase_libs
 ASE_SHOBJ_SO = $(ASE_SHOBJ_NAME).so
 
 # -lrt option is required in order to use shared memory /dev/shm,
-ASE_LD_SWITCHES = -lrt -lpthread -lstdc++ -luuid
+ASE_LD_SWITCHES?=
+ASE_LD_SWITCHES+= -lrt -lpthread -lstdc++
 
 #########################################################################
 #                          VCS Build Switches                           #
@@ -192,7 +212,7 @@ SNPS_VHDLAN_OPT+= -work $(WORK)
 ## Verilog compile
 SNPS_VLOGAN_OPT?=
 SNPS_VLOGAN_OPT+= -nc -V -full64 +v2k -sverilog +define+$(SIMULATOR)
-SNPS_VLOGAN_OPT+= +incdir+$(DUT_INCDIR) +incdir+$(ASE_INCDIR)
+SNPS_VLOGAN_OPT+= +incdir+$(DUT_INCDIR)
 SNPS_VLOGAN_OPT+= +librescan -work $(WORK) -override_timescale=$(TIMESCALE)
 SNPS_VLOGAN_OPT+= +define+MMIO_RESPONSE_TIMEOUT=32768
 SNPS_VLOGAN_OPT+= +define+$(ASE_PLATFORM)
@@ -209,16 +229,16 @@ endif
 
 ## VCS elaboration
 SNPS_VCS_OPT?=
-SNPS_VCS_OPT+= -nc -V +vcs+lic+wait -full64 -debug_all -Mupdate -lca
+SNPS_VCS_OPT+= -nc -V +vcs+lic+wait -full64 -debug_pp -Mupdate -lca
 SNPS_VCS_OPT+= -j 4
 SNPS_VCS_OPT+= -l vcs_elab.log +vhdllib+$(WORK) -Mlib=$(WORK) +lint=TFIPC-L
 SNPS_VCS_OPT+= -override_timescale=$(TIMESCALE) -o $(WORK)/ase_simv
 # SNPS_VCS_OPT+= -LDFLAGS="-m64"             #  !!! DO NOT EDIT !!!
 
 ## Simulation options
-VCS_SIM_OPT+= -ucli -do $(ASE_SRCDIR)/vcs_run.tcl
-# VCS_SIM_OPT+= -l run.log
-VCS_SIM_OPT+= +ntb_random_seed=1234
+SNPS_SIM_OPT+= -ucli -do $(PWD)/vcs_run.tcl
+# SNPS_SIM_OPT+= -l run.log
+SNPS_SIM_OPT+= +ntb_random_seed=1234
 
 
 #########################################################################
@@ -232,7 +252,7 @@ MENT_VCOM_OPT+= -nologo -work $(WORK)
 # MENT_VLOG_OPT = -64
 MENT_VLOG_OPT?=
 MENT_VLOG_OPT+= -nologo +librescan -work $(WORK) +define+$(SIMULATOR) -novopt
-MENT_VLOG_OPT+= -dpiheader work/dpiheader.h +incdir+$(ASE_INCDIR)+$(DUT_INCDIR)+$(WORK)
+MENT_VLOG_OPT+= -dpiheader work/dpiheader.h +incdir+$(DUT_INCDIR)+$(WORK)
 MENT_VLOG_OPT+= -sv -timescale $(TIMESCALE) -l vlog.log
 MENT_VLOG_OPT+= +define+$(ASE_PLATFORM)
 ifeq ($(GLS_SIM), 1)
@@ -243,7 +263,7 @@ endif
 # MENT_VSIM_OPT = -64
 MENT_VSIM_OPT?=
 MENT_VSIM_OPT+= -c -l run.log -dpioutoftheblue 1 -novopt
-MENT_VSIM_OPT+= -sv_lib $(ASE_SHOBJ_NAME) -do $(ASE_SRCDIR)/vsim_run.tcl
+MENT_VSIM_OPT+= -sv_lib $(ASE_SHOBJ_NAME) -do $(PWD)/vsim_run.tcl
 MENT_VSIM_OPT+= -sv_seed 1234
 # -voptargs="+acc"
 
@@ -329,7 +349,7 @@ endif
 header:
 	@echo "#################################################################"
 	@echo "#                                                               #"
-	@echo "#             Intel(R) Xeon(R) + FPGA OPAE Library              #"
+	@echo "#             OPAE Intel(R) Xeon(R) + FPGA Library              #"
 	@echo "#               AFU Simulation Environment (ASE)                #"
 	@echo "#                                                               #"
 	@echo "#################################################################"
@@ -382,8 +402,9 @@ help: header
 sw_build:
 	make header
 	mkdir -p $(WORK)
+	cd $(WORK) ; $(CC) $(CC_OPT) -c $(SAFESTR_SRC_LIST) || exit 1 ; cd -
 	cd $(WORK) ; $(CC) $(CC_OPT) -c $(ASESW_FILE_LIST) || exit 1 ; cd -
-	cd $(WORK) ; $(CC) -g -shared -o $(ASE_SHOBJ_SO) `ls *.o` $(ASE_LD_SWITCHES) ; cd -
+	cd $(WORK) ; $(CC) $(CC_INT_SIZE) -g -shared -o $(ASE_SHOBJ_SO) `ls *.o` $(ASE_LD_SWITCHES) ; cd -
 	nm $(WORK)/$(ASE_SHOBJ_SO) > $(WORK)/$(ASE_SHOBJ_NAME).nm
 
 ## VCS build template ##
@@ -393,7 +414,13 @@ vcs_build: sw_build
 	@echo "#                VCS-GCC build initiated                   #"
 	@echo "#                                                          #"
 	@echo "############################################################"
+ifeq ($(ASE_PLATFORM), ASE_PLATFORM_DCP)
+	cp -f $(ASE_MEM_SRC)/*.hex $(ASE_WORKDIR)
+	vlogan $(SNPS_VLOGAN_OPT) $(ASEHW_FILE_LIST) $(ASE_PLATFORM_FILE_LIST) -l vlogan-ase.log
+else
 	vlogan $(SNPS_VLOGAN_OPT) $(ASEHW_FILE_LIST) -l vlogan-ase.log
+endif
+
 ifdef DUT_VHD_SRC_LIST
 	vhdlan $(SNPS_VHDLAN_OPT) -f $(DUT_VHD_SRC_LIST)
 endif
@@ -412,12 +439,13 @@ questa_build: sw_build
 	@echo "#                                                          #"
 	@echo "############################################################"
 	cd $(WORK) ; vlib $(WORK) ; vmap work $(WORK) ; cd -
-	cd $(WORK) ; vlog $(MENT_VLOG_OPT) $(ASEHW_FILE_LIST) -l vlog-ase.log ; cd -
+	cp -f $(ASE_MEM_SRC)/*.hex $(ASE_WORKDIR)
+	cd $(WORK) ; vlog $(MENT_VLOG_OPT) $(ASEHW_FILE_LIST) $(ASE_PLATFORM_FILE_LIST) -l vlog-ase.log ; cd -
 ifdef DUT_VHD_SRC_LIST
-	cd $(WORK) ; vcom $(MENT_VCOM_OPT) -f $(DUT_VHD_SRC_LIST) -l vcom-afu.log ; cd -
+	cd $(WORK) ; vcom $(MENT_VCOM_OPT) -F $(DUT_VHD_SRC_LIST) -l vcom-afu.log ; cd -
 endif
 ifdef DUT_VLOG_SRC_LIST
-	cd $(WORK) ; vlog $(MENT_VLOG_OPT) -f $(DUT_VLOG_SRC_LIST) -l vlog-afu.log ; cd -
+	cd $(WORK) ; vlog $(MENT_VLOG_OPT) -F $(DUT_VLOG_SRC_LIST) -l vlog-afu.log ; cd -
 endif
 
 ## Build Simulator objects ##
@@ -437,7 +465,7 @@ endif
 ## Run ASE Simulator ##
 sim: check
 ifeq ($(SIMULATOR), VCS)
-	cd $(ASE_WORKDIR) ; ./ase_simv $(VCS_SIM_OPT) +CONFIG=$(ASE_CONFIG) +SCRIPT=$(ASE_SCRIPT) ; cd -
+	cd $(ASE_WORKDIR) ; ./ase_simv $(SNPS_SIM_OPT) +CONFIG=$(ASE_CONFIG) +SCRIPT=$(ASE_SCRIPT) ; cd -
 else
   ifeq ($(SIMULATOR), QUESTA)
 	cd $(ASE_WORKDIR) ; vsim $(MENT_VSIM_OPT) +CONFIG=$(ASE_CONFIG) +SCRIPT=$(ASE_SCRIPT) $(ASE_TOP) ; cd -
