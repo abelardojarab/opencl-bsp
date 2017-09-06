@@ -27,7 +27,7 @@
 #define MEM_WINDOW_SPAN_MASK ((long)(MEM_WINDOW_SPAN-1))
 
 #define MINIMUM_DMA_SIZE	256
-#define DMA_ALIGNMENT	64
+#define DMA_ALIGNMENT	256
 
 //#define DISABLE_DMA
 

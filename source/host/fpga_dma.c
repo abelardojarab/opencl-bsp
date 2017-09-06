@@ -84,7 +84,7 @@ static fpga_result _do_dma(fpga_dma_handle dma_h, uint64_t dst, uint64_t src, in
    uint64_t data;
    fpga_result res;
 
-   // src, dst and count must be 64-byte aligned
+   // src, dst and count must be 256-byte aligned
    if(dst%FPGA_DMA_ALIGN_BYTES  !=0 ||
       src%FPGA_DMA_ALIGN_BYTES  !=0 ||
       count%FPGA_DMA_ALIGN_BYTES!=0) {      
@@ -254,7 +254,7 @@ fpga_result fpgaDmaTransferSync(fpga_dma_handle dma_h, uint64_t dst, uint64_t sr
          ON_ERR_GOTO(res, out, "FPGA_TO_HOST_MM Transfer failed");
 
          // hack: extra read to fence host memory writes
-         res = _do_dma(dma_h, dma_h->dma_buf_iova | 0x1000000000000, dma_h->dma_buf_iova | 0x1000000000000, 64);
+         res = _do_dma(dma_h, dma_h->dma_buf_iova | 0x1000000000000, dma_h->dma_buf_iova | 0x1000000000000, FPGA_DMA_ALIGN_BYTES);
          ON_ERR_GOTO(res, out, "FPGA_TO_HOST_MM Transfer failed");
 
          memcpy((void*)(dst+i*FPGA_DMA_BUF_SIZE), dma_h->dma_buf_ptr, FPGA_DMA_BUF_SIZE);
@@ -264,7 +264,7 @@ fpga_result fpgaDmaTransferSync(fpga_dma_handle dma_h, uint64_t dst, uint64_t sr
          ON_ERR_GOTO(res, out, "FPGA_TO_HOST_MM Transfer failed");
 
          // hack: extra read to fence host memory writes
-         res = _do_dma(dma_h, dma_h->dma_buf_iova | 0x1000000000000, dma_h->dma_buf_iova | 0x1000000000000, 64);
+         res = _do_dma(dma_h, dma_h->dma_buf_iova | 0x1000000000000, dma_h->dma_buf_iova | 0x1000000000000, FPGA_DMA_ALIGN_BYTES);
          ON_ERR_GOTO(res, out, "FPGA_TO_HOST_MM Transfer failed");
 
          memcpy((void*)(dst+dma_chunks*FPGA_DMA_BUF_SIZE), dma_h->dma_buf_ptr, count);

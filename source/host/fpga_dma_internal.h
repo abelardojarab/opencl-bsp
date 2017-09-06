@@ -56,7 +56,7 @@
 
 #define FPGA_DMA_DESC_BUFFER_EMPTY 0x2
 
-#define FPGA_DMA_ALIGN_BYTES 64
+#define FPGA_DMA_ALIGN_BYTES 256
 
 // Granularity of DMA transfer (maximum bytes that can be packed
 // in a single descriptor).This value must match configuration of
