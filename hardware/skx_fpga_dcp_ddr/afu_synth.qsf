@@ -105,9 +105,6 @@ set_global_assignment -name IP_FILE ip/board/board_clk_400.ip
 set_global_assignment -name IP_FILE ip/board/board_kernel_interface.ip
 set_global_assignment -name IP_FILE ip/board/board_kernel_clk_in.ip
 set_global_assignment -name IP_FILE ip/board/board_kernel_clk_export.ip
-set_global_assignment -name IP_FILE ip/board/board_por_reset_counter.ip
-set_global_assignment -name IP_FILE ip/board/board_pr_base_id.ip
-set_global_assignment -name IP_FILE ip/board/board_por_reset_controller.ip
 set_global_assignment -name IP_FILE ip/board/board_pipe_stage_host_ctrl.ip
 set_global_assignment -name IP_FILE ip/board/board_version_id_0.ip
 

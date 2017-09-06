@@ -51,7 +51,6 @@ module system (
 		input  wire         clk_400_clk,           //      clk_400.clk
 		input  wire         global_reset_reset_n,  // global_reset.reset_n
     input wire         kernel_clk,
-    input wire          bridge_reset_reset,
   
   // kernel interface
   
@@ -130,7 +129,6 @@ module system (
     .clk_400_clk                        (clk_400_clk),                                     //      clk_400.clk
    
     .global_reset_reset_n               (global_reset_reset_n),                            // global_reset.reset_n
-    .bridge_reset_reset                 (bridge_reset_reset),
     .kernel_clk_clk                     (board_kernel_clk_clk),                            //   kernel_clk.clk
     .kernel_cra_waitrequest             (board_kernel_cra_waitrequest),                    //   kernel_cra.waitrequest
     .kernel_cra_readdata                (board_kernel_cra_readdata),                       //             .readdata

@@ -122,8 +122,7 @@ module bsp_logic(
     system u0 (
 		.global_reset_reset_n (~pck_cp2af_softReset ), //  global_reset.reset_n
 		.clk_400_clk           (pClk ),
-		.bridge_reset_reset(pck_cp2af_softReset ),
-		.clk_200_clk           (pClkDiv4 ),
+		.clk_200_clk           (pClkDiv2 ),
 		
 		.avst_host_cmd_data         (avst_host_cmd_data ),         //      avst_host_cmd.data
 		.avst_host_cmd_valid        (avst_host_cmd_valid),        //                   .valid
