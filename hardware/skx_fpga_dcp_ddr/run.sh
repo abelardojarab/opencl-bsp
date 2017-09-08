@@ -99,8 +99,6 @@ rm -rf fpga.bin
 gzip -9c ./output_files/afu_fit.gbs > afu_fit.gbs.gz
 aocl binedit fpga.bin create
 aocl binedit fpga.bin add .acl.gbs.gz ./afu_fit.gbs.gz
-#TODO: remove pll.txt after old flows removed
-aocl binedit fpga.bin add .acl.pll ./pll.txt
 
 if [ -f afu_quartus_report.txt ]; then
 	aocl binedit fpga.bin add .afu_quartus_report.txt ./afu_quartus_report.txt

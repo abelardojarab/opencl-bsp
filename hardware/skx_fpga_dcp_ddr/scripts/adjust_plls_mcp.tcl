@@ -23,9 +23,6 @@ package require ::quartus::flow
 
 # Definitions
 
-#inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|outclk0 
-#
-
 #these are currently reversed
 #set k_clk_name "fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk[0]"
 set k_clk_name "fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|outclk0"
@@ -365,15 +362,6 @@ close $outfile
 
 # Preserve original sta report
 #file copy -force $revision_name.sta.rpt $revision_name.sta-orig.rpt
-
-# write  file for kernel freq
-set clockfile   [open "pll.txt" w]
-set pll_setting [expr int($k_fmax * 2)]
-if { $fmax2 < 10000} {
-set pll_setting [expr min($pll_setting,600) ]
-}
-puts $clockfile "$pll_setting"
-close $clockfile
 
 # write  file for kernel freq metadata
 set clockfile   [open "pll_metadata.txt" w]
