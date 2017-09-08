@@ -632,12 +632,12 @@ proc synthesize_persona_impl {synth_rev} {
 	project_open $PROJECT_NAME -rev $synth_rev
 
 	post_message -type info "   Synthesizing $synth_rev"
-	execute_module -dont_export_assignments -tool ipg -args "--generate_project_qsys_files"
+	execute_module -tool ipg -args "--generate_project_qsys_files"
 	if {[file exists "post_ipgenerate_persona_synth_flow.tcl"]} {
 		post_message -type info "Preparing to source post_ipgenerate_persona_synth_flow.tcl."
 		source "post_ipgenerate_persona_synth_flow.tcl"
 	}
-	execute_module -dont_export_assignments -tool syn
+	execute_module -tool syn
 	
 	# Export the synthesis for use in the impl compile
 	design::export_block root_partition -snapshot synthesized -file "$synth_rev.qdb"
@@ -690,12 +690,12 @@ proc compile_pr_revision_impl {impl_rev} {
 	project_open $PROJECT_NAME -rev $impl_rev
 
 	post_message -type info "Compiling PR implementation $impl_rev."
-	execute_module -dont_export_assignments -tool fit
-	execute_module -dont_export_assignments -tool asm
-	execute_module -dont_export_assignments -tool sta
+	execute_module -tool fit
+	execute_module -tool asm
+	execute_module -tool sta
 	
 	if {[check_option_on $FLOW_OPTION_RUN_POW]} {
-		execute_module -dont_export_assignments -tool pow
+		execute_module -tool pow
 	}
 
 	# Create all bitstreams
@@ -706,11 +706,11 @@ proc compile_pr_revision_impl {impl_rev} {
 			post_message -type info "   Converting bitstream for $block_name."
 	
 			if {[check_option_on $FLOW_OPTION_ENABLE_PR_BITSTREAM_COMPRESSION]} {
-				execute_module -dont_export_assignments -tool cpf -args "-c -o bitstream_compression=on ${BASE_REVISION_OUTPUT_DIR}/${impl_rev}.${block_name}.pmsf ${BASE_REVISION_OUTPUT_DIR}/${impl_rev}.${block_name}.rbf"
+				execute_module -tool cpf -args "-c -o bitstream_compression=on ${BASE_REVISION_OUTPUT_DIR}/${impl_rev}.${block_name}.pmsf ${BASE_REVISION_OUTPUT_DIR}/${impl_rev}.${block_name}.rbf"
 			} elseif {[check_option_on $FLOW_OPTION_ENABLE_ENHANCED_PR_BITSTREAM_COMPRESSION]} {
-				execute_module -dont_export_assignments -tool cpf -args "-c -o enhanced_bitstream_compression=on ${BASE_REVISION_OUTPUT_DIR}/${impl_rev}.${block_name}.pmsf ${BASE_REVISION_OUTPUT_DIR}/${impl_rev}.${block_name}.rbf"
+				execute_module -tool cpf -args "-c -o enhanced_bitstream_compression=on ${BASE_REVISION_OUTPUT_DIR}/${impl_rev}.${block_name}.pmsf ${BASE_REVISION_OUTPUT_DIR}/${impl_rev}.${block_name}.rbf"
 			} else {
-				execute_module -dont_export_assignments -tool cpf -args "-c ${BASE_REVISION_OUTPUT_DIR}/${impl_rev}.${block_name}.pmsf ${BASE_REVISION_OUTPUT_DIR}/${impl_rev}.${block_name}.rbf"
+				execute_module -tool cpf -args "-c ${BASE_REVISION_OUTPUT_DIR}/${impl_rev}.${block_name}.pmsf ${BASE_REVISION_OUTPUT_DIR}/${impl_rev}.${block_name}.rbf"
 			}
 		}
 	}
@@ -732,18 +732,18 @@ proc compile_base_revision {} {
 	
 	# Compile the base revision
 	post_message -type info "Compiling base revision $BASE_REVISION_NAME from project $PROJECT_NAME."
-	execute_module -dont_export_assignments -tool ipg -args "--generate_project_qsys_files"
+	execute_module -tool ipg -args "--generate_project_qsys_files"
 	if {[file exists "post_ipgenerate_base_flow.tcl"]} {
 		post_message -type info "Preparing to source post_ipgenerate_base_flow.tcl."
 		source "post_ipgenerate_base_flow.tcl"
 	}
-	execute_module -dont_export_assignments -tool syn
-	execute_module -dont_export_assignments -tool fit
-	execute_module -dont_export_assignments -tool asm
-	execute_module -dont_export_assignments -tool sta
+	execute_module -tool syn
+	execute_module -tool fit
+	execute_module -tool asm
+	execute_module -tool sta
 	
 	if {[check_option_on $FLOW_OPTION_RUN_POW]} {
-		execute_module -dont_export_assignments -tool pow
+		execute_module -tool pow
 	}
 	
 	# export the root partition
@@ -757,11 +757,11 @@ proc compile_base_revision {} {
 			post_message -type info "   Converting bitstream for $block_name."
 	
 			if {[check_option_on $FLOW_OPTION_ENABLE_PR_BITSTREAM_COMPRESSION]} {
-				execute_module -dont_export_assignments -tool cpf -args "-c -o bitstream_compression=on ${BASE_REVISION_OUTPUT_DIR}/${BASE_REVISION_NAME}.${block_name}.pmsf ${BASE_REVISION_OUTPUT_DIR}/${BASE_REVISION_NAME}.${block_name}.rbf"
+				execute_module -tool cpf -args "-c -o bitstream_compression=on ${BASE_REVISION_OUTPUT_DIR}/${BASE_REVISION_NAME}.${block_name}.pmsf ${BASE_REVISION_OUTPUT_DIR}/${BASE_REVISION_NAME}.${block_name}.rbf"
 			} elseif {[check_option_on $FLOW_OPTION_ENABLE_ENHANCED_PR_BITSTREAM_COMPRESSION]} {
-				execute_module -dont_export_assignments -tool cpf -args "-c -o enhanced_bitstream_compression=on ${BASE_REVISION_OUTPUT_DIR}/${BASE_REVISION_NAME}.${block_name}.pmsf ${BASE_REVISION_OUTPUT_DIR}/${BASE_REVISION_NAME}.${block_name}.rbf"
+				execute_module -tool cpf -args "-c -o enhanced_bitstream_compression=on ${BASE_REVISION_OUTPUT_DIR}/${BASE_REVISION_NAME}.${block_name}.pmsf ${BASE_REVISION_OUTPUT_DIR}/${BASE_REVISION_NAME}.${block_name}.rbf"
 			} else {
-				execute_module -dont_export_assignments -tool cpf -args "-c ${BASE_REVISION_OUTPUT_DIR}/${BASE_REVISION_NAME}.${block_name}.pmsf ${BASE_REVISION_OUTPUT_DIR}/${BASE_REVISION_NAME}.${block_name}.rbf"
+				execute_module -tool cpf -args "-c ${BASE_REVISION_OUTPUT_DIR}/${BASE_REVISION_NAME}.${block_name}.pmsf ${BASE_REVISION_OUTPUT_DIR}/${BASE_REVISION_NAME}.${block_name}.rbf"
 			}
 	
 		}

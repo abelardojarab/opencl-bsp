@@ -8,6 +8,7 @@ cd git_repo_root
 export OPENCL_ASE_SIM=1
 ./scripts/sim_bsp_env_shell.sh
 ./scripts/setup_packages.sh
+./scripts/setup_bsp.sh
 cd example_designs/mem_bandwidth
 aoc device/mem_bandwidth.cl -o bin/mem_bandwidth.aocx
 rm -fr bin/mem_bandwidth
@@ -21,6 +22,7 @@ export OPENCL_ASE_SIM=0
 export MINICLOUD=1
 ./scripts/bsp_env_shell.sh
 ./scripts/setup_packages.sh
+./scripts/setup_bsp.sh
 source /storage/shared/home_directories/crauer/opencl_install/aclrte/init_opencl.sh
 aoc device/mem_bandwidth.cl -o bin/mem_bandwidth.aocx
 rm -fr bin/mem_bandwidth

@@ -3,6 +3,7 @@
 SCRIPT_PATH=`readlink -f ${BASH_SOURCE[0]}`
 #get director of script path
 SCRIPT_DIR_PATH="$(dirname $SCRIPT_PATH)"
+MAIN_SRC_PATH="$(dirname $SCRIPT_DIR_PATH)"
 
 #we don't build release packages for simulation
 export OPENCL_ASE_SIM=0
@@ -21,13 +22,11 @@ PACKAGE_TEST_DIR=$RELEASE_BUILD_DIR/test_pkg
 BSP_DIR_NAME=dcp_opencl_bsp
 REPO_VERSION_FILE=$RELEASE_BUILD_DIR/repo_version.txt
 
-if [ "$1" != "" ]; then
-	export BSP_BOARD_TARGET=$1
-fi
+BSP_BOARD_TARGET=skx_fpga_dcp_ddr
+[ ! -z "$1" ] && BSP_BOARD_TARGET="$1"
 
-if [ "$BSP_BOARD_TARGET" == "" ]; then
-	export BSP_BOARD_TARGET=skx_fpga_dcp_ddr
-fi
+DCP_PLATFORM=dcp_1.0-skx
+[ ! -z "$2" ] && DCP_PLATFORM="$2"
 
 #use a stable OPAE release
 export OPAE_GIT_BRANCH=release/0.9.0
@@ -40,7 +39,7 @@ rm -fr $RELEASE_BUILD_DIR
 
 $SCRIPT_DIR_PATH/setup_packages.sh
 
-echo "Building Release packager for '$BSP_BOARD_TARGET'"
+echo "Building Release package for '$BSP_BOARD_TARGET'"
 
 #setup release dir
 mkdir $RELEASE_BUILD_DIR
@@ -63,10 +62,10 @@ cp -R $ROOT_PROJECT_PATH/linux64 $RELEASE_BUILD_DIR/$BSP_DIR_NAME/
 mkdir -p $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/
 cp -R $ROOT_PROJECT_PATH/hardware/$BSP_BOARD_TARGET $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/
 cd $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/$BSP_BOARD_TARGET/
-sh import_blue_bits.sh
+
+sh $SCRIPT_DIR_PATH/setup_bsp.sh $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/$BSP_BOARD_TARGET $DCP_PLATFORM
+
 rm $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/$BSP_BOARD_TARGET/*.sh
-rm -fr $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/$BSP_BOARD_TARGET/extra_sim_files
-rm -f $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/$BSP_BOARD_TARGET/mem_sim_model.sv
 cp -R $ROOT_PROJECT_PATH/hardware/$BSP_BOARD_TARGET/run.sh $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/$BSP_BOARD_TARGET
 
 #tar it up

@@ -10,6 +10,8 @@ export OPENCL_ASE_SIM=1
 setup_arc_for_script $@
 
 $SCRIPT_DIR_PATH/setup_packages.sh
+$SCRIPT_DIR_PATH/setup_bsp.sh
+
 cd $ROOT_PROJECT_PATH/example_designs/vector_add_int
 rm -fr bin/vector_add_int
 aoc vector_add_int.cl --board skx_fpga_dcp_ddr -o bin/vector_add_int.aocx

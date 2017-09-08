@@ -26,26 +26,19 @@ if [ $FLOW_SUCCESS != 0 ]; then
 	exit 1
 fi
 
-#check for bypass/alternative flows
-if [ "$DCP_BYPASS_OPENCL_RUN_SCRIPT" != "" ]; then
-	sh $DCP_BYPASS_OPENCL_RUN_SCRIPT
-	exit $?
-fi
-
 # Copy Blue bitstream library 
 # ===========================
 echo "Restoring Blue BS lib files"
 echo "==========================="
 
-if [ -f "dcp.qdb" ]; then
-	echo "INFO: blue bits already imported"
-else
-	sh import_blue_bits.sh
-	FLOW_SUCCESS=$?
-	if [ $FLOW_SUCCESS != 0 ]; then
-		echo "ERROR: Blue bits import failed!"
-		exit 1
-	fi
+if [ ! -f "dcp.qdb" ]; then
+	echo "ERROR: BSP is not setup"
+fi
+
+#check for bypass/alternative flows
+if [ "$DCP_BYPASS_OPENCL_RUN_SCRIPT" != "" ]; then
+	sh $DCP_BYPASS_OPENCL_RUN_SCRIPT
+	exit $?
 fi
 
 #need to design directory with timing files so that they are the same as blue 
