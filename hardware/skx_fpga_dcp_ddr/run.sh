@@ -106,6 +106,14 @@ if [ -f afu_quartus_report.txt ]; then
 	aocl binedit fpga.bin add .afu_quartus_report.txt ./afu_quartus_report.txt
 fi
 
+if [ -f afu_fit.failing_clocks.rpt ]; then
+	aocl binedit fpga.bin add .failing_clocks.rpt ./afu_fit.failing_clocks.rpt
+fi
+
+if [ -f afu_fit.failing_paths.rpt ]; then
+	aocl binedit fpga.bin add .failing_paths.rpt ./afu_fit.failing_paths.rpt
+fi
+
 if [ ! -f fpga.bin ]; then
 	echo "FPGA compilation failed!"
 	exit 1
