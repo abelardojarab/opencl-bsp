@@ -24,6 +24,20 @@ PLATFORM="dcp_1.0-skx"
 [ ! -z "$1" ] && BSP_DIR="$1"
 [ ! -z "$2" ] && PLATFORM="$2"
 
+if [ "$BSP_DIR" == "all" ]; then
+	
+	set -e 
+	for i in `find $MAIN_SRC_PATH/hardware/ -name board_spec.xml`
+	do
+		BSP_DIR=`dirname $i`
+		$SCRIPT_PATH $BSP_DIR $PLATFORM
+		echo $BSP_DIR
+	done
+exit 0
+fi
+
+echo BSP Setup: BSP_DIR=$BSP_DIR with PLATFORM=$PLATFORM
+
 cd $BSP_DIR
 
 if [ -z "$ADAPT_DEST_ROOT" ]; then
