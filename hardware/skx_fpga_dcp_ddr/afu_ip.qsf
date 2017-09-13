@@ -16,7 +16,7 @@ set_global_assignment -name SEARCH_PATH ./hw/rtl/cci-mpf-shims/cci_mpf_shim_edge
 set_global_assignment -name SEARCH_PATH ./hw/rtl/cci-mpf-shims/cci_mpf_shim_pwrite
 set_global_assignment -name SEARCH_PATH ./hw/rtl/cci-mpf-shims/cci_mpf_shim_vtp
 set_global_assignment -name SEARCH_PATH ./hw/rtl/cci-mpf-shims/cci_mpf_shim_wro
-#set_global_assignment -name SEARCH_PATH ./sw/include/fpga/mpf
+#set_global_assignment -name SEARCH_PATH ./sw/include/opae/mpf
 
 ## Type and interface Packages and header files
 set_global_assignment -name SYSTEMVERILOG_FILE ./hw/rtl/cci-if/ccis_if_pkg.sv
@@ -31,6 +31,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE ./hw/rtl/cci-mpf-shims/cci_mpf_sh
 
 ## Primary MPF module that instantiates the desired shims
 set_global_assignment -name SYSTEMVERILOG_FILE ./hw/rtl/cci_mpf.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ./hw/rtl/cci_mpf_null.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ./hw/rtl/cci_mpf_pipe_std.sv
 
 ## Map CCI wires to MPF's primary interface

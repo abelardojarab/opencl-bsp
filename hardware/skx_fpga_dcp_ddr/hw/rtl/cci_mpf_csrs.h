@@ -69,7 +69,7 @@ typedef enum
     // BBB feature ID high (read)
     CCI_MPF_VTP_CSR_ID_H = 16,
 
-    // Mode (4 bytes) (read/write)
+    // Mode (read/write)
     //   Bit 0:
     //      0 - Disabled (block memory traffic)
     //      1 - Enabled
