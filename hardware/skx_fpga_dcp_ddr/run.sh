@@ -41,6 +41,16 @@ if [ "$DCP_BYPASS_OPENCL_RUN_SCRIPT" != "" ]; then
 	exit $?
 fi
 
+#append kernel_system qsys/ip assignments to afu_fit revision
+rm -f kernel_system_qsf_append.txt
+cp afu_fit.qsf kernel_system_qsf_append.txt
+echo >> kernel_system_qsf_append.txt
+grep kernel_system.qsys afu_synth.qsf >> kernel_system_qsf_append.txt
+grep ip/kernel_system/ afu_synth.qsf >> kernel_system_qsf_append.txt
+echo >> kernel_system_qsf_append.txt
+rm -f afu_fit.qsf
+mv kernel_system_qsf_append.txt afu_fit.qsf
+
 #need to design directory with timing files so that they are the same as blue 
 #bits
 rsync -rvua design/ ../design
