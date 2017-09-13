@@ -33,6 +33,10 @@
 #define __FPGA_DMA_INT_H__
 
 #include <opae/fpga.h>
+#define QWORD_BYTES 8
+#define DWORD_BYTES 4
+#define IS_ALIGNED_DWORD(addr) (addr%4==0)
+#define IS_ALIGNED_QWORD(addr) (addr%8==0)
 
 #define FPGA_DMA_UUID_H 0xd79c094c7cf94cc1
 #define FPGA_DMA_UUID_L 0x94eb7d79c7c01ca3
@@ -51,26 +55,35 @@
 // DMA Register offsets from base
 #define FPGA_DMA_CSR 0x40
 #define FPGA_DMA_DESC 0x60
+#define FPGA_DMA_ADDR_SPAN_EXT_CNTL 0x200
+#define FPGA_DMA_ADDR_SPAN_EXT_DATA 0x1000
+
+#define DMA_ADDR_SPAN_EXT_WINDOW (4*1024)
+#define DMA_ADDR_SPAN_EXT_WINDOW_MASK ((uint64_t)(DMA_ADDR_SPAN_EXT_WINDOW-1))
 
 #define FPGA_DMA_MASK_32_BIT 0xFFFFFFFF
 
-#define FPGA_DMA_DESC_BUFFER_EMPTY 0x2
+#define FPGA_DMA_CSR_BUSY (1<<0)
+#define FPGA_DMA_DESC_BUFFER_EMPTY (1<<1)
+#define FPGA_DMA_DESC_BUFFER_FULL (1<<2)
 
-#define FPGA_DMA_ALIGN_BYTES 256
-
+#define FPGA_DMA_ALIGN_BYTES 64
+#define IS_DMA_ALIGNED(addr) (addr%FPGA_DMA_ALIGN_BYTES==0)
 // Granularity of DMA transfer (maximum bytes that can be packed
 // in a single descriptor).This value must match configuration of
 // the DMA IP. Larger transfers will be broken down into smaller
 // transactions.
-#define FPGA_DMA_BUF_SIZE (512*1024)
-
+#define FPGA_DMA_BUF_SIZE (1023*1024)
+#define FPGA_DMA_BUF_ALIGN_SIZE (1023*1024)
 // Convenience macros
 #ifdef FPGA_DMA_DEBUG
   #define debug_print(fmt, ...) \
-          do { if (FPGA_DMA_DEBUG) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
+          do { if (FPGA_DMA_DEBUG) fprintf(stderr, fmt, ##__VA_ARGS__); } while (0)
 #else
   #define debug_print(...)
 #endif
+
+#define MAX_BUF 4
 
 typedef union {
    uint64_t reg;
@@ -95,12 +108,12 @@ typedef struct __attribute__((__packed__))
   //0x8
   uint32_t len;
   //0xC
-  uint8_t wr_burst_count;
-  uint8_t rd_burst_count;
   uint16_t seq_num;
+  uint8_t rd_burst_count;
+  uint8_t wr_burst_count;
   //0x10
-  uint16_t wr_stride;
   uint16_t rd_stride;
+  uint16_t wr_stride;
   //0x14
   uint32_t rd_address_ext;
   //0x18
@@ -116,9 +129,9 @@ struct _dma_handle_t
    uint64_t mmio_offset;
    uint64_t dma_base;
    uint64_t dma_offset;
-   uint64_t *dma_buf_ptr;
-   uint64_t dma_buf_wsid;
-   uint64_t dma_buf_iova;
+   uint64_t *dma_buf_ptr[MAX_BUF];
+   uint64_t dma_buf_wsid[MAX_BUF];
+   uint64_t dma_buf_iova[MAX_BUF];
 };
 
 #endif // __FPGA_DMA_INT_H__

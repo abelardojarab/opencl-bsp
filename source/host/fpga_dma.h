@@ -45,16 +45,6 @@ extern "C" {
 #endif
 
 /*
- * macro for checking return codes
- */
-#define ON_ERR_GOTO(res, label, desc)\
-  do {\
-    if ((res) != FPGA_OK) {\
-    	goto label;\
-    }\
-  } while (0)
-
-/*
 * The DMA driver supports host to FPGA, FPGA to host and FPGA
 * to FPGA transfers. The FPGA interface can be streaming
 * or memory-mapped. Streaming interfaces are not currently
