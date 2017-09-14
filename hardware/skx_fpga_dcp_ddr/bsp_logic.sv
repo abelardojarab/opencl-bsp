@@ -13,6 +13,10 @@
 
 `include "cci_mpf_if.vh"
 
+`ifndef OPENCL_MEMORY_ADDR_WIDTH
+`define OPENCL_MEMORY_ADDR_WIDTH 26
+`endif
+
 module bsp_logic(
   // CCI-P Clocks and Resets
   input           logic             pClk,              // 400MHz - CCI-P clock domain. Primary interface clock
@@ -44,7 +48,7 @@ module bsp_logic(
   output logic   [7:0]  	board_kernel_cra_byteenable,
   output logic         	board_kernel_cra_debugaccess,
 
-	output	[32:0]	acl_internal_snoop_data,
+	output	[`OPENCL_MEMORY_ADDR_WIDTH+6:0]	acl_internal_snoop_data,
 	output		acl_internal_snoop_valid,
 	input		acl_internal_snoop_ready,
   
@@ -56,7 +60,7 @@ module bsp_logic(
 	input		emif_ddr4a_readdatavalid,
 	output	[6:0]	emif_ddr4a_burstcount,
 	output	[511:0]	emif_ddr4a_writedata,
-	output	[31:0]	emif_ddr4a_address,
+	output	[`OPENCL_MEMORY_ADDR_WIDTH+6-1:0]	emif_ddr4a_address,
 	output		emif_ddr4a_write,
 	output		emif_ddr4a_read,
 	output	[63:0]	emif_ddr4a_byteenable,
@@ -67,7 +71,7 @@ module bsp_logic(
 	input		emif_ddr4b_readdatavalid,
 	output	[6:0]	emif_ddr4b_burstcount,
 	output	[511:0]	emif_ddr4b_writedata,
-	output	[31:0]	emif_ddr4b_address,
+	output	[`OPENCL_MEMORY_ADDR_WIDTH+6-1:0]	emif_ddr4b_address,
 	output		emif_ddr4b_write,
 	output		emif_ddr4b_read,
 	output	[63:0]	emif_ddr4b_byteenable,
@@ -78,7 +82,7 @@ module bsp_logic(
 	output		kernel_ddr4a_readdatavalid,
 	input	[4:0]	kernel_ddr4a_burstcount,
 	input	[511:0]	kernel_ddr4a_writedata,
-	input	[31:0]	kernel_ddr4a_address,
+	input	[`OPENCL_MEMORY_ADDR_WIDTH+6-1:0]	kernel_ddr4a_address,
 	input		kernel_ddr4a_write,
 	input		kernel_ddr4a_read,
 	input	[63:0]	kernel_ddr4a_byteenable,
@@ -89,7 +93,7 @@ module bsp_logic(
 	output		kernel_ddr4b_readdatavalid,
 	input	[4:0]	kernel_ddr4b_burstcount,
 	input	[511:0]	kernel_ddr4b_writedata,
-	input	[31:0]	kernel_ddr4b_address,
+	input	[`OPENCL_MEMORY_ADDR_WIDTH+6-1:0]	kernel_ddr4b_address,
 	input		kernel_ddr4b_write,
 	input		kernel_ddr4b_read,
 	input	[63:0]	kernel_ddr4b_byteenable,

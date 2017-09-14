@@ -27,7 +27,10 @@
 //
 // ***************************************************************************
 
-module mem_sim_model (
+module mem_sim_model #(
+	parameter AVMM_ADDR_WIDTH = 26
+	)
+	(
   input   wire                          clk,
   input wire reset,
   output   logic                          avmm_waitrequest,
@@ -35,7 +38,7 @@ module mem_sim_model (
   output   logic                          avmm_readdatavalid,
   input  wire [6:0]                    avmm_burstcount,
   input  wire [511:0]                  avmm_writedata,
-  input  wire [25:0]                   avmm_address,
+  input  wire [AVMM_ADDR_WIDTH-1:0]                   avmm_address,
   input  wire                          avmm_write,
   input  wire                          avmm_read,
   input  wire [63:0]                   avmm_byteenable
@@ -43,12 +46,12 @@ module mem_sim_model (
 	
 	initial avmm_readdata = 512'b0;
 	initial avmm_readdatavalid = 0;
-	reg  [511:0] mem_array[ reg [25:0] ]; // Fake emif sim model, we model 2 banks of memory using systemverilog associative arrays
+	reg  [511:0] mem_array[ reg [AVMM_ADDR_WIDTH-1:0] ]; // Fake emif sim model, we model 2 banks of memory using systemverilog associative arrays
 	
 	wire [511:0] avmm_byteenable_mask;
 	reg [511:0] tmp_read = 0;
 	reg [6:0] avmm_burst_state = 0;
-	reg [25:0]  avmm_burst_address = 0;
+	reg [AVMM_ADDR_WIDTH-1:0]  avmm_burst_address = 0;
 	reg [511:0] avmm_burst_byteenable_mask = 0;
 	genvar i;
 	generate
@@ -70,7 +73,7 @@ module mem_sim_model (
 			avmm_readdata      <= 512'b0;
 			avmm_readdatavalid <= 1'b0;
 			avmm_burst_state <= 6'b0;
-			avmm_burst_address <= 25'b0;
+			avmm_burst_address <= 0;
 			avmm_burst_byteenable_mask <= 512'b0;
 			is_read_burst <= 1'b0;
 			is_write_burst <= 1'b0;

@@ -1,4 +1,6 @@
 +define+MPF_PLATFORM_DCP_PCIE
 
+//+define+OPENCL_MEMORY_ADDR_WIDTH=27
+
 -F ./qsys_files/mpf/sim/cci_mpf_sim_addenda.txt
 

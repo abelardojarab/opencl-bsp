@@ -29,7 +29,11 @@
 
 // system.v
 
-// Top level module of OpenCL for MCP
+// Top level module of OpenCL for DCP
+
+`ifndef OPENCL_MEMORY_ADDR_WIDTH
+`define OPENCL_MEMORY_ADDR_WIDTH 26
+`endif
 
 `timescale 1 ps / 1 ps
 module system (
@@ -70,7 +74,7 @@ module system (
   output   [7:0]  	board_kernel_cra_byteenable,
   output         	board_kernel_cra_debugaccess,
   
-  	output	[32:0]	acl_internal_snoop_data,
+  	output	[`OPENCL_MEMORY_ADDR_WIDTH+6:0]	acl_internal_snoop_data,
 	output		acl_internal_snoop_valid,
 	input		acl_internal_snoop_ready,
   
@@ -82,7 +86,7 @@ module system (
 	input		emif_ddr4a_readdatavalid,
 	output	[6:0]	emif_ddr4a_burstcount,
 	output	[511:0]	emif_ddr4a_writedata,
-	output	[31:0]	emif_ddr4a_address,
+	output	[`OPENCL_MEMORY_ADDR_WIDTH+6-1:0]	emif_ddr4a_address,
 	output		emif_ddr4a_write,
 	output		emif_ddr4a_read,
 	output	[63:0]	emif_ddr4a_byteenable,
@@ -93,7 +97,7 @@ module system (
 	input		emif_ddr4b_readdatavalid,
 	output	[6:0]	emif_ddr4b_burstcount,
 	output	[511:0]	emif_ddr4b_writedata,
-	output	[31:0]	emif_ddr4b_address,
+	output	[`OPENCL_MEMORY_ADDR_WIDTH+6-1:0]	emif_ddr4b_address,
 	output		emif_ddr4b_write,
 	output		emif_ddr4b_read,
 	output	[63:0]	emif_ddr4b_byteenable,
@@ -104,7 +108,7 @@ module system (
 	output		kernel_ddr4a_readdatavalid,
 	input	[4:0]	kernel_ddr4a_burstcount,
 	input	[511:0]	kernel_ddr4a_writedata,
-	input	[31:0]	kernel_ddr4a_address,
+	input	[`OPENCL_MEMORY_ADDR_WIDTH+6-1:0]	kernel_ddr4a_address,
 	input		kernel_ddr4a_write,
 	input		kernel_ddr4a_read,
 	input	[63:0]	kernel_ddr4a_byteenable,
@@ -115,7 +119,7 @@ module system (
 	output		kernel_ddr4b_readdatavalid,
 	input	[4:0]	kernel_ddr4b_burstcount,
 	input	[511:0]	kernel_ddr4b_writedata,
-	input	[31:0]	kernel_ddr4b_address,
+	input	[`OPENCL_MEMORY_ADDR_WIDTH+6-1:0]	kernel_ddr4b_address,
 	input		kernel_ddr4b_write,
 	input		kernel_ddr4b_read,
 	input	[63:0]	kernel_ddr4b_byteenable,

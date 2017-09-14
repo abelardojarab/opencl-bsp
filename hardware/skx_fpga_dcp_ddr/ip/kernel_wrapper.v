@@ -32,6 +32,10 @@
 // using kernel wrapper instead of kernel_system, since kernel_system is auto generated
 // kernel_system introduces boundary ports that are not used, and in PR, it gets preserved
 
+`ifndef OPENCL_MEMORY_ADDR_WIDTH
+`define OPENCL_MEMORY_ADDR_WIDTH 26
+`endif
+
 module kernel_wrapper(
   input	          clock_reset_clk,
   input	          clock_reset2x_clk,
@@ -48,7 +52,7 @@ module kernel_wrapper(
   input   [7:0]  	kernel_cra_byteenable,
   input           kernel_cra_debugaccess,
   
-	input	[32:0]	acl_internal_snoop_data,
+	input	[`OPENCL_MEMORY_ADDR_WIDTH+6:0]	acl_internal_snoop_data,
 	input		acl_internal_snoop_valid,
 	output		acl_internal_snoop_ready,
   
@@ -57,7 +61,7 @@ module kernel_wrapper(
 	input		kernel_ddr4a_readdatavalid,
 	output	[4:0]	kernel_ddr4a_burstcount,
 	output	[511:0]	kernel_ddr4a_writedata,
-	output	[31:0]	kernel_ddr4a_address,
+	output	[`OPENCL_MEMORY_ADDR_WIDTH+6-1:0]	kernel_ddr4a_address,
 	output		kernel_ddr4a_write,
 	output		kernel_ddr4a_read,
 	output	[63:0]	kernel_ddr4a_byteenable,
@@ -68,7 +72,7 @@ module kernel_wrapper(
 	input		kernel_ddr4b_readdatavalid,
 	output	[4:0]	kernel_ddr4b_burstcount,
 	output	[511:0]	kernel_ddr4b_writedata,
-	output	[31:0]	kernel_ddr4b_address,
+	output	[`OPENCL_MEMORY_ADDR_WIDTH+6-1:0]	kernel_ddr4b_address,
 	output		kernel_ddr4b_write,
 	output		kernel_ddr4b_read,
 	output	[63:0]	kernel_ddr4b_byteenable,
