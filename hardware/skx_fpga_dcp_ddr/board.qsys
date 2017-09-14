@@ -226,18 +226,6 @@
  <parameter name="systemInfos"><![CDATA[<systemInfosDefinition>
     <connPtSystemInfos>
         <entry>
-            <key>clk_200</key>
-            <value>
-                <connectionPointName>clk_200</connectionPointName>
-                <suppliedSystemInfos>
-                    <entry>
-                        <key>CLOCK_RATE</key>
-                    </entry>
-                </suppliedSystemInfos>
-                <consumedSystemInfos/>
-            </value>
-        </entry>
-        <entry>
             <key>emif_ddr4a</key>
             <value>
                 <connectionPointName>emif_ddr4a</connectionPointName>
@@ -291,6 +279,18 @@
             </value>
         </entry>
         <entry>
+            <key>kernel_clk_in</key>
+            <value>
+                <connectionPointName>kernel_clk_in</connectionPointName>
+                <suppliedSystemInfos>
+                    <entry>
+                        <key>CLOCK_RATE</key>
+                    </entry>
+                </suppliedSystemInfos>
+                <consumedSystemInfos/>
+            </value>
+        </entry>
+        <entry>
             <key>kernel_ddr4a</key>
             <value>
                 <connectionPointName>kernel_ddr4a</connectionPointName>
@@ -332,18 +332,6 @@
                 </consumedSystemInfos>
             </value>
         </entry>
-        <entry>
-            <key>psl_clk</key>
-            <value>
-                <connectionPointName>psl_clk</connectionPointName>
-                <suppliedSystemInfos>
-                    <entry>
-                        <key>CLOCK_RATE</key>
-                    </entry>
-                </suppliedSystemInfos>
-                <consumedSystemInfos/>
-            </value>
-        </entry>
     </connPtSystemInfos>
 </systemInfosDefinition>]]></parameter>
  <parameter name="systemScripts" value="" />
@@ -376,6 +364,7 @@
    internal="ccip_avmm_bridge_inst.avst_mmio_rsp"
    type="avalon_streaming"
    dir="start" />
+ <interface name="clk_200" internal="clk_200.in_clk" type="clock" dir="end" />
  <interface name="clk_400" internal="clk_400.in_clk" type="clock" dir="end" />
  <interface
    name="emif_ddr4a"
@@ -439,7 +428,6 @@
    dir="start" />
  <interface name="mem_export_export" internal=".export" />
  <interface name="mem_export_irq_export" internal=".irq_export" />
- <interface name="clk_200" internal="clk_200.in_clk" type="clock" dir="end" />
  <module
    name="acl_irq_to_polling_slave_0"
    kind="altera_generic_component"
