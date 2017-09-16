@@ -378,14 +378,18 @@ if { $fmax2 < 10000} {
 puts $clockfile "clock-frequency-low:$pll_1x_setting clock-frequency-high:$pll_2x_setting"
 close $clockfile
 
-file rename -force user_clock.sdc user_clock_orig.sdc													
+#kernel clk 2x / uClk_usr
+set period2 [expr 500.0 / $k_fmax]
+#cut off to 2 decimal places
+set period2 [expr {double(round(100*$period2))/100}]
+
+#kernel clk 1x / uClk_usrDiv2
+set period [expr 2.0 * $period2]
+
+file rename -force user_clock.sdc user_clock_orig.sdc	
 
 set sdcfile   [open "user_clock.sdc" w]
-#kernel clk 1x / uClk_usrDiv2
-set period [expr 1000 / $k_fmax]
 puts $sdcfile "create_clock -name {fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|outclk0} -period $period \[get_pins {fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk\[0\]}\]"
-#kernel clk 2x / uClk_usr
-set period2 [expr 500 / $k_fmax]
 puts $sdcfile "create_clock -name {fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|outclk1} -period $period2 \[get_pins {fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk\[1\]}\]"
 close $sdcfile
 
