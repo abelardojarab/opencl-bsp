@@ -192,7 +192,7 @@ kernel void Arbiter() {
          #pragma unroll
          for (int i = 0; i < COPIES; i++) {
             if (i == source) {
-               hc = read_channel_nb_altera(results[i], &success);
+               hc = read_channel_nb_intel(results[i], &success);
             }
           }
       }
@@ -206,7 +206,7 @@ kernel void Arbiter() {
       for (int i = 0; i < 16; i++) dc.data[i] = hc.data[i];
       if (!success && left == 0) source++;
       if (success || sendEOBs) {
-         write_channel_altera(toDCT, dc);
+         write_channel_intel(toDCT, dc);
          if (left == 0) {
             left = 23;
          } else if (left == 1) {
@@ -231,7 +231,7 @@ kernel void Arbiter() {
 // local work size - 24 threads processing one tile
 __attribute__((reqd_work_group_size(24, 1, 1)))
 kernel void DCTandRGB(global uchar *output, uchar write) {
-   struct DCTContext dc = read_channel_altera(toDCT);
+   struct DCTContext dc = read_channel_intel(toDCT);
    uint tilesPerRow = (dc.cols + 15) / 16;
    local short inputBlocks[24][16];
    local short blocks[48][8];
@@ -322,7 +322,7 @@ void read_entropy(global uint * restrict images, int offset, int size, int copy)
       bytes[7] = data >> 24;
       if (i > 0) {
          if (j < 2048 * 4) {
-            write_channel_altera(config[copy], bytes[3] << 24 | bytes[2] << 16 | bytes[1] << 8 | bytes[0]);
+            write_channel_intel(config[copy], bytes[3] << 24 | bytes[2] << 16 | bytes[1] << 8 | bytes[0]);
             j++;
          } else {
             uchar index = 0;
@@ -353,7 +353,7 @@ void read_entropy(global uint * restrict images, int offset, int size, int copy)
                .bitsToReset = bytesToReset * 8,
                .keep_going = !done
             };
-            write_channel_altera(entropy_without_markers[copy], toSend);
+            write_channel_intel(entropy_without_markers[copy], toSend);
             if (done) {
                j = 0;
                done = false;
@@ -387,7 +387,7 @@ void huffmanDecoder(int copy) {
 
    uchar pos = 0;
    for (ushort i = 0; i < 2048 * 4; i++) {
-      uint tmp = read_channel_altera(config[copy]);
+      uint tmp = read_channel_intel(config[copy]);
       decHufflow[i] = tmp >> 16;
       if (i < 2048) {
          decHuffhigh[i] = tmp;
@@ -460,7 +460,7 @@ void huffmanDecoder(int copy) {
       if (!haveReserve) {
          // When a reset or done follows, the sender transmists 0xFFFF which is an
          // illegal huffman symbol, together with the actual number of bits until reset
-         struct entropyData entropy = read_channel_nb_altera(entropy_without_markers[copy], &haveReserve);
+         struct entropyData entropy = read_channel_nb_intel(entropy_without_markers[copy], &haveReserve);
          reserve.data[2] = (ulong)entropy.data >> bits;
          reserve.data[1] = ((ulong)entropy.data << 32) >> bits;
          reserve.data[0] = ((ulong)entropy.data << (63 - bits)) << 1;
@@ -535,7 +535,7 @@ void huffmanDecoder(int copy) {
             for (int i = 0; i < 16; i++) {
                hc.data[i] = block[i];
             }
-            write_channel_altera(results[copy], hc);
+            write_channel_intel(results[copy], hc);
             #pragma unroll
             for (int i = 0; i < 16; i++) {
                block[i] = 0;
