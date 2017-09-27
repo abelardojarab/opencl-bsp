@@ -7,12 +7,8 @@ mkdir ./qsys_files_vhd
 mv qsys_files/*.vhd ./qsys_files_vhd
 #cp /swip_build/releases/acds/17.0/248/linux64/quartus/eda/sim_lib/*.vhd ./qsys_files_vhd
 
-###setup MPF with ASE
-#ln -s $MPF_INSTALL_PATH mpf_src
 
-pkill -9 ase_simv
-
-(cat vlog_files_base.list ; find ./qsys_files | grep -v mpf ) > ./vlog_files.list
+(cat vlog_files_base.list ; find ./qsys_files | grep -v ./qsys_files/BBB_ ) > ./vlog_files.list
 
 echo > ./vhdl_files.list
 find $ALTERAOCLSDKROOT/ip/dspba_library_package.vhd >> ./vhdl_files.list

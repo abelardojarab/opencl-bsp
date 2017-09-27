@@ -50,7 +50,7 @@ cp -f ccip_iface/ccip_avmm_mmio.sv ./sim_files
 cp -rf extra_sim_files/global_routing.v ./sim_files/global_routing.v
 cp -rf system.v ./sim_files/system.v
 cp -rf bsp_logic.sv ./sim_files/bsp_logic.sv
-cp -fr hw sim_files/mpf
+cp -fr BBB_* sim_files/    
 rm simulation.tar.gz
 tar -zcvf simulation.tar.gz sim_files sys_description.hex *.hex 
 cp -rf simulation.tar.gz fpga.bin

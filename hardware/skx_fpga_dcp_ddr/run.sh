@@ -41,6 +41,9 @@ if [ "$DCP_BYPASS_OPENCL_RUN_SCRIPT" != "" ]; then
 	exit $?
 fi
 
+#add BBBs to quartus pr project
+quartus_sh -t add_bbb_to_pr_project.tcl
+
 #append kernel_system qsys/ip assignments to afu_fit revision
 rm -f kernel_system_qsf_append.txt
 cp afu_fit.qsf kernel_system_qsf_append.txt
