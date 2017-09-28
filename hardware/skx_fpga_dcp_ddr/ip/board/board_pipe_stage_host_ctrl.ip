@@ -694,7 +694,7 @@
           <spirit:direction>out</spirit:direction>
           <spirit:vector>
             <spirit:left>0</spirit:left>
-            <spirit:right>31</spirit:right>
+            <spirit:right>63</spirit:right>
           </spirit:vector>
           <spirit:wireTypeDefs>
             <spirit:wireTypeDef>
@@ -734,7 +734,7 @@
           <spirit:direction>in</spirit:direction>
           <spirit:vector>
             <spirit:left>0</spirit:left>
-            <spirit:right>31</spirit:right>
+            <spirit:right>63</spirit:right>
           </spirit:vector>
           <spirit:wireTypeDefs>
             <spirit:wireTypeDef>
@@ -790,7 +790,7 @@
           <spirit:direction>in</spirit:direction>
           <spirit:vector>
             <spirit:left>0</spirit:left>
-            <spirit:right>3</spirit:right>
+            <spirit:right>7</spirit:right>
           </spirit:vector>
           <spirit:wireTypeDefs>
             <spirit:wireTypeDef>
@@ -830,7 +830,7 @@
           <spirit:direction>in</spirit:direction>
           <spirit:vector>
             <spirit:left>0</spirit:left>
-            <spirit:right>31</spirit:right>
+            <spirit:right>63</spirit:right>
           </spirit:vector>
           <spirit:wireTypeDefs>
             <spirit:wireTypeDef>
@@ -870,7 +870,7 @@
           <spirit:direction>out</spirit:direction>
           <spirit:vector>
             <spirit:left>0</spirit:left>
-            <spirit:right>31</spirit:right>
+            <spirit:right>63</spirit:right>
           </spirit:vector>
           <spirit:wireTypeDefs>
             <spirit:wireTypeDef>
@@ -926,7 +926,7 @@
           <spirit:direction>out</spirit:direction>
           <spirit:vector>
             <spirit:left>0</spirit:left>
-            <spirit:right>3</spirit:right>
+            <spirit:right>7</spirit:right>
           </spirit:vector>
           <spirit:wireTypeDefs>
             <spirit:wireTypeDef>
@@ -962,7 +962,7 @@
         <spirit:parameter>
           <spirit:name>DATA_WIDTH</spirit:name>
           <spirit:displayName>Data width</spirit:displayName>
-          <spirit:value spirit:format="long" spirit:id="DATA_WIDTH">32</spirit:value>
+          <spirit:value spirit:format="long" spirit:id="DATA_WIDTH">64</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>SYMBOL_WIDTH</spirit:name>
@@ -1121,7 +1121,7 @@
                     <name>m0_readdata</name>
                     <role>readdata</role>
                     <direction>Input</direction>
-                    <width>32</width>
+                    <width>64</width>
                     <lowerBound>0</lowerBound>
                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                 </port>
@@ -1145,7 +1145,7 @@
                     <name>m0_writedata</name>
                     <role>writedata</role>
                     <direction>Output</direction>
-                    <width>32</width>
+                    <width>64</width>
                     <lowerBound>0</lowerBound>
                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                 </port>
@@ -1177,7 +1177,7 @@
                     <name>m0_byteenable</name>
                     <role>byteenable</role>
                     <direction>Output</direction>
-                    <width>4</width>
+                    <width>8</width>
                     <lowerBound>0</lowerBound>
                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                 </port>
@@ -1380,7 +1380,7 @@
                     <name>s0_readdata</name>
                     <role>readdata</role>
                     <direction>Output</direction>
-                    <width>32</width>
+                    <width>64</width>
                     <lowerBound>0</lowerBound>
                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                 </port>
@@ -1404,7 +1404,7 @@
                     <name>s0_writedata</name>
                     <role>writedata</role>
                     <direction>Input</direction>
-                    <width>32</width>
+                    <width>64</width>
                     <lowerBound>0</lowerBound>
                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                 </port>
@@ -1436,7 +1436,7 @@
                     <name>s0_byteenable</name>
                     <role>byteenable</role>
                     <direction>Input</direction>
-                    <width>4</width>
+                    <width>8</width>
                     <lowerBound>0</lowerBound>
                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                 </port>

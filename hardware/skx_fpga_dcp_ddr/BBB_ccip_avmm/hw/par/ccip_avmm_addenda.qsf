@@ -19,7 +19,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE $CCIP_AVMM_SRC/hw/rtl/ccip_avmm_p
 ## Sources
 set_global_assignment -name SYSTEMVERILOG_FILE $CCIP_AVMM_SRC/hw/rtl/avmm_ccip_host.sv
 set_global_assignment -name SYSTEMVERILOG_FILE $CCIP_AVMM_SRC/hw/rtl/ccip_avmm_mmio.sv
-set_global_assignment -name SYSTEMVERILOG_FILE $CCIP_AVMM_SRC/hw/rtl/ccip_avmm_bridge.sv
 
 ## Constraints
 #no timing contraints

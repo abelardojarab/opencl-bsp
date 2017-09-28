@@ -11,4 +11,3 @@
 
 ../rtl/avmm_ccip_host.sv
 ../rtl/ccip_avmm_mmio.sv
-../rtl/ccip_avmm_bridge.sv

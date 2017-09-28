@@ -12,48 +12,49 @@
 // ***************************************************************************
 
 `include "cci_mpf_if.vh"
+import ccip_avmm_pkg::*;
 
 `ifndef OPENCL_MEMORY_ADDR_WIDTH
 `define OPENCL_MEMORY_ADDR_WIDTH 26
 `endif
 
-module bsp_logic(
-  // CCI-P Clocks and Resets
-  input           logic             pClk,              // 400MHz - CCI-P clock domain. Primary interface clock
-  input           logic             pClkDiv2,          // 200MHz - CCI-P clock domain.
-  input           logic             pClkDiv4,          // 100MHz - CCI-P clock domain.
-  input           logic             uClk_usr,          // User clock domain. Refer to clock programming guide  ** Currently provides fixed 300MHz clock **
-  input           logic             uClk_usrDiv2,      // User clock domain. Half the programmed frequency  ** Currently provides fixed 150MHz clock **
-  input           logic             pck_cp2af_softReset,      // CCI-P ACTIVE HIGH Soft Reset
-
-  // Interface structures
-  input           t_if_ccip_Rx      pck_cp2af_sRx,        // CCI-P Rx Port
-  output          t_if_ccip_Tx      pck_af2cp_sTx,        // CCI-P Tx Port
-
-  // kernel interface
-
-  // kernel interface
-  
-    //////// board ports //////////
-  output  logic      		board_kernel_reset_reset_n,
-  input logic    	board_kernel_irq_irq,
-  input logic          board_kernel_cra_waitrequest,
-  input logic [63:0]		board_kernel_cra_readdata,
-  input logic         	board_kernel_cra_readdatavalid,
-  output logic     board_kernel_cra_burstcount,
-  output logic  [63:0]   board_kernel_cra_writedata,
-  output logic  [29:0]   board_kernel_cra_address,
-  output logic         	board_kernel_cra_write,
-  output logic         	board_kernel_cra_read,
-  output logic   [7:0]  	board_kernel_cra_byteenable,
-  output logic         	board_kernel_cra_debugaccess,
-
+module bsp_logic #(
+	parameter MMIO_BYPASS_ADDRESS = 0,
+	parameter MMIO_BYPASS_SIZE = 0
+) 
+(
+	// CCI-P Clocks and Resets
+	input           logic             clk,          // 200MHz - CCI-P clock domain.
+	input           logic             reset,      // CCI-P ACTIVE HIGH Soft Reset
+	
+	// Interface structures
+	input           t_if_ccip_Rx      pck_cp2af_sRx,        // CCI-P Rx Port
+	output          t_if_ccip_Tx      pck_af2cp_sTx,        // CCI-P Tx Port
+	
+	// kernel interface
+	
+	// kernel interface
+	
+	//////// board ports //////////
+	output  logic      		board_kernel_reset_reset_n,
+	input logic    	board_kernel_irq_irq,
+	input logic          board_kernel_cra_waitrequest,
+	input logic [63:0]		board_kernel_cra_readdata,
+	input logic         	board_kernel_cra_readdatavalid,
+	output logic     board_kernel_cra_burstcount,
+	output logic  [63:0]   board_kernel_cra_writedata,
+	output logic  [29:0]   board_kernel_cra_address,
+	output logic         	board_kernel_cra_write,
+	output logic         	board_kernel_cra_read,
+	output logic   [7:0]  	board_kernel_cra_byteenable,
+	output logic         	board_kernel_cra_debugaccess,
+	
 	output	[`OPENCL_MEMORY_ADDR_WIDTH+6:0]	acl_internal_snoop_data,
 	output		acl_internal_snoop_valid,
 	input		acl_internal_snoop_ready,
-  
-  	input emif_ddr4a_clk,
-  	input emif_ddr4b_clk,
+	
+	input emif_ddr4a_clk,
+	input emif_ddr4b_clk,
 	
 	input		emif_ddr4a_waitrequest,
 	input	[511:0]	emif_ddr4a_readdata,
@@ -99,70 +100,50 @@ module bsp_logic(
 	input	[63:0]	kernel_ddr4b_byteenable,
 	input		kernel_ddr4b_debugaccess,
 	
-  input kernel_clk
+	input kernel_clk
 );
-
-	localparam AVMM_ADDR_WIDTH = 18;
-	localparam AVMM_DATA_WIDTH = 64;
-	localparam AVMM_BYTE_ENABLE_WIDTH=(AVMM_DATA_WIDTH/8);
+	//ccip avmm signals
+	wire requestor_avmm_waitrequest;
+	wire [CCIP_AVMM_REQUESTOR_DATA_WIDTH-1:0]	requestor_avmm_readdata;
+	wire requestor_avmm_readdatavalid;
+	wire [CCIP_AVMM_REQUESTOR_DATA_WIDTH-1:0]	requestor_avmm_writedata;
+	wire [CCIP_AVMM_REQUESTOR_ADDR_WIDTH-1:0]	requestor_avmm_address;
+	wire requestor_avmm_write;
+	wire requestor_avmm_read;
+	wire [CCIP_AVMM_REQUESTOR_BURST_WIDTH-1:0]	requestor_avmm_burstcount;
 	
-	localparam AVMM_HOST_ADDR_WIDTH = 48;
-	localparam AVMM_HOST_DATA_WIDTH = 512;
-    localparam AVMM_HOST_BURST_WIDTH = 3;
+	wire mmio_avmm_waitrequest;
+	wire [CCIP_AVMM_MMIO_DATA_WIDTH-1:0]	mmio_avmm_readdata;
+	wire mmio_avmm_readdatavalid;
+	wire [CCIP_AVMM_MMIO_DATA_WIDTH-1:0]	mmio_avmm_writedata;
+	wire [CCIP_AVMM_MMIO_ADDR_WIDTH-1:0]	mmio_avmm_address;
+	wire mmio_avmm_write;
+	wire mmio_avmm_read;
+	wire [(CCIP_AVMM_MMIO_DATA_WIDTH/8)-1:0]	mmio_avmm_byteenable;
 
-	wire	[AVMM_HOST_DATA_WIDTH+AVMM_HOST_ADDR_WIDTH+AVMM_HOST_BURST_WIDTH+1-1:0]	avst_host_cmd_data;
-	wire		avst_host_cmd_valid;
-	wire		avst_host_cmd_ready;
-	wire	[AVMM_HOST_DATA_WIDTH-1:0]	avst_host_rsp_data;
-	wire		avst_host_rsp_valid;
-	wire		avst_host_rsp_ready;
-	wire	[AVMM_ADDR_WIDTH+AVMM_DATA_WIDTH+2-1:0]	avst_mmio_cmd_data;
-	wire		avst_mmio_cmd_valid;
-	wire		avst_mmio_cmd_ready;
-	wire	[AVMM_DATA_WIDTH-1:0]	avst_mmio_rsp_data;
-	wire		avst_mmio_rsp_valid;
-	wire		avst_mmio_rsp_ready;
-
-    system u0 (
-		.global_reset_reset ( pck_cp2af_softReset ), //  global_reset.reset_n
-		.clk_400_clk           (pClk ),
-		.clk_200_clk           (pClkDiv2 ),
-		
-		.avst_host_cmd_data         (avst_host_cmd_data ),         //      avst_host_cmd.data
-		.avst_host_cmd_valid        (avst_host_cmd_valid),        //                   .valid
-		.avst_host_cmd_ready        (avst_host_cmd_ready),        //                   .ready
-		.avst_host_rsp_data         (avst_host_rsp_data ),         //      avst_host_rsp.data
-		.avst_host_rsp_valid        (avst_host_rsp_valid),        //                   .valid
-		.avst_host_rsp_ready        (avst_host_rsp_ready),        //                   .ready
-		.avst_mmio_cmd_data         (avst_mmio_cmd_data ),         //      avst_mmio_cmd.data
-		.avst_mmio_cmd_valid        (avst_mmio_cmd_valid),        //                   .valid
-		.avst_mmio_cmd_ready        (avst_mmio_cmd_ready),        //                   .ready
-		.avst_mmio_rsp_data         (avst_mmio_rsp_data ),         //      avst_mmio_rsp.data
-		.avst_mmio_rsp_valid        (avst_mmio_rsp_valid),        //                   .valid
-		.avst_mmio_rsp_ready        (avst_mmio_rsp_ready),        //                   .ready
-
-		
-		.board_kernel_clk_clk       	(board_kernel_clk_clk       	),
-		.board_kernel_clk2x_clk     	(board_kernel_clk2x_clk     	),
-		.board_kernel_reset_reset_n 	(board_kernel_reset_reset_n 	),
-		.board_kernel_irq_irq       	(board_kernel_irq_irq       	),
-		.board_kernel_cra_waitrequest   (board_kernel_cra_waitrequest),
-		.board_kernel_cra_readdata      (board_kernel_cra_readdata),
-		.board_kernel_cra_readdatavalid (board_kernel_cra_readdatavalid),
-		.board_kernel_cra_burstcount    (board_kernel_cra_burstcount),
-		.board_kernel_cra_writedata     (board_kernel_cra_writedata),
-		.board_kernel_cra_address       (board_kernel_cra_address),
-		.board_kernel_cra_write         (board_kernel_cra_write),
-		.board_kernel_cra_read          (board_kernel_cra_read),
-		.board_kernel_cra_byteenable    (board_kernel_cra_byteenable),
-		.board_kernel_cra_debugaccess   (board_kernel_cra_debugaccess),
+	board board_inst (
+		.clk_200_clk                        (clk),                                     //      psl_clk.clk
+		.global_reset_reset               (reset),                            // global_reset.reset_n
+		.kernel_clk_clk                     (),                            //   kernel_clk.clk
+		.kernel_cra_waitrequest             (board_kernel_cra_waitrequest),                    //   kernel_cra.waitrequest
+		.kernel_cra_readdata                (board_kernel_cra_readdata),                       //             .readdata
+		.kernel_cra_readdatavalid           (board_kernel_cra_readdatavalid),                  //             .readdatavalid
+		.kernel_cra_burstcount              (board_kernel_cra_burstcount),                     //             .burstcount
+		.kernel_cra_writedata               (board_kernel_cra_writedata),                      //             .writedata
+		.kernel_cra_address                 (board_kernel_cra_address),                        //             .address
+		.kernel_cra_write                   (board_kernel_cra_write),                          //             .write
+		.kernel_cra_read                    (board_kernel_cra_read),                           //             .read
+		.kernel_cra_byteenable              (board_kernel_cra_byteenable),                     //             .byteenable
+		.kernel_cra_debugaccess             (board_kernel_cra_debugaccess),                    //             .debugaccess
+		.kernel_irq_irq                     (board_kernel_irq_irq),                            //   kernel_irq.irq
+		.kernel_reset_reset_n               (board_kernel_reset_reset_n),                        // kernel_reset.reset_n
 		
 		.acl_internal_snoop_data(acl_internal_snoop_data),
 		.acl_internal_snoop_valid(acl_internal_snoop_valid),
 		.acl_internal_snoop_ready(acl_internal_snoop_ready),
-		
-		.emif_ddr4a_clk(emif_ddr4a_clk),
-		.emif_ddr4b_clk(emif_ddr4b_clk),
+			
+		.emif_ddr4a_clk_clk(emif_ddr4a_clk),
+		.emif_ddr4b_clk_clk(emif_ddr4b_clk),
 		
 		.emif_ddr4a_waitrequest(emif_ddr4a_waitrequest),
 		.emif_ddr4a_readdata(emif_ddr4a_readdata),
@@ -207,50 +188,73 @@ module bsp_logic(
 		.kernel_ddr4b_read(kernel_ddr4b_read),
 		.kernel_ddr4b_byteenable(kernel_ddr4b_byteenable),
 		.kernel_ddr4b_debugaccess(kernel_ddr4b_debugaccess),
+
+        .ccip_avmm_mmio_waitrequest         (mmio_avmm_waitrequest),         //       ccip_avm_mmio.waitrequest
+        .ccip_avmm_mmio_readdata            (mmio_avmm_readdata),            //                    .readdata
+        .ccip_avmm_mmio_readdatavalid       (mmio_avmm_readdatavalid),       //                    .readdatavalid
+        .ccip_avmm_mmio_burstcount          (1'b1),          //                    .burstcount
+        .ccip_avmm_mmio_writedata           (mmio_avmm_writedata),           //                    .writedata
+        .ccip_avmm_mmio_address             (mmio_avmm_address),             //                    .address
+        .ccip_avmm_mmio_write               (mmio_avmm_write),               //                    .write
+        .ccip_avmm_mmio_read                (mmio_avmm_read),                //                    .read
+        .ccip_avmm_mmio_byteenable          (mmio_avmm_byteenable),          //                    .byteenable
+        .ccip_avmm_mmio_debugaccess         (),         //                    .debugaccess
+        .ccip_avmm_requestor_waitrequest   (requestor_avmm_waitrequest),   // ccip_avmm_requestor.waitrequest
+        .ccip_avmm_requestor_readdata      (requestor_avmm_readdata),      //                    .readdata
+        .ccip_avmm_requestor_readdatavalid (requestor_avmm_readdatavalid), //                    .readdatavalid
+        .ccip_avmm_requestor_burstcount    (requestor_avmm_burstcount),    //                    .burstcount
+        .ccip_avmm_requestor_writedata     (requestor_avmm_writedata),     //                    .writedata
+        .ccip_avmm_requestor_address       (requestor_avmm_address),       //                    .address
+        .ccip_avmm_requestor_write         (requestor_avmm_write),         //                    .write
+        .ccip_avmm_requestor_read          (requestor_avmm_read),          //                    .read
+        .ccip_avmm_requestor_byteenable    (),    //                    .byteenable
+        .ccip_avmm_requestor_debugaccess   (),   //                    .debugaccess
+        
+        .kernel_clk_in_clk(kernel_clk)
+	);
+
+	avmm_ccip_host avmm_ccip_host_inst (
+		.clk            (clk),            //   clk.clk
+		.reset        (reset),         // reset.reset
 		
-		.kernel_clk(kernel_clk)
-    );
-    
-    	avmm_ccip_host #(
-		.AVMM_ADDR_WIDTH(AVMM_HOST_ADDR_WIDTH), 
-		.AVMM_DATA_WIDTH(AVMM_HOST_DATA_WIDTH),
-        .AVMM_BURST_WIDTH(AVMM_HOST_BURST_WIDTH))
-	avmm_ccip_host_inst (
-		.clk            (pClk),            //   clk.clk
-		.reset        (pck_cp2af_softReset),         // reset.reset
-		
-		.avst_rd_rsp_data(avst_host_rsp_data),
-		.avst_rd_rsp_valid(avst_host_rsp_valid),
-		.avst_rd_rsp_ready(avst_host_rsp_ready), 
-		
-		.avst_avcmd_data(avst_host_cmd_data),
-		.avst_avcmd_valid(avst_host_cmd_valid),
-		.avst_avcmd_ready(avst_host_cmd_ready), 
+		.avmm_waitrequest(requestor_avmm_waitrequest),
+		.avmm_readdata(requestor_avmm_readdata),
+		.avmm_readdatavalid(requestor_avmm_readdatavalid),
+		.avmm_writedata(requestor_avmm_writedata),
+		.avmm_address(requestor_avmm_address),
+		.avmm_write(requestor_avmm_write),
+		.avmm_read(requestor_avmm_read),
+		.avmm_burstcount(requestor_avmm_burstcount),
 		
 		.c0TxAlmFull(pck_cp2af_sRx.c0TxAlmFull),
 		.c1TxAlmFull(pck_cp2af_sRx.c1TxAlmFull),
 		.c0rx(pck_cp2af_sRx.c0),
-		//.c1rx(pck_cp2af_sRx.c1),
+		//.c1rx(pck_cp2af_sRx.c1),	//write response
 		.c0tx(pck_af2cp_sTx.c0),
 		.c1tx(pck_af2cp_sTx.c1)
 	);
 	
-	ccip_avmm_mmio #(AVMM_ADDR_WIDTH, AVMM_DATA_WIDTH)
+	ccip_avmm_mmio #(
+		.MMIO_BYPASS_ADDRESS(MMIO_BYPASS_ADDRESS),
+		.MMIO_BYPASS_SIZE(MMIO_BYPASS_SIZE)
+	)
 	ccip_avmm_mmio_inst (
-		.in_data (avst_mmio_cmd_data),
-		.in_valid(avst_mmio_cmd_valid),
-		.in_ready(avst_mmio_cmd_ready),
-				 
-		.out_data(avst_mmio_rsp_data),
-		.out_valid(avst_mmio_rsp_valid),
-		.out_ready(avst_mmio_rsp_ready),
-
-		.clk            (pClk),            //   clk.clk
-		.SoftReset        (pck_cp2af_softReset),         // reset.reset
+		.avmm_waitrequest(mmio_avmm_waitrequest),
+		.avmm_readdata(mmio_avmm_readdata),
+		.avmm_readdatavalid(mmio_avmm_readdatavalid),
+		.avmm_writedata(mmio_avmm_writedata),
+		.avmm_address(mmio_avmm_address),
+		.avmm_write(mmio_avmm_write),
+		.avmm_read(mmio_avmm_read),
+		.avmm_byteenable(mmio_avmm_byteenable),
+	
+		.clk            (clk),            //   clk.clk
+		.reset        (reset),         // reset.reset
 		
-		.ccip_c0_Rx_port(pck_cp2af_sRx.c0),
-		.ccip_c2_Tx_port(pck_af2cp_sTx.c2)
+		.c0rx(pck_cp2af_sRx.c0),
+		.c2tx(pck_af2cp_sTx.c2)
 	);
 
 
-endmodule         
+endmodule
+

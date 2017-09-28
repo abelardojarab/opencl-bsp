@@ -33,6 +33,7 @@
 
 // Include MPF data types, including the CCI interface pacakge.
 `include "cci_mpf_if.vh"
+import cci_mpf_csrs_pkg::*;
 
 `ifndef OPENCL_MEMORY_ADDR_WIDTH
 `define OPENCL_MEMORY_ADDR_WIDTH 26
@@ -76,39 +77,39 @@ module ccip_std_afu(
   pck_cp2af_sRx,             // CCI-P Rx Port
   pck_af2cp_sTx              // CCI-P Tx Port
 );
-  input           wire             pClk;                     // 400MHz - CCI-P clock domain. Primary interface clock
-  input           wire             pClkDiv2;                 // 200MHz - CCI-P clock domain.
-  input           wire             pClkDiv4;                 // 100MHz - CCI-P clock domain.
-  input           wire             uClk_usr;                 // User clock domain. Refer to clock programming guide  ** Currently provides fixed 300MHz clock **
-  input           wire             uClk_usrDiv2;             // User clock domain. Half the programmed frequency  ** Currently provides fixed 150MHz clock **
-  input           wire             pck_cp2af_softReset;      // CCI-P ACTIVE HIGH Soft Reset
-  input           wire [1:0]       pck_cp2af_pwrState;       // CCI-P AFU Power State
-  input           wire             pck_cp2af_error;          // CCI-P Protocol Error Detected
+	input           wire             pClk;                     // 400MHz - CCI-P clock domain. Primary interface clock
+	input           wire             pClkDiv2;                 // 200MHz - CCI-P clock domain.
+	input           wire             pClkDiv4;                 // 100MHz - CCI-P clock domain.
+	input           wire             uClk_usr;                 // User clock domain. Refer to clock programming guide  ** Currently provides fixed 300MHz clock **
+	input           wire             uClk_usrDiv2;             // User clock domain. Half the programmed frequency  ** Currently provides fixed 150MHz clock **
+	input           wire             pck_cp2af_softReset;      // CCI-P ACTIVE HIGH Soft Reset
+	input           wire [1:0]       pck_cp2af_pwrState;       // CCI-P AFU Power State
+	input           wire             pck_cp2af_error;          // CCI-P Protocol Error Detected
 `ifdef INCLUDE_DDR4 
-  input   wire                          DDR4a_USERCLK;
-  input   wire                          DDR4a_waitrequest;
-  input   wire [511:0]                  DDR4a_readdata;
-  input   wire                          DDR4a_readdatavalid;
-  output  wire [6:0]                    DDR4a_burstcount;
-  output  wire [511:0]                  DDR4a_writedata;
-  output  wire [`OPENCL_MEMORY_ADDR_WIDTH-1:0]                   DDR4a_address;
-  output  wire                          DDR4a_write;
-  output  wire                          DDR4a_read;
-  output  wire [63:0]                   DDR4a_byteenable;
-  input   wire                          DDR4b_USERCLK;
-  input   wire                          DDR4b_waitrequest;
-  input   wire [511:0]                  DDR4b_readdata;
-  input   wire                          DDR4b_readdatavalid;
-  output  wire [6:0]                    DDR4b_burstcount;
-  output  wire [511:0]                  DDR4b_writedata;
-  output  wire [`OPENCL_MEMORY_ADDR_WIDTH-1:0]                   DDR4b_address;
-  output  wire                          DDR4b_write;
-  output  wire                          DDR4b_read;
-  output  wire [63:0]                   DDR4b_byteenable;
+	input   wire                          DDR4a_USERCLK;
+	input   wire                          DDR4a_waitrequest;
+	input   wire [511:0]                  DDR4a_readdata;
+	input   wire                          DDR4a_readdatavalid;
+	output  wire [6:0]                    DDR4a_burstcount;
+	output  wire [511:0]                  DDR4a_writedata;
+	output  wire [`OPENCL_MEMORY_ADDR_WIDTH-1:0]                   DDR4a_address;
+	output  wire                          DDR4a_write;
+	output  wire                          DDR4a_read;
+	output  wire [63:0]                   DDR4a_byteenable;
+	input   wire                          DDR4b_USERCLK;
+	input   wire                          DDR4b_waitrequest;
+	input   wire [511:0]                  DDR4b_readdata;
+	input   wire                          DDR4b_readdatavalid;
+	output  wire [6:0]                    DDR4b_burstcount;
+	output  wire [511:0]                  DDR4b_writedata;
+	output  wire [`OPENCL_MEMORY_ADDR_WIDTH-1:0]                   DDR4b_address;
+	output  wire                          DDR4b_write;
+	output  wire                          DDR4b_read;
+	output  wire [63:0]                   DDR4b_byteenable;
 `else
-     wire SoftReset;
-     assign SoftReset = pck_cp2af_softReset;
-     
+	wire SoftReset;
+	assign SoftReset = pck_cp2af_softReset;
+
 	wire          DDR4a_waitrequest;
 	wire [511:0]  DDR4a_readdata;
 	wire          DDR4a_readdatavalid;
@@ -173,12 +174,11 @@ module ccip_std_afu(
 		.avmm_byteenable(DDR4b_byteenable)
 	);
 `endif
-  // Interface structures
-  input           t_if_ccip_Rx     pck_cp2af_sRx;           // CCI-P Rx Port
-  output          t_if_ccip_Tx     pck_af2cp_sTx;           // CCI-P Tx Port
-
-  
-    wire          board_kernel_cra_waitrequest;                    // board:kernel_cra_waitrequest -> board:kernel_cra_waitrequest
+	// Interface structures
+	input           t_if_ccip_Rx     pck_cp2af_sRx;           // CCI-P Rx Port
+	output          t_if_ccip_Tx     pck_af2cp_sTx;           // CCI-P Tx Port
+	
+	wire          board_kernel_cra_waitrequest;                    // board:kernel_cra_waitrequest -> board:kernel_cra_waitrequest
 	wire   [63:0] board_kernel_cra_readdata;                       // board:kernel_cra_readdata -> board:kernel_cra_readdata
 	wire          board_kernel_cra_debugaccess;                    // board:kernel_cra_debugaccess -> board:kernel_cra_debugaccess
 	wire   [29:0] board_kernel_cra_address;                        // board:kernel_cra_address -> board:kernel_cra_address
@@ -194,35 +194,62 @@ module ccip_std_afu(
 	wire          irq_mapper_receiver0_irq;                        // board:kernel_irq_irq -> irq_mapper:receiver0_irq
 	wire    [0:0] board_kernel_irq_irq;                            // irq_mapper:sender_irq -> board:kernel_irq_irq
 	wire          rst_controller_reset_out_reset;                  // rst_controller:reset_out -> [irq_mapper:reset, mm_interconnect_0:board_global_reset_reset_bridge_in_reset_reset, mm_interconnect_0:board_qpi_slave_translator_reset_reset_bridge_in_reset_reset]
-  
+	
+	wire	[`OPENCL_MEMORY_ADDR_WIDTH+6:0]	acl_internal_snoop_data;
+	wire		acl_internal_snoop_valid;
+	wire		acl_internal_snoop_ready;  
+	
+	wire		kernel_ddr4a_waitrequest;
+	wire	[511:0]	kernel_ddr4a_readdata;
+	wire		kernel_ddr4a_readdatavalid;
+	wire	[4:0]	kernel_ddr4a_burstcount;
+	wire	[511:0]	kernel_ddr4a_writedata;
+	wire	[`OPENCL_MEMORY_ADDR_WIDTH+6-1:0]	kernel_ddr4a_address;
+	wire		kernel_ddr4a_write;
+	wire		kernel_ddr4a_read;
+	wire	[63:0]	kernel_ddr4a_byteenable;
+	wire		kernel_ddr4a_debugaccess;
+	wire		kernel_ddr4b_waitrequest;
+	wire	[511:0]	kernel_ddr4b_readdata;
+	wire		kernel_ddr4b_readdatavalid;
+	wire	[4:0]	kernel_ddr4b_burstcount;
+	wire	[511:0]	kernel_ddr4b_writedata;
+	wire	[`OPENCL_MEMORY_ADDR_WIDTH+6-1:0]	kernel_ddr4b_address;
+	wire		kernel_ddr4b_write;
+	wire		kernel_ddr4b_read;
+	wire	[63:0]	kernel_ddr4b_byteenable;
+	wire		kernel_ddr4b_debugaccess;
+	
+	wire [5:0]	ddr4a_byte_address_bits;
+	wire [5:0]	ddr4b_byte_address_bits;
 
-wire	[`OPENCL_MEMORY_ADDR_WIDTH+6:0]	acl_internal_snoop_data;
-wire		acl_internal_snoop_valid;
-wire		acl_internal_snoop_ready;  
-  
-wire		kernel_ddr4a_waitrequest;
-wire	[511:0]	kernel_ddr4a_readdata;
-wire		kernel_ddr4a_readdatavalid;
-wire	[4:0]	kernel_ddr4a_burstcount;
-wire	[511:0]	kernel_ddr4a_writedata;
-wire	[`OPENCL_MEMORY_ADDR_WIDTH+6-1:0]	kernel_ddr4a_address;
-wire		kernel_ddr4a_write;
-wire		kernel_ddr4a_read;
-wire	[63:0]	kernel_ddr4a_byteenable;
-wire		kernel_ddr4a_debugaccess;
-wire		kernel_ddr4b_waitrequest;
-wire	[511:0]	kernel_ddr4b_readdata;
-wire		kernel_ddr4b_readdatavalid;
-wire	[4:0]	kernel_ddr4b_burstcount;
-wire	[511:0]	kernel_ddr4b_writedata;
-wire	[`OPENCL_MEMORY_ADDR_WIDTH+6-1:0]	kernel_ddr4b_address;
-wire		kernel_ddr4b_write;
-wire		kernel_ddr4b_read;
-wire	[63:0]	kernel_ddr4b_byteenable;
-wire		kernel_ddr4b_debugaccess;
-  
-wire [5:0]	ddr4a_byte_address_bits;
-wire [5:0]	ddr4b_byte_address_bits;
+    //ccip async shim
+    wire 	  async_shim_reset_out;   
+    wire 	  afu_clk;   
+
+    t_if_ccip_Tx async2af_sTxPort;
+    t_if_ccip_Rx async2af_sRxPort;
+   
+    assign afu_clk = pClkDiv2 ;
+   
+    ccip_async_shim #(
+        //.C0TX_DEPTH_RADIX(8),
+    	//.C1TX_DEPTH_RADIX(8),
+    	//.C2TX_DEPTH_RADIX(8),
+    	//For DCP only 256 is needed.  going to 512 because m20k count wont be reduced
+    	.C0RX_DEPTH_RADIX(9),	//default was 10
+    	.C1RX_DEPTH_RADIX(9)	//default was 10
+    )
+    ccip_async_shim (
+				    .bb_softreset    (pck_cp2af_softReset),
+				    .bb_clk          (pClk),
+				    .bb_tx           (pck_af2cp_sTx),
+				    .bb_rx           (pck_cp2af_sRx),
+				    .afu_softreset   (async_shim_reset_out),
+				    .afu_clk         (afu_clk),
+				    .afu_tx          (async2af_sTxPort),
+				    .afu_rx          (async2af_sRxPort)
+				    );
 
     // ====================================================================
     //
@@ -253,7 +280,7 @@ wire [5:0]	ddr4b_byte_address_bits;
     //
     // Expose FIU as an MPF interface
     //
-    cci_mpf_if fiu(.clk(pClk));
+    cci_mpf_if fiu(.clk(afu_clk));
 
     // The CCI wires to MPF mapping connections have identical naming to
     // the standard AFU.  The module exports an interface named "fiu".
@@ -263,12 +290,19 @@ wire [5:0]	ddr4b_byte_address_bits;
         .REGISTER_INPUTS(1),
         .REGISTER_OUTPUTS(1)
         )
-      map_ifc(.*);
+      map_ifc
+       (
+        .pClk(afu_clk),
+        .pck_cp2af_softReset(async_shim_reset_out),
+        .pck_cp2af_sRx(async2af_sRxPort),
+        .pck_af2cp_sTx(async2af_sTxPort),
+        .*
+        );
 
     //
     // Instantiate MPF with the desired properties.
     //
-    cci_mpf_if afu(.clk(pClk));
+    cci_mpf_if afu(.clk(afu_clk));
 
     cci_mpf
       #(
@@ -345,7 +379,7 @@ wire [5:0]	ddr4b_byte_address_bits;
         )
       mpf
        (
-        .clk(pClk),
+        .clk(afu_clk),
         .fiu,
         .afu,
         .c0NotEmpty(),
@@ -424,17 +458,16 @@ wire [5:0]	ddr4b_byte_address_bits;
 // User AFU goes here
 //===============================================================================================
 
-  bsp_logic bsp_logic_inst (
-        .pClk                ( pClk),
-        .pClkDiv2            ( pClkDiv2),
-        .pClkDiv4            ( pClkDiv4),
-        .uClk_usr            ( uClk_usr),
-        .uClk_usrDiv2        ( uClk_usrDiv2),
-        
-		.pck_cp2af_softReset ( fiu.reset ) ,
+  bsp_logic #(
+		.MMIO_BYPASS_ADDRESS(MPF_DFH_MMIO_ADDR),
+		.MMIO_BYPASS_SIZE(CCI_MPF_MMIO_SIZE)
+	)  bsp_logic_inst (
+		.clk            ( afu_clk ),
+		
+		.reset ( fiu.reset ) ,
 		.pck_cp2af_sRx       ( mpf2af_sRxPort ) ,
 		.pck_af2cp_sTx       ( af2mpf_sTxPort ) ,
-        
+		
 		.board_kernel_reset_reset_n 	  (board_kernel_reset_reset_n),
 		.board_kernel_irq_irq       	  (board_kernel_irq_irq),
 		.board_kernel_cra_waitrequest   (board_kernel_cra_waitrequest),
@@ -447,66 +480,64 @@ wire [5:0]	ddr4b_byte_address_bits;
 		.board_kernel_cra_read          (board_kernel_cra_read),
 		.board_kernel_cra_byteenable    (board_kernel_cra_byteenable),
 		.board_kernel_cra_debugaccess   (board_kernel_cra_debugaccess),
-
-
-.acl_internal_snoop_data(acl_internal_snoop_data),
-.acl_internal_snoop_valid(acl_internal_snoop_valid),
-.acl_internal_snoop_ready(acl_internal_snoop_ready),
-
-.emif_ddr4a_clk(DDR4a_USERCLK),
-.emif_ddr4b_clk(DDR4b_USERCLK),
-
-.emif_ddr4a_waitrequest(DDR4a_waitrequest),
-.emif_ddr4a_readdata(DDR4a_readdata),
-.emif_ddr4a_readdatavalid(DDR4a_readdatavalid),
-.emif_ddr4a_burstcount(DDR4a_burstcount),
-.emif_ddr4a_writedata(DDR4a_writedata),
-.emif_ddr4a_address({DDR4a_address, ddr4a_byte_address_bits}),
-.emif_ddr4a_write(DDR4a_write),
-.emif_ddr4a_read(DDR4a_read),
-.emif_ddr4a_byteenable(DDR4a_byteenable),
-.emif_ddr4a_debugaccess(),
-
-.emif_ddr4b_waitrequest(DDR4b_waitrequest),
-.emif_ddr4b_readdata(DDR4b_readdata),
-.emif_ddr4b_readdatavalid(DDR4b_readdatavalid),
-.emif_ddr4b_burstcount(DDR4b_burstcount),
-.emif_ddr4b_writedata(DDR4b_writedata),
-.emif_ddr4b_address({DDR4b_address, ddr4b_byte_address_bits}),
-.emif_ddr4b_write(DDR4b_write),
-.emif_ddr4b_read(DDR4b_read),
-.emif_ddr4b_byteenable(DDR4b_byteenable),
-.emif_ddr4b_debugaccess(),
-
-.kernel_ddr4a_waitrequest(kernel_ddr4a_waitrequest),
-.kernel_ddr4a_readdata(kernel_ddr4a_readdata),
-.kernel_ddr4a_readdatavalid(kernel_ddr4a_readdatavalid),
-.kernel_ddr4a_burstcount(kernel_ddr4a_burstcount),
-.kernel_ddr4a_writedata(kernel_ddr4a_writedata),
-.kernel_ddr4a_address(kernel_ddr4a_address),
-.kernel_ddr4a_write(kernel_ddr4a_write),
-.kernel_ddr4a_read(kernel_ddr4a_read),
-.kernel_ddr4a_byteenable(kernel_ddr4a_byteenable),
-.kernel_ddr4a_debugaccess(kernel_ddr4a_debugaccess),
-
-.kernel_ddr4b_waitrequest(kernel_ddr4b_waitrequest),
-.kernel_ddr4b_readdata(kernel_ddr4b_readdata),
-.kernel_ddr4b_readdatavalid(kernel_ddr4b_readdatavalid),
-.kernel_ddr4b_burstcount(kernel_ddr4b_burstcount),
-.kernel_ddr4b_writedata(kernel_ddr4b_writedata),
-.kernel_ddr4b_address(kernel_ddr4b_address),
-.kernel_ddr4b_write(kernel_ddr4b_write),
-.kernel_ddr4b_read(kernel_ddr4b_read),
-.kernel_ddr4b_byteenable(kernel_ddr4b_byteenable),
-.kernel_ddr4b_debugaccess(kernel_ddr4b_debugaccess),
+		
+		
+		.acl_internal_snoop_data(acl_internal_snoop_data),
+		.acl_internal_snoop_valid(acl_internal_snoop_valid),
+		.acl_internal_snoop_ready(acl_internal_snoop_ready),
+		
+		.emif_ddr4a_clk(DDR4a_USERCLK),
+		.emif_ddr4b_clk(DDR4b_USERCLK),
+		
+		.emif_ddr4a_waitrequest(DDR4a_waitrequest),
+		.emif_ddr4a_readdata(DDR4a_readdata),
+		.emif_ddr4a_readdatavalid(DDR4a_readdatavalid),
+		.emif_ddr4a_burstcount(DDR4a_burstcount),
+		.emif_ddr4a_writedata(DDR4a_writedata),
+		.emif_ddr4a_address({DDR4a_address, ddr4a_byte_address_bits}),
+		.emif_ddr4a_write(DDR4a_write),
+		.emif_ddr4a_read(DDR4a_read),
+		.emif_ddr4a_byteenable(DDR4a_byteenable),
+		.emif_ddr4a_debugaccess(),
+		
+		.emif_ddr4b_waitrequest(DDR4b_waitrequest),
+		.emif_ddr4b_readdata(DDR4b_readdata),
+		.emif_ddr4b_readdatavalid(DDR4b_readdatavalid),
+		.emif_ddr4b_burstcount(DDR4b_burstcount),
+		.emif_ddr4b_writedata(DDR4b_writedata),
+		.emif_ddr4b_address({DDR4b_address, ddr4b_byte_address_bits}),
+		.emif_ddr4b_write(DDR4b_write),
+		.emif_ddr4b_read(DDR4b_read),
+		.emif_ddr4b_byteenable(DDR4b_byteenable),
+		.emif_ddr4b_debugaccess(),
+		
+		.kernel_ddr4a_waitrequest(kernel_ddr4a_waitrequest),
+		.kernel_ddr4a_readdata(kernel_ddr4a_readdata),
+		.kernel_ddr4a_readdatavalid(kernel_ddr4a_readdatavalid),
+		.kernel_ddr4a_burstcount(kernel_ddr4a_burstcount),
+		.kernel_ddr4a_writedata(kernel_ddr4a_writedata),
+		.kernel_ddr4a_address(kernel_ddr4a_address),
+		.kernel_ddr4a_write(kernel_ddr4a_write),
+		.kernel_ddr4a_read(kernel_ddr4a_read),
+		.kernel_ddr4a_byteenable(kernel_ddr4a_byteenable),
+		.kernel_ddr4a_debugaccess(kernel_ddr4a_debugaccess),
+		
+		.kernel_ddr4b_waitrequest(kernel_ddr4b_waitrequest),
+		.kernel_ddr4b_readdata(kernel_ddr4b_readdata),
+		.kernel_ddr4b_readdatavalid(kernel_ddr4b_readdatavalid),
+		.kernel_ddr4b_burstcount(kernel_ddr4b_burstcount),
+		.kernel_ddr4b_writedata(kernel_ddr4b_writedata),
+		.kernel_ddr4b_address(kernel_ddr4b_address),
+		.kernel_ddr4b_write(kernel_ddr4b_write),
+		.kernel_ddr4b_read(kernel_ddr4b_read),
+		.kernel_ddr4b_byteenable(kernel_ddr4b_byteenable),
+		.kernel_ddr4b_debugaccess(kernel_ddr4b_debugaccess),
 		
 		.kernel_clk(uClk_usrDiv2)
 	);
-  
 
-  
 	freeze_wrapper freeze_wrapper_inst (
-    .freeze                     	  (1'b0),
+		.freeze                     	  (1'b0),
 		.board_kernel_clk_clk       	  (uClk_usrDiv2),
 		.board_kernel_clk2x_clk     	  (uClk_usr ),
 		.board_kernel_reset_reset_n 	  (board_kernel_reset_reset_n),
@@ -521,32 +552,32 @@ wire [5:0]	ddr4b_byte_address_bits;
 		.board_kernel_cra_read          (board_kernel_cra_read),
 		.board_kernel_cra_byteenable    (board_kernel_cra_byteenable),
 		.board_kernel_cra_debugaccess   (board_kernel_cra_debugaccess),
-
-.acl_internal_snoop_data(acl_internal_snoop_data),
-.acl_internal_snoop_valid(acl_internal_snoop_valid),
-.acl_internal_snoop_ready(acl_internal_snoop_ready),
-
-.kernel_ddr4a_waitrequest(kernel_ddr4a_waitrequest),
-.kernel_ddr4a_readdata(kernel_ddr4a_readdata),
-.kernel_ddr4a_readdatavalid(kernel_ddr4a_readdatavalid),
-.kernel_ddr4a_burstcount(kernel_ddr4a_burstcount),
-.kernel_ddr4a_writedata(kernel_ddr4a_writedata),
-.kernel_ddr4a_address(kernel_ddr4a_address),
-.kernel_ddr4a_write(kernel_ddr4a_write),
-.kernel_ddr4a_read(kernel_ddr4a_read),
-.kernel_ddr4a_byteenable(kernel_ddr4a_byteenable),
-.kernel_ddr4a_debugaccess(kernel_ddr4a_debugaccess),
-
-.kernel_ddr4b_waitrequest(kernel_ddr4b_waitrequest),
-.kernel_ddr4b_readdata(kernel_ddr4b_readdata),
-.kernel_ddr4b_readdatavalid(kernel_ddr4b_readdatavalid),
-.kernel_ddr4b_burstcount(kernel_ddr4b_burstcount),
-.kernel_ddr4b_writedata(kernel_ddr4b_writedata),
-.kernel_ddr4b_address(kernel_ddr4b_address),
-.kernel_ddr4b_write(kernel_ddr4b_write),
-.kernel_ddr4b_read(kernel_ddr4b_read),
-.kernel_ddr4b_byteenable(kernel_ddr4b_byteenable),
-.kernel_ddr4b_debugaccess(kernel_ddr4b_debugaccess)
+		
+		.acl_internal_snoop_data(acl_internal_snoop_data),
+		.acl_internal_snoop_valid(acl_internal_snoop_valid),
+		.acl_internal_snoop_ready(acl_internal_snoop_ready),
+		
+		.kernel_ddr4a_waitrequest(kernel_ddr4a_waitrequest),
+		.kernel_ddr4a_readdata(kernel_ddr4a_readdata),
+		.kernel_ddr4a_readdatavalid(kernel_ddr4a_readdatavalid),
+		.kernel_ddr4a_burstcount(kernel_ddr4a_burstcount),
+		.kernel_ddr4a_writedata(kernel_ddr4a_writedata),
+		.kernel_ddr4a_address(kernel_ddr4a_address),
+		.kernel_ddr4a_write(kernel_ddr4a_write),
+		.kernel_ddr4a_read(kernel_ddr4a_read),
+		.kernel_ddr4a_byteenable(kernel_ddr4a_byteenable),
+		.kernel_ddr4a_debugaccess(kernel_ddr4a_debugaccess),
+		
+		.kernel_ddr4b_waitrequest(kernel_ddr4b_waitrequest),
+		.kernel_ddr4b_readdata(kernel_ddr4b_readdata),
+		.kernel_ddr4b_readdatavalid(kernel_ddr4b_readdatavalid),
+		.kernel_ddr4b_burstcount(kernel_ddr4b_burstcount),
+		.kernel_ddr4b_writedata(kernel_ddr4b_writedata),
+		.kernel_ddr4b_address(kernel_ddr4b_address),
+		.kernel_ddr4b_write(kernel_ddr4b_write),
+		.kernel_ddr4b_read(kernel_ddr4b_read),
+		.kernel_ddr4b_byteenable(kernel_ddr4b_byteenable),
+		.kernel_ddr4b_debugaccess(kernel_ddr4b_debugaccess)
 	);
 
 endmodule

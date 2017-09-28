@@ -44,11 +44,7 @@ cp -rf mem_sim_model.sv ./sim_files/mem_sim_model.sv
 cp -rf ccip_std_afu.sv ./sim_files/ccip_std_afu.sv
 find *.sv  | xargs cp -t ./sim_files
 
-cp -f ccip_iface/avmm_ccip_host.sv ./sim_files
-cp -f ccip_iface/ccip_avmm_mmio.sv ./sim_files
-
 cp -rf extra_sim_files/global_routing.v ./sim_files/global_routing.v
-cp -rf system.v ./sim_files/system.v
 cp -rf bsp_logic.sv ./sim_files/bsp_logic.sv
 cp -fr BBB_* sim_files/    
 rm simulation.tar.gz

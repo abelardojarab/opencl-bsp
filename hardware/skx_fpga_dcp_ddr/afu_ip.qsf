@@ -1,9 +1,5 @@
 set_global_assignment -name SYSTEMVERILOG_FILE ./bsp_logic.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ./system.v
 set_global_assignment -name SYSTEMVERILOG_FILE ./ccip_std_afu.sv
-
-set_global_assignment -name SYSTEMVERILOG_FILE ./ccip_iface/avmm_ccip_host.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ./ccip_iface/ccip_avmm_mmio.sv
 
 set_global_assignment -name QIP_FILE ./board/board.qip
 
@@ -20,11 +16,9 @@ set_global_assignment -name SOURCE_TCL_SCRIPT_FILE ip_include.tcl
 
 
 set_global_assignment -name IP_FILE ip/board/board_afu_regs.ip
-set_global_assignment -name IP_FILE ip/board/board_bridge_reset.ip
 set_global_assignment -name IP_FILE ip/board/board_acl_irq_to_polling_slave_0.ip
 set_global_assignment -name IP_FILE ip/board/board_global_reset_in.ip
 set_global_assignment -name IP_FILE ip/board/board_clk_200.ip
-set_global_assignment -name IP_FILE ip/board/board_clk_400.ip
 set_global_assignment -name IP_FILE ip/board/board_kernel_interface.ip
 set_global_assignment -name IP_FILE ip/board/board_kernel_clk_in.ip
 set_global_assignment -name IP_FILE ip/board/board_kernel_clk_export.ip
@@ -46,17 +40,7 @@ set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_4.ip
 set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_5.ip
 set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_clock_crossing_bridge_2.ip
 set_global_assignment -name IP_FILE ip/board/board_clock_bridge_0.ip
-set_global_assignment -name QSYS_FILE ccip_iface/ccip_avmm_bridge.qsys
-set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_avst_to_avmm_slave_0.ip
-set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_reset_bridge_0.ip
-set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_clock_bridge_0.ip
-set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_dc_fifo_3.ip
-set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_dc_fifo_2.ip
-set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_dc_fifo_0.ip
-set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_clock_bridge_2.ip
-set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_avst_to_avmm_master_0.ip
-set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_dc_fifo_1.ip
-set_global_assignment -name IP_FILE ccip_iface/ip/ccip_avmm_bridge/ccip_avmm_bridge_clock_bridge_3.ip
+
 set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_clock_crossing_bridge_4.ip
 set_global_assignment -name QSYS_FILE msgdma_bbb/msgdma_bbb.qsys
 set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_pipe_stage_m.ip
