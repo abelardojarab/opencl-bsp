@@ -29,7 +29,7 @@ endif
 LINKER = g++
 LINKER_LIBDIRARGS = -Llib -L$(ALTERAOCLSDKROOT)/host/linux64/lib
 LINKER_ARGS = -lrt -fPIC
-INCORPORATE_LIBS = 
+INCORPORATE_LIBS = -lpkg_editor
 PREBUILT_OBJS = 
 LINK_LIBS =  -lz
 
