@@ -62,6 +62,14 @@ vhdlan  -nc -full64 -work twentynm_hip $QUARTUS_HOME/eda/sim_lib/twentynm_hip_co
 vhdlan  -nc -full64 -work twentynm_hip $QUARTUS_HOME/eda/sim_lib/twentynm_hip_atoms.vhd 
 
 set -e
+
+#different hacks to extend mmio timeout
+#export SNPS_VLOGAN_OPT=" +define+MMIO_RESPONSE_TIMEOUT=32768 "
+#echo -e "+define+MMIO_RESPONSE_TIMEOUT=32768\n$(cat rtl/sources.txt)" > rtl/sources.txt
+
+#hack to fix vhdl compilation.  replace '-F' with '-f'
+sed -i -E 's;(vhdlan.*)-F;\1-f;g' Makefile
+
 make OPAE_BASEDIR=$OPAE_INSTALL_PATH/../opae_src
 cp $KDIR/*.hex ./work/
 make sim&
