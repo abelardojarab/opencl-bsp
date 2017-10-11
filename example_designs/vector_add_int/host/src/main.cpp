@@ -91,6 +91,7 @@ int main(int argc, char **argv) {
 	cl_device_type device_type = CL_DEVICE_TYPE_ALL;
 	std::vector<cl::Device> devices;
 	status |= platform.getDevices(device_type, &devices);
+	assert(devices.size() == 1);
 
 	cl::Device device = devices[0];
 	//TODO: crauer remove
