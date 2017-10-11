@@ -14,10 +14,13 @@ $SCRIPT_DIR_PATH/setup_bsp.sh
 
 cd $ROOT_PROJECT_PATH/example_designs/hello_world
 rm -fr bin/hello_world
-aoc device/hello_world.cl --board skx_fpga_dcp_ddr -o bin/hello_world.aocx
-#aoc device/hello_world.cl --board skx_fpga_dcp_svm -o bin/hello_world.aocx
-rm -fr hello_world_comp
-mv bin/hello_world hello_world_comp
+if [ ! -f bin/hello_world.aocx ]; then
+	echo "Running AOC..."
+	aoc device/hello_world.cl --board skx_fpga_dcp_ddr -o bin/hello_world.aocx
+	#aoc device/hello_world.cl --board skx_fpga_dcp_svm -o bin/hello_world.aocx
+	rm -fr hello_world_comp
+	mv bin/hello_world hello_world_comp
+fi
 aocl program acl0 bin/hello_world.aocx
 make
 cp ./bin/hello_world .

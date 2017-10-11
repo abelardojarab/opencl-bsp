@@ -14,10 +14,14 @@ $SCRIPT_DIR_PATH/setup_bsp.sh
 
 cd $ROOT_PROJECT_PATH/example_designs/vector_add_int
 rm -fr bin/vector_add_int
-aoc vector_add_int.cl --board skx_fpga_dcp_ddr -o bin/vector_add_int.aocx
-#aoc vector_add_int.cl --board skx_fpga_dcp_svm -o bin/vector_add_int.aocx
-rm -fr vector_add_int_comp
-mv bin/vector_add_int vector_add_int_comp
+if [ ! -f bin/vector_add_int.aocx ]; then
+	echo "Running AOC..."
+	aoc vector_add_int.cl --board skx_fpga_dcp_ddr -o bin/vector_add_int.aocx
+	#aoc vector_add_int.cl --board skx_fpga_dcp_svm -o bin/vector_add_int.aocx
+	rm -fr vector_add_int_comp
+	mv bin/vector_add_int vector_add_int_comp
+fi
+
 aocl program acl0 bin/vector_add_int.aocx
 make
 cp ./bin/vector_add_int .
