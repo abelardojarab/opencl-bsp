@@ -18,6 +18,8 @@
 #ifndef _CCIP_MMD_DEVICE_H
 #define _CCIP_MMD_DEVICE_H
 
+#include <mutex>
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -56,6 +58,8 @@
 #define MSGDMA_BBB_GUID		"d79c094c-7cf9-4cc1-94eb-7d79c7c01ca3"
 #define MSGDMA_BBB_SIZE		8192
 
+#define BSP_NAME "dcp"
+
 //debugging
 #ifdef DEBUG
 #define DEBUG_PRINT(...) fprintf(stderr,__VA_ARGS__)
@@ -80,19 +84,30 @@ enum {
 	AOCL_MMD_MEMORY = 0x100000	/* Data interface to device memory */
 };
 
+enum AfuStatu {
+   CCIP_MMD_INVALID_ID = 0,
+   CCIP_MMD_BSP,
+   CCIP_MMD_AFU
+};
+
+
 class CcipDevice final
 {
 	public:
-	CcipDevice();
+	CcipDevice(uint64_t);
 	~CcipDevice();
 
-	bool is_initialized() { return initialized; }
-	fpga_handle get_handle() { return afc_handle; }
-
+   int get_mmd_handle()         { return mmd_handle; }
+   uint64_t get_fpga_obj_id()   { return fpga_obj_id; }
+   std::string get_dev_name()   { return mmd_dev_name; }
+   
+   int program_bitstream(uint8_t *data, size_t data_size);
+   void initialize_bsp();
 	void set_kernel_interrupt(aocl_mmd_interrupt_handler_fn fn, void* user_data);
 	void set_status_handler(aocl_mmd_status_handler_fn fn, void* user_data);
 	int yield();
 	void event_update_fn(aocl_mmd_op_t op, int status);
+   bool bsp_loaded();
 
 	int read_block(aocl_mmd_op_t op,
 			int mmd_interface,
@@ -107,13 +122,25 @@ class CcipDevice final
 			size_t size);
 
 	private:
+   static int next_mmd_handle;
+   static std::mutex class_lock;
+
+   int mmd_handle;
+   uint64_t fpga_obj_id;
+   std::string mmd_dev_name;
 	aocl_mmd_interrupt_handler_fn kernel_interrupt;
 	void *kernel_interrupt_user_data;
 	aocl_mmd_status_handler_fn event_update;
 	void *event_update_user_data;
 
-	bool initialized;
+   uint8_t bus;
+   uint8_t device;
+   uint8_t function;
+
+   bool afu_initialized;
+	bool bsp_initialized;
 	bool mmio_is_mapped;
+
 	fpga_handle       afc_handle;
 	fpga_properties   filter;
 	fpga_token        afc_token;

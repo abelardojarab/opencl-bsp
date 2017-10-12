@@ -15,6 +15,7 @@
 /* Intel or its authorized distributors.  Please refer to the applicable           */
 /* agreement for further details.                                                  */
 
+#include <iostream>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -22,7 +23,9 @@
 #include <unistd.h>
 #include <zlib.h>
 
+#include <cassert>
 #include <sstream> 
+#include <map>
 
 #include "aocl_mmd.h"
 #include "ccip_mmd_device.h"
@@ -37,65 +40,231 @@
 
 #define ACL_PKG_SECTION_DCP_GBS_GZ	".acl.gbs.gz"
 
-//since we only support 1 device at a time, we always return 1 as the handle
 #define AOCL_INVALID_HANDLE 	-1
-#define AOCL_DEFAULT_HANDLE 	1
 
-// TODO: create map or some other data structure that supports multiple devices
-// and replace all uses of ccip_dev_global with appropriate lookup function
-CcipDevice *ccip_dev_global = NULL;
+// Mapping from OPAE obj ID to MMD handle
+static std::map<int, CcipDevice*> bsp_devices;
+static std::map<uint64_t, int> obj_handle_map;
+
+static inline int get_handle(uint64_t obj_id)
+{
+   auto it = obj_handle_map.find(obj_id);
+   if(it != obj_handle_map.end()) {
+      return it->second;
+   } else {
+      return AOCL_INVALID_HANDLE;
+   }
+}
+
+static CcipDevice *get_device(int handle)
+{
+   auto it = bsp_devices.find(handle);
+   if(it != bsp_devices.end()) {
+      return it->second;
+   } else {
+      return NULL;
+   }
+}
+
 
 // static helper functions
 static bool check_for_svm_env();
 
-//HACK: needed for reprogram to know if opencl image is loaded
-//opencl runtime gets confused if there is no opencl image loaded
-bool ccip_mmd_is_fpga_configured_with_opencl()
+//  * gcc 4.8 has problems with regex so this code doesn't work
+//    keeping for now until more robust parsing solution in place
+//#include <regex>  // needed if using regex
+//static uint64_t get_obj_id(const char *device_name_cstr)
+//{
+//   const std::string dcp_str("dcp");
+//   const std::string dcp_afu("dcp_afu");
+//   const std::string dcp_bsp("dcp_bsp");
+//   
+//	std::string device_name(device_name_cstr);
+//	std::smatch match;
+//	std::regex  re("^" + dcp_str + "|" + dcp_afu + "|" + dcp_bsp + "([0-9])+$");
+//	if(!std::regex_search(device_name, match, re)) {
+//		fprintf(stderr, "Error invalid device name '%s'\n", device_name_cstr);
+//       return AOCL_INVALID_HANDLE;
+//	}
+//
+//  if(match[1].matched) {
+//      uint64_t device_num = std::stoul(match[1],0,10);
+//      return device_num;
+//   } else {
+//      return 0;
+//   }
+//    
+//}
+
+
+static uint64_t get_obj_id(const char *device_name_cstr)
 {
-	fpga_guid guid;
-	fpga_result res = FPGA_OK;
-	uint32_t num_matches = 0;
-	fpga_properties   filter;
-	fpga_token        afc_token;
-
-	if (uuid_parse(DCP_OPENCL_DDR_AFU_ID, guid) < 0) {
-		fprintf(stderr, "Error parsing guid '%s'\n", DCP_OPENCL_DDR_AFU_ID);
-		return false;
-	}
-
-	res = fpgaGetProperties(NULL, &filter);
-	if(res != FPGA_OK) {
-		fprintf(stderr, "Error creating properties object\n");
-		return false;
-	}
-
-	res = fpgaPropertiesSetObjectType(filter, FPGA_ACCELERATOR);
-	if(res != FPGA_OK) {
-		fprintf(stderr, "Error setting object type\n");
-		return false;
-	}
-
-	res = fpgaPropertiesSetGUID(filter, guid);
-	if(res != FPGA_OK) {
-		fprintf(stderr, "Error setting GUID\n");
-		return false;
-	}
-
-	//TODO: Add selection via BDF / device ID
-	res = fpgaEnumerate(&filter, 1, &afc_token, 1, &num_matches);
-	if(res != FPGA_OK) {
-		fprintf(stderr, "Error enumerating AFCs: %d\n", res);
-		return false;
-	}
-
-	if(afc_token)
-		fpgaDestroyToken(&afc_token);
-	
-	if(filter)
-		fpgaDestroyProperties(&filter);
-	
-	return (num_matches >= 1);
+   //FIXME: need more robust parsing 
+   std::string device_num_str(&device_name_cstr[3]);
+   //uint64_t device_num = std::stoul(device_num_str, 0, 16);
+   uint64_t device_num = std::stoul(device_num_str);
+   return device_num;
 }
+
+
+// Interface for programing device that does not have a BSP loaded
+int ccip_mmd_device_reprogram(const char *device_name, void *data, size_t data_size)
+{
+   uint64_t obj_id = get_obj_id(device_name);
+   
+   int handle = get_handle(obj_id);
+   if(handle == -1) {
+      CcipDevice *dev = new CcipDevice(obj_id);
+      handle = dev->get_mmd_handle();
+      bsp_devices[handle] = dev;
+      obj_handle_map[obj_id] = handle;
+   }
+   
+   return aocl_mmd_reprogram(handle, data, data_size); 
+}
+
+// Interface for checking if AFU has BSP loaded
+bool ccip_mmd_bsp_loaded(const char *name)
+{
+   uint64_t obj_id = get_obj_id(name);
+   if(!obj_id) {
+      return false;
+   }
+
+   int handle = get_handle(obj_id);
+   if(handle > 0) {
+      CcipDevice *dev = get_device(handle);
+      if(dev)
+         return dev->bsp_loaded(); 
+      else 
+         return false;
+   } else {
+      CcipDevice dev = CcipDevice(obj_id);
+      return dev.bsp_loaded();
+   } 
+}
+
+
+static unsigned int get_offline_num_acl_boards() 
+{
+   fpga_result res = FPGA_OK;
+   uint32_t num_matches = 0;
+   fpga_properties   filter;
+
+   res = fpgaGetProperties(NULL, &filter);
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error creating properties object\n");
+      return 0;
+   }
+
+   res = fpgaPropertiesSetObjectType(filter, FPGA_ACCELERATOR);
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error setting object type\n");
+      return 0;
+   }
+
+   res = fpgaEnumerate(&filter, 1, NULL, 0, &num_matches);
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error enumerating AFCs: %d\n", res);
+      return 0;
+   }
+
+   if(filter)
+      fpgaDestroyProperties(&filter);
+
+   return num_matches;
+
+}	
+
+static std::string get_offline_board_names()
+{
+   fpga_guid dcp_guid;
+   fpga_result res = FPGA_OK;
+   uint32_t num_matches = 0;
+   fpga_properties   filter = nullptr;
+   fpga_properties   prop = nullptr;
+   std::string boards = std::string();
+   fpga_token *toks = nullptr;
+   fpga_guid afu_guid;
+   uint64_t obj_id;
+   
+   if (uuid_parse(DCP_OPENCL_DDR_AFU_ID, dcp_guid) < 0) {
+      fprintf(stderr, "Error parsing guid '%s'\n", DCP_OPENCL_DDR_AFU_ID);
+      goto cleanup;
+   }
+
+   res = fpgaGetProperties(NULL, &filter);
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error creating properties object\n");
+      goto cleanup;
+   }
+
+   res = fpgaPropertiesSetObjectType(filter, FPGA_ACCELERATOR);
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error setting object type\n");
+      goto cleanup;
+   }
+
+   res = fpgaEnumerate(&filter, 1, NULL, 0, &num_matches);
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error enumerating AFCs: %d\n", res);
+      goto cleanup;
+   }
+
+   toks = static_cast<fpga_token *>(malloc(num_matches * sizeof(fpga_token)));
+   if(toks == NULL) {
+      fprintf(stderr, "Error allocating memory\n");
+      goto cleanup;
+   }
+   
+   res = fpgaEnumerate(&filter, 1, toks, num_matches, &num_matches); 
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error enumerating AFCs: %d\n", res);
+      goto cleanup;
+   }
+
+   for(unsigned int i = 0; i < num_matches; i++) {
+      if(prop)
+         fpgaDestroyProperties(&prop);
+      res = fpgaGetProperties(toks[i], &prop);
+      if(res == FPGA_OK) {
+         res = fpgaPropertiesGetGUID(prop, &afu_guid);
+         if(res != FPGA_OK) {
+            fprintf(stderr, "Error reading GUID\n");
+            break;
+         }
+
+         // TODO: determine if boards with BSP loaded should have different name
+         // if not then simplify this code
+         if(uuid_compare(dcp_guid, afu_guid) == 0) {
+            boards.append(BSP_NAME);
+         } else {
+            boards.append(BSP_NAME);
+         }
+
+         res = fpgaPropertiesGetObjectID(prop, &obj_id);
+         if(res != FPGA_OK) {
+            fprintf(stderr, "Error reading object ID\n");
+            break;
+         }
+         boards.append(std::to_string(obj_id));
+         if( i < num_matches - 1)
+            boards.append(";");
+      } else {
+         fprintf(stderr,"Error reading properties: %s\n", fpgaErrStr(res));
+      }
+   }
+
+cleanup:
+   if(prop)
+      fpgaDestroyProperties(&prop);
+   if(filter)
+      fpgaDestroyProperties(&filter);
+   if(toks)
+      free(toks);
+   return boards;
+}
+
 
 AOCL_MMD_CALL void * aocl_mmd_shared_mem_alloc( int handle, size_t size, unsigned long long *device_ptr_out )
 {
@@ -109,17 +278,21 @@ AOCL_MMD_CALL void aocl_mmd_shared_mem_free ( int handle, void* host_ptr, size_t
 	exit(1);
 }
 
+
 int AOCL_MMD_CALL aocl_mmd_reprogram(int handle, void *data, size_t data_size)
 {
-	DCP_DEBUG_MEM("\n+ aocl_mmd_reprogram: handle=%d data=%p data_size=%d\n", handle, data, data_size);
-	
+   CcipDevice *afu = get_device(handle);
+   if(afu == NULL) {
+      fprintf(stderr, "aocl_mmd_reprogram: invalid handle: %d\n", handle);
+      return AOCL_INVALID_HANDLE;
+   }
+
 	struct acl_pkg_file *pkg = acl_pkg_open_file_from_memory( (char*)data, data_size, ACL_PKG_SHOW_ERROR );
 	struct acl_pkg_file *fpga_bin_pkg = NULL;
 	struct acl_pkg_file *search_pkg = pkg;
 	ACL_DCP_ERROR_IF(pkg == NULL, return AOCL_INVALID_HANDLE, "cannot open file from memory using pkg editor.\n");
 	
-	//need to handle aocx files directly for calling this API directly instead
-	//of through the OpenCL runtime
+   // extract bin file from aocx
 	size_t fpga_bin_len = 0;
 	char *fpga_bin_contents = NULL;
 	if(acl_pkg_section_exists( pkg, ACL_PKG_SECTION_FPGA_BIN, &fpga_bin_len ) &&
@@ -129,7 +302,7 @@ int AOCL_MMD_CALL aocl_mmd_reprogram(int handle, void *data, size_t data_size)
 		search_pkg = fpga_bin_pkg;
 	}
 	
-	//check for compressed GBS and attempt to load it
+	// load compressed gbs
 	size_t acl_gbs_gz_len = 0;
 	char *acl_gbs_gz_contents = NULL;
 	if(acl_pkg_section_exists( search_pkg, ACL_PKG_SECTION_DCP_GBS_GZ, &acl_gbs_gz_len ) &&
@@ -140,23 +313,7 @@ int AOCL_MMD_CALL aocl_mmd_reprogram(int handle, void *data, size_t data_size)
 		int ret = inf(acl_gbs_gz_contents, acl_gbs_gz_len, &gbs_data, &gbs_data_size);
 		ACL_DCP_ERROR_IF(ret != Z_OK, return AOCL_INVALID_HANDLE, "aocl_mmd_reprogram error: GBS decompression failed!\n");
 		
-		if(ccip_dev_global)
-		{
-			delete ccip_dev_global;
-			ccip_dev_global = NULL;
-		}
-		
-		//this will need to match input device handle
-		find_fpga_target target = {-1, -1, -1, -1};
-		fpga_token fpga_dev;
-		int num_found = find_fpga(target, &fpga_dev);
-		ACL_DCP_ERROR_IF(num_found == 0, return AOCL_INVALID_HANDLE, "FPGA device not found for reconfiguration!\n");
-		
-		//Do config
-		int programming_result = program_gbs_bitstream(fpga_dev, (uint8_t *)gbs_data, gbs_data_size);
-
-		//clean up
-		fpgaDestroyToken(&fpga_dev);
+		int res = afu->program_bitstream(static_cast<uint8_t *>(gbs_data), gbs_data_size);
 		
 		if(gbs_data)
 			free(gbs_data);
@@ -164,14 +321,13 @@ int AOCL_MMD_CALL aocl_mmd_reprogram(int handle, void *data, size_t data_size)
 		if ( pkg ) acl_pkg_close_file(pkg);
 		if ( fpga_bin_pkg ) acl_pkg_close_file(fpga_bin_pkg);
 		
-		if(programming_result != FPGA_OK)
+		if(res != 0)
 		{
 			ccip_mmd_dma_setup_check();
 			ccip_mmd_check_fme_driver_for_pr();
 		}
-		ACL_DCP_ERROR_IF(programming_result != FPGA_OK, return AOCL_INVALID_HANDLE, "FPGA programming failed!\n");
-
-		return aocl_mmd_open("acl0");
+		//ACL_DCP_ERROR_IF(res != FPGA_OK, return AOCL_INVALID_HANDLE, "FPGA programming failed!\n");
+      return handle;
 	}
 
 	return AOCL_INVALID_HANDLE;
@@ -182,11 +338,12 @@ int AOCL_MMD_CALL aocl_mmd_yield(int handle)
 	uint32_t irqval = 0;
 	DEBUG_PRINT("* Called: aocl_mmd_yield\n");
 	YIELD_DELAY();
+   CcipDevice *dev = get_device(handle);
 
-	ccip_dev_global->read_block(NULL, AOCL_IRQ_POLLING_BASE, &irqval, 0, 4);
+	dev->read_block(NULL, AOCL_IRQ_POLLING_BASE, &irqval, 0, 4);
 	DEBUG_PRINT("irqval: %u\n", irqval);
 	if(irqval) {
-		ccip_dev_global->yield();
+		dev->yield();
 	}
 
 	return 0;
@@ -214,6 +371,7 @@ static bool check_for_svm_env()
 }
 
 
+
 // Macros used for acol_mmd_get_offline_info and aocl_mmd_get_info
 #define RESULT_INT(X) {*((int*)param_value) = X; if (param_size_ret) *param_size_ret=sizeof(int);}
 #define RESULT_STR(X) do { \
@@ -233,12 +391,25 @@ int aocl_mmd_get_offline_info(
 	if(check_for_svm_env())
 		mem_type_info = (int)AOCL_MMD_SVM_COARSE_GRAIN_BUFFER;
 
+   unsigned int num_acl_boards;
+
 	switch(requested_info_id)
 	{
 		case AOCL_MMD_VERSION:              RESULT_STR("14.1"); break;
-		case AOCL_MMD_NUM_BOARDS:           RESULT_INT(1); break;
+		case AOCL_MMD_NUM_BOARDS:
+		{
+			num_acl_boards = get_offline_num_acl_boards();
+		   RESULT_INT(num_acl_boards); 
+			break;
+		}
 		case AOCL_MMD_VENDOR_NAME:          RESULT_STR("Intel Corp"); break;
-		case AOCL_MMD_BOARD_NAMES:          RESULT_STR("acl0"); break;
+		case AOCL_MMD_BOARD_NAMES:
+      {
+         std::ostringstream boards;
+         boards << get_offline_board_names();
+         RESULT_STR(boards.str().c_str()); 
+         break;
+      }
 		case AOCL_MMD_VENDOR_ID:            RESULT_INT(0); break;
 		case AOCL_MMD_USES_YIELD:           RESULT_INT(1); break;
 		case AOCL_MMD_MEM_TYPES_SUPPORTED:  RESULT_INT(mem_type_info); break;
@@ -255,13 +426,15 @@ int aocl_mmd_get_info(
 		size_t* param_size_ret )
 {
 	DEBUG_PRINT("called aocl_mmd_get_info\n");
+   CcipDevice *dev = get_device(handle);
+   if(dev == NULL)
+      return 0;
 	switch(requested_info_id)
 	{
 		case AOCL_MMD_BOARD_NAME:            
 		{
 			std::ostringstream board_name;
-			//TODO: fix this for multiboard support
-			board_name << "SKX DCP FPGA OpenCL BSP" << " (" << "acl0" << ")";
+			board_name << "SKX DCP FPGA OpenCL BSP" << " (" << dev->get_dev_name() << ")";
 			RESULT_STR(board_name.str().c_str()); 
 			break;
 		}
@@ -298,13 +471,19 @@ int aocl_mmd_get_info(
 
 int AOCL_MMD_CALL aocl_mmd_set_interrupt_handler( int handle, aocl_mmd_interrupt_handler_fn fn, void* user_data )
 {
-	ccip_dev_global->set_kernel_interrupt(fn, user_data);
+   CcipDevice *dev = get_device(handle);
+   if(dev)
+	   dev->set_kernel_interrupt(fn, user_data);
+      //TODO: handle error condition if dev null
 	return 0;
 }
 
 int AOCL_MMD_CALL aocl_mmd_set_status_handler( int handle, aocl_mmd_status_handler_fn fn, void* user_data )
 {
-	ccip_dev_global->set_status_handler(fn, user_data);
+   CcipDevice *dev = get_device(handle);
+   if(dev)
+	   dev->set_status_handler(fn, user_data);
+      //TODO: handle error condition if dev null
 	return 0;
 }
 
@@ -318,7 +497,13 @@ int AOCL_MMD_CALL aocl_mmd_write(
 		size_t offset)
 {
 	DCP_DEBUG_MEM("\n- aocl_mmd_write: %d\t %p\t %lu\t %p\t %d\t %lu\n",handle, op, len, src, mmd_interface, offset);
-	return ccip_dev_global->write_block(op, mmd_interface, src, offset, len);
+   CcipDevice *dev = get_device(handle);
+   if(dev)
+      return dev->write_block(op, mmd_interface, src, offset, len);
+   else
+      return -1;
+      //TODO: handle error condition if dev null
+   
 
 }
 
@@ -331,7 +516,12 @@ int AOCL_MMD_CALL aocl_mmd_read(
 		size_t offset)
 {
 	DCP_DEBUG_MEM("\n+ aocl_mmd_read: %d\t %p\t %lu\t %p\t %d\t %lu\n",handle, op, len, dst, mmd_interface, offset);
-	return ccip_dev_global->read_block(op, mmd_interface, dst, offset, len);
+   CcipDevice *dev = get_device(handle);
+   if(dev)
+	   return dev->read_block(op, mmd_interface, dst, offset, len);
+   else
+      return -1;
+      //TODO: handle error condition if dev null
 }
 
 int AOCL_MMD_CALL aocl_mmd_copy(
@@ -348,27 +538,45 @@ int AOCL_MMD_CALL aocl_mmd_copy(
 int AOCL_MMD_CALL aocl_mmd_open(const char *name)
 {
 	DEBUG_PRINT("Opening device: %s\n", name);
+ 
+   uint64_t obj_id = get_obj_id(name);
+   if(!obj_id) {
+      return AOCL_INVALID_HANDLE;
+   }
 
-	CcipDevice *ccip_dev = new CcipDevice();
-
-	if(ccip_dev->is_initialized()) {
-		ccip_dev_global = ccip_dev;
-	} else {
-		delete ccip_dev;
-		ccip_mmd_dma_setup_check();
-		ccip_mmd_check_limit_conf();
-		return AOCL_INVALID_HANDLE;
-	}
-
-	return AOCL_DEFAULT_HANDLE;   // TODO: return an actual unique ID for handle
+   int handle = get_handle(obj_id);
+   CcipDevice *dev = nullptr;
+   if(handle > 0) {
+      dev = get_device(handle);
+   } else {
+      dev = new CcipDevice(obj_id);
+      handle = dev->get_mmd_handle();
+      bsp_devices[handle] = dev;
+   } 
+   if(dev->bsp_loaded()) { 
+      dev->initialize_bsp();
+   } else {
+      handle = ~handle;
+      printf("handle is: %d\n", handle);
+   }
+	return handle;
 }
 
 int AOCL_MMD_CALL  aocl_mmd_close(int handle)
 {
-	if(ccip_dev_global)
+   CcipDevice *dev = get_device(handle);
+	if(dev)
 	{
-		delete ccip_dev_global;
-		ccip_dev_global = NULL;
+      assert(dev->get_mmd_handle() == handle);
+      uint64_t obj_id = dev->get_fpga_obj_id();
+     
+      auto obj_it = obj_handle_map.find(obj_id);
+      obj_handle_map.erase(obj_it);
+
+      auto handle_it = bsp_devices.find(handle);
+      bsp_devices.erase(handle_it);
+       
+		delete dev;
 	}
 	return 0;
 }

@@ -17,8 +17,12 @@
 
 #include <assert.h>
 
+#include <limits>
+#include <mutex>
+
 #include "ccip_mmd_device.h"
 #include "afu_bbb_util.h"
+#include "fpgaconf.h"
 
 //for DDR through MMIO
 #define MEM_WINDOW_CRTL 0x200
@@ -31,67 +35,109 @@
 
 //#define DISABLE_DMA
 
-CcipDevice::CcipDevice():
-	kernel_interrupt(NULL),
-	kernel_interrupt_user_data(NULL),
-	event_update(NULL),
-	event_update_user_data(NULL),
-	initialized(false),
-	mmio_is_mapped(false),
-	afc_handle(NULL),
-	filter(NULL),
-	afc_token(NULL),
-	dma_h(NULL),
-	msgdma_bbb_base_addr(0)
+int CcipDevice::next_mmd_handle{1};
+std::mutex CcipDevice::class_lock;
+
+CcipDevice::CcipDevice(uint64_t obj_id):
+   fpga_obj_id(obj_id),
+   kernel_interrupt(NULL),
+   kernel_interrupt_user_data(NULL),
+   event_update(NULL),
+   event_update_user_data(NULL),
+   afu_initialized(false),
+   bsp_initialized(false),
+   mmio_is_mapped(false),
+   afc_handle(NULL),
+   filter(NULL),
+   afc_token(NULL),
+   dma_h(NULL),
+   msgdma_bbb_base_addr(0)
 {
+   // Lock because 'next_mmd_handle' may be shared between threads 
+   {  
+      std::lock_guard<std::mutex> lock(class_lock);
+      mmd_handle = next_mmd_handle;
+      if(next_mmd_handle == std::numeric_limits<int>::max())
+         next_mmd_handle = 1;
+      else
+         next_mmd_handle++;
+   }
 
-	fpga_guid guid;
-	fpga_result res = FPGA_OK;
-	uint32_t num_matches;
+   fpga_guid guid;
+   fpga_result res = FPGA_OK;
+   uint32_t num_matches;
 
-	if (uuid_parse(DCP_OPENCL_DDR_AFU_ID, guid) < 0) {
-		fprintf(stderr, "Error parsing guid '%s'\n", DCP_OPENCL_DDR_AFU_ID);
-		return;
-	}
+   if (uuid_parse(DCP_OPENCL_DDR_AFU_ID, guid) < 0) {
+      fprintf(stderr, "Error parsing guid '%s'\n", DCP_OPENCL_DDR_AFU_ID);
+      return;
+   }
 
-	res = fpgaGetProperties(NULL, &filter);
-	if(res != FPGA_OK) {
-		fprintf(stderr, "Error creating properties object\n");
-		return;
-	}
+   res = fpgaGetProperties(NULL, &filter);
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error creating properties object\n");
+      return;
+   }
 
-	res = fpgaPropertiesSetObjectType(filter, FPGA_ACCELERATOR);
-	if(res != FPGA_OK) {
-		fprintf(stderr, "Error setting object type\n");
-		return;
-	}
+   res = fpgaPropertiesSetObjectType(filter, FPGA_ACCELERATOR);
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error setting object type\n");
+      return;
+   }
 
-	res = fpgaPropertiesSetGUID(filter, guid);
-	if(res != FPGA_OK) {
-		fprintf(stderr, "Error setting GUID\n");
-		return;
-	}
+   res = fpgaPropertiesSetObjectID(filter, obj_id);
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error setting object ID: %s\n", fpgaErrStr(res));
+      return;
+   }
 
-	//TODO: Add selection via BDF / device ID
-	res = fpgaEnumerate(&filter, 1, &afc_token, 1, &num_matches);
-	if(res != FPGA_OK) {
-		fprintf(stderr, "Error enumerating AFCs: %d\n", res);
-		return;
-	}
+   res = fpgaEnumerate(&filter, 1, &afc_token, 1, &num_matches);
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error enumerating AFCs: %s\n", fpgaErrStr(res));
+      return;
+   }
 
-	if(num_matches < 1) {
-		fprintf(stderr, "AFC not found\n");
-		res = fpgaDestroyProperties(&filter);
-		return;
-	}
+   if(num_matches < 1) {
+      fprintf(stderr, "AFC not found\n");
+      res = fpgaDestroyProperties(&filter);
+      return;
+   }
 
-	res = fpgaOpen(afc_token, &afc_handle, 0);
-	if(res != FPGA_OK) {
-		fprintf(stderr, "Error opening AFC: %d\n", res);
-		return;
-	}
+   res = fpgaOpen(afc_token, &afc_handle, 0);
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error opening AFC: %s\n", fpgaErrStr(res));
+      return;
+   }
 
-	res = fpgaMapMMIO(afc_handle, 0, NULL);
+   fpga_properties prop = nullptr;
+   res = fpgaGetProperties(afc_token, &prop);
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error reading properties: %s\n", fpgaErrStr(res));
+   }
+
+   res = fpgaPropertiesGetBus(prop, &bus);
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error reading bus: '%s'\n", fpgaErrStr(res));
+   }
+   res = fpgaPropertiesGetDevice(prop, &device);
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error reading device: '%s'\n", fpgaErrStr(res));
+   }
+   fpgaPropertiesGetFunction(prop, &function);
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error reading function: '%s'\n", fpgaErrStr(res));
+   }
+
+   mmd_dev_name = BSP_NAME + std::to_string(obj_id);
+   afu_initialized = true;
+}
+
+void CcipDevice::initialize_bsp()
+{
+   if(bsp_initialized) {
+      return;
+   }
+
+	fpga_result res = fpgaMapMMIO(afc_handle, 0, NULL);
 	if(res != FPGA_OK) {
 		fprintf(stderr, "Error mapping MMIO space: %d\n", res);
 		return;
@@ -131,7 +177,7 @@ CcipDevice::CcipDevice():
 	}
 	#endif
 	
-	initialized = true;
+	bsp_initialized = true;
 }
 
 CcipDevice::~CcipDevice()
@@ -169,11 +215,68 @@ CcipDevice::~CcipDevice()
 
 }
 
+int CcipDevice::program_bitstream(uint8_t *data, size_t data_size)
+{
+   if(!afu_initialized) {
+      return FPGA_NOT_FOUND;
+   }
+
+   assert(data);
+
+   find_fpga_target target = { bus, device, function, -1 }; 
+   fpga_token fpga_dev;
+   int num_found = find_fpga(target, &fpga_dev);
+  
+   int res;
+   if(num_found == 1) {
+      res =  program_gbs_bitstream(fpga_dev, data, data_size);
+   } else {
+      fprintf(stderr, "Error programming FPGA\n");
+      res = -1;
+   }
+
+   fpgaDestroyToken(&fpga_dev);
+   return res;
+}
+
+
 int CcipDevice::yield() {
-	//TODO: determine exactly what the yield() function should be doing
-	//the pcie reference example looks different from what the old MMD was doing
-	kernel_interrupt(1, kernel_interrupt_user_data);
+   kernel_interrupt(mmd_handle, kernel_interrupt_user_data);
 	return 0;
+}
+
+
+bool CcipDevice::bsp_loaded() {
+   fpga_guid dcp_guid;
+   fpga_guid afu_guid;
+   fpga_properties   prop;
+   fpga_result res;
+
+   if (uuid_parse(DCP_OPENCL_DDR_AFU_ID, dcp_guid) < 0) {
+      fprintf(stderr, "Error parsing guid '%s'\n", DCP_OPENCL_DDR_AFU_ID);
+      return false;
+   }
+ 
+   res = fpgaGetProperties(afc_token, &prop);
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error reading properties: %s\n", fpgaErrStr(res));
+      fpgaDestroyProperties(&prop);
+      return false;
+   }
+
+   res = fpgaPropertiesGetGUID(prop, &afu_guid);
+   if(res != FPGA_OK) {
+      fprintf(stderr, "Error reading GUID\n");
+      fpgaDestroyProperties(&prop);
+      return false;
+   } 
+
+   fpgaDestroyProperties(&prop);
+   if(uuid_compare(dcp_guid, afu_guid) == 0) {
+      return true;
+   } else {
+      return false;
+   }
 }
 
 

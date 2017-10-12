@@ -56,14 +56,7 @@
 
 #include "aocl_mmd.h"
 
-#if defined(WINDOWS)
-#  include "wdc_lib_wrapper.h"
-#endif   // WINDOWS
 
-//#if defined(LINUX)
-//#  include "../../linux64/driver/hw_pcie_constants.h"
-//#endif   // LINU
-// Branding/Naming the BSP
 #define ACL_BOARD_PKG_NAME                          "a10_dcp"
 #define ACL_VENDOR_NAME                             "Intel(R) Corporation"
 #define ACL_BOARD_NAME                              "Arria 10 DCP Platform"
@@ -79,6 +72,7 @@
 
 bool ccip_mmd_dma_setup_check();
 bool ccip_mmd_check_fme_driver_for_pr();
+bool ccip_mmd_bsp_loaded(const char *name);
 
 bool check_results(unsigned int * buf, unsigned int * output, unsigned n)
 {
@@ -96,31 +90,6 @@ bool check_results(unsigned int * buf, unsigned int * output, unsigned n)
 }
 
 #define MMD_STRING_RETURN_SIZE 1024
-int general_basic_tests()
-{
-#if defined(WINDOWS)
-   const char *license = JUNGO_LICENSE;
-   DWORD status        = WDC_DriverOpen( WDC_DRV_OPEN_DEFAULT, license );
-   if(status == WD_STATUS_SUCCESS) {
-      WDC_DriverClose();   
-   } else {
-      printf("\nUnable to open the kernel mode driver.\n");
-      printf("\nPlease make sure you have properly installed the driver. To install the driver, run\n");
-      printf("      aocl install\n");
-      return -1;   
-   }
-#endif   // WINDOWS
-#if defined(LINUX)
-   if ( system("cat /proc/modules | grep \"aclpci_" ACL_BOARD_PKG_NAME "_drv\" > /dev/null") ) {
-      printf("\nUnable to find the kernel mode driver.\n");
-      printf("\nPlease make sure you have properly installed the driver. To install the driver, run\n");
-      printf("      aocl install\n");
-      return -1;
-   }
-#endif   // LINUX
-
-   return 0;
-}
 
 int scan_devices ( const char * device_name )
 {
@@ -157,9 +126,7 @@ int scan_devices ( const char * device_name )
 
       // when handle < -1, a supported device exists, but it failed the initial tests. 
       if( handle < -1 ) {
-         o_list_stream << std::left << std::setw(14) << dev_name << "Failed   Board name not available.\n";
-         o_list_stream << "                       Failed initial tests, so not working as expected.\n"; 
-         o_list_stream << "                       Please try again after reprogramming the device.\n";
+         o_list_stream << std::left << std::setw(14) << dev_name << "Uninitialized   Not configured with OpenCL BSP.\n";
          o_list_stream << "\n";
       }
 
@@ -209,14 +176,7 @@ int main (int argc, char *argv[])
    bool probe = false;
    
    bool use_polling = true;
-   bool os_windows = false;
-#if defined(WINDOWS)
-   const char *msi_env = getenv("ACL_PCIE_DMA_USE_MSI");
-   os_windows = true;
-   if (msi_env)
-      use_polling = false;
-#endif
-
+   
    for ( int i = 1 ; i < argc; i ++ ) {
      if (strcmp(argv[i],"-probe") == 0) 
        probe = true;
@@ -224,38 +184,29 @@ int main (int argc, char *argv[])
        device_name=argv[i];
    }
 
-   //Disable driver check for DCP
-   //// Run driver check only if not run in -probe <no-arg> mode
-   //if( !(probe && device_name == NULL) ){
-   //  if( general_basic_tests() != 0 ){
-   //    printf("\nDIAGNOSTIC_FAILED\n");
-   //    return -1;
-   //  }
-   //}
-   //For DCP, do check for device files and permissions
-	if(!ccip_mmd_dma_setup_check())
-	{
-		printf("\nBASIC DCP DRIVER CHECK FAILED\n");
-		printf("\nDIAGNOSTIC_FAILED\n");
-		return -1;
-	}
-	
-	if(!ccip_mmd_check_fme_driver_for_pr())
-	{
-		printf("\nWARNING: DCP PR device files are not available.\n");
-		printf("\nWARNING: 'aocl program' is not available.\n");
-	}
+   if(!ccip_mmd_dma_setup_check())
+   {
+       printf("\nBASIC DCP DRIVER CHECK FAILED\n");
+       printf("\nDIAGNOSTIC_FAILED\n");
+       return -1;
+   }
+
+   if(!ccip_mmd_check_fme_driver_for_pr())
+   {
+       printf("\nWARNING: DCP PR device files are not available.\n");
+       printf("\nWARNING: 'aocl program' is not available.\n");
+   }
 
    // we scan all the device installed on the host machine and print
    // preliminary information about all or just the one specified
    if ( (!probe && device_name == NULL) || (probe && device_name != NULL) ) {
-      if( scan_devices(device_name) == 0 ){
-         printf("\nDIAGNOSTIC_PASSED\n");
-      } else {
-         printf("\nDIAGNOSTIC_FAILED\n");
-         return -1;
-      }
-      return 0;
+       if( scan_devices(device_name) == 0 ){
+           printf("\nDIAGNOSTIC_PASSED\n");
+       } else {
+           printf("\nDIAGNOSTIC_FAILED\n");
+           return -1;
+       }
+       return 0;
    }
 
 
@@ -266,6 +217,7 @@ int main (int argc, char *argv[])
    aocl_mmd_get_offline_info(AOCL_MMD_BOARD_NAMES, sizeof(boards_name), boards_name, NULL);
    char *dev_name;
    bool device_exists = false;
+   bool bsp_loaded = false;
    for(dev_name = strtok(boards_name, ";"); dev_name != NULL; dev_name = strtok(NULL, ";")) {
       if ( probe )
          printf("%s\n",dev_name);
@@ -284,6 +236,13 @@ int main (int argc, char *argv[])
       printf("Unable to open the device %s.\n", argv[1]);
       printf("Please make sure you have provided a proper <device_name>.\n");
       printf("  Expected device names = %s\n", boards_name);
+      return -1;
+   }
+
+   bsp_loaded = ccip_mmd_bsp_loaded(argv[1]);
+   if ( !bsp_loaded ) {
+      printf("\nBSP not loaded for Programmable Accelerator Card %s\n",argv[1]);
+      printf("Use 'aocl program <device_name> <aocx_file>' to initialize BSP\n\n");
       return -1;
    }
 
@@ -313,6 +272,7 @@ int main (int argc, char *argv[])
      else
        buf[j]=unsigned(rand()*rand());
 
+   //FIXME: should not assume one CL device
    unsigned dev_num = 0;  // Assume only one CL device
 
    ocl_device_init(dev_num,maxbytes);
@@ -383,18 +343,12 @@ int main (int argc, char *argv[])
    printf("Read top speed = %.2f MB/s\n",read_topspeed);
    printf("Throughput = %.2f MB/s\n",(read_topspeed+write_topspeed)/2);
    
-   if (use_polling && os_windows) {
+   if (use_polling ) {
       printf("\nUsing polling for DMA transfers.\n");
       printf("Bandwidth is higher at the cost of CPU utilization\n");
       printf("When using interrupts for DMA, bandwidth is limited by the maximum number of interrupts per second that the driver can process.\n");
       printf("To use interrupts for DMA Set environment variable 'ACL_PCIE_DMA_USE_MSI'.\n");
-   } else if (os_windows) {
-      printf("\nUsing MSI interrupts for DMA transfers.\n");
-      printf("Bandwidth will be limited by the maximum number of interrupts per second that the driver can process.\n");
-      printf("Remove environment variable 'ACL_PCIE_DMA_USE_MSI' for better DMA performance.\n");
-   }
-
-
+   } 
    if (result)
      printf("\nDIAGNOSTIC_PASSED\n");
    else
@@ -406,4 +360,3 @@ int main (int argc, char *argv[])
 
    return (result) ? 0 : -1;
 }
-#undef MMD_STRING_RETURN_SIZE
