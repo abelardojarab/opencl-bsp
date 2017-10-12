@@ -11,4 +11,4 @@ linux64/libexec/diagnose
 linux64/libexec/program
 ase/mpf_src
 *.pyc
-
+*.swp
