@@ -68,6 +68,7 @@ set -e
 #echo -e "+define+MMIO_RESPONSE_TIMEOUT=32768\n$(cat rtl/sources.txt)" > rtl/sources.txt
 
 #hack to fix vhdl compilation.  replace '-F' with '-f'
+#https://jira01.devtools.intel.com/browse/OPAE-641
 sed -i -E 's;(vhdlan.*)-F;\1-f;g' Makefile
 
 make OPAE_BASEDIR=$OPAE_INSTALL_PATH/../opae_src

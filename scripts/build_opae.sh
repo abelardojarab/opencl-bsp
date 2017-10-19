@@ -26,7 +26,9 @@ mkdir -p $OPAE_LOCAL_INST_PATH
 mkdir -p $OPAE_BUILD_PATH
 
 cd $OPAE_BUILD_PATH
-sed -i 's:add_subdirectory.tools/hssi.::' $OPAE_SRC_PATH/CMakeLists.txt 
+#might speed up compilation.  there was also an issue with hssi compile at one 
+#point.  this hack disabled hssi stuff in opae build
+#sed -i 's:add_subdirectory.tools/hssi.::' $OPAE_SRC_PATH/CMakeLists.txt 
 if [ "$OPENCL_ASE_SIM" == "1" ]; then
 	CC=`which gcc` CXX=`which g++` cmake -DBUILD_ASE=ON -DCMAKE_INSTALL_PREFIX=$OPAE_LOCAL_INST_PATH $OPAE_SRC_PATH
 else
