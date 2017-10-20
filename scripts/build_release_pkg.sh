@@ -29,7 +29,7 @@ DCP_PLATFORM=dcp_1.0-skx
 [ ! -z "$2" ] && DCP_PLATFORM="$2"
 
 #use a stable OPAE release
-export OPAE_GIT_BRANCH=release/0.12.0
+export OPAE_GIT_BRANCH=crauer/opencl_stable
 
 ##############################################################################
 
