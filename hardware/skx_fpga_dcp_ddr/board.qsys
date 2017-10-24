@@ -368,6 +368,11 @@
    dir="start" />
  <interface name="clk_200" internal="clk_200.in_clk" type="clock" dir="end" />
  <interface
+   name="dma_irq"
+   internal="ddr_board.dma_irq"
+   type="interrupt"
+   dir="end" />
+ <interface
    name="emif_ddr4a"
    internal="ddr_board.emif_ddr4a"
    type="avalon"

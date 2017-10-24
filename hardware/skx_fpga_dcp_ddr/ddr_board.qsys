@@ -244,11 +244,11 @@
                 <suppliedSystemInfos>
                     <entry>
                         <key>ADDRESS_MAP</key>
-                        <value>&lt;address-map&gt;&lt;slave name='parent/ccip_avmm_bridge_inst.avst_to_avmm_master_inst.avmm' start='0x0' end='0x1000000000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
+                        <value></value>
                     </entry>
                     <entry>
                         <key>ADDRESS_WIDTH</key>
-                        <value>48</value>
+                        <value>-1</value>
                     </entry>
                 </suppliedSystemInfos>
                 <consumedSystemInfos/>
@@ -261,7 +261,7 @@
                 <suppliedSystemInfos>
                     <entry>
                         <key>CLOCK_DOMAIN</key>
-                        <value>7</value>
+                        <value>6</value>
                     </entry>
                     <entry>
                         <key>CLOCK_RATE</key>
@@ -269,7 +269,7 @@
                     </entry>
                     <entry>
                         <key>RESET_DOMAIN</key>
-                        <value>7</value>
+                        <value>6</value>
                     </entry>
                 </suppliedSystemInfos>
                 <consumedSystemInfos/>
@@ -357,6 +357,11 @@
    dir="start" />
  <interface name="ddr_clk_a" internal="ddr_clk_a.in_clk" type="clock" dir="end" />
  <interface name="ddr_clk_b" internal="ddr_clk_b.in_clk" type="clock" dir="end" />
+ <interface
+   name="dma_irq"
+   internal="msgdma_bbb_inst.dma_irq"
+   type="interrupt"
+   dir="end" />
  <interface
    name="emif_ddr4a"
    internal="ddr4a_pipe_0.m0"
@@ -9377,8 +9382,8 @@
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="2" />
   <parameter name="AUTO_GENERATION_ID" value="0" />
-  <parameter name="AUTO_HOST_ADDRESS_MAP"><![CDATA[<address-map><slave name='parent/ccip_avmm_bridge_inst.avst_to_avmm_master_inst.avmm' start='0x0' end='0x1000000000000' datawidth='512' /></address-map>]]></parameter>
-  <parameter name="AUTO_HOST_ADDRESS_WIDTH" value="48" />
+  <parameter name="AUTO_HOST_ADDRESS_MAP" value="" />
+  <parameter name="AUTO_HOST_ADDRESS_WIDTH" value="-1" />
   <parameter name="AUTO_MEM_ADDRESS_MAP"><![CDATA[<address-map><slave name='ddr_board_acl_memory_bank_divider_0.s' start='0x0' end='0x200000000' datawidth='512' /></address-map>]]></parameter>
   <parameter name="AUTO_MEM_ADDRESS_WIDTH" value="33" />
   <parameter name="AUTO_UNIQUE_ID">ddr_board_msgdma_bbb_inst</parameter>

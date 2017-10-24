@@ -121,6 +121,8 @@ module bsp_logic #(
 	wire mmio_avmm_read;
 	wire [(CCIP_AVMM_MMIO_DATA_WIDTH/8)-1:0]	mmio_avmm_byteenable;
 
+	wire [CCIP_AVMM_NUM_INTERRUPT_LINES-1:0] ccip_irq;
+
 	board board_inst (
 		.clk_200_clk                        (clk),                                     //      psl_clk.clk
 		.global_reset_reset               (reset),                            // global_reset.reset_n
@@ -189,6 +191,8 @@ module bsp_logic #(
 		.kernel_ddr4b_byteenable(kernel_ddr4b_byteenable),
 		.kernel_ddr4b_debugaccess(kernel_ddr4b_debugaccess),
 
+		.dma_irq_irq(ccip_irq[0]),
+		
         .ccip_avmm_mmio_waitrequest         (mmio_avmm_waitrequest),         //       ccip_avm_mmio.waitrequest
         .ccip_avmm_mmio_readdata            (mmio_avmm_readdata),            //                    .readdata
         .ccip_avmm_mmio_readdatavalid       (mmio_avmm_readdatavalid),       //                    .readdatavalid
@@ -213,9 +217,21 @@ module bsp_logic #(
         .kernel_clk_in_clk(kernel_clk)
 	);
 
-	avmm_ccip_host avmm_ccip_host_inst (
+	//set unused interrupt lines to 0
+	genvar i;
+	generate
+		for (i = 1; i < CCIP_AVMM_NUM_INTERRUPT_LINES ; i = i + 1) begin
+			assign ccip_irq[i] = 1'b0;
+		end
+	endgenerate 
+	
+	avmm_ccip_host #(
+		.ENABLE_INTR(1)
+	) avmm_ccip_host_inst (
 		.clk            (clk),            //   clk.clk
 		.reset        (reset),         // reset.reset
+		
+		.irq(ccip_irq),
 		
 		.avmm_waitrequest(requestor_avmm_waitrequest),
 		.avmm_readdata(requestor_avmm_readdata),
