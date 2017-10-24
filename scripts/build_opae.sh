@@ -29,6 +29,10 @@ cd $OPAE_BUILD_PATH
 #might speed up compilation.  there was also an issue with hssi compile at one 
 #point.  this hack disabled hssi stuff in opae build
 #sed -i 's:add_subdirectory.tools/hssi.::' $OPAE_SRC_PATH/CMakeLists.txt 
+
+#hack ASE for interrupts on non-DCP platform(because DCP mem model is slow)
+sed -i -e 's/undef\s\+ASE_ENABLE_INTR_FEATURE/define  ASE_ENABLE_INTR_FEATURE/' $OPAE_SRC_PATH/ase/sw/ase_common.h
+
 if [ "$OPENCL_ASE_SIM" == "1" ]; then
 	CC=`which gcc` CXX=`which g++` cmake -DBUILD_ASE=ON -DCMAKE_INSTALL_PREFIX=$OPAE_LOCAL_INST_PATH $OPAE_SRC_PATH
 else

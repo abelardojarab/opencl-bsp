@@ -71,6 +71,11 @@ set -e
 #https://jira01.devtools.intel.com/browse/OPAE-641
 sed -i -E 's;(vhdlan.*)-F;\1-f;g' Makefile
 
+#hack ASE for interrupts on non-DCP platform(because DCP mem model is slow)
+sed -i -e 's/undef\s\+ASE_ENABLE_INTR_FEATURE/define  ASE_ENABLE_INTR_FEATURE/' ./sw/ase_common.h
+sed -i -e 's/undef\s\+ASE_ENABLE_INTR_FEATURE/define  ASE_ENABLE_INTR_FEATURE/' ./rtl/platform.vh
+sed -i -e 's/define\s\+FORWARDING_CHANNEL\s\+outoforder_wrf_channel/define FORWARDING_CHANNEL  inorder_wrf_channel/' ./rtl/platform.vh
+
 make OPAE_BASEDIR=$OPAE_INSTALL_PATH/../opae_src
 cp $KDIR/*.hex ./work/
 make sim&
