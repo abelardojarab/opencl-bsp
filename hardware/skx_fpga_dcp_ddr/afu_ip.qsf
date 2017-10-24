@@ -16,7 +16,7 @@ set_global_assignment -name SOURCE_TCL_SCRIPT_FILE ip_include.tcl
 
 
 set_global_assignment -name IP_FILE ip/board/board_afu_regs.ip
-set_global_assignment -name IP_FILE ip/board/board_acl_irq_to_polling_slave_0.ip
+set_global_assignment -name IP_FILE ip/board/board_irq_ctrl_0.ip
 set_global_assignment -name IP_FILE ip/board/board_global_reset_in.ip
 set_global_assignment -name IP_FILE ip/board/board_clk_200.ip
 set_global_assignment -name IP_FILE ip/board/board_kernel_interface.ip
