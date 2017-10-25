@@ -122,6 +122,15 @@ CcipDevice::CcipDevice():
 		return;
 	}
 	
+	#ifdef ENABLE_OPENCL_KERNEL_INTERRUPTS
+	uint32_t intr_mask = 0x00000001;
+	res = fpgaWriteMMIO32(afc_handle, 0, AOCL_IRQ_MASKING_BASE, intr_mask);
+	if(res != FPGA_OK) {
+		fprintf(stderr, "Error fpgaWriteMMIO32: %d\n", res);
+		return;
+	}
+	#endif
+	
 	initialized = true;
 }
 

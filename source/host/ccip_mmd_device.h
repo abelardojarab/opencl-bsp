@@ -74,7 +74,8 @@
 #endif
 
 enum {
-	AOCL_IRQ_POLLING_BASE = 0x0100,
+	AOCL_IRQ_POLLING_BASE = 0x0100,	//CSR to polling interrupt status
+	AOCL_IRQ_MASKING_BASE = 0x0108, //CSR to set/unset interrupt mask
 	AOCL_MMD_KERNEL = 0x4000,	/* Control interface into kernel interface */
 	AOCL_MMD_MEMORY = 0x100000	/* Data interface to device memory */
 };
