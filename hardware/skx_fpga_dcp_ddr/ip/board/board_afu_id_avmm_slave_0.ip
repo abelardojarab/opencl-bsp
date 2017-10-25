@@ -1,88 +1,53 @@
 <?xml version="1.0" ?>
 <spirit:component xmlns:altera="http://www.altera.com/XMLSchema/IPXact/extensions" xmlns:spirit="http://www.spiritconsortium.org/XMLSchema/SPIRIT/1685-2009">
-  <spirit:vendor>Altera OpenCL</spirit:vendor>
-  <spirit:library>board_version_id_0</spirit:library>
-  <spirit:name>version_id_0</spirit:name>
-  <spirit:version>10.0</spirit:version>
+  <spirit:vendor>Altera Corporation</spirit:vendor>
+  <spirit:library>board_afu_id_avmm_slave_0</spirit:library>
+  <spirit:name>board_afu_id_avmm_slave_0</spirit:name>
+  <spirit:version>1.0</spirit:version>
   <spirit:busInterfaces>
     <spirit:busInterface>
-      <spirit:name>clk</spirit:name>
-      <spirit:busType spirit:vendor="altera" spirit:library="altera" spirit:name="clock" spirit:version="17.0"></spirit:busType>
-      <spirit:slave></spirit:slave>
-      <spirit:portMaps>
-        <spirit:portMap>
-          <spirit:logicalPort>
-            <spirit:name>clk</spirit:name>
-          </spirit:logicalPort>
-          <spirit:physicalPort>
-            <spirit:name>clk</spirit:name>
-          </spirit:physicalPort>
-        </spirit:portMap>
-      </spirit:portMaps>
-      <spirit:parameters>
-        <spirit:parameter>
-          <spirit:name>clockRate</spirit:name>
-          <spirit:displayName>Clock rate</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="clockRate">0</spirit:value>
-        </spirit:parameter>
-        <spirit:parameter>
-          <spirit:name>externallyDriven</spirit:name>
-          <spirit:displayName>Externally driven</spirit:displayName>
-          <spirit:value spirit:format="bool" spirit:id="externallyDriven">false</spirit:value>
-        </spirit:parameter>
-        <spirit:parameter>
-          <spirit:name>ptfSchematicName</spirit:name>
-          <spirit:displayName>PTF schematic name</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="ptfSchematicName"></spirit:value>
-        </spirit:parameter>
-      </spirit:parameters>
-    </spirit:busInterface>
-    <spirit:busInterface>
-      <spirit:name>clk_reset</spirit:name>
-      <spirit:busType spirit:vendor="altera" spirit:library="altera" spirit:name="reset" spirit:version="17.0"></spirit:busType>
-      <spirit:slave></spirit:slave>
-      <spirit:portMaps>
-        <spirit:portMap>
-          <spirit:logicalPort>
-            <spirit:name>reset_n</spirit:name>
-          </spirit:logicalPort>
-          <spirit:physicalPort>
-            <spirit:name>resetn</spirit:name>
-          </spirit:physicalPort>
-        </spirit:portMap>
-      </spirit:portMaps>
-      <spirit:parameters>
-        <spirit:parameter>
-          <spirit:name>associatedClock</spirit:name>
-          <spirit:displayName>Associated clock</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="associatedClock">clk</spirit:value>
-        </spirit:parameter>
-        <spirit:parameter>
-          <spirit:name>synchronousEdges</spirit:name>
-          <spirit:displayName>Synchronous edges</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="synchronousEdges">DEASSERT</spirit:value>
-        </spirit:parameter>
-      </spirit:parameters>
-    </spirit:busInterface>
-    <spirit:busInterface>
-      <spirit:name>s</spirit:name>
+      <spirit:name>afu_cfg_slave</spirit:name>
       <spirit:busType spirit:vendor="altera" spirit:library="altera" spirit:name="avalon" spirit:version="17.0"></spirit:busType>
       <spirit:slave></spirit:slave>
       <spirit:portMaps>
         <spirit:portMap>
           <spirit:logicalPort>
-            <spirit:name>read</spirit:name>
+            <spirit:name>readdata</spirit:name>
           </spirit:logicalPort>
           <spirit:physicalPort>
-            <spirit:name>slave_read</spirit:name>
+            <spirit:name>avmm_readdata</spirit:name>
           </spirit:physicalPort>
         </spirit:portMap>
         <spirit:portMap>
           <spirit:logicalPort>
-            <spirit:name>readdata</spirit:name>
+            <spirit:name>writedata</spirit:name>
           </spirit:logicalPort>
           <spirit:physicalPort>
-            <spirit:name>slave_readdata</spirit:name>
+            <spirit:name>avmm_writedata</spirit:name>
+          </spirit:physicalPort>
+        </spirit:portMap>
+        <spirit:portMap>
+          <spirit:logicalPort>
+            <spirit:name>address</spirit:name>
+          </spirit:logicalPort>
+          <spirit:physicalPort>
+            <spirit:name>avmm_address</spirit:name>
+          </spirit:physicalPort>
+        </spirit:portMap>
+        <spirit:portMap>
+          <spirit:logicalPort>
+            <spirit:name>write</spirit:name>
+          </spirit:logicalPort>
+          <spirit:physicalPort>
+            <spirit:name>avmm_write</spirit:name>
+          </spirit:physicalPort>
+        </spirit:portMap>
+        <spirit:portMap>
+          <spirit:logicalPort>
+            <spirit:name>read</spirit:name>
+          </spirit:logicalPort>
+          <spirit:physicalPort>
+            <spirit:name>avmm_read</spirit:name>
           </spirit:physicalPort>
         </spirit:portMap>
       </spirit:portMaps>
@@ -100,7 +65,7 @@
         <spirit:parameter>
           <spirit:name>addressSpan</spirit:name>
           <spirit:displayName>Address span</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="addressSpan">4</spirit:value>
+          <spirit:value spirit:format="string" spirit:id="addressSpan">64</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>addressUnits</spirit:name>
@@ -115,12 +80,12 @@
         <spirit:parameter>
           <spirit:name>associatedClock</spirit:name>
           <spirit:displayName>Associated clock</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="associatedClock">clk</spirit:value>
+          <spirit:value spirit:format="string" spirit:id="associatedClock">clock</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>associatedReset</spirit:name>
           <spirit:displayName>Associated reset</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="associatedReset">clk_reset</spirit:value>
+          <spirit:value spirit:format="string" spirit:id="associatedReset">reset</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>bitsPerSymbol</spirit:name>
@@ -316,13 +281,72 @@
         </altera:altera_assignments>
       </spirit:vendorExtensions>
     </spirit:busInterface>
+    <spirit:busInterface>
+      <spirit:name>clock</spirit:name>
+      <spirit:busType spirit:vendor="altera" spirit:library="altera" spirit:name="clock" spirit:version="17.0"></spirit:busType>
+      <spirit:slave></spirit:slave>
+      <spirit:portMaps>
+        <spirit:portMap>
+          <spirit:logicalPort>
+            <spirit:name>clk</spirit:name>
+          </spirit:logicalPort>
+          <spirit:physicalPort>
+            <spirit:name>clk</spirit:name>
+          </spirit:physicalPort>
+        </spirit:portMap>
+      </spirit:portMaps>
+      <spirit:parameters>
+        <spirit:parameter>
+          <spirit:name>clockRate</spirit:name>
+          <spirit:displayName>Clock rate</spirit:displayName>
+          <spirit:value spirit:format="string" spirit:id="clockRate">0</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>externallyDriven</spirit:name>
+          <spirit:displayName>Externally driven</spirit:displayName>
+          <spirit:value spirit:format="bool" spirit:id="externallyDriven">false</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>ptfSchematicName</spirit:name>
+          <spirit:displayName>PTF schematic name</spirit:displayName>
+          <spirit:value spirit:format="string" spirit:id="ptfSchematicName"></spirit:value>
+        </spirit:parameter>
+      </spirit:parameters>
+    </spirit:busInterface>
+    <spirit:busInterface>
+      <spirit:name>reset</spirit:name>
+      <spirit:busType spirit:vendor="altera" spirit:library="altera" spirit:name="reset" spirit:version="17.0"></spirit:busType>
+      <spirit:slave></spirit:slave>
+      <spirit:portMaps>
+        <spirit:portMap>
+          <spirit:logicalPort>
+            <spirit:name>reset</spirit:name>
+          </spirit:logicalPort>
+          <spirit:physicalPort>
+            <spirit:name>reset</spirit:name>
+          </spirit:physicalPort>
+        </spirit:portMap>
+      </spirit:portMaps>
+      <spirit:parameters>
+        <spirit:parameter>
+          <spirit:name>associatedClock</spirit:name>
+          <spirit:displayName>Associated clock</spirit:displayName>
+          <spirit:value spirit:format="string" spirit:id="associatedClock">clock</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>synchronousEdges</spirit:name>
+          <spirit:displayName>Synchronous edges</spirit:displayName>
+          <spirit:value spirit:format="string" spirit:id="synchronousEdges">BOTH</spirit:value>
+        </spirit:parameter>
+      </spirit:parameters>
+    </spirit:busInterface>
   </spirit:busInterfaces>
   <spirit:model>
     <spirit:views>
       <spirit:view>
         <spirit:name>QUARTUS_SYNTH</spirit:name>
         <spirit:envIdentifier>:quartus.altera.com:</spirit:envIdentifier>
-        <spirit:modelName>version_id</spirit:modelName>
+        <spirit:modelName>afu_id_avmm_slave</spirit:modelName>
         <spirit:fileSetRef>
           <spirit:localName>QUARTUS_SYNTH</spirit:localName>
         </spirit:fileSetRef>
@@ -342,7 +366,7 @@
         </spirit:wire>
       </spirit:port>
       <spirit:port>
-        <spirit:name>resetn</spirit:name>
+        <spirit:name>reset</spirit:name>
         <spirit:wire>
           <spirit:direction>in</spirit:direction>
           <spirit:wireTypeDefs>
@@ -354,24 +378,12 @@
         </spirit:wire>
       </spirit:port>
       <spirit:port>
-        <spirit:name>slave_read</spirit:name>
-        <spirit:wire>
-          <spirit:direction>in</spirit:direction>
-          <spirit:wireTypeDefs>
-            <spirit:wireTypeDef>
-              <spirit:typeName>STD_LOGIC</spirit:typeName>
-              <spirit:viewNameRef>QUARTUS_SYNTH</spirit:viewNameRef>
-            </spirit:wireTypeDef>
-          </spirit:wireTypeDefs>
-        </spirit:wire>
-      </spirit:port>
-      <spirit:port>
-        <spirit:name>slave_readdata</spirit:name>
+        <spirit:name>avmm_readdata</spirit:name>
         <spirit:wire>
           <spirit:direction>out</spirit:direction>
           <spirit:vector>
             <spirit:left>0</spirit:left>
-            <spirit:right>31</spirit:right>
+            <spirit:right>63</spirit:right>
           </spirit:vector>
           <spirit:wireTypeDefs>
             <spirit:wireTypeDef>
@@ -381,31 +393,122 @@
           </spirit:wireTypeDefs>
         </spirit:wire>
       </spirit:port>
+      <spirit:port>
+        <spirit:name>avmm_writedata</spirit:name>
+        <spirit:wire>
+          <spirit:direction>in</spirit:direction>
+          <spirit:vector>
+            <spirit:left>0</spirit:left>
+            <spirit:right>63</spirit:right>
+          </spirit:vector>
+          <spirit:wireTypeDefs>
+            <spirit:wireTypeDef>
+              <spirit:typeName>STD_LOGIC_VECTOR</spirit:typeName>
+              <spirit:viewNameRef>QUARTUS_SYNTH</spirit:viewNameRef>
+            </spirit:wireTypeDef>
+          </spirit:wireTypeDefs>
+        </spirit:wire>
+      </spirit:port>
+      <spirit:port>
+        <spirit:name>avmm_address</spirit:name>
+        <spirit:wire>
+          <spirit:direction>in</spirit:direction>
+          <spirit:vector>
+            <spirit:left>0</spirit:left>
+            <spirit:right>2</spirit:right>
+          </spirit:vector>
+          <spirit:wireTypeDefs>
+            <spirit:wireTypeDef>
+              <spirit:typeName>STD_LOGIC_VECTOR</spirit:typeName>
+              <spirit:viewNameRef>QUARTUS_SYNTH</spirit:viewNameRef>
+            </spirit:wireTypeDef>
+          </spirit:wireTypeDefs>
+        </spirit:wire>
+      </spirit:port>
+      <spirit:port>
+        <spirit:name>avmm_write</spirit:name>
+        <spirit:wire>
+          <spirit:direction>in</spirit:direction>
+          <spirit:wireTypeDefs>
+            <spirit:wireTypeDef>
+              <spirit:typeName>STD_LOGIC</spirit:typeName>
+              <spirit:viewNameRef>QUARTUS_SYNTH</spirit:viewNameRef>
+            </spirit:wireTypeDef>
+          </spirit:wireTypeDefs>
+        </spirit:wire>
+      </spirit:port>
+      <spirit:port>
+        <spirit:name>avmm_read</spirit:name>
+        <spirit:wire>
+          <spirit:direction>in</spirit:direction>
+          <spirit:wireTypeDefs>
+            <spirit:wireTypeDef>
+              <spirit:typeName>STD_LOGIC</spirit:typeName>
+              <spirit:viewNameRef>QUARTUS_SYNTH</spirit:viewNameRef>
+            </spirit:wireTypeDef>
+          </spirit:wireTypeDefs>
+        </spirit:wire>
+      </spirit:port>
     </spirit:ports>
   </spirit:model>
   <spirit:vendorExtensions>
     <altera:entity_info>
-      <spirit:vendor>Altera OpenCL</spirit:vendor>
-      <spirit:library>board_version_id_0</spirit:library>
-      <spirit:name>version_id</spirit:name>
-      <spirit:version>10.0</spirit:version>
+      <spirit:vendor>Altera Corporation</spirit:vendor>
+      <spirit:library>board_afu_id_avmm_slave_0</spirit:library>
+      <spirit:name>afu_id_avmm_slave</spirit:name>
+      <spirit:version>1.0</spirit:version>
     </altera:entity_info>
     <altera:altera_module_parameters>
       <spirit:parameters>
         <spirit:parameter>
-          <spirit:name>WIDTH</spirit:name>
-          <spirit:displayName>Slave Width</spirit:displayName>
-          <spirit:value spirit:format="long" spirit:id="WIDTH">32</spirit:value>
+          <spirit:name>AFU_ID_H</spirit:name>
+          <spirit:displayName>AFU_ID_H</spirit:displayName>
+          <spirit:value spirit:format="string" spirit:id="AFU_ID_H">1781068074525739680</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
-          <spirit:name>VERSION_ID</spirit:name>
-          <spirit:displayName>Version ID (integer):</spirit:displayName>
-          <spirit:value spirit:format="long" spirit:id="VERSION_ID">1298131504</spirit:value>
+          <spirit:name>AFU_ID_L</spirit:name>
+          <spirit:displayName>AFU_ID_L</spirit:displayName>
+          <spirit:value spirit:format="string" spirit:id="AFU_ID_L">10875984402722769759</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
-          <spirit:name>AUTO_CLK_CLOCK_RATE</spirit:name>
-          <spirit:displayName>Auto CLOCK_RATE</spirit:displayName>
-          <spirit:value spirit:format="string" spirit:id="AUTO_CLK_CLOCK_RATE">200000000</spirit:value>
+          <spirit:name>DFH_FEATURE_TYPE</spirit:name>
+          <spirit:displayName>DFH_FEATURE_TYPE</spirit:displayName>
+          <spirit:value spirit:format="string" spirit:id="DFH_FEATURE_TYPE">1</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>DFH_AFU_MINOR_REV</spirit:name>
+          <spirit:displayName>DFH_AFU_MINOR_REV</spirit:displayName>
+          <spirit:value spirit:format="string" spirit:id="DFH_AFU_MINOR_REV">0</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>DFH_AFU_MAJOR_REV</spirit:name>
+          <spirit:displayName>DFH_AFU_MAJOR_REV</spirit:displayName>
+          <spirit:value spirit:format="string" spirit:id="DFH_AFU_MAJOR_REV">0</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>DFH_END_OF_LIST</spirit:name>
+          <spirit:displayName>DFH_END_OF_LIST</spirit:displayName>
+          <spirit:value spirit:format="string" spirit:id="DFH_END_OF_LIST">0</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>DFH_NEXT_OFFSET</spirit:name>
+          <spirit:displayName>DFH_NEXT_OFFSET</spirit:displayName>
+          <spirit:value spirit:format="string" spirit:id="DFH_NEXT_OFFSET">4096</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>DFH_FEATURE_ID</spirit:name>
+          <spirit:displayName>DFH_FEATURE_ID</spirit:displayName>
+          <spirit:value spirit:format="string" spirit:id="DFH_FEATURE_ID">0</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>NEXT_AFU_OFFSET</spirit:name>
+          <spirit:displayName>NEXT_AFU_OFFSET</spirit:displayName>
+          <spirit:value spirit:format="string" spirit:id="NEXT_AFU_OFFSET">0</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>CREATE_SCRATCH_REG</spirit:name>
+          <spirit:displayName>CREATE_SCRATCH_REG</spirit:displayName>
+          <spirit:value spirit:format="string" spirit:id="CREATE_SCRATCH_REG">0</spirit:value>
         </spirit:parameter>
       </spirit:parameters>
     </altera:altera_module_parameters>
@@ -445,88 +548,49 @@
           <spirit:value spirit:format="string" spirit:id="lockedInterfaceDefinition"><![CDATA[<boundaryDefinition>
     <interfaces>
         <interface>
-            <name>clk</name>
-            <type>clock</type>
-            <isStart>false</isStart>
-            <ports>
-                <port>
-                    <name>clk</name>
-                    <role>clk</role>
-                    <direction>Input</direction>
-                    <width>1</width>
-                    <lowerBound>0</lowerBound>
-                    <vhdlType>STD_LOGIC</vhdlType>
-                </port>
-            </ports>
-            <assignments>
-                <assignmentValueMap/>
-            </assignments>
-            <parameters>
-                <parameterValueMap>
-                    <entry>
-                        <key>clockRate</key>
-                        <value>0</value>
-                    </entry>
-                    <entry>
-                        <key>externallyDriven</key>
-                        <value>false</value>
-                    </entry>
-                    <entry>
-                        <key>ptfSchematicName</key>
-                    </entry>
-                </parameterValueMap>
-            </parameters>
-        </interface>
-        <interface>
-            <name>clk_reset</name>
-            <type>reset</type>
-            <isStart>false</isStart>
-            <ports>
-                <port>
-                    <name>resetn</name>
-                    <role>reset_n</role>
-                    <direction>Input</direction>
-                    <width>1</width>
-                    <lowerBound>0</lowerBound>
-                    <vhdlType>STD_LOGIC</vhdlType>
-                </port>
-            </ports>
-            <assignments>
-                <assignmentValueMap/>
-            </assignments>
-            <parameters>
-                <parameterValueMap>
-                    <entry>
-                        <key>associatedClock</key>
-                        <value>clk</value>
-                    </entry>
-                    <entry>
-                        <key>synchronousEdges</key>
-                        <value>DEASSERT</value>
-                    </entry>
-                </parameterValueMap>
-            </parameters>
-        </interface>
-        <interface>
-            <name>s</name>
+            <name>afu_cfg_slave</name>
             <type>avalon</type>
             <isStart>false</isStart>
             <ports>
                 <port>
-                    <name>slave_read</name>
+                    <name>avmm_readdata</name>
+                    <role>readdata</role>
+                    <direction>Output</direction>
+                    <width>64</width>
+                    <lowerBound>0</lowerBound>
+                    <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                </port>
+                <port>
+                    <name>avmm_writedata</name>
+                    <role>writedata</role>
+                    <direction>Input</direction>
+                    <width>64</width>
+                    <lowerBound>0</lowerBound>
+                    <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                </port>
+                <port>
+                    <name>avmm_address</name>
+                    <role>address</role>
+                    <direction>Input</direction>
+                    <width>3</width>
+                    <lowerBound>0</lowerBound>
+                    <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                </port>
+                <port>
+                    <name>avmm_write</name>
+                    <role>write</role>
+                    <direction>Input</direction>
+                    <width>1</width>
+                    <lowerBound>0</lowerBound>
+                    <vhdlType>STD_LOGIC</vhdlType>
+                </port>
+                <port>
+                    <name>avmm_read</name>
                     <role>read</role>
                     <direction>Input</direction>
                     <width>1</width>
                     <lowerBound>0</lowerBound>
                     <vhdlType>STD_LOGIC</vhdlType>
-                </port>
-                <port>
-                    <name>slave_readdata</name>
-                    <role>readdata</role>
-                    <direction>Output</direction>
-                    <width>32</width>
-                    <lowerBound>0</lowerBound>
-                    <vhdlType>STD_LOGIC_VECTOR</vhdlType>
                 </port>
             </ports>
             <assignments>
@@ -561,7 +625,7 @@
                     </entry>
                     <entry>
                         <key>addressSpan</key>
-                        <value>4</value>
+                        <value>64</value>
                     </entry>
                     <entry>
                         <key>addressUnits</key>
@@ -573,11 +637,11 @@
                     </entry>
                     <entry>
                         <key>associatedClock</key>
-                        <value>clk</value>
+                        <value>clock</value>
                     </entry>
                     <entry>
                         <key>associatedReset</key>
-                        <value>clk_reset</value>
+                        <value>reset</value>
                     </entry>
                     <entry>
                         <key>bitsPerSymbol</key>
@@ -717,6 +781,69 @@
                 </parameterValueMap>
             </parameters>
         </interface>
+        <interface>
+            <name>clock</name>
+            <type>clock</type>
+            <isStart>false</isStart>
+            <ports>
+                <port>
+                    <name>clk</name>
+                    <role>clk</role>
+                    <direction>Input</direction>
+                    <width>1</width>
+                    <lowerBound>0</lowerBound>
+                    <vhdlType>STD_LOGIC</vhdlType>
+                </port>
+            </ports>
+            <assignments>
+                <assignmentValueMap/>
+            </assignments>
+            <parameters>
+                <parameterValueMap>
+                    <entry>
+                        <key>clockRate</key>
+                        <value>0</value>
+                    </entry>
+                    <entry>
+                        <key>externallyDriven</key>
+                        <value>false</value>
+                    </entry>
+                    <entry>
+                        <key>ptfSchematicName</key>
+                    </entry>
+                </parameterValueMap>
+            </parameters>
+        </interface>
+        <interface>
+            <name>reset</name>
+            <type>reset</type>
+            <isStart>false</isStart>
+            <ports>
+                <port>
+                    <name>reset</name>
+                    <role>reset</role>
+                    <direction>Input</direction>
+                    <width>1</width>
+                    <lowerBound>0</lowerBound>
+                    <vhdlType>STD_LOGIC</vhdlType>
+                </port>
+            </ports>
+            <assignments>
+                <assignmentValueMap/>
+            </assignments>
+            <parameters>
+                <parameterValueMap>
+                    <entry>
+                        <key>associatedClock</key>
+                        <value>clock</value>
+                    </entry>
+                    <entry>
+                        <key>synchronousEdges</key>
+                        <value>BOTH</value>
+                    </entry>
+                </parameterValueMap>
+            </parameters>
+        </interface>
     </interfaces>
 </boundaryDefinition>]]></spirit:value>
         </spirit:parameter>
@@ -726,35 +853,22 @@
           <spirit:value spirit:format="string" spirit:id="systemInfos"><![CDATA[<systemInfosDefinition>
     <connPtSystemInfos>
         <entry>
-            <key>clk</key>
+            <key>afu_cfg_slave</key>
             <value>
-                <connectionPointName>clk</connectionPointName>
-                <suppliedSystemInfos>
-                    <entry>
-                        <key>CLOCK_RATE</key>
-                        <value>200000000</value>
-                    </entry>
-                </suppliedSystemInfos>
-                <consumedSystemInfos/>
-            </value>
-        </entry>
-        <entry>
-            <key>s</key>
-            <value>
-                <connectionPointName>s</connectionPointName>
+                <connectionPointName>afu_cfg_slave</connectionPointName>
                 <suppliedSystemInfos/>
                 <consumedSystemInfos>
                     <entry>
                         <key>ADDRESS_MAP</key>
-                        <value>&lt;address-map&gt;&lt;slave name='s' start='0x0' end='0x4' datawidth='32' /&gt;&lt;/address-map&gt;</value>
+                        <value>&lt;address-map&gt;&lt;slave name='afu_cfg_slave' start='0x0' end='0x40' datawidth='64' /&gt;&lt;/address-map&gt;</value>
                     </entry>
                     <entry>
                         <key>ADDRESS_WIDTH</key>
-                        <value>2</value>
+                        <value>6</value>
                     </entry>
                     <entry>
                         <key>MAX_SLAVE_DATA_WIDTH</key>
-                        <value>32</value>
+                        <value>64</value>
                     </entry>
                 </consumedSystemInfos>
             </value>
@@ -765,15 +879,18 @@
       </spirit:parameters>
     </altera:altera_system_parameters>
     <altera:altera_interface_boundary>
-      <altera:interface_mapping altera:name="clk" altera:internal="version_id_0.clk" altera:type="clock" altera:dir="end">
+      <altera:interface_mapping altera:name="afu_cfg_slave" altera:internal="board_afu_id_avmm_slave_0.afu_cfg_slave" altera:type="avalon" altera:dir="end">
+        <altera:port_mapping altera:name="avmm_address" altera:internal="avmm_address"></altera:port_mapping>
+        <altera:port_mapping altera:name="avmm_read" altera:internal="avmm_read"></altera:port_mapping>
+        <altera:port_mapping altera:name="avmm_readdata" altera:internal="avmm_readdata"></altera:port_mapping>
+        <altera:port_mapping altera:name="avmm_write" altera:internal="avmm_write"></altera:port_mapping>
+        <altera:port_mapping altera:name="avmm_writedata" altera:internal="avmm_writedata"></altera:port_mapping>
+      </altera:interface_mapping>
+      <altera:interface_mapping altera:name="clock" altera:internal="board_afu_id_avmm_slave_0.clock" altera:type="clock" altera:dir="end">
         <altera:port_mapping altera:name="clk" altera:internal="clk"></altera:port_mapping>
       </altera:interface_mapping>
-      <altera:interface_mapping altera:name="clk_reset" altera:internal="version_id_0.clk_reset" altera:type="reset" altera:dir="end">
-        <altera:port_mapping altera:name="resetn" altera:internal="resetn"></altera:port_mapping>
-      </altera:interface_mapping>
-      <altera:interface_mapping altera:name="s" altera:internal="version_id_0.s" altera:type="avalon" altera:dir="end">
-        <altera:port_mapping altera:name="slave_read" altera:internal="slave_read"></altera:port_mapping>
-        <altera:port_mapping altera:name="slave_readdata" altera:internal="slave_readdata"></altera:port_mapping>
+      <altera:interface_mapping altera:name="reset" altera:internal="board_afu_id_avmm_slave_0.reset" altera:type="reset" altera:dir="end">
+        <altera:port_mapping altera:name="reset" altera:internal="reset"></altera:port_mapping>
       </altera:interface_mapping>
     </altera:altera_interface_boundary>
     <altera:altera_has_warnings>false</altera:altera_has_warnings>

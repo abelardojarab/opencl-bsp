@@ -15,7 +15,6 @@ set_global_assignment -name SDC_FILE user_clock.sdc
 set_global_assignment -name SOURCE_TCL_SCRIPT_FILE ip_include.tcl
 
 
-set_global_assignment -name IP_FILE ip/board/board_afu_regs.ip
 set_global_assignment -name IP_FILE ip/board/board_irq_ctrl_0.ip
 set_global_assignment -name IP_FILE ip/board/board_global_reset_in.ip
 set_global_assignment -name IP_FILE ip/board/board_clk_200.ip
@@ -23,7 +22,7 @@ set_global_assignment -name IP_FILE ip/board/board_kernel_interface.ip
 set_global_assignment -name IP_FILE ip/board/board_kernel_clk_in.ip
 set_global_assignment -name IP_FILE ip/board/board_kernel_clk_export.ip
 set_global_assignment -name IP_FILE ip/board/board_pipe_stage_host_ctrl.ip
-set_global_assignment -name IP_FILE ip/board/board_version_id_0.ip
+set_global_assignment -name IP_FILE ip/board/board_afu_id_avmm_slave_0.ip
 
 set_global_assignment -name QSYS_FILE board.qsys
 set_global_assignment -name IP_FILE ip/ddr_board/kernel_clk.ip
