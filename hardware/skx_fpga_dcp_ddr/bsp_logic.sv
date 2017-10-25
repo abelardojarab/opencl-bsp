@@ -192,6 +192,7 @@ module bsp_logic #(
 		.kernel_ddr4b_debugaccess(kernel_ddr4b_debugaccess),
 
 		.dma_irq_irq(ccip_irq[0]),
+		.host_kernel_irq_irq(ccip_irq[1]),
 		
         .ccip_avmm_mmio_waitrequest         (mmio_avmm_waitrequest),         //       ccip_avm_mmio.waitrequest
         .ccip_avmm_mmio_readdata            (mmio_avmm_readdata),            //                    .readdata
@@ -220,7 +221,7 @@ module bsp_logic #(
 	//set unused interrupt lines to 0
 	genvar i;
 	generate
-		for (i = 1; i < CCIP_AVMM_NUM_INTERRUPT_LINES ; i = i + 1) begin
+		for (i = 2; i < CCIP_AVMM_NUM_INTERRUPT_LINES ; i = i + 1) begin
 			assign ccip_irq[i] = 1'b0;
 		end
 	endgenerate 

@@ -34,11 +34,11 @@ module irq_ena
 reg [31:0] ena_state;
 
 initial   
-    ena_state <= 32'hffff;
+    ena_state <= 32'h0000;
 
 always@(posedge clk or negedge resetn)
   if (!resetn)
-    ena_state <= 32'hffff;
+    ena_state <= 32'h0000;
   else if (slave_write)
     ena_state <= slave_writedata;
 
