@@ -16,7 +16,7 @@ cd $ROOT_PROJECT_PATH/example_designs/mem_bandwidth
 rm -fr bin/mem_bandwidth
 if [ ! -f bin/mem_bandwidth.aocx ]; then
 	echo "Running AOC..."
-	aoc device/mem_bandwidth.cl --board skx_fpga_dcp_ddr -o bin/mem_bandwidth.aocx
+	aoc device/mem_bandwidth.cl --board dcp_a10 -o bin/mem_bandwidth.aocx
 	#aoc device/mem_bandwidth.cl --board skx_fpga_dcp_svm -o bin/mem_bandwidth.aocx
 	rm -fr mem_bandwidth_comp
 	mv bin/mem_bandwidth mem_bandwidth_comp

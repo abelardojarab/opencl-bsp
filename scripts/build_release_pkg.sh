@@ -22,7 +22,7 @@ PACKAGE_TEST_DIR=$RELEASE_BUILD_DIR/test_pkg
 BSP_DIR_NAME=dcp_opencl_bsp
 REPO_VERSION_FILE=$RELEASE_BUILD_DIR/repo_version.txt
 
-BSP_BOARD_TARGET=skx_fpga_dcp_ddr
+BSP_BOARD_TARGET=dcp_a10
 [ ! -z "$1" ] && BSP_BOARD_TARGET="$1"
 
 DCP_PLATFORM=dcp_1.0-skx
@@ -56,7 +56,7 @@ git log -n 1 >> $REPO_VERSION_FILE
 #setup bsp dir
 cp -R $ROOT_PROJECT_PATH/board_env.xml $RELEASE_BUILD_DIR/$BSP_DIR_NAME/
 #cp -R $ROOT_PROJECT_PATH/readme.txt $RELEASE_BUILD_DIR/$BSP_DIR_NAME/
-sed -i -e "s/skx_fpga_dcp_ddr/$BSP_BOARD_TARGET/" $RELEASE_BUILD_DIR/$BSP_DIR_NAME/board_env.xml 
+sed -i -e "s/dcp_a10/$BSP_BOARD_TARGET/" $RELEASE_BUILD_DIR/$BSP_DIR_NAME/board_env.xml 
 
 cp -R $ROOT_PROJECT_PATH/linux64 $RELEASE_BUILD_DIR/$BSP_DIR_NAME/
 mkdir -p $RELEASE_BUILD_DIR/$BSP_DIR_NAME/hardware/

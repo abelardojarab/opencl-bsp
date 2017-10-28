@@ -10,7 +10,7 @@
       "accelerator-clusters":
          [
             {
-               "name": "skx_fpga_dcp_ddr",
+               "name": "dcp_a10",
                "total-contexts": 1,
                "accelerator-type-uuid": "18b79ffa-2ee5-4aa0-96ef-4230dafacb5f"
             }

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <board_env version="17.0" name="jtag">
-  <hardware dir="hardware" default="skx_fpga_dcp_ddr"></hardware>
+  <hardware dir="hardware" default="dcp_a10"></hardware>
   <platform name="linux64">
     <mmdlib>%b/linux64/lib/libaltera_ccip_mmd.so</mmdlib>
     <linkflags>-L%a/linux64/lib -L%b/linux64/lib -L$OPAE_INSTALL_PATH/lib/ </linkflags>

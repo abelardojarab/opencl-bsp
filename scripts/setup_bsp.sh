@@ -18,7 +18,7 @@ SCRIPT_PATH=`readlink -f ${BASH_SOURCE[0]}`
 SCRIPT_DIR_PATH="$(dirname $SCRIPT_PATH)"
 MAIN_SRC_PATH="$(dirname $SCRIPT_DIR_PATH)"
 
-BSP_DIR="$MAIN_SRC_PATH/hardware/skx_fpga_dcp_ddr"
+BSP_DIR="$MAIN_SRC_PATH/hardware/dcp_a10"
 PLATFORM="dcp_1.0-skx"
 
 [ ! -z "$1" ] && BSP_DIR="$1"

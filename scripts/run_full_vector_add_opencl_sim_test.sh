@@ -16,7 +16,7 @@ cd $ROOT_PROJECT_PATH/example_designs/vector_add_int
 rm -fr bin/vector_add_int
 if [ ! -f bin/vector_add_int.aocx ]; then
 	echo "Running AOC..."
-	aoc vector_add_int.cl --board skx_fpga_dcp_ddr -o bin/vector_add_int.aocx
+	aoc vector_add_int.cl --board dcp_a10 -o bin/vector_add_int.aocx
 	#aoc vector_add_int.cl --board skx_fpga_dcp_svm -o bin/vector_add_int.aocx
 	rm -fr vector_add_int_comp
 	mv bin/vector_add_int vector_add_int_comp
