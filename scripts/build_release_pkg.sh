@@ -15,12 +15,15 @@ export OPENCL_ASE_SIM=0
 set -e
 
 #RELEASE SCRIPT VARIABLES
+RELEASE_BUILD_DIR=$ROOT_PROJECT_PATH/release_build
+
 #git archive --format=tar HEAD | gzip -9 > git_archive_`date +%m%d%y`.tar.gz
 TOP_GIT_COMMIT=`cd $SCRIPT_DIR_PATH; git rev-parse --short HEAD`
 RELEASE_TAR_PATH=$RELEASE_BUILD_DIR/dcp_opencl_bsp_${TOP_GIT_COMMIT}_`date +%m%d%y_%H%M%S`.tar.gz
 PACKAGE_TEST_DIR=$RELEASE_BUILD_DIR/test_pkg
 BSP_DIR_NAME=dcp_opencl_bsp
 REPO_VERSION_FILE=$RELEASE_BUILD_DIR/repo_version.txt
+
 
 BSP_BOARD_TARGET=dcp_a10
 [ ! -z "$1" ] && BSP_BOARD_TARGET="$1"

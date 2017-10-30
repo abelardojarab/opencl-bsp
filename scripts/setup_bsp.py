@@ -30,7 +30,8 @@ import tarfile
 
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 PROJECT_PATH = os.path.dirname(os.path.abspath(SCRIPT_PATH))
-DEFAULT_BSP_DIR = os.path.join(PROJECT_PATH, 'hardware', 'dcp_a10')
+DEFAULT_BSP = 'dcp_a10'
+DEFAULT_BSP_DIR = os.path.join(PROJECT_PATH, 'hardware')
 DEFAULT_PLATFORM = "dcp_1.0-rc"
 
 
@@ -130,7 +131,8 @@ def rm_glob(src, verbose=False):
 
 
 # main work function for setting up bsp
-def setup_bsp(platform, bsp_search_dirs, verbose=False, debug=False):
+def setup_bsp(platform, bsp_search_dirs, sim_mode=False, verbose=False,
+              debug=False):
     packager_bin = get_packager_bin()
     platform_dir = get_platform_dir(platform)
 
@@ -187,10 +189,9 @@ def setup_bsp(platform, bsp_search_dirs, verbose=False, debug=False):
         os.remove(pr_design_artifacts_path)
 
         # setup sim stuff if needed
-        if("OPENCL_ASE_SIM" in os.environ):
-            if(os.environ["OPENCL_ASE_SIM"] == "1"):
-                copy_glob(os.path.join(PROJECT_PATH, 'ase', 'bsp', '*'),
-                          bsp_dir)
+        if(sim_mode):
+            copy_glob(os.path.join(PROJECT_PATH, 'ase', 'bsp', '*'),
+                      bsp_dir)
 
         # update quartus project files for opencl
         update_qsf_settings_for_opencl_afu(os.path.join(bsp_dir,
@@ -287,7 +288,13 @@ def main():
     if(args.debug):
         print "ARGS: ", args
 
+    sim_mode = False
+    if("OPENCL_ASE_SIM" in os.environ):
+        if(os.environ["OPENCL_ASE_SIM"] == "1"):
+            sim_mode = True
+
     setup_bsp(platform=args.platform, bsp_search_dirs=args.bsp_search_dirs,
+              sim_mode=sim_mode,
               verbose=args.verbose, debug=args.debug)
 
 
