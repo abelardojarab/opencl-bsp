@@ -22,6 +22,7 @@
 
 import argparse
 import datetime
+import glob
 import os
 import shutil
 import sys
@@ -77,17 +78,36 @@ def setup_sw_packages(opae_branch=None, sim_mode=None):
         exit(1)
 
 
+def find_all_files_with_text(src, search):
+    result = []
+    for i in glob.glob(src):
+        if os.path.isdir(i):
+            result += find_all_files_with_text(os.path.join(i, '*'), search)
+            # '.' files(hidden files) are not included in '*'
+            result += find_all_files_with_text(os.path.join(i, '.*'), search)
+        else:
+            found = False
+            with open(i) as f:
+                for line in f:
+                    if(search in line):
+                        found = True
+                        break
+            if(found):
+                result += [i]
+    return result
+
+
 # main work function for setting up bsp
 def build_release_pkg(platform, bsp_search_dirs, include_bsp,
                       default_bsp_arg=DEFAULT_BSP,
                       bsp_dir_name=DEFAULT_BSP_DIR_NAME,
+                      rename_bsp=[],
                       verbose=False, debug=False):
     setup_sw_packages(opae_branch=OPAE_GIT_BRANCH, sim_mode=False)
 
     # setup bsp list
     bsp_list = setup_bsp.get_bsp_list(bsp_search_dirs)
     if(include_bsp):
-        # TODO: rename bsp logic needed here
         filter_bsp_list = {}
         for i in bsp_list.keys():
             if(i in include_bsp):
@@ -95,6 +115,32 @@ def build_release_pkg(platform, bsp_search_dirs, include_bsp,
         bsp_list = filter_bsp_list
     if(debug):
         print "bsp_list: ", bsp_list
+
+    # setup rename bsp map and validate it
+    rename_bsp_map = {}
+    rename_bsp_map_reverse = {}
+    for i in rename_bsp:
+        tmp = i.split(":")
+        if(len(tmp) != 2):
+            print "Error: rename_bsp argument is invalid: '%s'" % i
+            exit(1)
+        src = tmp[0]
+        dst = tmp[1]
+        if src in rename_bsp_map:
+            print "Error: rename_bsp argument already used: '%s'" % i
+            exit(1)
+        if dst in rename_bsp_map_reverse:
+            print "Error: rename_bsp argument already used: '%s'" % i
+            exit(1)
+        if(src not in bsp_list):
+            print "Error: rename_bsp argument not in bsp list: '%s'" % i
+            exit(1)
+        if(dst in bsp_list):
+            print "Error: rename_bsp argument already in bsp list: '%s'" % i
+            exit(1)
+
+        rename_bsp_map[src] = dst
+        rename_bsp_map_reverse[dst] = src
 
     print "Building Release package for BSPs: %s" % include_bsp
 
@@ -113,17 +159,36 @@ def build_release_pkg(platform, bsp_search_dirs, include_bsp,
     delete_and_mkdir(release_bsp_hardware_dir)
 
     # set default BSP
-    # TODO: rename bsp logic needed here
-    if(DEFAULT_BSP != default_bsp_arg):
+    default_bsp_to_set = default_bsp_arg
+    if(default_bsp_arg in rename_bsp_map.keys()):
+        default_bsp_to_set = rename_bsp_map[default_bsp_arg]
+    if(DEFAULT_BSP != default_bsp_to_set):
         board_env_path = os.path.join(release_bsp_dir, 'board_env.xml')
         setup_bsp.replace_lines_in_file(board_env_path,
-                                        DEFAULT_BSP, default_bsp_arg)
+                                        DEFAULT_BSP, default_bsp_to_set)
 
     for i in bsp_list.keys():
         copy_glob(bsp_list[i]['dir'], release_bsp_hardware_dir)
         bsp_dir = os.path.join(release_bsp_hardware_dir, bsp_list[i]['name'])
         setup_bsp.rm_glob(os.path.join(bsp_dir, '*.sh'))
         copy_glob(os.path.join(bsp_list[i]['dir'], 'run.sh'), bsp_dir)
+        if(i in rename_bsp_map.keys()):
+            old_name = i
+            new_name = rename_bsp_map[i]
+            renamed_bsp_dir = os.path.join(release_bsp_hardware_dir,
+                                           new_name)
+            shutil.move(bsp_dir, renamed_bsp_dir)
+            setup_bsp.replace_lines_in_file(os.path.join(renamed_bsp_dir,
+                                                         'board_spec.xml'),
+                                            old_name, new_name)
+            setup_bsp.replace_lines_in_file(os.path.join(renamed_bsp_dir,
+                                                         'opencl_afu.json'),
+                                            old_name, new_name)
+            s = find_all_files_with_text(os.path.join(renamed_bsp_dir, "*"),
+                                         old_name)
+            if(s):
+                print("ERROR: bsp rename failed for files: %s\n" % s)
+                exit(1)
 
     setup_bsp.setup_bsp(platform=platform,
                         bsp_search_dirs=[release_bsp_hardware_dir],
@@ -196,6 +261,11 @@ def main():
     parser.add_argument('--bsp_dir_name', '-n', required=False,
                         default=DEFAULT_BSP_DIR_NAME,
                         help='set bsp dir name and package name')
+    parser.add_argument('--rename_bsp', '-r', nargs='*',
+                        required=False,
+                        default=[],
+                        help='list of bsp to rename, '
+                        'example old_name:new_name')
 
     args = parser.parse_args()
 
@@ -207,6 +277,7 @@ def main():
                       include_bsp=args.include_bsp,
                       default_bsp_arg=args.default_bsp,
                       bsp_dir_name=args.bsp_dir_name,
+                      rename_bsp=args.rename_bsp,
                       verbose=args.verbose, debug=args.debug)
 
 
