@@ -15,7 +15,6 @@
 /* Intel or its authorized distributors.  Please refer to the applicable           */
 /* agreement for further details.                                                  */
 
-#include <iostream>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -23,6 +22,7 @@
 #include <unistd.h>
 #include <zlib.h>
 
+#include <iostream>
 #include <cassert>
 #include <sstream> 
 #include <map>
@@ -338,7 +338,9 @@ int AOCL_MMD_CALL aocl_mmd_yield(int handle)
 	uint32_t irqval = 0;
 	DEBUG_PRINT("* Called: aocl_mmd_yield\n");
 	YIELD_DELAY();
+
    CcipDevice *dev = get_device(handle);
+   assert(dev);
 
 	dev->read_block(NULL, AOCL_IRQ_POLLING_BASE, &irqval, 0, 4);
 	DEBUG_PRINT("irqval: %u\n", irqval);
@@ -349,10 +351,13 @@ int AOCL_MMD_CALL aocl_mmd_yield(int handle)
 	return 0;
 }
 
+// TODO: determine if svm is used at all (i.e. in testing).  Otherwise
+// consider removing
+#if 0
 static bool check_for_svm_env()
 {
 	//SVM not yet supported so no reason to check right now
-#if 1
+#ifndef ENABLE_SVM
 	return false;
 #else
 	static bool env_checked = false;
@@ -369,15 +374,18 @@ static bool check_for_svm_env()
 	return svm_enabled;
 #endif
 }
-
+#endif
 
 
 // Macros used for acol_mmd_get_offline_info and aocl_mmd_get_info
+// TODO: switch from memcpy to memcpy_s once I figure out the library issues
 #define RESULT_INT(X) {*((int*)param_value) = X; if (param_size_ret) *param_size_ret=sizeof(int);}
 #define RESULT_STR(X) do { \
 	unsigned Xlen = strlen(X) + 1; \
-	memcpy((void*)param_value,X,(param_value_size <= Xlen) ? param_value_size : Xlen); \
-	if (param_size_ret) *param_size_ret=Xlen; \
+   unsigned Xcpylen = (param_value_size <= Xlen) ? param_value_size : Xlen; \
+	/*memcpy_s((void*)param_value, param_value_size, X, Xcpylen); \ */ \
+	memcpy((void*)param_value, X, Xcpylen); \
+	if (param_size_ret) *param_size_ret=Xcpylen; \
 } while(0)
 
 
@@ -388,8 +396,13 @@ int aocl_mmd_get_offline_info(
 		size_t* param_size_ret )
 {
 	int mem_type_info = (int)AOCL_MMD_PHYSICAL_MEMORY;
+
+// TODO: determine if svm is used at all (i.e. in testing).  Otherwise
+// consider removing
+#if 0
 	if(check_for_svm_env())
 		mem_type_info = (int)AOCL_MMD_SVM_COARSE_GRAIN_BUFFER;
+#endif
 
    unsigned int num_acl_boards;
 
@@ -553,6 +566,8 @@ int AOCL_MMD_CALL aocl_mmd_open(const char *name)
       handle = dev->get_mmd_handle();
       bsp_devices[handle] = dev;
    } 
+
+   assert(dev);
    if(dev->bsp_loaded()) { 
       dev->initialize_bsp();
    } else {
