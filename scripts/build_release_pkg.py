@@ -25,7 +25,6 @@ import datetime
 import glob
 import os
 import shutil
-import sys
 import tarfile
 import subprocess
 
@@ -101,7 +100,7 @@ def find_all_files_with_text(src, search):
 def build_release_pkg(platform, bsp_search_dirs, include_bsp,
                       default_bsp_arg=DEFAULT_BSP,
                       bsp_dir_name=DEFAULT_BSP_DIR_NAME,
-                      rename_bsp=[],
+                      rename_bsp=None,
                       verbose=False, debug=False):
     setup_sw_packages(opae_branch=OPAE_GIT_BRANCH, sim_mode=False)
 

@@ -41,7 +41,6 @@ DEFAULT_PLATFORM = "dcp_1.0-rc"
 #    [bsp_search_dir, bsp_search_dir/*, bsp_search_dir/hardware/*]
 # builds map with name, xml path, absolute dir path
 def get_bsp_list(bsp):
-    bsp_list = []
     # bsp can be string or list but we want to convert it to list
     if(isinstance(bsp, (str, unicode))):
         dir_list = [bsp]
@@ -50,7 +49,6 @@ def get_bsp_list(bsp):
 
     xml_list = []
     for i in dir_list:
-        glob_str = '%s/*' % i
         xml_list += glob.glob(os.path.join(i, 'board_spec.xml'))
         xml_list += glob.glob(os.path.join(i, '*', 'board_spec.xml'))
         xml_list += glob.glob(os.path.join(i, 'hardware', '*',
