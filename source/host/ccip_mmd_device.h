@@ -97,9 +97,13 @@ class CcipDevice final
 	CcipDevice(uint64_t);
 	~CcipDevice();
 
+   static std::string get_board_name(std::string prefix, uint64_t obj_id);
+   static uint64_t parse_board_name(const char *board_name);
+
    int get_mmd_handle()         { return mmd_handle; }
    uint64_t get_fpga_obj_id()   { return fpga_obj_id; }
    std::string get_dev_name()   { return mmd_dev_name; }
+   std::string get_bdf();
    
    int program_bitstream(uint8_t *data, size_t data_size);
    void initialize_bsp();

@@ -17,6 +17,9 @@
 
 #include <assert.h>
 
+#include <iostream>
+#include <iomanip>
+#include <sstream>
 #include <limits>
 #include <mutex>
 
@@ -37,6 +40,23 @@
 
 int CcipDevice::next_mmd_handle{1};
 std::mutex CcipDevice::class_lock;
+
+std::string CcipDevice::get_board_name(std::string prefix, uint64_t obj_id)
+{
+   std::ostringstream stream;
+   stream << prefix << "_" << std::setbase(16) << obj_id;
+   return stream.str();
+}
+
+// TODO: Need more robust string parsing and need to ensure 
+// get_board_name produces output that can be parsed by
+// parse_board_name
+uint64_t CcipDevice::parse_board_name(const char *board_name)
+{
+   std::string device_num_str(&board_name[4]); // FIXME: need better parsing
+   uint64_t device_num = std::stoul(device_num_str,0,16);
+   return device_num;
+}
 
 CcipDevice::CcipDevice(uint64_t obj_id):
    fpga_obj_id(obj_id),
@@ -130,7 +150,7 @@ CcipDevice::CcipDevice(uint64_t obj_id):
       fprintf(stderr, "Error reading function: '%s'\n", fpgaErrStr(res));
    }
 
-   mmd_dev_name = BSP_NAME + std::to_string(obj_id);
+   mmd_dev_name = get_board_name(BSP_NAME, obj_id);
    afu_initialized = true;
 }
 
@@ -171,6 +191,7 @@ void CcipDevice::initialize_bsp()
 		return;
 	}
 	
+
 	#ifdef ENABLE_OPENCL_KERNEL_INTERRUPTS
 	uint32_t intr_mask = 0x00000001;
 	res = fpgaWriteMMIO32(afc_handle, 0, AOCL_IRQ_MASKING_BASE, intr_mask);
@@ -282,7 +303,15 @@ bool CcipDevice::bsp_loaded() {
    }
 }
 
+std::string CcipDevice::get_bdf() {
+   std::ostringstream bdf;
+   bdf << std::setfill('0') << std::setw(2) << unsigned(bus) << ":"
+       << std::setfill('0') << std::setw(2) << unsigned(device) << "."
+       << unsigned(function);
 
+   return bdf.str();
+}
+ 
 void CcipDevice::set_kernel_interrupt(aocl_mmd_interrupt_handler_fn fn, void* user_data)
 {
 	kernel_interrupt = fn;

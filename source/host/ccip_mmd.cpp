@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <zlib.h>
 
+#include <iomanip>
 #include <iostream>
 #include <cassert>
 #include <sstream> 
@@ -68,49 +69,15 @@ static CcipDevice *get_device(int handle)
 
 
 // static helper functions
+#if 0
 static bool check_for_svm_env();
-
-//  * gcc 4.8 has problems with regex so this code doesn't work
-//    keeping for now until more robust parsing solution in place
-//#include <regex>  // needed if using regex
-//static uint64_t get_obj_id(const char *device_name_cstr)
-//{
-//   const std::string dcp_str("dcp");
-//   const std::string dcp_afu("dcp_afu");
-//   const std::string dcp_bsp("dcp_bsp");
-//   
-//	std::string device_name(device_name_cstr);
-//	std::smatch match;
-//	std::regex  re("^" + dcp_str + "|" + dcp_afu + "|" + dcp_bsp + "([0-9])+$");
-//	if(!std::regex_search(device_name, match, re)) {
-//		fprintf(stderr, "Error invalid device name '%s'\n", device_name_cstr);
-//       return AOCL_INVALID_HANDLE;
-//	}
-//
-//  if(match[1].matched) {
-//      uint64_t device_num = std::stoul(match[1],0,10);
-//      return device_num;
-//   } else {
-//      return 0;
-//   }
-//    
-//}
-
-
-static uint64_t get_obj_id(const char *device_name_cstr)
-{
-   //FIXME: need more robust parsing 
-   std::string device_num_str(&device_name_cstr[3]);
-   //uint64_t device_num = std::stoul(device_num_str, 0, 16);
-   uint64_t device_num = std::stoul(device_num_str);
-   return device_num;
-}
+#endif
 
 
 // Interface for programing device that does not have a BSP loaded
 int ccip_mmd_device_reprogram(const char *device_name, void *data, size_t data_size)
 {
-   uint64_t obj_id = get_obj_id(device_name);
+   uint64_t obj_id = CcipDevice::parse_board_name(device_name);
    
    int handle = get_handle(obj_id);
    if(handle == -1) {
@@ -126,7 +93,7 @@ int ccip_mmd_device_reprogram(const char *device_name, void *data, size_t data_s
 // Interface for checking if AFU has BSP loaded
 bool ccip_mmd_bsp_loaded(const char *name)
 {
-   uint64_t obj_id = get_obj_id(name);
+   uint64_t obj_id = CcipDevice::parse_board_name(name);
    if(!obj_id) {
       return false;
    }
@@ -184,6 +151,7 @@ static std::string get_offline_board_names()
    fpga_properties   filter = nullptr;
    fpga_properties   prop = nullptr;
    std::string boards = std::string();
+   std::ostringstream board_name;
    fpga_token *toks = nullptr;
    fpga_guid afu_guid;
    uint64_t obj_id;
@@ -236,10 +204,11 @@ static std::string get_offline_board_names()
 
          // TODO: determine if boards with BSP loaded should have different name
          // if not then simplify this code
+         std::string prefix;
          if(uuid_compare(dcp_guid, afu_guid) == 0) {
-            boards.append(BSP_NAME);
+             prefix = BSP_NAME;
          } else {
-            boards.append(BSP_NAME);
+             prefix = BSP_NAME;
          }
 
          res = fpgaPropertiesGetObjectID(prop, &obj_id);
@@ -247,7 +216,7 @@ static std::string get_offline_board_names()
             fprintf(stderr, "Error reading object ID\n");
             break;
          }
-         boards.append(std::to_string(obj_id));
+         boards.append(CcipDevice::get_board_name(prefix, obj_id));
          if( i < num_matches - 1)
             boards.append(";");
       } else {
@@ -461,7 +430,11 @@ int aocl_mmd_get_info(
 #endif
 		case AOCL_MMD_MEMORY_INTERFACE:
 						     RESULT_INT(AOCL_MMD_MEMORY); break;
-		case AOCL_MMD_PCIE_INFO:             RESULT_STR("N/A"); break;
+      case AOCL_MMD_PCIE_INFO:        
+      {
+         RESULT_STR(dev->get_bdf().c_str());
+         break;
+      }
 		case AOCL_MMD_BOARD_UNIQUE_ID:       RESULT_INT(0); break;
 		case AOCL_MMD_TEMPERATURE:
 						     {
@@ -552,7 +525,7 @@ int AOCL_MMD_CALL aocl_mmd_open(const char *name)
 {
 	DEBUG_PRINT("Opening device: %s\n", name);
  
-   uint64_t obj_id = get_obj_id(name);
+   uint64_t obj_id = CcipDevice::parse_board_name(name);
    if(!obj_id) {
       return AOCL_INVALID_HANDLE;
    }
