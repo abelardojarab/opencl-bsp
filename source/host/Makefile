@@ -15,15 +15,19 @@
 ECHO = @
 CXX = g++ -o 
 
-CPPFLAGS = -DKERNEL_64BIT -Wall -Wno-unknown-pragmas  -fPIC -fpermissive -DLINUX  -D__USE_XOPEN2K8 -DACL_VERSION=\"v14.1\" -I. -I../../include -I../include -I$(ALTERAOCLSDKROOT)/host/include/CL -I$(OPAE_INSTALL_PATH)/include
+CPPFLAGS = -DKERNEL_64BIT -Wall -Wno-unknown-pragmas  -fPIC -DLINUX  -D__USE_XOPEN2K8 -DACL_VERSION=\"v14.1\" -I. -I../../include -I../include -I$(ALTERAOCLSDKROOT)/host/include/CL -I$(OPAE_INSTALL_PATH)/include
 #-I$(MPF_INSTALL_PATH)/sw/include
 CFLAGS = -fPIC -m64 
 CXXFLAGS = -fPIC -m64 -std=c++11
 
 ifeq (1,${OPENCL_ASE_SIM})
+	CPPFLAGS += -DSIM
+endif
+
+ifeq (1,${DEBUG})
 	CFLAGS += -g
 	CXXFLAGS += -g
-	CPPFLAGS += -DSIM
+	CPPFLAGS += -g
 endif
 
 LINKER = g++

@@ -45,6 +45,11 @@ EXIST_CLEAN_TMP:= $(strip $(EXEFILE) $(DLLFILE) $(DLLLIBFILE) $(DLLEXPFILE) $(DL
 EXIST_CLEAN_OBJ:= $(strip $(wildcard $(addprefix $(INSTALL_DIR)$(PS),$(TARGET_FILES)) $(SPECIAL_INSTALL_FILE) $(OBJ_FILES)))
 EXIST_CLEAN_DIR:= $(strip $(wildcard $(CLEAN_DIR)))
 
+CXXFLAGS += "-std=c++11"
+ifeq (1, ${DEBUG})
+	CXXFLAGS += "-g"
+endif
+
 .DEFAULT_GOAL = all
 
 all : subdirs this
