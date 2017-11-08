@@ -18,8 +18,6 @@
 #ifndef _CCIP_MMD_DEVICE_H
 #define _CCIP_MMD_DEVICE_H
 
-#include <mutex>
-
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -127,7 +125,6 @@ class CcipDevice final
 
 	private:
    static int next_mmd_handle;
-   static std::mutex class_lock;
 
    int mmd_handle;
    uint64_t fpga_obj_id;

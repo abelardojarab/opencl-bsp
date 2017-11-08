@@ -21,7 +21,6 @@
 #include <iomanip>
 #include <sstream>
 #include <limits>
-#include <mutex>
 
 #include "ccip_mmd_device.h"
 #include "afu_bbb_util.h"
@@ -39,7 +38,6 @@
 //#define DISABLE_DMA
 
 int CcipDevice::next_mmd_handle{1};
-std::mutex CcipDevice::class_lock;
 
 std::string CcipDevice::get_board_name(std::string prefix, uint64_t obj_id)
 {
@@ -76,15 +74,13 @@ CcipDevice::CcipDevice(uint64_t obj_id):
    dma_h(NULL),
    msgdma_bbb_base_addr(0)
 {
-   // Lock because 'next_mmd_handle' may be shared between threads 
-   {  
-      std::lock_guard<std::mutex> lock(class_lock);
-      mmd_handle = next_mmd_handle;
-      if(next_mmd_handle == std::numeric_limits<int>::max())
-         next_mmd_handle = 1;
-      else
-         next_mmd_handle++;
-   }
+   // Note that this constructor is not thread-safe because next_mmd_handle
+   // is shared between all class instances
+   mmd_handle = next_mmd_handle;
+   if(next_mmd_handle == std::numeric_limits<int>::max())
+      next_mmd_handle = 1;
+   else
+      next_mmd_handle++;
 
    fpga_guid guid;
    fpga_result res = FPGA_OK;
