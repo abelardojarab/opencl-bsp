@@ -47,6 +47,7 @@
 #include <malloc.h>
 #include <time.h>
 
+#include <limits>
 #include <sstream>   // std::ostringstream
 #include <iomanip>   // std::setw
 
@@ -249,9 +250,14 @@ int main (int argc, char *argv[])
 
    srand ( unsigned(time(NULL)) );
 
-   int maxbytes = int((argc>=3) ? atoi(argv[2]) : DEFAULT_MAXNUMBYTES);
-   unsigned maxints = unsigned(maxbytes/sizeof(int));
+   int maxbytes = DEFAULT_MAXNUMBYTES;
+   if(argc >= 3) {
+       maxbytes = atoi(argv[2]);
+       if(maxbytes < 0 || maxbytes > std::numeric_limits<int>::max())
+          maxbytes = DEFAULT_MAXNUMBYTES;
+   }
 
+   unsigned maxints = unsigned(maxbytes/sizeof(int));
 
    unsigned iterations=1;
    for (unsigned i=maxbytes/DEFAULT_MINNUMBYTES; i>>1 ; i=i>>1)
@@ -357,6 +363,8 @@ int main (int argc, char *argv[])
    acl_util_aligned_free (buf);
    acl_util_aligned_free (output);
 
+   delete[] readspeed;
+   delete[] writespeed;
 
    return (result) ? 0 : -1;
 }
