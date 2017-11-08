@@ -84,6 +84,7 @@ def find_all_files_with_text(src, search):
             dir_path = os.path.join(filename, '*')
             result.extend(find_all_files_with_text(dir_path, search))
             # '.' files(hidden files) are not included in '*'
+            dir_path = os.path.join(filename, '.*')
             result.extend(find_all_files_with_text(dir_path, search))
         else:
             with open(filename) as f:
