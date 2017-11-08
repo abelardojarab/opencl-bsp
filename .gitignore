@@ -12,3 +12,5 @@ linux64/libexec/program
 ase/mpf_src
 *.pyc
 *.swp
+*.kwlp
+*.kwps
