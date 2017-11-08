@@ -40,7 +40,7 @@ DEFAULT_PLATFORM = "dcp_1.0-rc"
 # searches these paths:
 #    [bsp_search_dir, bsp_search_dir/*, bsp_search_dir/hardware/*]
 # builds map with name, xml path, absolute dir path
-def get_bsp_list(bsp):
+def get_bsp_info_map(bsp):
     # bsp can be string or list but we want to convert it to list
     if(isinstance(bsp, (str, unicode))):
         dir_list = [bsp]
@@ -49,10 +49,10 @@ def get_bsp_list(bsp):
 
     xml_list = []
     for i in dir_list:
-        xml_list += glob.glob(os.path.join(i, 'board_spec.xml'))
-        xml_list += glob.glob(os.path.join(i, '*', 'board_spec.xml'))
-        xml_list += glob.glob(os.path.join(i, 'hardware', '*',
-                                           'board_spec.xml'))
+        xml_list.extend(glob.glob(os.path.join(i, 'board_spec.xml')))
+        xml_list.extend(glob.glob(os.path.join(i, '*', 'board_spec.xml')))
+        xml_list.extend(glob.glob(os.path.join(i, 'hardware', '*',
+                                               'board_spec.xml')))
 
     bsp_map = {}
     for i in xml_list:
@@ -134,20 +134,20 @@ def setup_bsp(platform, bsp_search_dirs, sim_mode=False, verbose=False,
     packager_bin = get_packager_bin()
     platform_dir = get_platform_dir(platform)
 
-    bsp_list = get_bsp_list(bsp_search_dirs)
+    bsp_info_map = get_bsp_info_map(bsp_search_dirs)
 
     if(verbose):
         print "bsp_search_dirs: %s" % bsp_search_dirs
         print "platform: %s" % platform
         print "packager_bin: %s" % packager_bin
         print "platform_dir: %s" % platform_dir
-        print "bsp_list: %s" % bsp_list.keys()
+        print "bsp_info_map: %s" % bsp_info_map.keys()
 
     if(debug):
-        print "bsp_list %s\n" % bsp_list
+        print "bsp_info_map %s\n" % bsp_info_map
 
-    for bsp in bsp_list.keys():
-        bsp_dir = bsp_list[bsp]['dir']
+    for bsp in bsp_info_map.keys():
+        bsp_dir = bsp_info_map[bsp]['dir']
 
         # create empty directories inside bsp_dir
         output_files_dir = os.path.join(bsp_dir, 'output_files')
@@ -205,7 +205,7 @@ def remove_lines_in_file(file_name, search_text):
         for line in f:
             if search_text in line:
                 continue
-            lines += [line]
+            lines.append(line)
 
     with open(file_name, 'w') as f:
         for line in lines:
@@ -217,9 +217,9 @@ def replace_lines_in_file(file_name, search_text, replace_text):
     with open(file_name) as f:
         for line in f:
             if search_text in line:
-                lines += [line.replace(search_text, replace_text)]
+                lines.append(line.replace(search_text, replace_text))
             else:
-                lines += [line]
+                lines.append(line)
 
     with open(file_name, 'w') as f:
         for line in lines:
@@ -276,7 +276,7 @@ def main():
                         help='print more output for debugging')
     parser.add_argument('--platform', '-p', required=False,
                         default=DEFAULT_PLATFORM, help='set platform')
-    parser.add_argument('--bsp_search_dirs', '-b', nargs='*',
+    parser.add_argument('--bsp-search-dirs', '-b', nargs='*',
                         required=False,
                         default=[DEFAULT_BSP_DIR],
                         help='set bsp search directories')
