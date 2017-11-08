@@ -97,10 +97,9 @@ def find_all_files_with_text(src, search):
 
 
 # main work function for setting up bsp
-def build_release_pkg(platform, bsp_search_dirs, include_bsp,
+def build_release_pkg(platform, bsp_search_dirs, include_bsp, rename_bsp,
                       default_bsp_arg=DEFAULT_BSP,
                       bsp_dir_name=DEFAULT_BSP_DIR_NAME,
-                      rename_bsp=None,
                       verbose=False, debug=False):
     setup_sw_packages(opae_branch=OPAE_GIT_BRANCH, sim_mode=False)
 
