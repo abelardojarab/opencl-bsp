@@ -59,8 +59,7 @@ uint64_t CcipDevice::parse_board_name(const char *board_name)
 
 CcipDevice::CcipDevice(uint64_t obj_id):
    fpga_obj_id(obj_id),
-   kernel_interrupt(NULL),
-   kernel_interrupt_user_data(NULL),
+   kernel_interrupt_thread(NULL),
    event_update(NULL),
    event_update_user_data(NULL),
    fme_sysfs_temp_initialized(false),
@@ -184,16 +183,16 @@ void CcipDevice::initialize_fme_sysfs() {
    }
 }
 
-void CcipDevice::initialize_bsp()
+bool CcipDevice::initialize_bsp()
 {
    if(bsp_initialized) {
-      return;
+      return true;
    }
 
 	fpga_result res = fpgaMapMMIO(afc_handle, 0, NULL);
 	if(res != FPGA_OK) {
 		fprintf(stderr, "Error mapping MMIO space: %d\n", res);
-		return;
+		return false;
 	}
 	mmio_is_mapped = true;
 
@@ -201,7 +200,7 @@ void CcipDevice::initialize_bsp()
 	res = fpgaReset(afc_handle);
 	if(res != FPGA_OK) {
 		fprintf(stderr, "Error resetting AFC: %d\n", res);
-		return;
+		return false;
 	}
 	AFU_RESET_DELAY();
 	
@@ -209,7 +208,7 @@ void CcipDevice::initialize_bsp()
 	res = fpgaDmaOpen(afc_handle, &dma_h);
 	if(res != FPGA_OK) {
 		fprintf(stderr, "Error initializing DMA: %d\n", res);
-		return;
+		return false;
 	}
 	#endif
 	
@@ -218,25 +217,30 @@ void CcipDevice::initialize_bsp()
 	bool found_dfh = find_dfh_by_guid(afc_handle, MSGDMA_BBB_GUID, &msgdma_bbb_base_addr, &dfh_size);
 	if(!found_dfh || dfh_size != MSGDMA_BBB_SIZE) {
 		fprintf(stderr, "Error initializing DMA: %d\n", res);
-		return;
+		return false;
 	}
 	
-
-	#ifdef ENABLE_OPENCL_KERNEL_INTERRUPTS
-	uint32_t intr_mask = 0x00000001;
-	res = fpgaWriteMMIO32(afc_handle, 0, AOCL_IRQ_MASKING_BASE, intr_mask);
-	if(res != FPGA_OK) {
-		fprintf(stderr, "Error fpgaWriteMMIO32: %d\n", res);
-		return;
+	kernel_interrupt_thread = new KernelInterrupt(afc_handle, mmd_handle);
+	
+	if(!kernel_interrupt_thread->initialized())
+	{
+		fprintf(stderr, "Error initializing kernel interrupts\n");
+		return false;
 	}
-	#endif
 	
 	bsp_initialized = true;
+	return bsp_initialized;
 }
 
 CcipDevice::~CcipDevice()
 {
 	int num_errors = 0;
+	if(kernel_interrupt_thread)
+	{
+		delete kernel_interrupt_thread;
+		kernel_interrupt_thread = NULL;
+	}
+	
 	if(dma_h) {
 		if(fpgaDmaClose(dma_h) != FPGA_OK)
 			num_errors++;
@@ -295,7 +299,8 @@ int CcipDevice::program_bitstream(uint8_t *data, size_t data_size)
 
 
 int CcipDevice::yield() {
-   kernel_interrupt(mmd_handle, kernel_interrupt_user_data);
+	if(kernel_interrupt_thread)
+		kernel_interrupt_thread->yield();
 	return 0;
 }
 
@@ -354,8 +359,10 @@ float CcipDevice::get_temperature() {
  
 void CcipDevice::set_kernel_interrupt(aocl_mmd_interrupt_handler_fn fn, void* user_data)
 {
-	kernel_interrupt = fn;
-	kernel_interrupt_user_data = user_data;
+	if(kernel_interrupt_thread)
+	{
+		kernel_interrupt_thread->set_kernel_interrupt(fn, user_data);
+	}
 }
 
 void CcipDevice::set_status_handler(aocl_mmd_status_handler_fn fn, void *user_data)

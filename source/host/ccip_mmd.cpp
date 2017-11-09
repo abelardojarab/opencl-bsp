@@ -304,18 +304,12 @@ int AOCL_MMD_CALL aocl_mmd_reprogram(int handle, void *data, size_t data_size)
 
 int AOCL_MMD_CALL aocl_mmd_yield(int handle)
 {
-	uint32_t irqval = 0;
 	DEBUG_PRINT("* Called: aocl_mmd_yield\n");
 	YIELD_DELAY();
 
    CcipDevice *dev = get_device(handle);
    assert(dev);
-
-	dev->read_block(NULL, AOCL_IRQ_POLLING_BASE, &irqval, 0, 4);
-	DEBUG_PRINT("irqval: %u\n", irqval);
-	if(irqval) {
-		dev->yield();
-	}
+   dev->yield();
 
 	return 0;
 }
@@ -393,7 +387,7 @@ int aocl_mmd_get_offline_info(
          break;
       }
 		case AOCL_MMD_VENDOR_ID:            RESULT_INT(0); break;
-		case AOCL_MMD_USES_YIELD:           RESULT_INT(1); break;
+		case AOCL_MMD_USES_YIELD:           RESULT_INT(KernelInterrupt::yield_is_enabled()); break;
 		case AOCL_MMD_MEM_TYPES_SUPPORTED:  RESULT_INT(mem_type_info); break;
 	}
 
@@ -542,7 +536,11 @@ int AOCL_MMD_CALL aocl_mmd_open(const char *name)
 
    assert(dev);
    if(dev->bsp_loaded()) { 
-      dev->initialize_bsp();
+      if(!dev->initialize_bsp())
+      {
+      	  handle = ~handle;
+      	  fprintf(stderr, "Error initializing bsp\n");
+      }
    } else {
       handle = ~handle;
       printf("handle is: %d\n", handle);

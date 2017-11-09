@@ -24,12 +24,15 @@
 #include <stdint.h>
 #include <unistd.h>
 
+#include <string>
+
 #include <uuid/uuid.h>
 #include <opae/fpga.h>
 
 #include "pkg_editor.h"
 #include "aocl_mmd.h"
 #include "fpga_dma.h"
+#include "kernel_interrupt.h"
 
 // Tune delay for simulation or HW. Eventually delay
 // should be removed for HW, may still be needed for ASE simulation
@@ -105,7 +108,7 @@ class CcipDevice final
    float get_temperature();
    
    int program_bitstream(uint8_t *data, size_t data_size);
-   void initialize_bsp();
+   bool initialize_bsp();
 	void set_kernel_interrupt(aocl_mmd_interrupt_handler_fn fn, void* user_data);
 	void set_status_handler(aocl_mmd_status_handler_fn fn, void* user_data);
 	int yield();
@@ -130,8 +133,7 @@ class CcipDevice final
    int mmd_handle;
    uint64_t fpga_obj_id;
    std::string mmd_dev_name;
-	aocl_mmd_interrupt_handler_fn kernel_interrupt;
-	void *kernel_interrupt_user_data;
+   KernelInterrupt *kernel_interrupt_thread;
 	aocl_mmd_status_handler_fn event_update;
 	void *event_update_user_data;
  
