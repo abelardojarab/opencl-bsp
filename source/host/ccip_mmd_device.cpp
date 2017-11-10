@@ -264,6 +264,11 @@ int CcipDevice::program_bitstream(uint8_t *data, size_t data_size)
    }
 
    assert(data);
+   
+   if(kernel_interrupt_thread)
+   {
+   	   kernel_interrupt_thread->disable_interrupts();
+   }
 
    find_fpga_target target = { bus, device, function, -1 }; 
    fpga_token fpga_dev;
@@ -278,6 +283,17 @@ int CcipDevice::program_bitstream(uint8_t *data, size_t data_size)
    }
 
    fpgaDestroyToken(&fpga_dev);
+   
+   if(kernel_interrupt_thread)
+   {
+   	  kernel_interrupt_thread->enable_interrupts();
+      if(!kernel_interrupt_thread->initialized())
+      {
+         fprintf(stderr, "Error initializing kernel interrupts\n");
+         return false;
+      }
+   }
+   
    return res;
 }
 

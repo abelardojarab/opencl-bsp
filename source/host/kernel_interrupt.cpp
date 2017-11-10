@@ -173,7 +173,14 @@ void KernelInterrupt::interrupt_polling_thread(KernelInterrupt &obj)
 			uint64_t count;
 			read(intr_fd, &count, sizeof(count));
 			DEBUG_PRINT("Poll success. Return=%d count=%u\n",res, count);
-			obj.run_kernel_interrupt_fn();
+
+			//probobly not required but we poll the interrupt line
+			//make sure an interrupt was actually triggered
+			uint32_t irqval = 0;
+			fpgaReadMMIO32(obj.m_fpga_handle, 0, AOCL_IRQ_POLLING_BASE, &irqval);
+
+			if(irqval)
+				obj.run_kernel_interrupt_fn();
 		} else if(res > 0 && pollfd_arr[1].revents == POLLIN) {
 			uint64_t count;
 			read(thread_signal_fd, &count, sizeof(count));

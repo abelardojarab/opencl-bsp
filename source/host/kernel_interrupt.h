@@ -41,9 +41,10 @@ public:
 	void yield();
 	static bool yield_is_enabled();
 
-private:
 	void enable_interrupts();
 	void disable_interrupts();
+
+private:
 	void set_interrupt_mask(uint32_t intr_mask);
 	void run_kernel_interrupt_fn();
 
