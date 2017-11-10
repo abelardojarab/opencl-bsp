@@ -34,6 +34,8 @@
 #include "fpgaconf.h"
 #include "test_perm.h"
 
+using namespace intel_opae_mmd;
+
 #define ACL_DCP_ERROR_IF(COND,NEXT,...) \
    do { if ( COND )  { \
       printf("\nMMD ERROR: " __VA_ARGS__); fflush(stdout); NEXT; } \

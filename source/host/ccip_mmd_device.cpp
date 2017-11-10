@@ -27,6 +27,8 @@
 #include "afu_bbb_util.h"
 #include "fpgaconf.h"
 
+using namespace intel_opae_mmd;
+
 //for DDR through MMIO
 #define MEM_WINDOW_CRTL 0x200
 #define MEM_WINDOW_MEM 0x1000

@@ -15,58 +15,65 @@
 /* Intel or its authorized distributors.  Please refer to the applicable           */
 /* agreement for further details.                                                  */
 
-#ifndef _KERNEL_INTERRUPT_H
-#define _KERNEL_INTERRUPT_H
+#ifndef _EVENTFD_WRAPPER_H
+#define _EVENTFD_WRAPPER_H
 
-#include <opae/fpga.h>
-
-#include <thread>
-#include <atomic>
-
-#include "aocl_mmd.h"
+#include <sys/eventfd.h>
 
 namespace intel_opae_mmd {
-	
-class eventfd_wrapper;
 
-class KernelInterrupt final
+//simple wrapper class for managing eventfd objects
+class eventfd_wrapper final
 {
 public:
-	KernelInterrupt(fpga_handle fpga_handle_arg, int mmd_handle);
-	~KernelInterrupt();
+	eventfd_wrapper()
+	{
+		m_initialized = false;
 
+		m_fd = eventfd(0, 0);
+		if (m_fd < 0) {
+			fprintf(stderr, "eventfd : %s", strerror(errno));
+			return;
+		}
+	
+		m_initialized = true;
+	}
+	
+	~eventfd_wrapper()
+	{
+		if(m_initialized)
+		{
+			if (close(m_fd) < 0) {
+				fprintf(stderr, "eventfd : %s", strerror(errno));
+			}
+		}
+	}
+	
+	bool notify()
+	{
+		uint64_t count = 1;
+		size_t res = write(m_fd, &count, sizeof(count));
+		if (res < 0) {
+			fprintf(stderr, "eventfd : %s", strerror(errno));
+			return false;
+		}
+		
+		return true;
+	}
+	
+	int get_fd() { return m_fd; }
 	bool initialized() { return m_initialized; }
 
-	void set_kernel_interrupt(aocl_mmd_interrupt_handler_fn fn, void* user_data);
-	void yield();
-	static bool yield_is_enabled();
-
 private:
-	void enable_interrupts();
-	void disable_interrupts();
-	void set_interrupt_mask(uint32_t intr_mask);
-	void run_kernel_interrupt_fn();
-
-	static void interrupt_polling_thread(KernelInterrupt &obj);
-
-	bool m_initialized;
-	eventfd_wrapper *m_eventfd_wrapper;
-
-	std::thread *m_thread;
-
-	aocl_mmd_interrupt_handler_fn m_kernel_interrupt_fn;
-	void* m_kernel_interrupt_user_data;
-
-	fpga_handle m_fpga_handle;
-	int m_mmd_handle;
-
-	fpga_event_handle m_event_handle;
-	
 	//not used and not implemented
-	KernelInterrupt (KernelInterrupt& other);
-	KernelInterrupt& operator= (const KernelInterrupt& other);
-}; // class KernelInterrupt
+	eventfd_wrapper (eventfd_wrapper& other);
+	eventfd_wrapper& operator= (const eventfd_wrapper& other);
+	
+	//member varaibles
+	int m_fd;
+	int m_initialized;
+}; // class eventfd_wrapper
 
 }; // namespace intel_opae_mmd
 
-#endif // _KERNEL_INTERRUPT_H
+#endif // _EVENTFD_WRAPPER_H

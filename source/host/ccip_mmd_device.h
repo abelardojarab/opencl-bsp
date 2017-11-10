@@ -133,7 +133,7 @@ class CcipDevice final
    int mmd_handle;
    uint64_t fpga_obj_id;
    std::string mmd_dev_name;
-   KernelInterrupt *kernel_interrupt_thread;
+   intel_opae_mmd::KernelInterrupt *kernel_interrupt_thread;
 	aocl_mmd_status_handler_fn event_update;
 	void *event_update_user_data;
  
