@@ -40,7 +40,7 @@ DEFAULT_PLATFORM = setup_bsp.DEFAULT_PLATFORM
 DEFAULT_BSP_DIR_NAME = 'opencl_bsp'
 
 # use a stable OPAE release
-OPAE_GIT_BRANCH = 'crauer/opencl_stable'
+OPAE_GIT_BRANCH = 'crauer/opencl_stable_111017'
 
 
 # run git command
