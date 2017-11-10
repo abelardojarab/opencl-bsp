@@ -15,7 +15,7 @@
 /* Intel or its authorized distributors.  Please refer to the applicable           */
 /* agreement for further details.                                                  */
 
-#include <sys/select.h>
+#include <poll.h>
 #include <stdlib.h>
 
 #include <thread>
@@ -61,14 +61,14 @@ void KernelInterrupt::disable_interrupts()
 	{
 		//send message to thread to end it
 		m_eventfd_wrapper->notify();
-		
+
 		//join with thread until it ends
 		m_thread->join();
 
 		delete m_thread;
 		m_thread = NULL;
 	}
-	
+
 	if(m_eventfd_wrapper)
 	{
 		delete m_eventfd_wrapper;
@@ -146,7 +146,6 @@ void KernelInterrupt::interrupt_polling_thread(KernelInterrupt &obj)
 {
 	int res;
 	fpga_result fpga_res;
-	fd_set rfds;
 
 	//get eventfd handles
 	int intr_fd;
@@ -157,35 +156,30 @@ void KernelInterrupt::interrupt_polling_thread(KernelInterrupt &obj)
 		return;
 	}
 	int thread_signal_fd = obj.m_eventfd_wrapper->get_fd();
-	
 
+	struct pollfd pollfd_arr[2];
 	while(1)
 	{
-		//use select() to poll 2 file descriptors simulateously
-		//select() is a weird function.  read man page for more details
-		FD_ZERO(&rfds);
-		FD_SET(intr_fd, &rfds);
-		FD_SET(thread_signal_fd, &rfds);
-		int max_fd;
-		if(intr_fd > thread_signal_fd)
-			max_fd = intr_fd;
-		else
-			max_fd = thread_signal_fd;
-		res = select(max_fd+1, &rfds, NULL, NULL, NULL);
+		pollfd_arr[0].fd = intr_fd;
+		pollfd_arr[0].events = POLLIN;
+		pollfd_arr[0].revents = 0;
+		pollfd_arr[1].fd = thread_signal_fd;
+		pollfd_arr[1].events = POLLIN;
+		pollfd_arr[1].revents = 0;
+		res = poll(pollfd_arr, 2, -1);
 		if(res < 0) {
 			fprintf(stderr, "Poll error errno = %s\n",strerror(errno));
-		} else if(FD_ISSET(intr_fd, &rfds)) {
+		} else if(res > 0 && pollfd_arr[0].revents == POLLIN) {
 			uint64_t count;
 			read(intr_fd, &count, sizeof(count));
 			DEBUG_PRINT("Poll success. Return=%d count=%u\n",res, count);
 			obj.run_kernel_interrupt_fn();
-		} else if(FD_ISSET(thread_signal_fd, &rfds)) {
+		} else if(res > 0 && pollfd_arr[1].revents == POLLIN) {
 			uint64_t count;
 			read(thread_signal_fd, &count, sizeof(count));
 			DEBUG_PRINT("Poll success. Return=%d count=%u\n",res, count);
 			break;
 		}
-
 	}
 }
 
