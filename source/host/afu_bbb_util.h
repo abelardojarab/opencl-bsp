@@ -29,6 +29,7 @@
 #ifndef __AFU_BBB_UTIL_H__
 #define __AFU_BBB_UTIL_H__
 
+#include <uuid/uuid.h>
 #include <opae/fpga.h>
 
 #define DFH_FEATURE_EOL(dfh) (((dfh >> 40) & 1) == 1)
@@ -117,3 +118,4 @@ static bool find_dfh_by_guid(fpga_handle afc_handle,
 }
 
 #endif // __AFU_BBB_UTIL_H__
+

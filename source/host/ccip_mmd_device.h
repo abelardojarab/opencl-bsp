@@ -31,7 +31,7 @@
 
 #include "pkg_editor.h"
 #include "aocl_mmd.h"
-#include "fpga_dma.h"
+#include "mmd_dma.h"
 #include "kernel_interrupt.h"
 
 // Tune delay for simulation or HW. Eventually delay
@@ -56,8 +56,6 @@
 #define MCP_OPENCL_AFU_ID "C000C966-0D82-4272-9AEF-FE5F84570612"
 #define DCP_OPENCL_SVM_AFU_ID "3A00972E-7AAC-41DE-BBD1-3901124E8CDA"
 #define DCP_OPENCL_DDR_AFU_ID "18B79FFA-2EE5-4AA0-96EF-4230DAFACB5F"
-#define MSGDMA_BBB_GUID		"d79c094c-7cf9-4cc1-94eb-7d79c7c01ca3"
-#define MSGDMA_BBB_SIZE		8192
 
 #define BSP_NAME "dcp"
 
@@ -74,10 +72,6 @@
 #define DCP_DEBUG_MEM(...)
 #endif
 
-#ifdef SIM
-//TODO: put sim specific stuff here
-#endif
-
 enum {
 	AOCL_IRQ_POLLING_BASE = 0x0100,	//CSR to polling interrupt status
 	AOCL_IRQ_MASKING_BASE = 0x0108, //CSR to set/unset interrupt mask
@@ -90,7 +84,6 @@ enum AfuStatu {
    CCIP_MMD_BSP,
    CCIP_MMD_AFU
 };
-
 
 class CcipDevice final
 {
@@ -157,16 +150,9 @@ class CcipDevice final
 	fpga_handle       afc_handle;
 	fpga_properties   filter;
 	fpga_token        afc_token;
-	fpga_dma_handle   dma_h;
-	uint64_t          msgdma_bbb_base_addr;
+	intel_opae_mmd::mmd_dma *dma_h;
 
 	// Helper functions
-	int read_memory(uint64_t *host_addr, size_t dev_addr, size_t size);
-	int read_memory_mmio(uint64_t *host_addr, size_t dev_addr, size_t size);
-	int write_memory(const uint64_t *host_addr, size_t dev_addr, size_t size);
-	int write_memory_mmio(const uint64_t *host_addr, size_t dev_addr, size_t size);
-	int write_memory_mmio_unaligned(const uint64_t *host_addr, size_t dev_addr, size_t size);
-	int read_memory_mmio_unaligned(void *host_addr, size_t dev_addr, size_t size);
 	int read_mmio(void *host_addr, size_t dev_addr, size_t size);
 	int write_mmio(const void *host_addr, size_t dev_addr, size_t size);
 };

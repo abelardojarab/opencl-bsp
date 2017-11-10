@@ -15,59 +15,67 @@
 /* Intel or its authorized distributors.  Please refer to the applicable           */
 /* agreement for further details.                                                  */
 
-#ifndef _KERNEL_INTERRUPT_H
-#define _KERNEL_INTERRUPT_H
+#ifndef _MMD_DMA_H
+#define _MMD_DMA_H
 
 #include <opae/fpga.h>
 
 #include <thread>
 #include <atomic>
 
+#include "fpga_dma.h"
 #include "aocl_mmd.h"
 
 namespace intel_opae_mmd {
 	
-class eventfd_wrapper;
-
-class KernelInterrupt final
+class mmd_dma final
 {
 public:
-	KernelInterrupt(fpga_handle fpga_handle_arg, int mmd_handle);
-	~KernelInterrupt();
+	mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle);
+	~mmd_dma();
 
 	bool initialized() { return m_initialized; }
 
-	void set_kernel_interrupt(aocl_mmd_interrupt_handler_fn fn, void* user_data);
-	void yield();
-	static bool yield_is_enabled();
-
+	//void set_kernel_interrupt(aocl_mmd_interrupt_handler_fn fn, void* user_data);
+	int read_memory(aocl_mmd_op_t op, uint64_t *host_addr, size_t dev_addr, size_t size);
+	int write_memory(aocl_mmd_op_t op, const uint64_t *host_addr, size_t dev_addr, size_t size);
+	
+	void set_status_handler(aocl_mmd_status_handler_fn fn, void *user_data);
+	
 private:
-	void enable_interrupts();
-	void disable_interrupts();
-	void set_interrupt_mask(uint32_t intr_mask);
-	void run_kernel_interrupt_fn();
-
-	static void interrupt_polling_thread(KernelInterrupt &obj);
+	// Helper functions
+	int read_memory(uint64_t *host_addr, size_t dev_addr, size_t size);
+	int write_memory(const uint64_t *host_addr, size_t dev_addr, size_t size);
+	int read_memory_mmio(uint64_t *host_addr, size_t dev_addr, size_t size);
+	int write_memory_mmio(const uint64_t *host_addr, size_t dev_addr, size_t size);
+	int write_memory_mmio_unaligned(const uint64_t *host_addr, size_t dev_addr, size_t size);
+	int read_memory_mmio_unaligned(void *host_addr, size_t dev_addr, size_t size);
+	
+	void event_update_fn(aocl_mmd_op_t op, int status);
+	
+	//void run_kernel_interrupt_fn();
+	//static void interrupt_polling_thread(KernelInterrupt &obj);
 
 	bool m_initialized;
-	eventfd_wrapper *m_eventfd_wrapper;
+	//eventfd_wrapper *m_eventfd_wrapper;
 
-	std::thread *m_thread;
+	//std::thread *m_thread;
 
-	aocl_mmd_interrupt_handler_fn m_kernel_interrupt_fn;
-	void* m_kernel_interrupt_user_data;
+	aocl_mmd_status_handler_fn m_status_handler_fn;
+	void *m_status_handler_user_data;
 
 	fpga_handle m_fpga_handle;
 	int m_mmd_handle;
-
-	fpga_event_handle m_event_handle;
 	
+	fpga_dma_handle   dma_h;
+	uint64_t          msgdma_bbb_base_addr;
+
 	//not used and not implemented
-	KernelInterrupt (KernelInterrupt& other);
-	KernelInterrupt& operator= (const KernelInterrupt& other);
-}; // class KernelInterrupt
+	mmd_dma (mmd_dma& other);
+	mmd_dma& operator= (const mmd_dma& other);
+}; // class mmd_dma
 
 }; // namespace intel_opae_mmd
 
-#endif // _KERNEL_INTERRUPT_H
+#endif // _MMD_DMA_H
 

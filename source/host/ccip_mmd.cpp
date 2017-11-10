@@ -569,3 +569,4 @@ int AOCL_MMD_CALL  aocl_mmd_close(int handle)
 	}
 	return 0;
 }
+

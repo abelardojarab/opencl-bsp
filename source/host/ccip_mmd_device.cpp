@@ -24,21 +24,9 @@
 #include <fstream>
 
 #include "ccip_mmd_device.h"
-#include "afu_bbb_util.h"
 #include "fpgaconf.h"
 
 using namespace intel_opae_mmd;
-
-//for DDR through MMIO
-#define MEM_WINDOW_CRTL 0x200
-#define MEM_WINDOW_MEM 0x1000
-#define MEM_WINDOW_SPAN (4*1024)
-#define MEM_WINDOW_SPAN_MASK ((long)(MEM_WINDOW_SPAN-1))
-
-#define MINIMUM_DMA_SIZE	256
-#define DMA_ALIGNMENT	256
-
-//#define DISABLE_DMA
 
 int CcipDevice::next_mmd_handle{1};
 
@@ -74,8 +62,7 @@ CcipDevice::CcipDevice(uint64_t obj_id):
    afc_handle(NULL),
    filter(NULL),
    afc_token(NULL),
-   dma_h(NULL),
-   msgdma_bbb_base_addr(0)
+   dma_h(NULL)
 {
    // Note that this constructor is not thread-safe because next_mmd_handle
    // is shared between all class instances
@@ -209,19 +196,10 @@ bool CcipDevice::initialize_bsp()
 	}
 	AFU_RESET_DELAY();
 	
-	#ifndef DISABLE_DMA
-	res = fpgaDmaOpen(afc_handle, &dma_h);
-	if(res != FPGA_OK) {
-		fprintf(stderr, "Error initializing DMA: %d\n", res);
-		return false;
-	}
-	#endif
-	
-	//need base address for address span extender
-	uint64_t dfh_size = 0;
-	bool found_dfh = find_dfh_by_guid(afc_handle, MSGDMA_BBB_GUID, &msgdma_bbb_base_addr, &dfh_size);
-	if(!found_dfh || dfh_size != MSGDMA_BBB_SIZE) {
-		fprintf(stderr, "Error initializing DMA: %d\n", res);
+	dma_h = new mmd_dma(afc_handle, mmd_handle);
+	if(!dma_h->initialized())
+	{
+		fprintf(stderr, "Error initializing mmd dma\n");
 		return false;
 	}
 	
@@ -246,9 +224,10 @@ CcipDevice::~CcipDevice()
 		kernel_interrupt_thread = NULL;
 	}
 	
-	if(dma_h) {
-		if(fpgaDmaClose(dma_h) != FPGA_OK)
-			num_errors++;
+	if(dma_h)
+	{
+		delete dma_h;
+		dma_h = NULL;
 	}
 
 	if(mmio_is_mapped)
@@ -374,11 +353,12 @@ void CcipDevice::set_status_handler(aocl_mmd_status_handler_fn fn, void *user_da
 {
 	event_update = fn;
 	event_update_user_data = user_data;
+	dma_h->set_status_handler(fn, user_data);
 }
 
 void CcipDevice::event_update_fn(aocl_mmd_op_t op, int status)
 {
-	event_update(1, event_update_user_data, op, status);
+	event_update(mmd_handle, event_update_user_data, op, status);
 }
 
 int CcipDevice::read_block(aocl_mmd_op_t op, int mmd_interface, void *host_addr, size_t offset, size_t size)
@@ -389,15 +369,15 @@ int CcipDevice::read_block(aocl_mmd_op_t op, int mmd_interface, void *host_addr,
 	// to memory requires special functionality.  Otherwise do direct MMIO read of
 	// base address + offset
 	if(mmd_interface == AOCL_MMD_MEMORY) {
-		status = read_memory(static_cast<uint64_t *>(host_addr), offset, size);
+		status = dma_h->read_memory(op, static_cast<uint64_t *>(host_addr), offset, size);
 	} else {
 		status = read_mmio(host_addr, mmd_interface + offset, size);
-	}
-
-	if(op) {
-		//TODO: check what status value should really be instead of just using 0
-		//Also handle case when op is NULL
-		this->event_update_fn(op, 0);
+		
+		if(op) {
+			//TODO: check what status value should really be instead of just using 0
+			//Also handle case when op is NULL
+			this->event_update_fn(op, 0);
+		}
 	}
 
 	//TODO: check what status values aocl wants and also parse the result
@@ -416,15 +396,15 @@ int CcipDevice::write_block(aocl_mmd_op_t op, int mmd_interface, const void *hos
 	// The mmd_interface is defined as the base address of the MMIO write.  Access
 	// to memory requires special functionality.  Otherwise do direct MMIO write
 	if(mmd_interface == AOCL_MMD_MEMORY) {
-		status = write_memory(static_cast<const uint64_t *>(host_addr), offset, size);
+		status = dma_h->write_memory(op, static_cast<const uint64_t *>(host_addr), offset, size);
 	} else {
 		status = write_mmio(host_addr, mmd_interface + offset, size);
-	}
-
-	if(op) {
-		//TODO: check what 'status' value should really be.  Right now just
-		//using 0 as was done in previous CCIP MMD.  Also handle case if op is NULL
-		this->event_update_fn(op, 0);
+		
+		if(op) {
+			//TODO: check what 'status' value should really be.  Right now just
+			//using 0 as was done in previous CCIP MMD.  Also handle case if op is NULL
+			this->event_update_fn(op, 0);
+		}
 	}
 
 	//TODO: check what status values aocl wants and also parse the result
@@ -434,256 +414,6 @@ int CcipDevice::write_block(aocl_mmd_op_t op, int mmd_interface, const void *hos
 	} else {
 		return 0;
 	}
-}
-
-int CcipDevice::read_memory(uint64_t *host_addr, size_t dev_addr, size_t size)
-{
-	DCP_DEBUG_MEM("DCP DEBUG: read_memory %p %lx %ld\n", host_addr, dev_addr, size);
-	int res = FPGA_OK;
-	
-	//check for alignment
-	if(dev_addr % DMA_ALIGNMENT != 0)
-	{
-		//check for mmio alignment
-		uint64_t mmio_shift = dev_addr % 8;
-		if(mmio_shift != 0)
-		{
-			size_t unaligned_size = 8 - mmio_shift;
-			if(unaligned_size > size)
-				unaligned_size = size;
-			
-			read_memory_mmio_unaligned(host_addr, dev_addr, unaligned_size);
-			
-			if(size > unaligned_size)
-				res = read_memory((uint64_t *)(((char *)host_addr)+unaligned_size), dev_addr+unaligned_size, size-unaligned_size);
-			return res;
-		}
-		
-		//TODO: need to do a shift here
-		return read_memory_mmio(host_addr, dev_addr, size);
-	}
-	
-	//check size
-	if(size < MINIMUM_DMA_SIZE)
-		return read_memory_mmio(host_addr, dev_addr, size);
-	
-	size_t remainder = (size % DMA_ALIGNMENT);
-	size_t dma_size = size - remainder;
-	
-	#ifdef DISABLE_DMA
-	res = read_memory_mmio(host_addr, dev_addr, dma_size);
-	#else
-	res = fpgaDmaTransferSync(dma_h, (uint64_t)host_addr /*dst*/, dev_addr /*src*/, dma_size, FPGA_TO_HOST_MM);
-	#endif
-	if(res != FPGA_OK)
-		return res;
-	
-	if(remainder)
-		res = read_memory_mmio(host_addr+dma_size/8, dev_addr+dma_size, remainder);
-	
-	if(res != FPGA_OK)
-		return res;
-
-	DCP_DEBUG_MEM("DCP DEBUG: host_addr=%lx, dev_addr=%lx, size=%d\n", host_addr, dev_addr, size);
-	DCP_DEBUG_MEM("DCP DEBUG: remainder=%d, dma_size=%d, size=%d\n", remainder, dma_size, size);
-
-	DCP_DEBUG_MEM("DCP DEBUG: CcipDevice::read_memory done!\n");
-	return FPGA_OK;
-}
-
-int CcipDevice::read_memory_mmio_unaligned(void *host_addr, size_t dev_addr, size_t size)
-{
-	DCP_DEBUG_MEM("DCP DEBUG: read_memory_mmio_unaligned %p %lx %ld\n", host_addr, dev_addr, size);
-	int res = FPGA_OK;
-	
-	uint64_t shift = dev_addr % 8;
-	
-	assert(size+shift <= 8);
-
-	uint64_t cur_mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
-	res = fpgaWriteMMIO64(afc_handle, 0, msgdma_bbb_base_addr+MEM_WINDOW_CRTL, cur_mem_page);
-	if(res != FPGA_OK)
-		return res;
-
-	uint64_t dev_aligned_addr = dev_addr - shift;
-	
-	//read data from device memory
-	uint64_t read_tmp;
-	res = fpgaReadMMIO64(afc_handle, 0, (msgdma_bbb_base_addr+MEM_WINDOW_MEM)+((dev_aligned_addr)&MEM_WINDOW_SPAN_MASK), &read_tmp);
-	if(res != FPGA_OK)
-		return res;
-	//overlay our data
-	memcpy(host_addr, ((char *)(&read_tmp))+shift, size);
-	
-	return FPGA_OK;
-}
-
-int CcipDevice::read_memory_mmio(uint64_t *host_addr, size_t dev_addr, size_t size)
-{
-	DCP_DEBUG_MEM("DCP DEBUG: read_memory_mmio %p %lx %ld\n", host_addr, dev_addr, size);
-
-	int res = FPGA_OK;
-	uint64_t cur_mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
-	res = fpgaWriteMMIO64(afc_handle, 0, msgdma_bbb_base_addr+MEM_WINDOW_CRTL, cur_mem_page);
-	if(res != FPGA_OK)
-		return res;
-	DCP_DEBUG_MEM("DCP DEBUG: set page %08lx\n", cur_mem_page);
-	for(size_t i = 0; i < size/8; i++) {
-		uint64_t mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
-		if(mem_page != cur_mem_page) {
-			cur_mem_page = mem_page;
-			res = fpgaWriteMMIO64(afc_handle, 0, msgdma_bbb_base_addr+MEM_WINDOW_CRTL, cur_mem_page);
-			if(res != FPGA_OK)
-				return res;
-			DCP_DEBUG_MEM("DCP DEBUG: set page %08lx\n", cur_mem_page);
-		}
-		DCP_DEBUG_MEM("DCP DEBUG: read data %8p %08lx %16p\n", host_addr, dev_addr, host_addr);
-		res = fpgaReadMMIO64(afc_handle, 0, (msgdma_bbb_base_addr+MEM_WINDOW_MEM)+(dev_addr&MEM_WINDOW_SPAN_MASK), host_addr);
-		if(res != FPGA_OK)
-			return res;
-
-		host_addr += 1;
-		dev_addr += 8;
-	}
-	
-		
-	if(size % 8 != 0)
-	{
-		res = read_memory_mmio_unaligned(host_addr, dev_addr, size%8);
-		if(res != FPGA_OK)
-			return res;
-	}
-
-	DCP_DEBUG_MEM("DCP DEBUG: CcipDevice::read_memory_mmio done!\n");
-	return FPGA_OK;
-}
-
-int CcipDevice::write_memory(const uint64_t *host_addr, size_t dev_addr, size_t size)
-{
-	DCP_DEBUG_MEM("DCP DEBUG: write_memory %p %lx %ld\n", host_addr, dev_addr, size);
-	int res = FPGA_OK;
-	
-	//check for alignment
-	if(dev_addr % DMA_ALIGNMENT != 0)
-	{
-		//check for mmio alignment
-		uint64_t mmio_shift = dev_addr % 8;
-		if(mmio_shift != 0)
-		{
-			size_t unaligned_size = 8 - mmio_shift;
-			if(unaligned_size > size)
-				unaligned_size = size;
-			
-			DCP_DEBUG_MEM("DCP DEBUG: write_memory %ld %ld %ld\n", mmio_shift, unaligned_size, size);
-			write_memory_mmio_unaligned(host_addr, dev_addr, unaligned_size);
-			
-			if(size > unaligned_size)
-				res = write_memory((uint64_t *)(((char *)host_addr)+unaligned_size), dev_addr+unaligned_size, size-unaligned_size);
-			return res;
-		}
-		
-		//TODO: need to do a shift here
-		return write_memory_mmio(host_addr, dev_addr, size);
-	}
-	
-	//check size
-	if(size < MINIMUM_DMA_SIZE)
-		return write_memory_mmio(host_addr, dev_addr, size);
-	
-	size_t remainder = (size % DMA_ALIGNMENT);
-	size_t dma_size = size - remainder;
-	
-	//TODO: make switch for MMIO
-	#ifdef DISABLE_DMA
-	res = write_memory_mmio(host_addr, dev_addr, dma_size);
-	#else
-	res = fpgaDmaTransferSync(dma_h, dev_addr /*dst*/, (uint64_t)host_addr /*src*/, dma_size, HOST_TO_FPGA_MM);
-	#endif
-	if(res != FPGA_OK)
-		return res;
-	
-	if(remainder)
-		res = write_memory(host_addr+dma_size/8, dev_addr+dma_size, remainder);
-	
-	if(res != FPGA_OK)
-		return res;
-
-	DCP_DEBUG_MEM("DCP DEBUG: host_addr=%lx, dev_addr=%lx, size=%d\n", host_addr, dev_addr, size);
-	DCP_DEBUG_MEM("DCP DEBUG: remainder=%d, dma_size=%d, size=%d\n", remainder, dma_size, size);
-
-	DCP_DEBUG_MEM("DCP DEBUG: CcipDevice::write_memory done!\n");
-	return FPGA_OK;
-}
-
-int CcipDevice::write_memory_mmio_unaligned(const uint64_t *host_addr, size_t dev_addr, size_t size)
-{
-	DCP_DEBUG_MEM("DCP DEBUG: write_memory_mmio_unaligned %p %lx %ld\n", host_addr, dev_addr, size);
-	int res = FPGA_OK;
-	
-	uint64_t shift = dev_addr % 8;
-	
-	assert(size+shift <= 8);
-
-	uint64_t cur_mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
-	res = fpgaWriteMMIO64(afc_handle, 0, msgdma_bbb_base_addr+MEM_WINDOW_CRTL, cur_mem_page);
-	if(res != FPGA_OK)
-		return res;
-
-	uint64_t dev_aligned_addr = dev_addr - shift;
-	
-	//read data from device memory
-	uint64_t read_tmp;
-	res = fpgaReadMMIO64(afc_handle, 0, (msgdma_bbb_base_addr+MEM_WINDOW_MEM)+((dev_aligned_addr)&MEM_WINDOW_SPAN_MASK), &read_tmp);
-	if(res != FPGA_OK)
-		return res;
-	//overlay our data
-	memcpy(((char *)(&read_tmp))+shift, host_addr, size);
-	
-	//write back to device
-	res = fpgaWriteMMIO64(afc_handle, 0, (msgdma_bbb_base_addr+MEM_WINDOW_MEM)+(dev_aligned_addr&MEM_WINDOW_SPAN_MASK), read_tmp);
-	if(res != FPGA_OK)
-		return res;
-	
-	return FPGA_OK;
-}
-
-int CcipDevice::write_memory_mmio(const uint64_t *host_addr, size_t dev_addr, size_t size)
-{
-	DCP_DEBUG_MEM("DCP DEBUG: write_memory_mmio %p %lx %ld\n", host_addr, dev_addr, size);
-	
-	int res = FPGA_OK;
-	uint64_t cur_mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
-	res = fpgaWriteMMIO64(afc_handle, 0, msgdma_bbb_base_addr+MEM_WINDOW_CRTL, cur_mem_page);
-	if(res != FPGA_OK)
-		return res;
-	DCP_DEBUG_MEM("DCP DEBUG: set page %08lx\n", cur_mem_page);
-	for(size_t i = 0; i < size/8; i++) {
-		uint64_t mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
-		if(mem_page != cur_mem_page) {
-			cur_mem_page = mem_page;
-			res = fpgaWriteMMIO64(afc_handle, 0, msgdma_bbb_base_addr+MEM_WINDOW_CRTL, cur_mem_page);
-			if(res != FPGA_OK)
-				return res;
-			DCP_DEBUG_MEM("DCP DEBUG: set page %08lx\n", cur_mem_page);
-		}
-		DCP_DEBUG_MEM("DCP DEBUG: write data %8p %08lx %016lx\n", host_addr, dev_addr, *host_addr);
-		res = fpgaWriteMMIO64(afc_handle, 0, (msgdma_bbb_base_addr+MEM_WINDOW_MEM)+(dev_addr&MEM_WINDOW_SPAN_MASK), *host_addr);
-		if(res != FPGA_OK)
-			return res;
-
-		host_addr += 1;
-		dev_addr += 8;
-	}
-	
-	if(size % 8 != 0)
-	{
-		res = write_memory_mmio_unaligned(host_addr, dev_addr, size%8);
-		if(res != FPGA_OK)
-			return res;
-	}
-
-	DCP_DEBUG_MEM("DCP DEBUG: aocl_mmd_write done!\n");
-	return FPGA_OK;
 }
 
 int CcipDevice::read_mmio(void *host_addr, size_t mmio_addr, size_t size)
