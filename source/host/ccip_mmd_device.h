@@ -102,6 +102,7 @@ class CcipDevice final
    uint64_t get_fpga_obj_id()   { return fpga_obj_id; }
    std::string get_dev_name()   { return mmd_dev_name; }
    std::string get_bdf();
+   float get_temperature();
    
    int program_bitstream(uint8_t *data, size_t data_size);
    void initialize_bsp();
@@ -133,7 +134,14 @@ class CcipDevice final
 	void *kernel_interrupt_user_data;
 	aocl_mmd_status_handler_fn event_update;
 	void *event_update_user_data;
-
+ 
+   // HACK: use the sysfs path to read temperature value
+   // this should be replaced with OPAE call once that is
+   // available
+   std::string fme_sysfs_temp_path; 
+   bool fme_sysfs_temp_initialized;
+   void initialize_fme_sysfs();
+   
    uint8_t bus;
    uint8_t device;
    uint8_t function;

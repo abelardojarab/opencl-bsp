@@ -21,6 +21,7 @@
 #include <iomanip>
 #include <sstream>
 #include <limits>
+#include <fstream>
 
 #include "ccip_mmd_device.h"
 #include "afu_bbb_util.h"
@@ -62,6 +63,7 @@ CcipDevice::CcipDevice(uint64_t obj_id):
    kernel_interrupt_user_data(NULL),
    event_update(NULL),
    event_update_user_data(NULL),
+   fme_sysfs_temp_initialized(false),
    bus(0),
    device(0),
    function(0),
@@ -146,8 +148,40 @@ CcipDevice::CcipDevice(uint64_t obj_id):
       fprintf(stderr, "Error reading function: '%s'\n", fpgaErrStr(res));
    }
 
+   // HACK: for now read temperature directly from sysfs.  Initialization
+   // logic encapsulted here so it can easily removed laster
+   initialize_fme_sysfs();
+
    mmd_dev_name = get_board_name(BSP_NAME, obj_id);
    afu_initialized = true;
+}
+
+void CcipDevice::initialize_fme_sysfs() {
+   const int MAX_LEN = 250;
+   char fmepath[MAX_LEN];
+   
+   // HACK: currently ObjectID is constructed using its lower 20 bits
+   // as the device minor number.  The device minor number also matches
+   // the device ID in sysfs.  This is a simple way to construct a path
+   // to the device FME using information that is already available (object_id).
+   // Eventually this code should be replaced with a direct call to OPAE C API,
+   // but API does not currently expose the device temperature.
+   int dev_num = 0xFFFFF & fpga_obj_id;
+   snprintf(fmepath, MAX_LEN, 
+            "/sys/class/fpga/intel-fpga-dev.%d/intel-fpga-fme.%d/thermal_mgmt/temperature", 
+            dev_num, dev_num
+            );
+
+   // Try to open the sysfs file. If open succeeds then set as initialized 
+   // to be able to read temperature in future.  If open fails then not 
+   // initalized and skip attempt to read temperature in future.
+   FILE *tmp;
+   tmp = fopen(fmepath, "r");
+   if(tmp) {
+      fme_sysfs_temp_path = std::string(fmepath);
+      fme_sysfs_temp_initialized = true;
+      fclose(tmp);
+   }
 }
 
 void CcipDevice::initialize_bsp()
@@ -306,6 +340,16 @@ std::string CcipDevice::get_bdf() {
        << unsigned(function);
 
    return bdf.str();
+}
+
+float CcipDevice::get_temperature() {
+   float temp = 0;
+   if(fme_sysfs_temp_initialized) {
+      std::ifstream sysfs_temp(fme_sysfs_temp_path, std::ifstream::in);
+      sysfs_temp >> temp;
+      sysfs_temp.close();
+   }
+   return temp;
 }
  
 void CcipDevice::set_kernel_interrupt(aocl_mmd_interrupt_handler_fn fn, void* user_data)

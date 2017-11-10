@@ -411,6 +411,8 @@ int aocl_mmd_get_info(
    CcipDevice *dev = get_device(handle);
    if(dev == NULL)
       return 0;
+
+   assert(param_value);
 	switch(requested_info_id)
 	{
 		case AOCL_MMD_BOARD_NAME:            
@@ -438,15 +440,13 @@ int aocl_mmd_get_info(
 		case AOCL_MMD_BOARD_UNIQUE_ID:       RESULT_INT(0); break;
 		case AOCL_MMD_TEMPERATURE:
 						     {
-							     //TODO: I think FME has temperature reading.  If available, we could
-							     //probobly use that
-							     float *r;
-							     int temp = 0;
-							     r = (float*)param_value;
-							     *r = (float)temp;
-							     if (param_size_ret)
-								     *param_size_ret = sizeof(float);
-							     break;
+                          if(param_value_size == sizeof(float)) {
+                             float *ptr = static_cast<float *>(param_value);
+                             *ptr = dev->get_temperature();
+                             if(param_size_ret)
+                                *param_size_ret = sizeof(float);
+                          }
+                          break;
 						     }
 	}
 	return 0;
