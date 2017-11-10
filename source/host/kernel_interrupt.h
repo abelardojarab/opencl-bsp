@@ -21,6 +21,7 @@
 #include <opae/fpga.h>
 
 #include <thread>
+#include <atomic>
 
 #include "aocl_mmd.h"
 
@@ -47,7 +48,7 @@ private:
 	static void interrupt_polling_thread(KernelInterrupt *obj);
 
 	bool m_initialized;
-	bool m_thread_running;
+	std::atomic<bool> m_thread_running;
 
 	std::thread *m_thread;
 

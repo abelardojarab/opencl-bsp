@@ -137,7 +137,7 @@ void KernelInterrupt::interrupt_polling_thread(KernelInterrupt *obj)
 	struct pollfd pfd;
 	int res;
 
-	while(obj && obj->m_thread_running)
+	while(obj && obj->m_thread_running.load())
 	{
 		// Poll event handle
 		pfd.fd = (int)obj->m_event_handle;
