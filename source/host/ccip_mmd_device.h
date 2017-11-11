@@ -95,7 +95,9 @@ enum AfuStatu {
 class CcipDevice final
 {
 	public:
-	CcipDevice(uint64_t);
+	explicit CcipDevice(uint64_t);
+   CcipDevice(const CcipDevice&) =delete;
+   CcipDevice& operator=(const CcipDevice&) =delete;
 	~CcipDevice();
 
    static std::string get_board_name(std::string prefix, uint64_t obj_id);

@@ -136,17 +136,20 @@ CcipDevice::CcipDevice(uint64_t obj_id):
       fprintf(stderr, "Error reading properties: %s\n", fpgaErrStr(res));
    }
 
-   res = fpgaPropertiesGetBus(prop, &bus);
-   if(res != FPGA_OK) {
-      fprintf(stderr, "Error reading bus: '%s'\n", fpgaErrStr(res));
-   }
-   res = fpgaPropertiesGetDevice(prop, &device);
-   if(res != FPGA_OK) {
-      fprintf(stderr, "Error reading device: '%s'\n", fpgaErrStr(res));
-   }
-   fpgaPropertiesGetFunction(prop, &function);
-   if(res != FPGA_OK) {
-      fprintf(stderr, "Error reading function: '%s'\n", fpgaErrStr(res));
+   if(prop) {
+      res = fpgaPropertiesGetBus(prop, &bus);
+      if(res != FPGA_OK) {
+         fprintf(stderr, "Error reading bus: '%s'\n", fpgaErrStr(res));
+      }
+      res = fpgaPropertiesGetDevice(prop, &device);
+      if(res != FPGA_OK) {
+         fprintf(stderr, "Error reading device: '%s'\n", fpgaErrStr(res));
+      }
+      fpgaPropertiesGetFunction(prop, &function);
+      if(res != FPGA_OK) {
+         fprintf(stderr, "Error reading function: '%s'\n", fpgaErrStr(res));
+      }
+      fpgaDestroyProperties(&prop);
    }
 
    // HACK: for now read temperature directly from sysfs.  Initialization

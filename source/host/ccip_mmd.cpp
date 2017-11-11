@@ -108,7 +108,7 @@ bool ccip_mmd_bsp_loaded(const char *name)
       else 
          return false;
    } else {
-      CcipDevice dev = CcipDevice(obj_id);
+      CcipDevice dev(obj_id);
       return dev.bsp_loaded();
    } 
 }
@@ -123,21 +123,22 @@ static unsigned int get_offline_num_acl_boards()
    res = fpgaGetProperties(NULL, &filter);
    if(res != FPGA_OK) {
       fprintf(stderr, "Error creating properties object\n");
-      return 0;
+      goto out;
    }
 
    res = fpgaPropertiesSetObjectType(filter, FPGA_ACCELERATOR);
    if(res != FPGA_OK) {
       fprintf(stderr, "Error setting object type\n");
-      return 0;
+      goto out;
    }
 
    res = fpgaEnumerate(&filter, 1, NULL, 0, &num_matches);
    if(res != FPGA_OK) {
       fprintf(stderr, "Error enumerating AFCs: %d\n", res);
-      return 0;
+      goto out;
    }
 
+out:
    if(filter)
       fpgaDestroyProperties(&filter);
 
