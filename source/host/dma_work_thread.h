@@ -15,66 +15,61 @@
 /* Intel or its authorized distributors.  Please refer to the applicable           */
 /* agreement for further details.                                                  */
 
-#ifndef _EVENTFD_WRAPPER_H
-#define _EVENTFD_WRAPPER_H
+#ifndef _DMA_WORK_THREAD_H
+#define _DMA_WORK_THREAD_H
 
-#include <sys/eventfd.h>
-#include <unistd.h>
+#include <opae/fpga.h>
+
+#include <thread>
+#include <mutex>
+#include <queue>
+
+#include "aocl_mmd.h"
 
 namespace intel_opae_mmd {
 
-//simple wrapper class for managing eventfd objects
-class eventfd_wrapper final
+//forward class definitions
+class eventfd_wrapper;
+class mmd_dma;
+
+class dma_work_item
 {
 public:
-	eventfd_wrapper()
-	{
-		m_initialized = false;
+	aocl_mmd_op_t op;
+	uint64_t *rd_host_addr;
+	const uint64_t *wr_host_addr;
+	size_t dev_addr;
+	size_t size;
+};
 
-		m_fd = eventfd(0, 0);
-		if (m_fd < 0) {
-			fprintf(stderr, "eventfd : %s", strerror(errno));
-			return;
-		}
-	
-		m_initialized = true;
-	}
-	
-	~eventfd_wrapper()
-	{
-		if(m_initialized)
-		{
-			if (close(m_fd) < 0) {
-				fprintf(stderr, "eventfd : %s", strerror(errno));
-			}
-		}
-	}
-	
-	bool notify()
-	{
-		uint64_t count = 1;
-		size_t res = write(m_fd, &count, sizeof(count));
-		if (res < 0) {
-			fprintf(stderr, "eventfd : %s", strerror(errno));
-			return false;
-		}
-		
-		return true;
-	}
-	
-	int get_fd() { return m_fd; }
+class dma_work_thread final
+{
+public:
+	dma_work_thread(mmd_dma &mmd_dma_arg);
+	~dma_work_thread();
+
 	bool initialized() { return m_initialized; }
 
-private:
-	//not used and not implemented
-	eventfd_wrapper (eventfd_wrapper& other);
-	eventfd_wrapper& operator= (const eventfd_wrapper& other);
+	int enqueue_dma(dma_work_item &item);
+	int do_dma(dma_work_item &item);
 	
-	//member varaibles
-	int m_fd;
-	int m_initialized;
-}; // class eventfd_wrapper
+private:
+	static void work_thread(dma_work_thread &obj);
+
+	bool m_initialized;
+	
+	eventfd_wrapper *m_thread_wake_event;
+	std::thread *m_thread;
+	std::mutex m_work_queue_mutex;
+	std::queue<dma_work_item> m_work_queue;
+
+	mmd_dma &m_mmd_dma;
+	
+	//not used and not implemented
+	dma_work_thread (dma_work_thread& other);
+	dma_work_thread& operator= (const dma_work_thread& other);
+}; // class dma_work_thread
 
 }; // namespace intel_opae_mmd
 
-#endif // _EVENTFD_WRAPPER_H
+#endif // _DMA_WORK_THREAD_H

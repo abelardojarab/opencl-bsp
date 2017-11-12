@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "mmd_dma.h"
+#include "ccip_mmd_device.h"
 #include "afu_bbb_util.h"
 
 using namespace intel_opae_mmd;
@@ -28,6 +29,7 @@ using namespace intel_opae_mmd;
 //blocking
 #define ENABLE_DMA_WORK_THREAD
 
+//disable dma and only use mmio.  this is very slow.
 //#define DISABLE_DMA
 
 //for DDR through MMIO
@@ -51,6 +53,8 @@ using namespace intel_opae_mmd;
 
 mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle) :
 	m_initialized(false),
+	m_dma_work_thread(NULL),
+	m_dma_op_mutex(),
 	m_status_handler_fn(NULL),
 	m_status_handler_user_data(NULL),
 	m_fpga_handle(fpga_handle_arg),
@@ -71,20 +75,103 @@ mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle) :
 	uint64_t dfh_size = 0;
 	bool found_dfh = find_dfh_by_guid(m_fpga_handle, MSGDMA_BBB_GUID, &msgdma_bbb_base_addr, &dfh_size);
 	if(!found_dfh || dfh_size != MSGDMA_BBB_SIZE) {
-		fprintf(stderr, "Error initializing DMA: %d\n", res);
+		fprintf(stderr, "Error initializing DMA\n");
 		return;
 	}
+	
+	#ifdef ENABLE_DMA_WORK_THREAD
+	m_dma_work_thread = new dma_work_thread(*this);
+	if(!m_dma_work_thread->initialized())
+		return;
+	#endif
 	
 	m_initialized = true;
 }
 
 mmd_dma::~mmd_dma()
 {
+	//kill the thread
+	if(m_dma_work_thread)
+	{
+		delete m_dma_work_thread;
+		m_dma_work_thread = NULL;
+	}
+	
 	if(dma_h) {
 		if(fpgaDmaClose(dma_h) != FPGA_OK)
 			fprintf(stderr, "Error closing DMA\n");
 	}
 	m_initialized = false;
+}
+
+void mmd_dma::set_status_handler(aocl_mmd_status_handler_fn fn, void *user_data)
+{
+	m_status_handler_fn = fn;
+	m_status_handler_user_data = user_data;
+}
+
+void mmd_dma::event_update_fn(aocl_mmd_op_t op, int status)
+{
+	m_status_handler_fn(m_mmd_handle, m_status_handler_user_data, op, status);
+}
+
+int mmd_dma::do_dma(dma_work_item &item)
+{
+	//main dma function needs to be thread safe because dma csr operations
+	//are not thread safe
+	std::lock_guard<std::mutex> lock(m_dma_op_mutex);
+
+	int res = 0;
+	assert(item.rd_host_addr != NULL || item.wr_host_addr != NULL);
+	if(item.rd_host_addr) {
+		res = read_memory(item.rd_host_addr, item.dev_addr, item.size);
+	} else {
+		assert(item.wr_host_addr);
+		res = write_memory(item.wr_host_addr, item.dev_addr, item.size);
+	}
+	
+	if(item.op)
+	{
+		//TODO: check what 'status' value should really be.  Right now just
+		//using 0 as was done in previous CCIP MMD.  Also handle case if op is NULL
+		event_update_fn(item.op, 0);
+	}
+	
+	return res;
+}
+
+int mmd_dma::enqueue_dma(dma_work_item &item)
+{
+#ifdef ENABLE_DMA_WORK_THREAD
+	return m_dma_work_thread->enqueue_dma(item);
+#else
+	//if work thread is not enabled, then blocking mode is always used.
+	return do_dma(item);
+#endif
+}
+
+int mmd_dma::read_memory(aocl_mmd_op_t op, uint64_t *host_addr, size_t dev_addr, size_t size)
+{
+	dma_work_item item;
+	item.op = op;
+	item.rd_host_addr = host_addr;
+	item.wr_host_addr = NULL;
+	item.dev_addr = dev_addr;
+	item.size = size;
+	
+	return enqueue_dma(item);
+}
+
+int mmd_dma::write_memory(aocl_mmd_op_t op, const uint64_t *host_addr, size_t dev_addr, size_t size)
+{
+	dma_work_item item;
+	item.op = op;
+	item.rd_host_addr = NULL;
+	item.wr_host_addr = host_addr;
+	item.dev_addr = dev_addr;
+	item.size = size;
+
+	return enqueue_dma(item);
 }
 
 int mmd_dma::read_memory(uint64_t *host_addr, size_t dev_addr, size_t size)
@@ -335,42 +422,5 @@ int mmd_dma::write_memory_mmio(const uint64_t *host_addr, size_t dev_addr, size_
 
 	DCP_DEBUG_DMA("DCP DEBUG: aocl_mmd_write done!\n");
 	return FPGA_OK;
-}
-
-int mmd_dma::read_memory(aocl_mmd_op_t op, uint64_t *host_addr, size_t dev_addr, size_t size)
-{
-	int res = read_memory(host_addr, dev_addr, size);
-	
-	if(op) {
-		//TODO: check what 'status' value should really be.  Right now just
-		//using 0 as was done in previous CCIP MMD.  Also handle case if op is NULL
-		this->event_update_fn(op, 0);
-	}
-	
-	return res;
-}
-
-int mmd_dma::write_memory(aocl_mmd_op_t op, const uint64_t *host_addr, size_t dev_addr, size_t size)
-{
-	int res = write_memory(host_addr, dev_addr, size);
-	
-	if(op) {
-		//TODO: check what 'status' value should really be.  Right now just
-		//using 0 as was done in previous CCIP MMD.  Also handle case if op is NULL
-		this->event_update_fn(op, 0);
-	}
-	
-	return res;
-}
-
-void mmd_dma::set_status_handler(aocl_mmd_status_handler_fn fn, void *user_data)
-{
-	m_status_handler_fn = fn;
-	m_status_handler_user_data = user_data;
-}
-
-void mmd_dma::event_update_fn(aocl_mmd_op_t op, int status)
-{
-	m_status_handler_fn(m_mmd_handle, m_status_handler_user_data, op, status);
 }
 
