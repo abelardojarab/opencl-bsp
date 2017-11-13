@@ -95,7 +95,7 @@ enum AfuStatu {
 class CcipDevice final
 {
 	public:
-	explicit CcipDevice(uint64_t);
+	CcipDevice(uint64_t);
    CcipDevice(const CcipDevice&) =delete;
    CcipDevice& operator=(const CcipDevice&) =delete;
 	~CcipDevice();
