@@ -12,4 +12,4 @@
 # Intel or its authorized distributors.  Please refer to the applicable
 # agreement for further details.
 
-ip-make-ipx --source-directory="ccip_iface/afu_id_avmm_slave,ip/irq_controller/,$ALTERAOCLSDKROOT/ip/board" --output=iface.ipx  --relative-vars=ALTERAOCLSDKROOT
+ip-make-ipx --source-directory="ccip_iface/*/,ip/*/,$ALTERAOCLSDKROOT/ip/board" --output=iface.ipx  --relative-vars=ALTERAOCLSDKROOT

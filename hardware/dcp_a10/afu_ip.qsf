@@ -55,6 +55,7 @@ set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/dma_core_dma_read_m
 set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/dma_core_modular_sgdma_dispatcher_0.ip
 set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_address_span_extender_0.ip
 set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_clk.ip
+set_global_assignment -name IP_FILE msgdma_bbb/ip/msgdma_bbb/msgdma_bbb_magic_number_rom_0.ip
 set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_0.ip
 set_global_assignment -name IP_FILE ip/ddr_board/ddr_board_mm_bridge_1.ip
 set_global_assignment -name IP_FILE ip/board/board_clock_bridge_1.ip

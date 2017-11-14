@@ -41,7 +41,7 @@ using namespace intel_opae_mmd;
 #define MINIMUM_DMA_SIZE	256
 #define DMA_ALIGNMENT	256
 
-#define MSGDMA_BBB_GUID		"d79c094c-7cf9-4cc1-94eb-7d79c7c01ca3"
+#define MSGDMA_BBB_GUID		"ef82def7-f6ec-40fc-a914-9a35bace01ea"
 #define MSGDMA_BBB_SIZE		8192
 
 #ifdef DEBUG_MEM
