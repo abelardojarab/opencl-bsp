@@ -47,6 +47,7 @@ public:
 private:
 	void set_interrupt_mask(uint32_t intr_mask);
 	void run_kernel_interrupt_fn();
+	bool poll_interrupt(int poll_timeout_arg);
 
 	static void interrupt_polling_thread(KernelInterrupt &obj);
 

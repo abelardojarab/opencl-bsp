@@ -27,8 +27,12 @@
 using namespace intel_opae_mmd;
 
 //if ENABLE_OPENCL_KERNEL_INTERRUPTS is set at compile time, interrupts will
-//be enabled.  otherwise it will using polling/yield
+//be enabled.
 //#define ENABLE_OPENCL_KERNEL_INTERRUPTS
+
+//if ENABLE_OPENCL_KERNEL_POLLING_THREAD is set at compile time, a thread will
+//replace yield and the thread will call runtime call back
+//#define ENABLE_OPENCL_KERNEL_POLLING_THREAD
 
 //ccip interrupt line that is used for kernel
 #define MMD_KERNEL_INTERRUPT_LINE_NUM	1
@@ -78,11 +82,13 @@ void KernelInterrupt::disable_interrupts()
 	if(m_event_handle)
 	{
 		fpga_result res;
+#ifdef ENABLE_OPENCL_KERNEL_INTERRUPTS
 		res = fpgaUnregisterEvent(m_fpga_handle, FPGA_EVENT_INTERRUPT, m_event_handle);
 		if(res != FPGA_OK)
 		{
 			fprintf(stderr, "error fpgaUnregisterEvent");
 		}
+#endif
 
 		res = fpgaDestroyEventHandle(&m_event_handle);
 		if(res != FPGA_OK)
@@ -99,11 +105,13 @@ void KernelInterrupt::disable_interrupts()
 
 void KernelInterrupt::enable_interrupts()
 {
-#ifdef ENABLE_OPENCL_KERNEL_INTERRUPTS
 	m_eventfd_wrapper = new eventfd_wrapper();
 	if(!m_eventfd_wrapper->initialized())
 		return;
+
+#ifdef ENABLE_OPENCL_KERNEL_POLLING_THREAD
 	m_thread = new std::thread(interrupt_polling_thread, std::ref(*this));
+#endif
 
 	fpga_result res;
 	// Create event
@@ -114,6 +122,7 @@ void KernelInterrupt::enable_interrupts()
 		return;
 	}
 
+#ifdef ENABLE_OPENCL_KERNEL_INTERRUPTS
 	// Register user interrupt with event handle
 	res = fpgaRegisterEvent(m_fpga_handle, FPGA_EVENT_INTERRUPT, m_event_handle, MMD_KERNEL_INTERRUPT_LINE_NUM);
 	if(res != FPGA_OK)
@@ -125,11 +134,9 @@ void KernelInterrupt::enable_interrupts()
 
 	//enable opencl kernel interrupts
 	set_interrupt_mask(0x00000001);
+#endif
 
 	m_initialized = true;
-#else
-	m_initialized = true;
-#endif
 }
 
 void KernelInterrupt::set_interrupt_mask(uint32_t intr_mask)
@@ -144,55 +151,81 @@ void KernelInterrupt::set_interrupt_mask(uint32_t intr_mask)
 
 void KernelInterrupt::interrupt_polling_thread(KernelInterrupt &obj)
 {
-	int res;
+	bool thread_is_active = true;
+	while(thread_is_active)
+	{
+#ifdef ENABLE_OPENCL_KERNEL_INTERRUPTS
+		const int timeout = -1;
+#else
+		const int timeout = 0;
+		usleep(100);
+#endif
+		thread_is_active = obj.poll_interrupt(timeout);
+	}
+}
+
+bool KernelInterrupt::poll_interrupt(int poll_timeout_arg)
+{
 	fpga_result fpga_res;
 
+	int res;
 	//get eventfd handles
 	int intr_fd;
-	fpga_res = fpgaGetOSObjectFromEventHandle(obj.m_event_handle, &intr_fd);
+	fpga_res = fpgaGetOSObjectFromEventHandle(m_event_handle, &intr_fd);
 	if(fpga_res != FPGA_OK)
 	{
 		fprintf(stderr, "error getting event file handle");
-		return;
+		return false;
 	}
-	int thread_signal_fd = obj.m_eventfd_wrapper->get_fd();
+	int thread_signal_fd = m_eventfd_wrapper->get_fd();
 
 	struct pollfd pollfd_arr[2];
-	while(1)
-	{
-		pollfd_arr[0].fd = intr_fd;
-		pollfd_arr[0].events = POLLIN;
-		pollfd_arr[0].revents = 0;
-		pollfd_arr[1].fd = thread_signal_fd;
-		pollfd_arr[1].events = POLLIN;
-		pollfd_arr[1].revents = 0;
-		res = poll(pollfd_arr, 2, -1);
-		if(res < 0) {
-			fprintf(stderr, "Poll error errno = %s\n",strerror(errno));
-		} else if(res > 0 && pollfd_arr[0].revents == POLLIN) {
-			uint64_t count;
-			read(intr_fd, &count, sizeof(count));
-			DEBUG_PRINT("Poll success. Return=%d count=%u\n",res, count);
-
-			//probobly not required but we poll the interrupt line
-			//make sure an interrupt was actually triggered
-			uint32_t irqval = 0;
-			fpgaReadMMIO32(obj.m_fpga_handle, 0, AOCL_IRQ_POLLING_BASE, &irqval);
-
-			if(irqval)
-				obj.run_kernel_interrupt_fn();
-		} else if(res > 0 && pollfd_arr[1].revents == POLLIN) {
-			uint64_t count;
-			read(thread_signal_fd, &count, sizeof(count));
-			DEBUG_PRINT("Poll success. Return=%d count=%u\n",res, count);
-			break;
-		}
+	pollfd_arr[0].fd = intr_fd;
+	pollfd_arr[0].events = POLLIN;
+	pollfd_arr[0].revents = 0;
+	pollfd_arr[1].fd = thread_signal_fd;
+	pollfd_arr[1].events = POLLIN;
+	pollfd_arr[1].revents = 0;
+	res = poll(pollfd_arr, 2, poll_timeout_arg);
+	if(res < 0) {
+		fprintf(stderr, "Poll error errno = %s\n",strerror(errno));
+		return false;
+	} else if(res > 0 && pollfd_arr[0].revents == POLLIN) {
+		uint64_t count;
+		read(intr_fd, &count, sizeof(count));
+		DEBUG_PRINT("Poll success. Return=%d count=%u\n",res, count);
+	} else if(res > 0 && pollfd_arr[1].revents == POLLIN) {
+		uint64_t count;
+		read(thread_signal_fd, &count, sizeof(count));
+		DEBUG_PRINT("Poll success. Return=%d count=%u\n",res, count);
+		return false;
+	} else {
+		//no event fd event happened
+#ifdef ENABLE_OPENCL_KERNEL_INTERRUPTS
+		return false;
+#endif
 	}
+
+
+	//probobly not required for interrupt polling but we poll the interrupt
+	//csr line to make sure an interrupt was actually triggered
+	uint32_t irqval = 0;
+	fpga_res = fpgaReadMMIO32(m_fpga_handle, 0, AOCL_IRQ_POLLING_BASE, &irqval);
+	if(fpga_res != FPGA_OK) {
+		fprintf(stderr, "Error fpgaReadMMIO32: %d\n", fpga_res);
+		return false;
+	}
+
+	DEBUG_PRINT("irqval: %u\n", irqval);
+	if(irqval)
+		run_kernel_interrupt_fn();
+
+	return true;
 }
 
 bool KernelInterrupt::yield_is_enabled()
 {
-#ifdef ENABLE_OPENCL_KERNEL_INTERRUPTS
+#ifdef ENABLE_OPENCL_KERNEL_POLLING_THREAD
 	return false;
 #else
 	return true;
@@ -200,22 +233,10 @@ bool KernelInterrupt::yield_is_enabled()
 }
 
 void KernelInterrupt::yield() {
-#ifdef ENABLE_OPENCL_KERNEL_INTERRUPTS
+#ifdef ENABLE_OPENCL_KERNEL_POLLING_THREAD
 	usleep(0);
 #else
-	uint32_t irqval = 0;
-	fpga_result res;
-
-	res = fpgaReadMMIO32(m_fpga_handle, 0, AOCL_IRQ_POLLING_BASE, &irqval);
-	if(res != FPGA_OK) {
-		fprintf(stderr, "Error fpgaReadMMIO32: %d\n", res);
-		return;
-	}
-
-	DEBUG_PRINT("irqval: %u\n", irqval);
-	if(irqval) {
-		run_kernel_interrupt_fn();
-	}
+	poll_interrupt(0);
 #endif
 }
 
