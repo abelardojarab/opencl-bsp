@@ -37,16 +37,26 @@ int CcipDevice::next_mmd_handle{1};
 std::string CcipDevice::get_board_name(std::string prefix, uint64_t obj_id)
 {
    std::ostringstream stream;
-   stream << prefix << "_" << std::setbase(16) << obj_id;
+   stream << prefix << std::setbase(16) << obj_id;
    return stream.str();
 }
 
-// TODO: Need more robust string parsing and need to ensure 
-// get_board_name produces output that can be parsed by
-// parse_board_name
-uint64_t CcipDevice::parse_board_name(const char *board_name)
+// TODO: consider if more robust string parsing is needed
+uint64_t CcipDevice::parse_board_name(const char *board_name_str)
 {
-   std::string device_num_str(&board_name[4]); // FIXME: need better parsing
+   std::string prefix(BSP_NAME);
+   std::string board_name(board_name_str);
+
+   if(board_name.length() <= prefix.length()) {
+      fprintf(stderr,"Error parsing device name '%s'\n", board_name_str);
+      exit(-1);
+   }
+   if(board_name.compare(0,prefix.length(), prefix)) {
+      fprintf(stderr,"Error parsing device name '%s'\n", board_name_str);
+      exit(-1);
+   }
+     
+   std::string device_num_str = board_name.substr(prefix.length()); 
    uint64_t device_num = std::stoul(device_num_str,0,16);
    return device_num;
 }

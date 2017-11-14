@@ -53,7 +53,7 @@ public:
 	bool notify()
 	{
 		uint64_t count = 1;
-		size_t res = write(m_fd, &count, sizeof(count));
+		ssize_t res = write(m_fd, &count, sizeof(count));
 		if (res < 0) {
 			fprintf(stderr, "eventfd : %s", strerror(errno));
 			return false;

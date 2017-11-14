@@ -138,13 +138,13 @@ int scan_devices ( const char * device_name )
       num_active_boards++;
       o_list_stream << "\n";
       aocl_mmd_get_info(handle,AOCL_MMD_BOARD_NAME, sizeof(board_name), board_name, NULL);
-      o_list_stream << std::left << std::setw(14) << dev_name << "Passed   " << board_name << "\n";
+      o_list_stream << std::left << std::setw(25) << dev_name << "Passed   " << board_name << "\n";
 
       aocl_mmd_get_info(handle, AOCL_MMD_PCIE_INFO, sizeof(pcie_info), pcie_info, NULL);
-      o_list_stream << "                       PCIe " << pcie_info << "\n";
+      o_list_stream << "                            PCIe " << pcie_info << "\n";
 
       aocl_mmd_get_info(handle, AOCL_MMD_TEMPERATURE, sizeof(float), &temperature,NULL);
-      o_list_stream << "                       FPGA temperature = " << temperature << " degrees C.\n";
+      o_list_stream << "                            FPGA temperature = " << temperature << " degrees C.\n";
    }
 
    if(num_active_boards > 0) {
@@ -155,13 +155,9 @@ int scan_devices ( const char * device_name )
          o_list_stream << "      aocl diagnose <device_name>\n";
       }
    } else {
+      // TODO: better error message
       o_list_stream << "\nFound no active device installed on the host machine.\n";
-      o_list_stream << "\nPlease make sure to: \n";
-      o_list_stream << "      1. Set the environment variable AOCL_BOARD_PACKAGE_ROOT to the correct board package.\n";
-      o_list_stream << "      2. Install the driver from the selected board package.\n";
-      o_list_stream << "      3. Properly install the device in the host machine.\n";
-      o_list_stream << "      4. Configure the device with a supported OpenCL design.\n";
-      o_list_stream << "      5. Reboot the machine if the PCI Express link failed.\n";
+      o_list_stream << "      Please consult documentation for troubleshooting steps\n";
    }
 
    // output all characters in ostringstream
@@ -205,7 +201,7 @@ int main (int argc, char *argv[])
            printf("\nDIAGNOSTIC_PASSED\n");
        } else {
            printf("\nDIAGNOSTIC_FAILED\n");
-           return -1;
+           return 0;
        }
        return 0;
    }
@@ -244,7 +240,7 @@ int main (int argc, char *argv[])
    if ( !bsp_loaded ) {
       printf("\nBSP not loaded for Programmable Accelerator Card %s\n",argv[1]);
       printf("Use 'aocl program <device_name> <aocx_file>' to initialize BSP\n\n");
-      return -1;
+      return 0;
    }
 
 
@@ -366,5 +362,9 @@ int main (int argc, char *argv[])
    delete[] readspeed;
    delete[] writespeed;
 
-   return (result) ? 0 : -1;
+   // * Always return 0 because 'aocl' wrapper program may print debugging message that
+   // * does not apply to DCP.
+   // * Wrapper code is at: //acds/main/acl/sysgen/lib/acl/Command.pm
+   //return (result) ? 0 : -1;
+   return 0;
 }
