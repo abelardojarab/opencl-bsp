@@ -28,7 +28,7 @@ using namespace intel_opae_mmd;
 
 //if ENABLE_OPENCL_KERNEL_INTERRUPTS is set at compile time, interrupts will
 //be enabled.
-//#define ENABLE_OPENCL_KERNEL_INTERRUPTS
+#define ENABLE_OPENCL_KERNEL_INTERRUPTS
 
 //if ENABLE_OPENCL_KERNEL_POLLING_THREAD is set at compile time, a thread will
 //replace yield and the thread will call runtime call back
