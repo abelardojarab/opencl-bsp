@@ -104,6 +104,32 @@ mmd_dma::~mmd_dma()
 	m_initialized = false;
 }
 
+void mmd_dma::reinit_dma()
+{
+	if(!m_initialized)
+		return;
+	
+	if(dma_h) {
+		m_initialized = false;
+		
+		fpga_result res;
+		res = fpgaDmaClose(dma_h);
+		dma_h = NULL;
+		if(res != FPGA_OK) {
+			fprintf(stderr, "Error closing DMA\n");
+			return;
+		}
+		
+		res = fpgaDmaOpen(m_fpga_handle, &dma_h);
+		if(res != FPGA_OK) {
+			fprintf(stderr, "Error initializing DMA: %d\n", res);
+			return;
+		}
+		
+		m_initialized = true;
+	}
+}
+
 void mmd_dma::set_status_handler(aocl_mmd_status_handler_fn fn, void *user_data)
 {
 	m_status_handler_fn = fn;

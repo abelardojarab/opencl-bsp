@@ -43,6 +43,9 @@ public:
 	int do_dma(dma_work_item &item);
 
 	void set_status_handler(aocl_mmd_status_handler_fn fn, void *user_data);
+	
+	//used after reconfigation
+	void reinit_dma();
 
 private:
 	// Helper functions

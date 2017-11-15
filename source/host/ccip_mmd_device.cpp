@@ -294,6 +294,16 @@ int CcipDevice::program_bitstream(uint8_t *data, size_t data_size)
       }
    }
    
+   if(dma_h)
+   {
+	   dma_h->reinit_dma();
+	   if(!dma_h->initialized())
+	   {
+		  fprintf(stderr, "Error initializing DMA\n");
+		  return false;
+	   }
+   }
+   
    return res;
 }
 
