@@ -233,12 +233,13 @@ module ccip_std_afu(
     assign afu_clk = pClkDiv2 ;
    
     ccip_async_shim #(
-		.C0TX_DEPTH_RADIX(7),   //default was 8
-		.C1TX_DEPTH_RADIX(7),   //default was 8
-		.C2TX_DEPTH_RADIX(7),   //default was 8
-		//For DCP only 256 is needed.  Using 512 so that the RX to TX depth ratio is 4:1 to ensure for each 4CL read there are 4 beats of space in the response
-		.C0RX_DEPTH_RADIX(9),	//default was 10
-		.C1RX_DEPTH_RADIX(9)	//default was 10
+	.C0TX_DEPTH_RADIX(7),   //default was 8
+	.C1TX_DEPTH_RADIX(7),   //default was 8
+	.C2TX_DEPTH_RADIX(7),   //default was 8
+	//For DCP only 256 is needed.  Using 512 so that the RX to TX depth ratio is 4:1 to ensure for each 4CL read there are 4 beats of space in the response
+	//However, 512 is not enough because mmio requests come in on C0RX so we need to double the 512 to 1024
+	.C0RX_DEPTH_RADIX(10),	//default was 10
+	.C1RX_DEPTH_RADIX(10)	//default was 10
     )
     ccip_async_shim (
 				    .bb_softreset    (pck_cp2af_softReset),
