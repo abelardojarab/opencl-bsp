@@ -1,0 +1,29 @@
+#!/bin/bash
+#get exact script path
+SCRIPT_PATH=`readlink -f ${BASH_SOURCE[0]}`
+#get director of script path
+SCRIPT_DIR_PATH="$(dirname $SCRIPT_PATH)"
+
+. $SCRIPT_DIR_PATH/bsp_common.sh
+
+export OPENCL_ASE_SIM=1
+setup_arc_for_script $@
+
+$SCRIPT_DIR_PATH/setup_packages.sh
+python $SCRIPT_DIR_PATH/setup_bsp.py -v
+
+cd $ROOT_PROJECT_PATH/example_designs/mmd_copy_test
+rm -fr bin/hello_world
+if [ ! -f bin/hello_world.aocx ]; then
+	echo "Running AOC..."
+	aoc device/hello_world.cl --board dcp_a10 -o bin/hello_world.aocx
+	rm -fr hello_world_comp
+	mv bin/hello_world hello_world_comp
+fi
+aocl program acl0 bin/hello_world.aocx
+make
+cp ./bin/hello_world .
+cp bin/hello_world.aocx .
+#16384 == buffer test size for dma
+./hello_world 16384
+
