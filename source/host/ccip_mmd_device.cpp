@@ -26,6 +26,8 @@
 #include "ccip_mmd_device.h"
 #include "fpgaconf.h"
 
+#define MMD_COPY_BUFFER_SIZE (1024*1024)
+
 using namespace intel_opae_mmd;
 
 int CcipDevice::next_mmd_handle{1};
@@ -62,7 +64,8 @@ CcipDevice::CcipDevice(uint64_t obj_id):
    afc_handle(NULL),
    filter(NULL),
    afc_token(NULL),
-   dma_h(NULL)
+   dma_h(NULL),
+   mmd_copy_buffer(NULL)
 {
    // Note that this constructor is not thread-safe because next_mmd_handle
    // is shared between all class instances
@@ -72,10 +75,16 @@ CcipDevice::CcipDevice(uint64_t obj_id):
    else
       next_mmd_handle++;
 
+  mmd_copy_buffer = (char *)malloc(MMD_COPY_BUFFER_SIZE);
+  if(mmd_copy_buffer == NULL) {
+  	  fprintf(stderr, "malloc failed for mmd_copy_buffer\n");
+  	  return;
+  }
+  
    fpga_guid guid;
    fpga_result res = FPGA_OK;
    uint32_t num_matches;
-
+   
    if (uuid_parse(DCP_OPENCL_DDR_AFU_ID, guid) < 0) {
       fprintf(stderr, "Error parsing guid '%s'\n", DCP_OPENCL_DDR_AFU_ID);
       return;
@@ -218,6 +227,11 @@ bool CcipDevice::initialize_bsp()
 CcipDevice::~CcipDevice()
 {
 	int num_errors = 0;
+	if(mmd_copy_buffer) {
+		free(mmd_copy_buffer);
+		mmd_copy_buffer = NULL;
+    }
+	
 	if(kernel_interrupt_thread)
 	{
 		delete kernel_interrupt_thread;
@@ -440,6 +454,50 @@ int CcipDevice::write_block(aocl_mmd_op_t op, int mmd_interface, const void *hos
 	} else {
 		return 0;
 	}
+}
+
+int CcipDevice::copy_block(aocl_mmd_op_t op,
+		int mmd_interface,
+		size_t src_offset, size_t dst_offset,
+		size_t size)
+{
+	int status = -1;
+	
+	if(mmd_interface == AOCL_MMD_MEMORY) {
+		size_t bytes_left = size;
+		size_t read_offset = src_offset;
+		size_t write_offset = dst_offset;
+		while(bytes_left != 0) {
+			size_t chunk = bytes_left > MMD_COPY_BUFFER_SIZE ? MMD_COPY_BUFFER_SIZE : bytes_left;
+			
+			//for now, just to reads and writes to/from host to implement this
+			//DMA hw can support direct copy but we don't have time to verify
+			//that so close to the release.
+			//also this API is rarely used.
+			status = read_block(NULL, AOCL_MMD_MEMORY, mmd_copy_buffer, read_offset, chunk);
+			if(status != 0)
+				break;
+			status = write_block(NULL, AOCL_MMD_MEMORY, mmd_copy_buffer, write_offset, chunk);
+			if(status != 0)
+				break;
+			read_offset += chunk;
+			write_offset += chunk;
+			bytes_left -= chunk;
+		}
+		status = 0;
+	} else {
+		DEBUG_PRINT("copy_block unsupported mmd_interface: %d\n", mmd_interface);
+		status = -1;
+	}
+	
+	
+	if(op) {
+		//TODO: check what 'status' value should really be.  Right now just
+		//using 0 as was done in previous CCIP MMD.  Also handle case if op is NULL
+		this->event_update_fn(op, 0);
+	}
+	
+	return status;
 }
 
 int CcipDevice::read_mmio(void *host_addr, size_t mmio_addr, size_t size)

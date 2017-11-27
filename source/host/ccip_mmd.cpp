@@ -513,9 +513,13 @@ int AOCL_MMD_CALL aocl_mmd_copy(
 		size_t len,
 		int mmd_interface, size_t src_offset, size_t dst_offset )
 {
-	printf("aocl_mmd_copy is not implemented\n");
-	exit(1);
-	return 0;
+   DCP_DEBUG_MEM("\n+ aocl_mmd_copy: %d\t %p\t %lu\t %d\t %lu %lu\n",handle, op, len, mmd_interface, src_offset, dst_offset);
+   CcipDevice *dev = get_device(handle);
+   if(dev)
+	   return dev->copy_block(op, mmd_interface, src_offset, dst_offset, len);
+   else
+      return -1;
+      //TODO: handle error condition if dev null
 }
 
 int AOCL_MMD_CALL aocl_mmd_open(const char *name)

@@ -101,7 +101,7 @@ class CcipDevice final
    std::string get_dev_name()   { return mmd_dev_name; }
    std::string get_bdf();
    float get_temperature();
-   
+
    int program_bitstream(uint8_t *data, size_t data_size);
    bool initialize_bsp();
 	void set_kernel_interrupt(aocl_mmd_interrupt_handler_fn fn, void* user_data);
@@ -122,6 +122,11 @@ class CcipDevice final
 			size_t dev_addr,
 			size_t size);
 
+	int copy_block(aocl_mmd_op_t op,
+		int mmd_interface,
+		size_t src_offset, size_t dst_offset,
+		size_t size);
+
 	private:
    static int next_mmd_handle;
 
@@ -131,14 +136,14 @@ class CcipDevice final
    intel_opae_mmd::KernelInterrupt *kernel_interrupt_thread;
 	aocl_mmd_status_handler_fn event_update;
 	void *event_update_user_data;
- 
+
    // HACK: use the sysfs path to read temperature value
    // this should be replaced with OPAE call once that is
    // available
-   std::string fme_sysfs_temp_path; 
+   std::string fme_sysfs_temp_path;
    bool fme_sysfs_temp_initialized;
    void initialize_fme_sysfs();
-   
+
    uint8_t bus;
    uint8_t device;
    uint8_t function;
@@ -151,6 +156,8 @@ class CcipDevice final
 	fpga_properties   filter;
 	fpga_token        afc_token;
 	intel_opae_mmd::mmd_dma *dma_h;
+
+	char *mmd_copy_buffer;
 
 	// Helper functions
 	int read_mmio(void *host_addr, size_t dev_addr, size_t size);
