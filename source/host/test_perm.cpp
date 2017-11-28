@@ -66,8 +66,7 @@ static bool test_exists(const char *file)
 	
 	result = (glob_obj.gl_pathc > 0);
 	
-	if(glob_obj.gl_pathc > 0)
-		globfree(&glob_obj);
+   globfree(&glob_obj);
 	
 	return result;
 }
@@ -106,8 +105,7 @@ static bool verbose_test_perm_glob(const char *file)
 	
 	result &= (glob_obj.gl_pathc > 0);
 	
-	if(glob_obj.gl_pathc > 0)
-		globfree(&glob_obj);
+   globfree(&glob_obj);
 	
 	return result;
 }
