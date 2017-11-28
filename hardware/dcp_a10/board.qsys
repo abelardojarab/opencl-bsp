@@ -223,9 +223,24 @@
             </value>
         </entry>
         <entry>
-            <key>ccip_avmm_requestor</key>
+            <key>ccip_avmm_requestor_rd</key>
             <value>
-                <connectionPointName>ccip_avmm_requestor</connectionPointName>
+                <connectionPointName>ccip_avmm_requestor_rd</connectionPointName>
+                <suppliedSystemInfos>
+                    <entry>
+                        <key>ADDRESS_MAP</key>
+                    </entry>
+                    <entry>
+                        <key>ADDRESS_WIDTH</key>
+                    </entry>
+                </suppliedSystemInfos>
+                <consumedSystemInfos/>
+            </value>
+        </entry>
+        <entry>
+            <key>ccip_avmm_requestor_wr</key>
+            <value>
+                <connectionPointName>ccip_avmm_requestor_wr</connectionPointName>
                 <suppliedSystemInfos>
                     <entry>
                         <key>ADDRESS_MAP</key>
@@ -361,9 +376,15 @@
    internal="pipe_stage_host_ctrl.s0"
    type="avalon"
    dir="end" />
+ <interface name="ccip_avmm_requestor" internal="ddr_board.host_mem" />
  <interface
-   name="ccip_avmm_requestor"
-   internal="ddr_board.host_mem"
+   name="ccip_avmm_requestor_rd"
+   internal="ddr_board.host_rd"
+   type="avalon"
+   dir="start" />
+ <interface
+   name="ccip_avmm_requestor_wr"
+   internal="ddr_board.host_wr"
    type="avalon"
    dir="start" />
  <interface name="clk_200" internal="clk_200.in_clk" type="clock" dir="end" />
@@ -1701,8 +1722,10 @@
   <parameter name="AUTO_HOST_CLK_CLOCK_DOMAIN" value="1" />
   <parameter name="AUTO_HOST_CLK_CLOCK_RATE" value="200000000" />
   <parameter name="AUTO_HOST_CLK_RESET_DOMAIN" value="1" />
-  <parameter name="AUTO_HOST_MEM_ADDRESS_MAP" value="" />
-  <parameter name="AUTO_HOST_MEM_ADDRESS_WIDTH" value="-1" />
+  <parameter name="AUTO_HOST_RD_ADDRESS_MAP" value="" />
+  <parameter name="AUTO_HOST_RD_ADDRESS_WIDTH" value="-1" />
+  <parameter name="AUTO_HOST_WR_ADDRESS_MAP" value="" />
+  <parameter name="AUTO_HOST_WR_ADDRESS_WIDTH" value="-1" />
   <parameter name="AUTO_KERNEL_CLK_CLOCK_DOMAIN" value="6" />
   <parameter name="AUTO_KERNEL_CLK_CLOCK_RATE" value="0" />
   <parameter name="AUTO_KERNEL_CLK_RESET_DOMAIN" value="6" />
