@@ -46,12 +46,17 @@ unsigned char *acl_loadFileIntoMemory (const char *in_file, size_t *file_size_ou
   
   // slurp the whole file into allocated buf
   buf = (unsigned char*) malloc (sizeof(char) * file_size);
+  if(!buf) {
+     fprintf(stderr,"Error cannot allocate memory\n");
+     exit(-1);
+  }
   *file_size_out = fread (buf, sizeof(char), file_size, f);
   fclose (f);
   
   if (*file_size_out != file_size) {
     fprintf (stderr, "Error reading %s. Read only %lu out of %lu bytes\n", 
                      in_file, *file_size_out, file_size);
+    free(buf);
     return NULL;
   }
   return buf;
