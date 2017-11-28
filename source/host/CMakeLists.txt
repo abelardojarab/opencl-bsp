@@ -19,7 +19,11 @@ target_link_libraries(altera_ccip_mmd
    -lpkg_editor
    -lz
 )
- 
+
+target_link_libraries(altera_ccip_mmd
+   "${OPAE_INSTALL_PATH}/lib/libsafestr.a"
+   )
+
 install(TARGETS altera_ccip_mmd
    LIBRARY DESTINATION lib
    COMPONENT libmmd 

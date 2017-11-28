@@ -33,10 +33,12 @@ cd $OPAE_BUILD_PATH
 #hack ASE for interrupts on non-DCP platform(because DCP mem model is slow)
 sed -i -e 's/undef\s\+ASE_ENABLE_INTR_FEATURE/define  ASE_ENABLE_INTR_FEATURE/' $OPAE_SRC_PATH/ase/sw/ase_common.h
 
+OPAE_BUILD_TYPE="${OPAE_BUILD_TYPE:-Release}"
+
 if [ "$OPENCL_ASE_SIM" == "1" ]; then
-	CC=`which gcc` CXX=`which g++` cmake -DBUILD_ASE=ON -DCMAKE_INSTALL_PREFIX=$OPAE_LOCAL_INST_PATH $OPAE_SRC_PATH
+	CC=`which gcc` CXX=`which g++` cmake -DINSTALL_SAFESTR=ON -DCMAKE_BUILD_TYPE=$OPAE_BUILD_TYPE -DBUILD_ASE=ON -DCMAKE_INSTALL_PREFIX=$OPAE_LOCAL_INST_PATH $OPAE_SRC_PATH
 else
-	CC=`which gcc` CXX=`which g++` cmake -DCMAKE_INSTALL_PREFIX=$OPAE_LOCAL_INST_PATH $OPAE_SRC_PATH
+	CC=`which gcc` CXX=`which g++` cmake -DINSTALL_SAFESTR=ON -DCMAKE_BUILD_TYPE=$OPAE_BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$OPAE_LOCAL_INST_PATH $OPAE_SRC_PATH
 fi
 make -j16
 make install
