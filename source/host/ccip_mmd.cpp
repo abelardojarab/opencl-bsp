@@ -28,6 +28,8 @@
 #include <sstream> 
 #include <map>
 
+#include <safe_string/safe_string.h>
+
 #include "aocl_mmd.h"
 #include "ccip_mmd_device.h"
 #include "zlib_inflate.h"
@@ -349,8 +351,7 @@ static bool check_for_svm_env()
 #define RESULT_STR(X) do { \
 	unsigned Xlen = strlen(X) + 1; \
    unsigned Xcpylen = (param_value_size <= Xlen) ? param_value_size : Xlen; \
-	/*memcpy_s((void*)param_value, param_value_size, X, Xcpylen); \ */ \
-	memcpy((void*)param_value, X, Xcpylen); \
+	memcpy_s((void*)param_value, param_value_size, X, Xcpylen); \
 	if (param_size_ret) *param_size_ret=Xcpylen; \
 } while(0)
 
