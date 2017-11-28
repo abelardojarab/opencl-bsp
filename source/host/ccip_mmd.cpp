@@ -285,7 +285,13 @@ int AOCL_MMD_CALL aocl_mmd_reprogram(int handle, void *data, size_t data_size)
 		void *gbs_data = NULL;
 		size_t gbs_data_size = 0;
 		int ret = inf(acl_gbs_gz_contents, acl_gbs_gz_len, &gbs_data, &gbs_data_size);
-		ACL_DCP_ERROR_IF(ret != Z_OK, return AOCL_INVALID_HANDLE, "aocl_mmd_reprogram error: GBS decompression failed!\n");
+
+		if(ret != Z_OK) {
+          fprintf(stderr,"aocl_mmd_reprogram error: GBS decompression failed!\n");
+          if(gbs_data)
+             free(gbs_data);
+          return AOCL_INVALID_HANDLE;
+      }
 		
 		int res = afu->program_bitstream(static_cast<uint8_t *>(gbs_data), gbs_data_size);
 		
