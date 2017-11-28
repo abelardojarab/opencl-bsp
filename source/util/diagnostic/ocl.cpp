@@ -238,7 +238,12 @@ int ocl_test_all_global_memory( )
     offset += chunk;
     bytes_rem -= chunk;
   }
-  printf("Write speed: %.2lf MB/s [%.2lf -> %.2lf]\n", max_size * 1000.0 / sum_time, min_bw, max_bw);
+
+  if(sum_time > 0) {
+     printf("Write speed: %.2lf MB/s [%.2lf -> %.2lf]\n", max_size * 1000.0 / sum_time, min_bw, max_bw);
+  } else {
+     printf("Error measuring write speed\n");
+  }
 
   // Read-back and verify
   printf("Reading and verifying " cl_ulong_printf " MB from global memory ...\n", max_size / MB);
@@ -280,7 +285,11 @@ int ocl_test_all_global_memory( )
     offset += chunk;
     bytes_rem -= chunk;
   }
-  printf("Read speed: %.2lf MB/s [%.2lf -> %.2lf]\n", max_size * 1000.0 / sum_time, min_bw, max_bw);
+  if(sum_time > 0) {
+     printf("Read speed: %.2lf MB/s [%.2lf -> %.2lf]\n", max_size * 1000.0 / sum_time, min_bw, max_bw);
+  } else {
+     printf("Error measuring read speed\n");
+  }
 
   acl_util_aligned_free(hostbuf);
   clReleaseMemObject(mem);
