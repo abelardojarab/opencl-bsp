@@ -22,7 +22,7 @@ add_executable(diagnose ${DIAGNOSE_SRC})
 
 target_link_libraries(diagnose
    -lalteracl
-   altera_ccip_mmd
+   intel_opae_mmd
    -lelf
    -lalterahalmmd
    -lopae-c

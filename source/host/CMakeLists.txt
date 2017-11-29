@@ -12,16 +12,16 @@ set(MMD_SRC
    zlib_inflate.c
 )
 
-add_library(altera_ccip_mmd SHARED ${MMD_SRC})
+add_library(intel_opae_mmd SHARED ${MMD_SRC})
 
-target_link_libraries(altera_ccip_mmd
+target_link_libraries(intel_opae_mmd
    -lrt
    -lpkg_editor
    -lz
    safestr
 )
 
-install(TARGETS altera_ccip_mmd
+install(TARGETS intel_opae_mmd
    LIBRARY DESTINATION lib
    COMPONENT libmmd 
 )

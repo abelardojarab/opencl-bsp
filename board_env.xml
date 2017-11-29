@@ -2,9 +2,9 @@
 <board_env version="17.0" name="jtag">
   <hardware dir="hardware" default="dcp_a10"></hardware>
   <platform name="linux64">
-    <mmdlib>%b/linux64/lib/libaltera_ccip_mmd.so</mmdlib>
+    <mmdlib>%b/linux64/lib/libintel_opae_mmd.so</mmdlib>
     <linkflags>-L%a/linux64/lib -L%b/linux64/lib -L$OPAE_INSTALL_PATH/lib/ </linkflags>
-    <linklibs> -lalterahalmmd -laltera_ccip_mmd -lrt -lpthread -lopae-c -luuid</linklibs>
+    <linklibs> -lalterahalmmd -lintel_opae_mmd -lrt -lpthread -lopae-c -luuid</linklibs>
     <utilbindir>%b/linux64/libexec</utilbindir>
   </platform>
 

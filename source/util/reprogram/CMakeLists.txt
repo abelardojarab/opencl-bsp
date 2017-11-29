@@ -20,7 +20,7 @@ add_executable(program ${PROGRAM_SRC})
 
 target_link_libraries(program
    -lalteracl
-   altera_ccip_mmd
+   intel_opae_mmd
    -lelf
    -lalterahalmmd
    -lopae-c
