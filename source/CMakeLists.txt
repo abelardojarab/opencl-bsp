@@ -11,7 +11,7 @@
 # agreement for further details.
 
 
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8.12)
 project(a10_dcp)
 
 #set(AOCL_BOARD_PACKAGE_ROOT $ENV{AOCL_BOARD_PACKAGE_ROOT})
@@ -41,6 +41,7 @@ include_directories(
 #find_package(opae REQUIRED)
 
 set (CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11") 
 add_subdirectory(host)
 add_subdirectory(util)
 add_subdirectory(safe_string)
