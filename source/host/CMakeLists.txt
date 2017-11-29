@@ -18,11 +18,8 @@ target_link_libraries(altera_ccip_mmd
    -lrt
    -lpkg_editor
    -lz
+   safestr
 )
-
-target_link_libraries(altera_ccip_mmd
-   "${OPAE_INSTALL_PATH}/lib/libsafestr.a"
-   )
 
 install(TARGETS altera_ccip_mmd
    LIBRARY DESTINATION lib

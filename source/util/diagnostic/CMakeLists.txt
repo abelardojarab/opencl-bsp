@@ -27,6 +27,7 @@ target_link_libraries(diagnose
    -lalterahalmmd
    -lopae-c
    -luuid
+   safestr
 )
  
 install(TARGETS diagnose 

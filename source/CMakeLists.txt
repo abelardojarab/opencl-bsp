@@ -43,3 +43,4 @@ include_directories(
 set (CMAKE_CXX_STANDARD 11)
 add_subdirectory(host)
 add_subdirectory(util)
+add_subdirectory(safe_string)

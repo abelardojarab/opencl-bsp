@@ -25,6 +25,7 @@ target_link_libraries(program
    -lalterahalmmd
    -lopae-c
    -luuid
+   safestr
 )
  
 install(TARGETS program
