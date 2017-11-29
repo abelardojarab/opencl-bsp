@@ -29,6 +29,7 @@ module bsp_logic #(
 	
 	// Interface structures
 	input           t_if_ccip_Rx      pck_cp2af_sRx,        // CCI-P Rx Port
+	input           t_if_ccip_c0_Rx   cp2af_mmio_c0rx,
 	output          t_if_ccip_Tx      pck_af2cp_sTx,        // CCI-P Tx Port
 	
 	// kernel interface
@@ -279,11 +280,7 @@ module bsp_logic #(
 		.c0tx(pck_af2cp_sTx.c0)
 	);
 	
-	ccip_avmm_mmio #(
-		.MMIO_BYPASS_ADDRESS(MMIO_BYPASS_ADDRESS),
-		.MMIO_BYPASS_SIZE(MMIO_BYPASS_SIZE)
-	)
-	ccip_avmm_mmio_inst (
+	ccip_avmm_mmio ccip_avmm_mmio_inst (
 		.avmm_waitrequest(mmio_avmm_waitrequest),
 		.avmm_readdata(mmio_avmm_readdata),
 		.avmm_readdatavalid(mmio_avmm_readdatavalid),
@@ -296,7 +293,7 @@ module bsp_logic #(
 		.clk            (clk),            //   clk.clk
 		.reset        (reset),         // reset.reset
 		
-		.c0rx(pck_cp2af_sRx.c0),
+		.c0rx(cp2af_mmio_c0rx),
 		.c2tx(pck_af2cp_sTx.c2)
 	);
 

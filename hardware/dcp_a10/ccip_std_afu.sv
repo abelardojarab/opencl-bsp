@@ -231,15 +231,18 @@ module ccip_std_afu(
     t_if_ccip_Rx async2af_sRxPort;
    
     assign afu_clk = pClkDiv2 ;
-   
+
+    t_if_ccip_c0_Rx async2af_mmio_c0rx;
+
     ccip_async_shim #(
 	.C0TX_DEPTH_RADIX(7),   //default was 8
 	.C1TX_DEPTH_RADIX(7),   //default was 8
 	.C2TX_DEPTH_RADIX(7),   //default was 8
+	.ENABLE_SEPARATE_MMIO_FIFO(1),
+	.C0RX_MMIO_DEPTH_RADIX(9), //default was 9
 	//For DCP only 256 is needed.  Using 512 so that the RX to TX depth ratio is 4:1 to ensure for each 4CL read there are 4 beats of space in the response
-	//However, 512 is not enough because mmio requests come in on C0RX so we need to double the 512 to 1024
-	.C0RX_DEPTH_RADIX(10),	//default was 10
-	.C1RX_DEPTH_RADIX(10)	//default was 10
+	.C0RX_DEPTH_RADIX(9),	//default was 10
+	.C1RX_DEPTH_RADIX(9)	//default was 10
     )
     ccip_async_shim (
 				    .bb_softreset    (pck_cp2af_softReset),
@@ -249,7 +252,8 @@ module ccip_std_afu(
 				    .afu_softreset   (async_shim_reset_out),
 				    .afu_clk         (afu_clk),
 				    .afu_tx          (async2af_sTxPort),
-				    .afu_rx          (async2af_sRxPort)
+				    .afu_rx          (async2af_sRxPort),
+				    .afu_mmio_c0rx   (async2af_mmio_c0rx)
 				    );
 
     // ====================================================================
@@ -267,8 +271,10 @@ module ccip_std_afu(
     // also tell the MPF module the MMIO address at which MPF should start
     // its feature chain.
     //
-    localparam MPF_DFH_MMIO_ADDR = 'h1000;
-    localparam MPF_DFH_MMIO_NEXT_ADDR = 'h20000;
+    //Note: with ENABLE_SEPARATE_MMIO_FIFO, MPF will not receive or forward
+    //any mmio requests
+    localparam MPF_DFH_MMIO_ADDR = 'h0000;
+    localparam MPF_DFH_MMIO_NEXT_ADDR = 'h0000;
 
     //
     // MPF represents CCI as a SystemVerilog interface, derived from the
@@ -468,6 +474,7 @@ module ccip_std_afu(
 		.reset ( fiu.reset ) ,
 		.pck_cp2af_sRx       ( mpf2af_sRxPort ) ,
 		.pck_af2cp_sTx       ( af2mpf_sTxPort ) ,
+		.cp2af_mmio_c0rx     ( async2af_mmio_c0rx ) ,
 		
 		.board_kernel_reset_reset_n 	  (board_kernel_reset_reset_n),
 		.board_kernel_irq_irq       	  (board_kernel_irq_irq),
