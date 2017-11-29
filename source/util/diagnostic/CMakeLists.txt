@@ -24,7 +24,6 @@ target_link_libraries(diagnose
    -lalteracl
    intel_opae_mmd
    -lelf
-   -lalterahalmmd
    -lopae-c
    -luuid
    safestr

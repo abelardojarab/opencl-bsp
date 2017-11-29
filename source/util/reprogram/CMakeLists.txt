@@ -22,7 +22,6 @@ target_link_libraries(program
    -lalteracl
    intel_opae_mmd
    -lelf
-   -lalterahalmmd
    -lopae-c
    -luuid
    safestr

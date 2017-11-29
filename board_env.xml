@@ -4,7 +4,7 @@
   <platform name="linux64">
     <mmdlib>%b/linux64/lib/libintel_opae_mmd.so</mmdlib>
     <linkflags>-L%a/linux64/lib -L%b/linux64/lib -L$OPAE_INSTALL_PATH/lib/ </linkflags>
-    <linklibs> -lalterahalmmd -lintel_opae_mmd -lrt -lpthread -lopae-c -luuid</linklibs>
+    <linklibs> -lintel_opae_mmd -lrt -lpthread -lopae-c -luuid</linklibs>
     <utilbindir>%b/linux64/libexec</utilbindir>
   </platform>
 
