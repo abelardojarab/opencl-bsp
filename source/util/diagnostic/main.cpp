@@ -172,8 +172,6 @@ int main (int argc, char *argv[])
    char * device_name = NULL;
    bool probe = false;
    
-   bool use_polling = true;
-   
    for ( int i = 1 ; i < argc; i ++ ) {
      if (strcmp(argv[i],"-probe") == 0) 
        probe = true;
@@ -345,12 +343,6 @@ int main (int argc, char *argv[])
    printf("Read top speed = %.2f MB/s\n",read_topspeed);
    printf("Throughput = %.2f MB/s\n",(read_topspeed+write_topspeed)/2);
    
-   if (use_polling ) {
-      printf("\nUsing polling for DMA transfers.\n");
-      printf("Bandwidth is higher at the cost of CPU utilization\n");
-      printf("When using interrupts for DMA, bandwidth is limited by the maximum number of interrupts per second that the driver can process.\n");
-      printf("To use interrupts for DMA Set environment variable 'ACL_PCIE_DMA_USE_MSI'.\n");
-   } 
    if (result)
      printf("\nDIAGNOSTIC_PASSED\n");
    else
