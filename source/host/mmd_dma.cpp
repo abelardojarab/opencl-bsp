@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include <safe_string/safe_string.h>
+#include "memcpy_s_fast.h"
 
 #include "mmd_dma.h"
 #include "ccip_mmd_device.h"
@@ -279,7 +280,7 @@ int mmd_dma::read_memory_mmio_unaligned(void *host_addr, size_t dev_addr, size_t
 	if(res != FPGA_OK)
 		return res;
 	//overlay our data
-	memcpy_s(host_addr, size, ((char *)(&read_tmp))+shift, size);
+	memcpy_s_fast(host_addr, size, ((char *)(&read_tmp))+shift, size);
 	
 	return FPGA_OK;
 }
@@ -403,7 +404,7 @@ int mmd_dma::write_memory_mmio_unaligned(const uint64_t *host_addr, size_t dev_a
 	if(res != FPGA_OK)
 		return res;
 	//overlay our data
-	memcpy_s(((char *)(&read_tmp))+shift, size, host_addr, size);
+	memcpy_s_fast(((char *)(&read_tmp))+shift, size, host_addr, size);
 	
 	//write back to device
 	res = fpgaWriteMMIO64(m_fpga_handle, 0, (msgdma_bbb_base_addr+MEM_WINDOW_MEM)+(dev_aligned_addr&MEM_WINDOW_SPAN_MASK), read_tmp);

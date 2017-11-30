@@ -29,6 +29,12 @@ if(OPENCL_ASE_SIM)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSIM")
 endif()
 
+option(USE_MEMCPY_S "Use memcpy_s included in safe_string library" OFF)
+if(USE_MEMCPY_S)
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMEMCPY_S_FAST_USE_MEMCPY_S")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMEMCPY_S_FAST_USE_MEMCPY_S")
+endif()
+
 include_directories(
    ${OPAE_INSTALL_PATH}/include
    ${CMAKE_CURRENT_SOURCE_DIR}

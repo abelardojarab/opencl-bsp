@@ -24,6 +24,7 @@
 #include <fstream>
 
 #include <safe_string/safe_string.h>
+#include "memcpy_s_fast.h"
 
 #include "ccip_mmd_device.h"
 #include "fpgaconf.h"
@@ -547,7 +548,7 @@ int CcipDevice::read_mmio(void *host_addr, size_t mmio_addr, size_t size)
 		res = fpgaReadMMIO32(afc_handle, 0, mmio_addr, &read_data);
 		if(res != FPGA_OK)
 			return res;
-		memcpy_s(host_addr32, size, &read_data, size);
+		memcpy_s_fast(host_addr32, size, &read_data, size);
 	}
 
 	return res;
@@ -578,7 +579,7 @@ int CcipDevice::write_mmio(const void *host_addr, size_t mmio_addr, size_t size)
 	while(size > 0) {
 		uint32_t tmp_data32 = 0;
 		size_t chunk_size = (size >= 4) ? 4 : size;
-		memcpy_s(&tmp_data32, sizeof(tmp_data32), host_addr32, chunk_size);
+		memcpy_s_fast(&tmp_data32, sizeof(tmp_data32), host_addr32, chunk_size);
 		res = fpgaWriteMMIO32(afc_handle, 0, mmio_addr, tmp_data32);
 		if(res != FPGA_OK)
 			return res;

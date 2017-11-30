@@ -29,6 +29,7 @@
 #include <map>
 
 #include <safe_string/safe_string.h>
+#include "memcpy_s_fast.h"
 
 #include "aocl_mmd.h"
 #include "ccip_mmd_device.h"
@@ -352,12 +353,11 @@ static bool check_for_svm_env()
 
 
 // Macros used for acol_mmd_get_offline_info and aocl_mmd_get_info
-// TODO: switch from memcpy to memcpy_s once I figure out the library issues
 #define RESULT_INT(X) {*((int*)param_value) = X; if (param_size_ret) *param_size_ret=sizeof(int);}
 #define RESULT_STR(X) do { \
 	unsigned Xlen = strlen(X) + 1; \
    unsigned Xcpylen = (param_value_size <= Xlen) ? param_value_size : Xlen; \
-	memcpy_s((void*)param_value, param_value_size, X, Xcpylen); \
+	memcpy_s_fast((void*)param_value, param_value_size, X, Xcpylen); \
 	if (param_size_ret) *param_size_ret=Xcpylen; \
 } while(0)
 

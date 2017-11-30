@@ -41,6 +41,8 @@
 #include <assert.h>
 
 #include <safe_string/safe_string.h>
+#include "memcpy_s_fast.h"
+
 #include "zlib.h"
 
 #define CHUNK 16384
@@ -129,7 +131,7 @@ int inf(void *in_data, size_t in_size, void **out_data, size_t *out_size)
             	}
             	*out_data = tmp;
             }
-            memcpy_s(*out_data+*out_size, out_alloc_size - *out_size, out, have);
+            memcpy_s_fast(*out_data+*out_size, out_alloc_size - *out_size, out, have);
             (*out_size) += have;
         } while (strm.avail_out == 0);
 
