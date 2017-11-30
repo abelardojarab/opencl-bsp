@@ -2,8 +2,8 @@
 ##   The FROM object will need to change if you drive the FIFO from
 ##   a different reset.
 ##
-set_false_path -from [get_keepers fpga_top|inst*_ccip_interface_reg|pck_cp2af_softReset_T*] -to [get_keepers *ccip_async_shim*softreset*]
-set_false_path -from [get_keepers fpga_top|inst*_ccip_interface_reg|pck_cp2af_softReset_T*] -to [get_keepers *ccip_async_shim*dcfifo_component*dffe*]
+set_false_path -from [get_keepers fpga_top|inst_green_bs|inst_ccip_std_afu|pck_cp2af_softReset_q2] -to [get_keepers *ccip_async_shim*softreset*]
+set_false_path -from [get_keepers fpga_top|inst_green_bs|inst_ccip_std_afu|pck_cp2af_softReset_q2] -to [get_keepers *ccip_async_shim*dcfifo_component*dffe*]
 
 
 

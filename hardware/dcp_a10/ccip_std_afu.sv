@@ -85,6 +85,16 @@ module ccip_std_afu(
 	input           wire             pck_cp2af_softReset;      // CCI-P ACTIVE HIGH Soft Reset
 	input           wire [1:0]       pck_cp2af_pwrState;       // CCI-P AFU Power State
 	input           wire             pck_cp2af_error;          // CCI-P Protocol Error Detected
+	
+	// Start by registering reset
+	(* preserve *) logic pck_cp2af_softReset_q = 1'b1;
+	(* preserve *) logic pck_cp2af_softReset_q2 = 1'b1;
+	always @(posedge pClk)
+	begin
+		pck_cp2af_softReset_q <= pck_cp2af_softReset;
+		pck_cp2af_softReset_q2 <= pck_cp2af_softReset_q;
+	end
+	
 `ifdef INCLUDE_DDR4 
 	input   wire                          DDR4a_USERCLK;
 	input   wire                          DDR4a_waitrequest;
@@ -107,9 +117,6 @@ module ccip_std_afu(
 	output  wire                          DDR4b_read;
 	output  wire [63:0]                   DDR4b_byteenable;
 `else
-	wire SoftReset;
-	assign SoftReset = pck_cp2af_softReset;
-
 	wire          DDR4a_waitrequest;
 	wire [511:0]  DDR4a_readdata;
 	wire          DDR4a_readdatavalid;
@@ -145,7 +152,7 @@ module ccip_std_afu(
 		)
 		ddr4a_inst(
 		.clk(DDR4a_USERCLK),
-		.reset(SoftReset),
+		.reset(pck_cp2af_softReset_q2),
 		.avmm_waitrequest(DDR4a_waitrequest),
 		.avmm_readdata(DDR4a_readdata),
 		.avmm_readdatavalid(DDR4a_readdatavalid),
@@ -162,7 +169,7 @@ module ccip_std_afu(
 		)
 		ddr4b_inst(
 		.clk(DDR4b_USERCLK),
-		.reset(SoftReset),
+		.reset(pck_cp2af_softReset_q2),
 		.avmm_waitrequest(DDR4b_waitrequest),
 		.avmm_readdata(DDR4b_readdata),
 		.avmm_readdatavalid(DDR4b_readdatavalid),
@@ -245,7 +252,7 @@ module ccip_std_afu(
 	.C1RX_DEPTH_RADIX(9)	//default was 10
     )
     ccip_async_shim (
-				    .bb_softreset    (pck_cp2af_softReset),
+				    .bb_softreset    (pck_cp2af_softReset_q2),
 				    .bb_clk          (pClk),
 				    .bb_tx           (pck_af2cp_sTx),
 				    .bb_rx           (pck_cp2af_sRx),
