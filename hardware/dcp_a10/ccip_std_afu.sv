@@ -230,15 +230,24 @@ module ccip_std_afu(
 	wire [5:0]	ddr4a_byte_address_bits;
 	wire [5:0]	ddr4b_byte_address_bits;
 
+	//register tx/rx inputs
+	//almost full signals can be registered because async fifo has slack
+	t_if_ccip_Rx     pck_cp2af_sRx_q;           // CCI-P Rx Port
+	t_if_ccip_Tx     pck_af2cp_sTx_q;           // CCI-P Tx Port
+	always @(posedge pClk)
+	begin
+		pck_af2cp_sTx <= pck_af2cp_sTx_q;
+		pck_cp2af_sRx_q <= pck_cp2af_sRx;
+	end
+
     //ccip async shim
     wire 	  async_shim_reset_out;   
     wire 	  afu_clk;   
-
+    
     t_if_ccip_Tx async2af_sTxPort;
     t_if_ccip_Rx async2af_sRxPort;
    
     assign afu_clk = pClkDiv2 ;
-
     t_if_ccip_c0_Rx async2af_mmio_c0rx;
 
     ccip_async_shim #(
@@ -254,8 +263,8 @@ module ccip_std_afu(
     ccip_async_shim (
 				    .bb_softreset    (pck_cp2af_softReset_q2),
 				    .bb_clk          (pClk),
-				    .bb_tx           (pck_af2cp_sTx),
-				    .bb_rx           (pck_cp2af_sRx),
+				    .bb_tx           (pck_af2cp_sTx_q),
+				    .bb_rx           (pck_cp2af_sRx_q),
 				    .afu_softreset   (async_shim_reset_out),
 				    .afu_clk         (afu_clk),
 				    .afu_tx          (async2af_sTxPort),
