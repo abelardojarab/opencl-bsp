@@ -18,6 +18,9 @@ target_link_libraries(intel_opae_mmd
    -lrt
    -lpkg_editor
    -lz
+   -lelf
+   -lopae-c
+   -luuid
    safestr
 )
 

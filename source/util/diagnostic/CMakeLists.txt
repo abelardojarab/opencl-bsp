@@ -22,10 +22,7 @@ add_executable(diagnose ${DIAGNOSE_SRC})
 
 target_link_libraries(diagnose
    -lalteracl
-   intel_opae_mmd
-   -lelf
-   -lopae-c
-   -luuid
+   -lintel_opae_mmd
    safestr
 )
  

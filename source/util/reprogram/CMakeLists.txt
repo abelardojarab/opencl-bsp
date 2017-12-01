@@ -20,10 +20,7 @@ add_executable(program ${PROGRAM_SRC})
 
 target_link_libraries(program
    -lalteracl
-   intel_opae_mmd
-   -lelf
-   -lopae-c
-   -luuid
+   -lintel_opae_mmd
    safestr
 )
  

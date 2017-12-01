@@ -14,7 +14,6 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(a10_dcp)
 
-#set(AOCL_BOARD_PACKAGE_ROOT $ENV{AOCL_BOARD_PACKAGE_ROOT})
 set(OPAE_INSTALL_PATH $ENV{OPAE_INSTALL_PATH})
 set(ALTERAOCLSDKROOT $ENV{ALTERAOCLSDKROOT})
 
@@ -22,6 +21,7 @@ set(ALTERAOCLSDKROOT $ENV{ALTERAOCLSDKROOT})
 link_directories("${ALTERAOCLSDKROOT}/host/linux64/lib")
 link_directories("${CMAKE_SOURCE_DIR}/../linux64/lib")
 link_directories("${CMAKE_SOURCE_DIR}/host/lib")
+link_directories("${CMAKE_BINARY_DIR}/host")
 link_directories("${OPAE_INSTALL_PATH}/lib")
 
 option(OPENCL_ASE_SIM "Build for ASE simulation" OFF)
