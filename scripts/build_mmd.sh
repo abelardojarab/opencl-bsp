@@ -14,6 +14,12 @@ if [ "$OPENCL_ASE_SIM" == "1" ]; then
 fi
 
 cd $ROOT_PROJECT_PATH/source
+rm -fr build
+
+rm -fr $ROOT_PROJECT_PATH/linux64/lib
+rm -f $ROOT_PROJECT_PATH/linux64/libexec/diagnose
+rm -f $ROOT_PROJECT_PATH/linux64/libexec/program
+
 mkdir build && cd build
 CC=`which gcc` CXX=`which g++` cmake -DOPENCL_ASE_SIM=$SET_ASE -DCMAKE_INSTALL_PREFIX=$ROOT_PROJECT_PATH/linux64 $ROOT_PROJECT_PATH/source
 make && make install
