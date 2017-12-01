@@ -4,7 +4,7 @@
   <platform name="linux64">
     <mmdlib>%b/linux64/lib/libintel_opae_mmd.so</mmdlib>
     <linkflags>-L%a/linux64/lib -L%b/linux64/lib </linkflags>
-    <linklibs> -lintel_opae_mmd</linklibs>
+    <linklibs> -lintel_opae_mmd -lrt</linklibs>
     <utilbindir>%b/linux64/libexec</utilbindir>
   </platform>
 
