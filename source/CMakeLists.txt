@@ -27,6 +27,9 @@ link_directories("${OPAE_INSTALL_PATH}/lib")
 option(OPENCL_ASE_SIM "Build for ASE simulation" OFF)
 if(OPENCL_ASE_SIM)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSIM")
+else()
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 endif()
 
 option(USE_MEMCPY_S "Use memcpy_s included in safe_string library" OFF)
@@ -48,9 +51,8 @@ include_directories(
 
 set (CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11") 
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3") 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3") 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 
 add_subdirectory(host)
 add_subdirectory(util)
