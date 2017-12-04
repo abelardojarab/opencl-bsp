@@ -15,13 +15,13 @@ set(MMD_SRC
 add_library(intel_opae_mmd SHARED ${MMD_SRC})
 
 target_link_libraries(intel_opae_mmd
-   -lrt
-   -lpkg_editor
+   pkg_editor.a
+   safestr
+   libelf.so.0
+   -lpthread
    -lz
-   -lelf
    -lopae-c
    -luuid
-   safestr
 )
 
 install(TARGETS intel_opae_mmd

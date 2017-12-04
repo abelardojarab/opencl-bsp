@@ -21,9 +21,9 @@ add_definitions(-DOPTION3=1
 add_executable(diagnose ${DIAGNOSE_SRC})
 
 target_link_libraries(diagnose
+   safestr
    -lalteracl
    -lintel_opae_mmd
-   safestr
 )
  
 install(TARGETS diagnose 

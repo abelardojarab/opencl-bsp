@@ -19,9 +19,9 @@ add_definitions(-DOPTION3=1
 add_executable(program ${PROGRAM_SRC})
 
 target_link_libraries(program
+   safestr
    -lalteracl
    -lintel_opae_mmd
-   safestr
 )
  
 install(TARGETS program
