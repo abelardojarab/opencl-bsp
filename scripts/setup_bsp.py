@@ -25,6 +25,7 @@ import glob
 import os
 import shutil
 import stat
+import subprocess
 import sys
 import tarfile
 
@@ -100,6 +101,27 @@ def get_packager_bin():
     return packager_bin
 
 
+# run command
+def run_cmd(cmd, path=None):
+    if(path):
+        old_cwd = os.getcwd()
+        os.chdir(path)
+    process = subprocess.Popen(cmd,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
+                               stdin=subprocess.PIPE,
+                               shell=True)
+    out, _err = process.communicate()
+    exitcode = process.poll()
+    if(path):
+        os.chdir(old_cwd)
+    if exitcode == 0:
+        return str(out).rstrip()
+    else:
+        print "ERROR: command '%s' failed" % cmd
+        sys.exit(1)
+
+
 # delete directory and create empty directory in its place
 def delete_and_mkdir(dir_path):
     shutil.rmtree(dir_path, ignore_errors=True)
@@ -130,7 +152,7 @@ def rm_glob(src, verbose=False):
 
 # main work function for setting up bsp
 def setup_bsp(platform, bsp_search_dirs, sim_mode=False, verbose=False,
-              debug=False):
+              debug=False, overlay=None):
     packager_bin = get_packager_bin()
     platform_dir = get_platform_dir(platform)
 
@@ -148,6 +170,15 @@ def setup_bsp(platform, bsp_search_dirs, sim_mode=False, verbose=False,
 
     for bsp in bsp_info_map.keys():
         bsp_dir = bsp_info_map[bsp]['dir']
+
+        # handle overlay/patch to bsp hw
+        if(overlay):
+            overlay_file = os.path.join(PROJECT_PATH, 'overlays',
+                                        "%s.patch" % overlay)
+            if(not os.path.exists(overlay_file)):
+                print "ERROR: overlay %s path not found" % overlay_file
+                sys.exit(1)
+            run_cmd("patch -f -p3 -i %s" % overlay_file, bsp_dir)
 
         # create empty directories inside bsp_dir
         output_files_dir = os.path.join(bsp_dir, 'output_files')
@@ -276,6 +307,8 @@ def main():
                         help='print more output for debugging')
     parser.add_argument('--platform', '-p', required=False,
                         default=DEFAULT_PLATFORM, help='set platform')
+    parser.add_argument('--overlay', '-o', required=False,
+                        default=None, help='include bsp overlay modification')
     parser.add_argument('--bsp-search-dirs', '-b', nargs='*',
                         required=False,
                         default=[DEFAULT_BSP_DIR],
@@ -293,7 +326,7 @@ def main():
 
     setup_bsp(platform=args.platform, bsp_search_dirs=args.bsp_search_dirs,
               sim_mode=sim_mode,
-              verbose=args.verbose, debug=args.debug)
+              verbose=args.verbose, debug=args.debug, overlay=args.overlay)
 
 
 if __name__ == '__main__':

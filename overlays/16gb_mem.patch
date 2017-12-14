@@ -1,0 +1,1622 @@
+diff --git a/hardware/dcp_a10/afu_ip.qsf b/hardware/dcp_a10/afu_ip.qsf
+index 6140e8c..12dccfe 100644
+--- a/hardware/dcp_a10/afu_ip.qsf
++++ b/hardware/dcp_a10/afu_ip.qsf
+@@ -1,3 +1,6 @@
++#16gb ddr addressing
++set_global_assignment -name VERILOG_MACRO "OPENCL_MEMORY_ADDR_WIDTH=27"
++
+ set_global_assignment -name SYSTEMVERILOG_FILE ./bsp_logic.sv
+ set_global_assignment -name SYSTEMVERILOG_FILE ./ccip_std_afu.sv
+ 
+diff --git a/hardware/dcp_a10/board_spec.xml b/hardware/dcp_a10/board_spec.xml
+index 1e6a42f..c1df7cb 100755
+--- a/hardware/dcp_a10/board_spec.xml
++++ b/hardware/dcp_a10/board_spec.xml
+@@ -24,8 +24,8 @@
+ 
+   <!-- DDR4-2133 -->
+   <global_mem name="DDR" max_bandwidth="34133" interleaved_bytes="1024" config_addr="0x018">
+-    <interface name="board" port="kernel_ddr4a" type="slave" width="512" maxburst="16" address="0x00000000" size="0x100000000" latency="240" addpipe="1"/>
+-    <interface name="board" port="kernel_ddr4b" type="slave" width="512" maxburst="16" address="0x100000000" size="0x100000000" latency="240" addpipe="1"/>
++    <interface name="board" port="kernel_ddr4a" type="slave" width="512" maxburst="16" address="0x00000000" size="0x200000000" latency="240" addpipe="1"/>
++    <interface name="board" port="kernel_ddr4b" type="slave" width="512" maxburst="16" address="0x200000000" size="0x200000000" latency="240" addpipe="1"/>
+   </global_mem>
+     
+   <host>
+@@ -35,7 +35,7 @@
+   <interfaces>
+     <interface name="board" port="kernel_cra" type="master" width="64" misc="0"/>
+     <interface name="board" port="kernel_irq" type="irq" width="1"/>
+-    <interface name="board" port="acl_internal_snoop" type="streamsource" enable="SNOOPENABLE" width="33" clock="board.kernel_clk"/>
++    <interface name="board" port="acl_internal_snoop" type="streamsource" enable="SNOOPENABLE" width="34" clock="board.kernel_clk"/>
+     <kernel_clk_reset clk="board.kernel_clk" clk2x="board.kernel_clk2x" reset="board.kernel_reset"/>
+   </interfaces>
+ </board>
+diff --git a/hardware/dcp_a10/ddr_board.qsys b/hardware/dcp_a10/ddr_board.qsys
+index 3f0e2fa..2c836f3 100644
+--- a/hardware/dcp_a10/ddr_board.qsys
++++ b/hardware/dcp_a10/ddr_board.qsys
+@@ -296,11 +296,11 @@
+                 <consumedSystemInfos>
+                     <entry>
+                         <key>ADDRESS_MAP</key>
+-                        <value>&lt;address-map&gt;&lt;slave name='ddr4a_pipe_0.s0' start='0x0' end='0x100000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
++                        <value>&lt;address-map&gt;&lt;slave name='ddr4a_pipe_0.s0' start='0x0' end='0x200000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
+                     </entry>
+                     <entry>
+                         <key>ADDRESS_WIDTH</key>
+-                        <value>32</value>
++                        <value>33</value>
+                     </entry>
+                     <entry>
+                         <key>MAX_SLAVE_DATA_WIDTH</key>
+@@ -317,11 +317,11 @@
+                 <consumedSystemInfos>
+                     <entry>
+                         <key>ADDRESS_MAP</key>
+-                        <value>&lt;address-map&gt;&lt;slave name='ddr4b_pipe_0.s0' start='0x0' end='0x100000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
++                        <value>&lt;address-map&gt;&lt;slave name='ddr4b_pipe_0.s0' start='0x0' end='0x200000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
+                     </entry>
+                     <entry>
+                         <key>ADDRESS_WIDTH</key>
+-                        <value>32</value>
++                        <value>33</value>
+                     </entry>
+                     <entry>
+                         <key>MAX_SLAVE_DATA_WIDTH</key>
+@@ -351,36 +351,6 @@
+                 </consumedSystemInfos>
+             </value>
+         </entry>
+-        <entry>
+-            <key>msgdma_bbb_inst_host_rd</key>
+-            <value>
+-                <connectionPointName>msgdma_bbb_inst_host_rd</connectionPointName>
+-                <suppliedSystemInfos>
+-                    <entry>
+-                        <key>ADDRESS_MAP</key>
+-                    </entry>
+-                    <entry>
+-                        <key>ADDRESS_WIDTH</key>
+-                    </entry>
+-                </suppliedSystemInfos>
+-                <consumedSystemInfos/>
+-            </value>
+-        </entry>
+-        <entry>
+-            <key>msgdma_bbb_inst_host_wr</key>
+-            <value>
+-                <connectionPointName>msgdma_bbb_inst_host_wr</connectionPointName>
+-                <suppliedSystemInfos>
+-                    <entry>
+-                        <key>ADDRESS_MAP</key>
+-                    </entry>
+-                    <entry>
+-                        <key>ADDRESS_WIDTH</key>
+-                    </entry>
+-                </suppliedSystemInfos>
+-                <consumedSystemInfos/>
+-            </value>
+-        </entry>
+     </connPtSystemInfos>
+ </systemInfosDefinition>]]></parameter>
+  <parameter name="systemScripts" value="" />
+@@ -422,6 +392,16 @@
+    dir="end" />
+  <interface name="host_clk" internal="host_clk.in_clk" type="clock" dir="end" />
+  <interface name="host_mem" internal="msgdma_bbb_inst.host" />
++ <interface
++   name="host_rd"
++   internal="msgdma_bbb_inst.host_rd"
++   type="avalon"
++   dir="start" />
++ <interface
++   name="host_wr"
++   internal="msgdma_bbb_inst.host_wr"
++   type="avalon"
++   dir="start" />
+  <interface name="kernel_clk" internal="kernel_clk.in_clk" type="clock" dir="end" />
+  <interface
+    name="kernel_ddr4a"
+@@ -443,16 +423,6 @@
+    internal="msgdma_bbb_inst.csr"
+    type="avalon"
+    dir="end" />
+- <interface
+-   name="host_rd"
+-   internal="msgdma_bbb_inst.host_rd"
+-   type="avalon"
+-   dir="start" />
+- <interface
+-   name="host_wr"
+-   internal="msgdma_bbb_inst.host_wr"
+-   type="avalon"
+-   dir="start" />
+  <module
+    name="ddr4a_cross_to_host"
+    kind="altera_generic_component"
+@@ -510,7 +480,7 @@
+                         <name>m0_address</name>
+                         <role>address</role>
+                         <direction>Output</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -802,7 +772,7 @@
+                         <name>s0_address</name>
+                         <role>address</role>
+                         <direction>Input</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -871,7 +841,7 @@
+                         </entry>
+                         <entry>
+                             <key>addressSpan</key>
+-                            <value>4294967296</value>
++                            <value>8589934592</value>
+                         </entry>
+                         <entry>
+                             <key>addressUnits</key>
+@@ -1119,7 +1089,7 @@
+                     <consumedSystemInfos>
+                         <entry>
+                             <key>ADDRESS_WIDTH</key>
+-                            <value>32</value>
++                            <value>33</value>
+                         </entry>
+                     </consumedSystemInfos>
+                 </value>
+@@ -1231,7 +1201,7 @@
+                         <name>m0_address</name>
+                         <role>address</role>
+                         <direction>Output</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -1523,7 +1493,7 @@
+                         <name>s0_address</name>
+                         <role>address</role>
+                         <direction>Input</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -1592,7 +1562,7 @@
+                         </entry>
+                         <entry>
+                             <key>addressSpan</key>
+-                            <value>4294967296</value>
++                            <value>8589934592</value>
+                         </entry>
+                         <entry>
+                             <key>addressUnits</key>
+@@ -1840,7 +1810,7 @@
+                     <consumedSystemInfos>
+                         <entry>
+                             <key>ADDRESS_WIDTH</key>
+-                            <value>32</value>
++                            <value>33</value>
+                         </entry>
+                     </consumedSystemInfos>
+                 </value>
+@@ -1985,7 +1955,7 @@
+                         <name>m0_address</name>
+                         <role>address</role>
+                         <direction>Output</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -2244,7 +2214,7 @@
+                         <name>s0_address</name>
+                         <role>address</role>
+                         <direction>Input</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -2313,7 +2283,7 @@
+                         </entry>
+                         <entry>
+                             <key>addressSpan</key>
+-                            <value>4294967296</value>
++                            <value>8589934592</value>
+                         </entry>
+                         <entry>
+                             <key>addressUnits</key>
+@@ -2643,7 +2613,7 @@
+                         <name>m0_address</name>
+                         <role>address</role>
+                         <direction>Output</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -2902,7 +2872,7 @@
+                         <name>s0_address</name>
+                         <role>address</role>
+                         <direction>Input</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -2971,7 +2941,7 @@
+                         </entry>
+                         <entry>
+                             <key>addressSpan</key>
+-                            <value>4294967296</value>
++                            <value>8589934592</value>
+                         </entry>
+                         <entry>
+                             <key>addressUnits</key>
+@@ -3156,7 +3126,7 @@
+                     <consumedSystemInfos>
+                         <entry>
+                             <key>ADDRESS_WIDTH</key>
+-                            <value>32</value>
++                            <value>33</value>
+                         </entry>
+                     </consumedSystemInfos>
+                 </value>
+@@ -3301,7 +3271,7 @@
+                         <name>m0_address</name>
+                         <role>address</role>
+                         <direction>Output</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -3560,7 +3530,7 @@
+                         <name>s0_address</name>
+                         <role>address</role>
+                         <direction>Input</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -3629,7 +3599,7 @@
+                         </entry>
+                         <entry>
+                             <key>addressSpan</key>
+-                            <value>4294967296</value>
++                            <value>8589934592</value>
+                         </entry>
+                         <entry>
+                             <key>addressUnits</key>
+@@ -3814,7 +3784,7 @@
+                     <consumedSystemInfos>
+                         <entry>
+                             <key>ADDRESS_WIDTH</key>
+-                            <value>32</value>
++                            <value>33</value>
+                         </entry>
+                     </consumedSystemInfos>
+                 </value>
+@@ -3926,7 +3896,7 @@
+                         <name>m0_address</name>
+                         <role>address</role>
+                         <direction>Output</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -4218,7 +4188,7 @@
+                         <name>s0_address</name>
+                         <role>address</role>
+                         <direction>Input</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -4287,7 +4257,7 @@
+                         </entry>
+                         <entry>
+                             <key>addressSpan</key>
+-                            <value>4294967296</value>
++                            <value>8589934592</value>
+                         </entry>
+                         <entry>
+                             <key>addressUnits</key>
+@@ -4535,7 +4505,7 @@
+                     <consumedSystemInfos>
+                         <entry>
+                             <key>ADDRESS_WIDTH</key>
+-                            <value>32</value>
++                            <value>33</value>
+                         </entry>
+                     </consumedSystemInfos>
+                 </value>
+@@ -4647,7 +4617,7 @@
+                         <name>m0_address</name>
+                         <role>address</role>
+                         <direction>Output</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -4939,7 +4909,7 @@
+                         <name>s0_address</name>
+                         <role>address</role>
+                         <direction>Input</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -5008,7 +4978,7 @@
+                         </entry>
+                         <entry>
+                             <key>addressSpan</key>
+-                            <value>4294967296</value>
++                            <value>8589934592</value>
+                         </entry>
+                         <entry>
+                             <key>addressUnits</key>
+@@ -5256,7 +5226,7 @@
+                     <consumedSystemInfos>
+                         <entry>
+                             <key>ADDRESS_WIDTH</key>
+-                            <value>32</value>
++                            <value>33</value>
+                         </entry>
+                     </consumedSystemInfos>
+                 </value>
+@@ -5401,7 +5371,7 @@
+                         <name>m0_address</name>
+                         <role>address</role>
+                         <direction>Output</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -5660,7 +5630,7 @@
+                         <name>s0_address</name>
+                         <role>address</role>
+                         <direction>Input</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -5729,7 +5699,7 @@
+                         </entry>
+                         <entry>
+                             <key>addressSpan</key>
+-                            <value>4294967296</value>
++                            <value>8589934592</value>
+                         </entry>
+                         <entry>
+                             <key>addressUnits</key>
+@@ -6059,7 +6029,7 @@
+                         <name>m0_address</name>
+                         <role>address</role>
+                         <direction>Output</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -6318,7 +6288,7 @@
+                         <name>s0_address</name>
+                         <role>address</role>
+                         <direction>Input</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -6387,7 +6357,7 @@
+                         </entry>
+                         <entry>
+                             <key>addressSpan</key>
+-                            <value>4294967296</value>
++                            <value>8589934592</value>
+                         </entry>
+                         <entry>
+                             <key>addressUnits</key>
+@@ -6572,7 +6542,7 @@
+                     <consumedSystemInfos>
+                         <entry>
+                             <key>ADDRESS_WIDTH</key>
+-                            <value>32</value>
++                            <value>33</value>
+                         </entry>
+                     </consumedSystemInfos>
+                 </value>
+@@ -6717,7 +6687,7 @@
+                         <name>m0_address</name>
+                         <role>address</role>
+                         <direction>Output</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -6976,7 +6946,7 @@
+                         <name>s0_address</name>
+                         <role>address</role>
+                         <direction>Input</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -7045,7 +7015,7 @@
+                         </entry>
+                         <entry>
+                             <key>addressSpan</key>
+-                            <value>4294967296</value>
++                            <value>8589934592</value>
+                         </entry>
+                         <entry>
+                             <key>addressUnits</key>
+@@ -7230,7 +7200,7 @@
+                     <consumedSystemInfos>
+                         <entry>
+                             <key>ADDRESS_WIDTH</key>
+-                            <value>32</value>
++                            <value>33</value>
+                         </entry>
+                     </consumedSystemInfos>
+                 </value>
+@@ -7334,7 +7304,7 @@
+                         <name>acl_bsp_snoop_data</name>
+                         <role>data</role>
+                         <direction>Output</direction>
+-                        <width>33</width>
++                        <width>34</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -7374,7 +7344,7 @@
+                         </entry>
+                         <entry>
+                             <key>dataBitsPerSymbol</key>
+-                            <value>33</value>
++                            <value>34</value>
+                         </entry>
+                         <entry>
+                             <key>emptyWithinPacket</key>
+@@ -7423,7 +7393,7 @@
+                         <name>bank1_address</name>
+                         <role>address</role>
+                         <direction>Output</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -7644,7 +7614,7 @@
+                         <name>bank2_address</name>
+                         <role>address</role>
+                         <direction>Output</direction>
+-                        <width>32</width>
++                        <width>33</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -8074,7 +8044,7 @@
+                         <name>s_address</name>
+                         <role>address</role>
+                         <direction>Input</direction>
+-                        <width>27</width>
++                        <width>28</width>
+                         <lowerBound>0</lowerBound>
+                         <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                     </port>
+@@ -8111,7 +8081,7 @@
+                         </entry>
+                         <entry>
+                             <key>addressSpan</key>
+-                            <value>8589934592</value>
++                            <value>17179869184</value>
+                         </entry>
+                         <entry>
+                             <key>addressUnits</key>
+@@ -8389,11 +8359,11 @@
+                     <suppliedSystemInfos>
+                         <entry>
+                             <key>ADDRESS_MAP</key>
+-                            <value>&lt;address-map&gt;&lt;slave name='s' start='0x0' end='0x200000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
++                            <value>&lt;address-map&gt;&lt;slave name='s' start='0x0' end='0x400000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
+                         </entry>
+                         <entry>
+                             <key>ADDRESS_WIDTH</key>
+-                            <value>33</value>
++                            <value>34</value>
+                         </entry>
+                         <entry>
+                             <key>MAX_SLAVE_DATA_WIDTH</key>
+@@ -9435,8 +9405,8 @@
+   <parameter name="AUTO_HOST_RD_ADDRESS_WIDTH" value="-1" />
+   <parameter name="AUTO_HOST_WR_ADDRESS_MAP" value="" />
+   <parameter name="AUTO_HOST_WR_ADDRESS_WIDTH" value="-1" />
+-  <parameter name="AUTO_MEM_ADDRESS_MAP"><![CDATA[<address-map><slave name='ddr_board_acl_memory_bank_divider_0.s' start='0x0' end='0x200000000' datawidth='512' /></address-map>]]></parameter>
+-  <parameter name="AUTO_MEM_ADDRESS_WIDTH" value="33" />
++  <parameter name="AUTO_MEM_ADDRESS_MAP"><![CDATA[<address-map><slave name='ddr_board_acl_memory_bank_divider_0.s' start='0x0' end='0x400000000' datawidth='512' /></address-map>]]></parameter>
++  <parameter name="AUTO_MEM_ADDRESS_WIDTH" value="34" />
+   <parameter name="AUTO_UNIQUE_ID">ddr_board_msgdma_bbb_inst</parameter>
+  </module>
+  <connection
+diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_acl_memory_bank_divider_0.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_acl_memory_bank_divider_0.ip
+index feecd76..6e7f5fa 100644
+--- a/hardware/dcp_a10/ip/ddr_board/ddr_board_acl_memory_bank_divider_0.ip
++++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_acl_memory_bank_divider_0.ip
+@@ -86,7 +86,7 @@
+         <spirit:parameter>
+           <spirit:name>dataBitsPerSymbol</spirit:name>
+           <spirit:displayName>Data bits per symbol</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="dataBitsPerSymbol">33</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="dataBitsPerSymbol">34</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>emptyWithinPacket</spirit:name>
+@@ -887,7 +887,7 @@
+         <spirit:parameter>
+           <spirit:name>addressSpan</spirit:name>
+           <spirit:displayName>Address span</spirit:displayName>
+-          <spirit:value spirit:format="string" spirit:id="addressSpan">8589934592</spirit:value>
++          <spirit:value spirit:format="string" spirit:id="addressSpan">17179869184</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>addressUnits</spirit:name>
+@@ -1138,7 +1138,7 @@
+           <spirit:direction>out</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>32</spirit:right>
++            <spirit:right>33</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -1178,7 +1178,7 @@
+           <spirit:direction>out</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -1306,7 +1306,7 @@
+           <spirit:direction>out</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -1594,7 +1594,7 @@
+           <spirit:direction>in</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>26</spirit:right>
++            <spirit:right>27</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -1643,7 +1643,7 @@
+         <spirit:parameter>
+           <spirit:name>ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Address Width (total addressable)</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">33</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">34</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>BURST_SIZE</spirit:name>
+@@ -1778,7 +1778,7 @@
+                     <name>acl_bsp_snoop_data</name>
+                     <role>data</role>
+                     <direction>Output</direction>
+-                    <width>33</width>
++                    <width>34</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1818,7 +1818,7 @@
+                     </entry>
+                     <entry>
+                         <key>dataBitsPerSymbol</key>
+-                        <value>33</value>
++                        <value>34</value>
+                     </entry>
+                     <entry>
+                         <key>emptyWithinPacket</key>
+@@ -1867,7 +1867,7 @@
+                     <name>bank1_address</name>
+                     <role>address</role>
+                     <direction>Output</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -2088,7 +2088,7 @@
+                     <name>bank2_address</name>
+                     <role>address</role>
+                     <direction>Output</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -2518,7 +2518,7 @@
+                     <name>s_address</name>
+                     <role>address</role>
+                     <direction>Input</direction>
+-                    <width>27</width>
++                    <width>28</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -2555,7 +2555,7 @@
+                     </entry>
+                     <entry>
+                         <key>addressSpan</key>
+-                        <value>8589934592</value>
++                        <value>17179869184</value>
+                     </entry>
+                     <entry>
+                         <key>addressUnits</key>
+@@ -2769,11 +2769,11 @@
+                 <consumedSystemInfos>
+                     <entry>
+                         <key>ADDRESS_MAP</key>
+-                        <value>&lt;address-map&gt;&lt;slave name='s' start='0x0' end='0x200000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
++                        <value>&lt;address-map&gt;&lt;slave name='s' start='0x0' end='0x400000000' datawidth='512' /&gt;&lt;/address-map&gt;</value>
+                     </entry>
+                     <entry>
+                         <key>ADDRESS_WIDTH</key>
+-                        <value>33</value>
++                        <value>34</value>
+                     </entry>
+                     <entry>
+                         <key>MAX_SLAVE_DATA_WIDTH</key>
+diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_0.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_0.ip
+index b2c8407..530a36a 100644
+--- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_0.ip
++++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_0.ip
+@@ -423,7 +423,7 @@
+         <spirit:parameter>
+           <spirit:name>addressSpan</spirit:name>
+           <spirit:displayName>Address span</spirit:displayName>
+-          <spirit:value spirit:format="string" spirit:id="addressSpan">4294967296</spirit:value>
++          <spirit:value spirit:format="string" spirit:id="addressSpan">8589934592</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>addressUnits</spirit:name>
+@@ -754,7 +754,7 @@
+           <spirit:direction>in</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -894,7 +894,7 @@
+           <spirit:direction>out</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -980,12 +980,12 @@
+         <spirit:parameter>
+           <spirit:name>ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>SYSINFO_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>SYSINFO_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="SYSINFO_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="SYSINFO_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>USE_AUTO_ADDRESS_WIDTH</spirit:name>
+@@ -995,12 +995,12 @@
+         <spirit:parameter>
+           <spirit:name>AUTO_ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Automatically-determined address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="AUTO_ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="AUTO_ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>HDL_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>HDL_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>ADDRESS_UNITS</spirit:name>
+@@ -1161,7 +1161,7 @@
+                     <name>m0_address</name>
+                     <role>address</role>
+                     <direction>Output</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1420,7 +1420,7 @@
+                     <name>s0_address</name>
+                     <role>address</role>
+                     <direction>Input</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1489,7 +1489,7 @@
+                     </entry>
+                     <entry>
+                         <key>addressSpan</key>
+-                        <value>4294967296</value>
++                        <value>8589934592</value>
+                     </entry>
+                     <entry>
+                         <key>addressUnits</key>
+@@ -1661,7 +1661,7 @@
+                 <suppliedSystemInfos>
+                     <entry>
+                         <key>ADDRESS_WIDTH</key>
+-                        <value>32</value>
++                        <value>33</value>
+                     </entry>
+                 </suppliedSystemInfos>
+                 <consumedSystemInfos/>
+diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_1.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_1.ip
+index ebee6ee..d8738a5 100644
+--- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_1.ip
++++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_1.ip
+@@ -423,7 +423,7 @@
+         <spirit:parameter>
+           <spirit:name>addressSpan</spirit:name>
+           <spirit:displayName>Address span</spirit:displayName>
+-          <spirit:value spirit:format="string" spirit:id="addressSpan">4294967296</spirit:value>
++          <spirit:value spirit:format="string" spirit:id="addressSpan">8589934592</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>addressUnits</spirit:name>
+@@ -754,7 +754,7 @@
+           <spirit:direction>in</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -894,7 +894,7 @@
+           <spirit:direction>out</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -980,12 +980,12 @@
+         <spirit:parameter>
+           <spirit:name>ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>SYSINFO_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>SYSINFO_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="SYSINFO_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="SYSINFO_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>USE_AUTO_ADDRESS_WIDTH</spirit:name>
+@@ -995,12 +995,12 @@
+         <spirit:parameter>
+           <spirit:name>AUTO_ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Automatically-determined address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="AUTO_ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="AUTO_ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>HDL_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>HDL_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>ADDRESS_UNITS</spirit:name>
+@@ -1161,7 +1161,7 @@
+                     <name>m0_address</name>
+                     <role>address</role>
+                     <direction>Output</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1420,7 +1420,7 @@
+                     <name>s0_address</name>
+                     <role>address</role>
+                     <direction>Input</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1489,7 +1489,7 @@
+                     </entry>
+                     <entry>
+                         <key>addressSpan</key>
+-                        <value>4294967296</value>
++                        <value>8589934592</value>
+                     </entry>
+                     <entry>
+                         <key>addressUnits</key>
+@@ -1661,7 +1661,7 @@
+                 <suppliedSystemInfos>
+                     <entry>
+                         <key>ADDRESS_WIDTH</key>
+-                        <value>32</value>
++                        <value>33</value>
+                     </entry>
+                 </suppliedSystemInfos>
+                 <consumedSystemInfos/>
+diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_2.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_2.ip
+index 1890528..b9ae21d 100644
+--- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_2.ip
++++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_2.ip
+@@ -423,7 +423,7 @@
+         <spirit:parameter>
+           <spirit:name>addressSpan</spirit:name>
+           <spirit:displayName>Address span</spirit:displayName>
+-          <spirit:value spirit:format="string" spirit:id="addressSpan">4294967296</spirit:value>
++          <spirit:value spirit:format="string" spirit:id="addressSpan">8589934592</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>addressUnits</spirit:name>
+@@ -754,7 +754,7 @@
+           <spirit:direction>in</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -894,7 +894,7 @@
+           <spirit:direction>out</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -980,7 +980,7 @@
+         <spirit:parameter>
+           <spirit:name>ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>SYSINFO_ADDR_WIDTH</spirit:name>
+@@ -1000,7 +1000,7 @@
+         <spirit:parameter>
+           <spirit:name>HDL_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>HDL_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>ADDRESS_UNITS</spirit:name>
+@@ -1161,7 +1161,7 @@
+                     <name>m0_address</name>
+                     <role>address</role>
+                     <direction>Output</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1420,7 +1420,7 @@
+                     <name>s0_address</name>
+                     <role>address</role>
+                     <direction>Input</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1489,7 +1489,7 @@
+                     </entry>
+                     <entry>
+                         <key>addressSpan</key>
+-                        <value>4294967296</value>
++                        <value>8589934592</value>
+                     </entry>
+                     <entry>
+                         <key>addressUnits</key>
+diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_3.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_3.ip
+index 544e97d..52a6643 100644
+--- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_3.ip
++++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_3.ip
+@@ -423,7 +423,7 @@
+         <spirit:parameter>
+           <spirit:name>addressSpan</spirit:name>
+           <spirit:displayName>Address span</spirit:displayName>
+-          <spirit:value spirit:format="string" spirit:id="addressSpan">4294967296</spirit:value>
++          <spirit:value spirit:format="string" spirit:id="addressSpan">8589934592</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>addressUnits</spirit:name>
+@@ -754,7 +754,7 @@
+           <spirit:direction>in</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -894,7 +894,7 @@
+           <spirit:direction>out</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -980,12 +980,12 @@
+         <spirit:parameter>
+           <spirit:name>ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>SYSINFO_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>SYSINFO_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="SYSINFO_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="SYSINFO_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>USE_AUTO_ADDRESS_WIDTH</spirit:name>
+@@ -995,12 +995,12 @@
+         <spirit:parameter>
+           <spirit:name>AUTO_ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Automatically-determined address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="AUTO_ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="AUTO_ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>HDL_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>HDL_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>ADDRESS_UNITS</spirit:name>
+@@ -1161,7 +1161,7 @@
+                     <name>m0_address</name>
+                     <role>address</role>
+                     <direction>Output</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1420,7 +1420,7 @@
+                     <name>s0_address</name>
+                     <role>address</role>
+                     <direction>Input</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1489,7 +1489,7 @@
+                     </entry>
+                     <entry>
+                         <key>addressSpan</key>
+-                        <value>4294967296</value>
++                        <value>8589934592</value>
+                     </entry>
+                     <entry>
+                         <key>addressUnits</key>
+@@ -1661,7 +1661,7 @@
+                 <suppliedSystemInfos>
+                     <entry>
+                         <key>ADDRESS_WIDTH</key>
+-                        <value>32</value>
++                        <value>33</value>
+                     </entry>
+                 </suppliedSystemInfos>
+                 <consumedSystemInfos/>
+diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_4.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_4.ip
+index 92af1a3..bd651cb 100644
+--- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_4.ip
++++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_4.ip
+@@ -423,7 +423,7 @@
+         <spirit:parameter>
+           <spirit:name>addressSpan</spirit:name>
+           <spirit:displayName>Address span</spirit:displayName>
+-          <spirit:value spirit:format="string" spirit:id="addressSpan">4294967296</spirit:value>
++          <spirit:value spirit:format="string" spirit:id="addressSpan">8589934592</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>addressUnits</spirit:name>
+@@ -754,7 +754,7 @@
+           <spirit:direction>in</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -894,7 +894,7 @@
+           <spirit:direction>out</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -980,7 +980,7 @@
+         <spirit:parameter>
+           <spirit:name>ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>SYSINFO_ADDR_WIDTH</spirit:name>
+@@ -1000,7 +1000,7 @@
+         <spirit:parameter>
+           <spirit:name>HDL_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>HDL_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>ADDRESS_UNITS</spirit:name>
+@@ -1161,7 +1161,7 @@
+                     <name>m0_address</name>
+                     <role>address</role>
+                     <direction>Output</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1420,7 +1420,7 @@
+                     <name>s0_address</name>
+                     <role>address</role>
+                     <direction>Input</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1489,7 +1489,7 @@
+                     </entry>
+                     <entry>
+                         <key>addressSpan</key>
+-                        <value>4294967296</value>
++                        <value>8589934592</value>
+                     </entry>
+                     <entry>
+                         <key>addressUnits</key>
+diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_5.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_5.ip
+index e729941..78ef2ad 100644
+--- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_5.ip
++++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_5.ip
+@@ -423,7 +423,7 @@
+         <spirit:parameter>
+           <spirit:name>addressSpan</spirit:name>
+           <spirit:displayName>Address span</spirit:displayName>
+-          <spirit:value spirit:format="string" spirit:id="addressSpan">4294967296</spirit:value>
++          <spirit:value spirit:format="string" spirit:id="addressSpan">8589934592</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>addressUnits</spirit:name>
+@@ -754,7 +754,7 @@
+           <spirit:direction>in</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -894,7 +894,7 @@
+           <spirit:direction>out</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -980,12 +980,12 @@
+         <spirit:parameter>
+           <spirit:name>ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>SYSINFO_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>SYSINFO_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="SYSINFO_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="SYSINFO_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>USE_AUTO_ADDRESS_WIDTH</spirit:name>
+@@ -995,12 +995,12 @@
+         <spirit:parameter>
+           <spirit:name>AUTO_ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Automatically-determined address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="AUTO_ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="AUTO_ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>HDL_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>HDL_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>ADDRESS_UNITS</spirit:name>
+@@ -1161,7 +1161,7 @@
+                     <name>m0_address</name>
+                     <role>address</role>
+                     <direction>Output</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1420,7 +1420,7 @@
+                     <name>s0_address</name>
+                     <role>address</role>
+                     <direction>Input</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1489,7 +1489,7 @@
+                     </entry>
+                     <entry>
+                         <key>addressSpan</key>
+-                        <value>4294967296</value>
++                        <value>8589934592</value>
+                     </entry>
+                     <entry>
+                         <key>addressUnits</key>
+@@ -1661,7 +1661,7 @@
+                 <suppliedSystemInfos>
+                     <entry>
+                         <key>ADDRESS_WIDTH</key>
+-                        <value>32</value>
++                        <value>33</value>
+                     </entry>
+                 </suppliedSystemInfos>
+                 <consumedSystemInfos/>
+diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_0.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_0.ip
+index 76f07ee..05279ae 100644
+--- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_0.ip
++++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_0.ip
+@@ -423,7 +423,7 @@
+         <spirit:parameter>
+           <spirit:name>addressSpan</spirit:name>
+           <spirit:displayName>Address span</spirit:displayName>
+-          <spirit:value spirit:format="string" spirit:id="addressSpan">4294967296</spirit:value>
++          <spirit:value spirit:format="string" spirit:id="addressSpan">8589934592</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>addressUnits</spirit:name>
+@@ -837,7 +837,7 @@
+           <spirit:direction>in</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -977,7 +977,7 @@
+           <spirit:direction>out</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -1063,12 +1063,12 @@
+         <spirit:parameter>
+           <spirit:name>ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>SYSINFO_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>SYSINFO_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="SYSINFO_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="SYSINFO_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>USE_AUTO_ADDRESS_WIDTH</spirit:name>
+@@ -1078,12 +1078,12 @@
+         <spirit:parameter>
+           <spirit:name>AUTO_ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Automatically-determined address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="AUTO_ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="AUTO_ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>HDL_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>HDL_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>ADDRESS_UNITS</spirit:name>
+@@ -1206,7 +1206,7 @@
+                     <name>m0_address</name>
+                     <role>address</role>
+                     <direction>Output</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1498,7 +1498,7 @@
+                     <name>s0_address</name>
+                     <role>address</role>
+                     <direction>Input</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1567,7 +1567,7 @@
+                     </entry>
+                     <entry>
+                         <key>addressSpan</key>
+-                        <value>4294967296</value>
++                        <value>8589934592</value>
+                     </entry>
+                     <entry>
+                         <key>addressUnits</key>
+@@ -1802,7 +1802,7 @@
+                 <suppliedSystemInfos>
+                     <entry>
+                         <key>ADDRESS_WIDTH</key>
+-                        <value>32</value>
++                        <value>33</value>
+                     </entry>
+                 </suppliedSystemInfos>
+                 <consumedSystemInfos/>
+diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_1.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_1.ip
+index b4fc3a1..a4a5399 100644
+--- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_1.ip
++++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_1.ip
+@@ -423,7 +423,7 @@
+         <spirit:parameter>
+           <spirit:name>addressSpan</spirit:name>
+           <spirit:displayName>Address span</spirit:displayName>
+-          <spirit:value spirit:format="string" spirit:id="addressSpan">4294967296</spirit:value>
++          <spirit:value spirit:format="string" spirit:id="addressSpan">8589934592</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>addressUnits</spirit:name>
+@@ -837,7 +837,7 @@
+           <spirit:direction>in</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -977,7 +977,7 @@
+           <spirit:direction>out</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -1063,12 +1063,12 @@
+         <spirit:parameter>
+           <spirit:name>ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>SYSINFO_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>SYSINFO_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="SYSINFO_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="SYSINFO_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>USE_AUTO_ADDRESS_WIDTH</spirit:name>
+@@ -1078,12 +1078,12 @@
+         <spirit:parameter>
+           <spirit:name>AUTO_ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Automatically-determined address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="AUTO_ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="AUTO_ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>HDL_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>HDL_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>ADDRESS_UNITS</spirit:name>
+@@ -1206,7 +1206,7 @@
+                     <name>m0_address</name>
+                     <role>address</role>
+                     <direction>Output</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1498,7 +1498,7 @@
+                     <name>s0_address</name>
+                     <role>address</role>
+                     <direction>Input</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1567,7 +1567,7 @@
+                     </entry>
+                     <entry>
+                         <key>addressSpan</key>
+-                        <value>4294967296</value>
++                        <value>8589934592</value>
+                     </entry>
+                     <entry>
+                         <key>addressUnits</key>
+@@ -1802,7 +1802,7 @@
+                 <suppliedSystemInfos>
+                     <entry>
+                         <key>ADDRESS_WIDTH</key>
+-                        <value>32</value>
++                        <value>33</value>
+                     </entry>
+                 </suppliedSystemInfos>
+                 <consumedSystemInfos/>
+diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_2.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_2.ip
+index 680a1dc..c4c3f90 100644
+--- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_2.ip
++++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_2.ip
+@@ -423,7 +423,7 @@
+         <spirit:parameter>
+           <spirit:name>addressSpan</spirit:name>
+           <spirit:displayName>Address span</spirit:displayName>
+-          <spirit:value spirit:format="string" spirit:id="addressSpan">4294967296</spirit:value>
++          <spirit:value spirit:format="string" spirit:id="addressSpan">8589934592</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>addressUnits</spirit:name>
+@@ -837,7 +837,7 @@
+           <spirit:direction>in</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -977,7 +977,7 @@
+           <spirit:direction>out</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -1063,12 +1063,12 @@
+         <spirit:parameter>
+           <spirit:name>ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>SYSINFO_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>SYSINFO_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="SYSINFO_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="SYSINFO_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>USE_AUTO_ADDRESS_WIDTH</spirit:name>
+@@ -1078,12 +1078,12 @@
+         <spirit:parameter>
+           <spirit:name>AUTO_ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Automatically-determined address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="AUTO_ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="AUTO_ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>HDL_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>HDL_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>ADDRESS_UNITS</spirit:name>
+@@ -1206,7 +1206,7 @@
+                     <name>m0_address</name>
+                     <role>address</role>
+                     <direction>Output</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1498,7 +1498,7 @@
+                     <name>s0_address</name>
+                     <role>address</role>
+                     <direction>Input</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1567,7 +1567,7 @@
+                     </entry>
+                     <entry>
+                         <key>addressSpan</key>
+-                        <value>4294967296</value>
++                        <value>8589934592</value>
+                     </entry>
+                     <entry>
+                         <key>addressUnits</key>
+@@ -1802,7 +1802,7 @@
+                 <suppliedSystemInfos>
+                     <entry>
+                         <key>ADDRESS_WIDTH</key>
+-                        <value>32</value>
++                        <value>33</value>
+                     </entry>
+                 </suppliedSystemInfos>
+                 <consumedSystemInfos/>
+diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_4.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_4.ip
+index 1f6ae10..59e8b4e 100644
+--- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_4.ip
++++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_4.ip
+@@ -423,7 +423,7 @@
+         <spirit:parameter>
+           <spirit:name>addressSpan</spirit:name>
+           <spirit:displayName>Address span</spirit:displayName>
+-          <spirit:value spirit:format="string" spirit:id="addressSpan">4294967296</spirit:value>
++          <spirit:value spirit:format="string" spirit:id="addressSpan">8589934592</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>addressUnits</spirit:name>
+@@ -837,7 +837,7 @@
+           <spirit:direction>in</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -977,7 +977,7 @@
+           <spirit:direction>out</spirit:direction>
+           <spirit:vector>
+             <spirit:left>0</spirit:left>
+-            <spirit:right>31</spirit:right>
++            <spirit:right>32</spirit:right>
+           </spirit:vector>
+           <spirit:wireTypeDefs>
+             <spirit:wireTypeDef>
+@@ -1063,12 +1063,12 @@
+         <spirit:parameter>
+           <spirit:name>ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>SYSINFO_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>SYSINFO_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="SYSINFO_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="SYSINFO_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>USE_AUTO_ADDRESS_WIDTH</spirit:name>
+@@ -1078,12 +1078,12 @@
+         <spirit:parameter>
+           <spirit:name>AUTO_ADDRESS_WIDTH</spirit:name>
+           <spirit:displayName>Automatically-determined address width</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="AUTO_ADDRESS_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="AUTO_ADDRESS_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>HDL_ADDR_WIDTH</spirit:name>
+           <spirit:displayName>HDL_ADDR_WIDTH</spirit:displayName>
+-          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">32</spirit:value>
++          <spirit:value spirit:format="long" spirit:id="HDL_ADDR_WIDTH">33</spirit:value>
+         </spirit:parameter>
+         <spirit:parameter>
+           <spirit:name>ADDRESS_UNITS</spirit:name>
+@@ -1206,7 +1206,7 @@
+                     <name>m0_address</name>
+                     <role>address</role>
+                     <direction>Output</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1498,7 +1498,7 @@
+                     <name>s0_address</name>
+                     <role>address</role>
+                     <direction>Input</direction>
+-                    <width>32</width>
++                    <width>33</width>
+                     <lowerBound>0</lowerBound>
+                     <vhdlType>STD_LOGIC_VECTOR</vhdlType>
+                 </port>
+@@ -1567,7 +1567,7 @@
+                     </entry>
+                     <entry>
+                         <key>addressSpan</key>
+-                        <value>4294967296</value>
++                        <value>8589934592</value>
+                     </entry>
+                     <entry>
+                         <key>addressUnits</key>
+@@ -1802,7 +1802,7 @@
+                 <suppliedSystemInfos>
+                     <entry>
+                         <key>ADDRESS_WIDTH</key>
+-                        <value>32</value>
++                        <value>33</value>
+                     </entry>
+                 </suppliedSystemInfos>
+                 <consumedSystemInfos/>

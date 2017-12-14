@@ -25,10 +25,10 @@ import datetime
 import glob
 import os
 import shutil
-import tarfile
 import subprocess
+import tarfile
 
-from setup_bsp import delete_and_mkdir, copy_glob
+from setup_bsp import delete_and_mkdir, copy_glob, run_cmd
 import setup_bsp
 
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -40,26 +40,7 @@ DEFAULT_PLATFORM = setup_bsp.DEFAULT_PLATFORM
 DEFAULT_BSP_DIR_NAME = 'opencl_bsp'
 
 # use a stable OPAE release
-#OPAE_GIT_BRANCH = 'crauer/opencl_stable_111017'
 OPAE_GIT_BRANCH = 'release/0.13'
-
-
-# run git command
-def run_cmd(cmd, path=None):
-    if(path):
-        old_cwd = os.getcwd()
-        os.chdir(path)
-    process = subprocess.Popen(cmd,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE,
-                               stdin=subprocess.PIPE,
-                               shell=True)
-    out, _err = process.communicate()
-    exitcode = process.poll()
-    if(path):
-        os.chdir(old_cwd)
-    if exitcode == 0:
-        return str(out).rstrip()
 
 
 def setup_sw_packages(opae_branch=None, sim_mode=None):
@@ -197,7 +178,7 @@ def copy_and_setup_bsp_hw_dirs(release_bsp_dir, bsp_info_map, rename_bsp_map):
 def build_release_pkg(platform, bsp_search_dirs, include_bsp, rename_bsp_arg,
                       default_bsp_arg=DEFAULT_BSP,
                       bsp_dir_name=DEFAULT_BSP_DIR_NAME,
-                      verbose=False, debug=False):
+                      verbose=False, debug=False, overlay=None):
     setup_sw_packages(opae_branch=OPAE_GIT_BRANCH, sim_mode=False)
 
     bsp_info_map = get_filtered_bsp_list(bsp_search_dirs, include_bsp)
@@ -219,7 +200,8 @@ def build_release_pkg(platform, bsp_search_dirs, include_bsp, rename_bsp_arg,
 
     setup_bsp.setup_bsp(platform=platform,
                         bsp_search_dirs=[get_bsp_hw_dir(release_bsp_dir)],
-                        sim_mode=False, verbose=verbose, debug=debug)
+                        sim_mode=False, verbose=verbose, debug=debug,
+                        overlay=overlay)
 
     create_log_file(release_build_dir)
 
@@ -309,6 +291,8 @@ def main():
                         default=[],
                         help='list of bsp to rename, '
                         'example old_name:new_name')
+    parser.add_argument('--overlay', '-o', required=False,
+                        default=None, help='include bsp overlay modification')
 
     args = parser.parse_args()
 
@@ -321,7 +305,8 @@ def main():
                       default_bsp_arg=args.default_bsp,
                       bsp_dir_name=args.bsp_dir_name,
                       rename_bsp_arg=args.rename_bsp,
-                      verbose=args.verbose, debug=args.debug)
+                      verbose=args.verbose, debug=args.debug,
+                      overlay=args.overlay)
 
 
 if __name__ == '__main__':
