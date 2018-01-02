@@ -21,7 +21,7 @@ rm -f $ROOT_PROJECT_PATH/linux64/libexec/diagnose
 rm -f $ROOT_PROJECT_PATH/linux64/libexec/program
 
 mkdir build && cd build
-CC=`which gcc` CXX=`which g++` cmake -DOPENCL_ASE_SIM=$SET_ASE -DCMAKE_INSTALL_PREFIX=$ROOT_PROJECT_PATH/linux64 $ROOT_PROJECT_PATH/source
+CC=`which gcc` CXX=`which g++` cmake -DUSE_MEMCPY_S=ON -DOPENCL_ASE_SIM=$SET_ASE -DCMAKE_INSTALL_PREFIX=$ROOT_PROJECT_PATH/linux64 $ROOT_PROJECT_PATH/source
 make && make install
 
 if [ "$OPENCL_ASE_SIM" == "1" ]; then
