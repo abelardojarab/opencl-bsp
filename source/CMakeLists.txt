@@ -14,6 +14,33 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(a10_dcp)
 
+####################################################################
+## SDL required compiler flags
+####################################################################
+## C options
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wformat -Wformat-security")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -D_FORTIFY_SOURCE=2")
+if (GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
+   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector-strong")
+   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -z noexecstack -z relro -z now")
+else()
+   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector-all")
+endif()
+
+## C++ options
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wformat -Wformat-security")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -D_FORTIFY_SOURCE=2")
+if (GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
+   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstack-protector-strong")
+   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -z noexecstack -z relro -z now")
+else()
+   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstack-protector-all")
+endif()
+
+set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pie")
+set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pie")
+####################################################################
+
 set(OPAE_INSTALL_PATH $ENV{OPAE_INSTALL_PATH})
 set(ALTERAOCLSDKROOT $ENV{ALTERAOCLSDKROOT})
 
