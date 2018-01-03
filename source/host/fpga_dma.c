@@ -738,8 +738,12 @@ static fpga_result poll_interrupt(fpga_dma_handle dma_h) {
 		res = FPGA_EXCEPTION;
 	} else {
 		uint64_t count = 0;
-		read(pfd.fd, &count, sizeof(count));
-		debug_print("Poll success. Return = %d, count = %d\n",poll_res, (int)count);
+		ssize_t bytes_read = read(pfd.fd, &count, sizeof(count));
+      if(bytes_read > 0) {
+         debug_print("Poll success. Return = %d, count = %d\n",poll_res, (int)count);
+      } else {
+         fprintf(stderr,"Error: poll failed: %s\n", bytes_read < 0? strerror(errno) : "zero bytes read");
+      }
 		res = FPGA_OK;
 	}
 

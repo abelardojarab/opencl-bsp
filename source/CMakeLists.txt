@@ -78,8 +78,11 @@ include_directories(
 
 set (CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11") 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+
+# Enable all warnings except unknown-pragmas.  Wunknown-pragmas must be excluded because
+# it is triggered by header file included from OpenCL runtime
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unknown-pragmas")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wno-unknown-pragmas")
 
 # Make warnings errors to avoid having them in SDL report
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")

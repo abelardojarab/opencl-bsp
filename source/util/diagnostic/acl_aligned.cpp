@@ -25,9 +25,13 @@ extern "C" {
 
 #ifdef LINUX
 #include <stdlib.h>
+#include <stdio.h>
 void* acl_util_aligned_malloc (size_t size) {
   void *result = NULL;
-  posix_memalign (&result, ACL_ALIGNMENT, size);
+  int res = posix_memalign (&result, ACL_ALIGNMENT, size);
+  if(res) {
+     fprintf(stderr,"Error: memory allocation failed: %d\n", res);
+  }
   return result;
 }
 void acl_util_aligned_free (void *ptr) {

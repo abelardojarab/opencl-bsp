@@ -85,8 +85,15 @@ void dma_work_thread::work_thread(dma_work_thread &obj)
 			fprintf(stderr, "Poll error errno = %s\n",strerror(errno));
 		} else if(res > 0 && pollfd_setup.revents == POLLIN) {
 			uint64_t count;
-			read(thread_signal_fd, &count, sizeof(count));
-			DEBUG_PRINT("Poll success. Return=%d count=%u\n",res, count);
+			ssize_t bytes_read = read(thread_signal_fd, &count, sizeof(count));
+         if(bytes_read > 0) {
+            DEBUG_PRINT("Poll success. Return=%d count=%u\n",res, count);
+         } else {
+            //TODO: determine if exiting is best strategy here 
+            fprintf(stderr,"Error: poll failed: %s\n", 
+               bytes_read < 0 ? strerror(errno): "zero bytes read");
+            exit(-1);
+         }
 			
 			obj.m_work_queue_mutex.lock();
 			if(obj.m_work_queue.empty())

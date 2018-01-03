@@ -192,12 +192,24 @@ bool KernelInterrupt::poll_interrupt(int poll_timeout_arg)
 		return false;
 	} else if(res > 0 && pollfd_arr[0].revents == POLLIN) {
 		uint64_t count;
-		read(intr_fd, &count, sizeof(count));
-		DEBUG_PRINT("Poll success. Return=%d count=%u\n",res, count);
+		ssize_t bytes_read = read(intr_fd, &count, sizeof(count));
+      if(bytes_read > 0) {
+         DEBUG_PRINT("Poll success. Return=%d count=%u\n",res, count);
+      } else {
+         fprintf(stderr,"Error: poll failed: %s\n", bytes_read < 0 ?
+            strerror(errno): "zero bytes read");
+         exit(-1);
+      }
 	} else if(res > 0 && pollfd_arr[1].revents == POLLIN) {
 		uint64_t count;
-		read(thread_signal_fd, &count, sizeof(count));
-		DEBUG_PRINT("Poll success. Return=%d count=%u\n",res, count);
+		ssize_t bytes_read = read(thread_signal_fd, &count, sizeof(count));
+      if(bytes_read > 0) {
+         DEBUG_PRINT("Poll success. Return=%d count=%u\n",res, count);
+      } else {
+         fprintf(stderr,"Error: poll failed: %s\n", bytes_read < 0 ?
+            strerror(errno): "zero bytes read");
+         exit(-1);
+      }
 		return false;
 	} else {
 		//no event fd event happened

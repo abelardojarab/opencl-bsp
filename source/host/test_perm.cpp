@@ -113,6 +113,7 @@ static bool verbose_test_perm_glob(const char *file)
 bool ccip_mmd_check_huge_pages()
 {
 #ifdef SIM
+   (void)get_num_pages_setting;  // unused function in SIM
 	return true;
 #else
 	long num_pages = 0;
@@ -134,6 +135,7 @@ bool ccip_mmd_check_huge_pages()
 bool ccip_mmd_check_limit_conf()
 {
 #ifdef SIM
+   (void)MEMLOCK_CONF_PATH; //unused var in SIM
 	return true;
 #else
 	bool result = test_exists(MEMLOCK_CONF_PATH);
@@ -165,6 +167,8 @@ static bool check_device_file(const char *dev_file)
 bool ccip_mmd_check_afu_driver()
 {
 #ifdef SIM
+   (void)FPGA_PORT_DEV; // unused variable in SIM mode
+   (void)check_device_file; //unused function in SIM mode
 	return true;
 #else
 	return check_device_file(FPGA_PORT_DEV);
@@ -183,6 +187,7 @@ bool ccip_mmd_dma_setup_check()
 bool ccip_mmd_check_fme_driver_for_pr()
 {
 #ifdef SIM
+   (void)FPGA_FME_PR_DEV_LIST; // unused var in SIM
 	return true;
 #else
 	size_t num_dev = sizeof(FPGA_FME_PR_DEV_LIST)/sizeof(FPGA_FME_PR_DEV_LIST[0]);
