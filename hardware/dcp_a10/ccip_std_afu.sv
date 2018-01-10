@@ -232,8 +232,13 @@ module ccip_std_afu(
 
 	//register tx/rx inputs
 	//almost full signals can be registered because async fifo has slack
+
+	//this assignment prevents these registers from being inferred into a ram
+	(* altera_attribute = "-name auto_shift_register_recognition OFF" *)
 	t_if_ccip_Rx     pck_cp2af_sRx_q;           // CCI-P Rx Port
+	(* altera_attribute = "-name auto_shift_register_recognition OFF" *)
 	t_if_ccip_Tx     pck_af2cp_sTx_q;           // CCI-P Tx Port
+
 	always @(posedge pClk)
 	begin
 		pck_af2cp_sTx <= pck_af2cp_sTx_q;
