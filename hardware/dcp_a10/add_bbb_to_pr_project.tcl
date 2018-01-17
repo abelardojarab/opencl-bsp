@@ -15,10 +15,6 @@ proc add_bbb_assignments { } {
 	set CCIP_AVMM_SRC "./BBB_ccip_avmm"
 	source "$CCIP_AVMM_SRC/hw/par/ccip_avmm_addenda.qsf"
 	
-	#ccip async shim
-	set CCIP_ASYNC_SRC "./BBB_ccip_async"
-	source "$CCIP_ASYNC_SRC/hw/par/ccip_async_addenda.qsf"
-	
 	#mpf
 	set_global_assignment -name VERILOG_MACRO "MPF_PLATFORM_DCP_PCIE=1"
 	set CCI_MPF_SRC "./BBB_cci_mpf"
