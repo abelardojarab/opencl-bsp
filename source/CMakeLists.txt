@@ -90,4 +90,3 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
 
 add_subdirectory(host)
 add_subdirectory(util)
-add_subdirectory(safe_string)
