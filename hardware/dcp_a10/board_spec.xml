@@ -14,10 +14,10 @@
   
   <device device_model="10ax115s2f45i2sges_dm.xml">
     <used_resources>
-      <alms num="59225"/> <!-- ALMs used in final placement - ALMs used for registers -->
-      <ffs num="236900"/>
-      <dsps num="121"/>
-      <rams num="481"/>
+      <alms num="72100"/> <!-- ALMs used in final placement - ALMs used for registers -->
+      <ffs num="288400"/>
+      <dsps num="116"/>
+      <rams num="512"/>
     </used_resources>
   </device>
 
