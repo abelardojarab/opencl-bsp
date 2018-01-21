@@ -24,7 +24,8 @@ if [ "$OPAE_GIT_PATH" == "" ]; then
 		OPAE_GIT_PATH=/swip_apps/avl_vm/git_sync/git/opae-sdk-x.git
 	fi
 fi
-OPAE_USE_GIT_ARCHIVE=1
+
+OPAE_USE_GIT_ARCHIVE="${OPAE_USE_GIT_ARCHIVE:-1}"
 if [ "$OPAE_GIT_BRANCH" == "" ]; then
 	OPAE_GIT_BRANCH=master-x
 fi
