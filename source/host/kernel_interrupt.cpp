@@ -232,6 +232,28 @@ bool KernelInterrupt::poll_interrupt(int poll_timeout_arg)
 	if(irqval)
 		run_kernel_interrupt_fn();
 
+#ifdef ENABLE_OPENCL_KERNEL_INTERRUPTS
+	//workaround for fb:530016
+	//check if irq line is still high and generate another interrupt event
+	fpga_res = fpgaReadMMIO32(m_fpga_handle, 0, AOCL_IRQ_POLLING_BASE, &irqval);
+	if(fpga_res != FPGA_OK) {
+		fprintf(stderr, "Error fpgaReadMMIO32: %d\n", fpga_res);
+		return false;
+	}
+
+	//signal intr event fd
+	if(irqval)
+	{
+		DEBUG_PRINT("CRITICAL WARNING: irqval has not been cleared by aocl runtime\n");
+		uint64_t count = 1;
+		ssize_t res = write(intr_fd, &count, sizeof(count));
+		if (res < 0) {
+			fprintf(stderr, "eventfd : %s", strerror(errno));
+			return false;
+		}
+	}
+#endif
+
 	return true;
 }
 
