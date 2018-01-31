@@ -19,6 +19,9 @@
 // This agreement shall be governed in all respects by the laws of the State of California and
 // by the laws of the United States of America.
 
+//needed for acl/17.1 compatibility
+#pragma OPENCL EXTENSION cl_intel_channels : enable
+
 #include "../host/inc/jpeg.h"
 
 struct entropyData {
