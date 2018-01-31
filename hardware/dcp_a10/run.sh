@@ -71,7 +71,6 @@ FLOW_SUCCESS=$?
 if [ $FLOW_SUCCESS -eq 0 ]
 then
 	quartus_sh -t scripts/adjust_plls_mcp.tcl
-	quartus_sh -t scripts/create_afu_quartus_report.tcl dcp afu_fit
 else
     echo "Persona compilation failed"
     exit 1
@@ -105,10 +104,6 @@ rm -rf fpga.bin
 gzip -9c ./output_files/afu_fit.gbs > afu_fit.gbs.gz
 aocl binedit fpga.bin create
 aocl binedit fpga.bin add .acl.gbs.gz ./afu_fit.gbs.gz
-
-if [ -f afu_quartus_report.txt ]; then
-	aocl binedit fpga.bin add .afu_quartus_report.txt ./afu_quartus_report.txt
-fi
 
 if [ -f afu_fit.failing_clocks.rpt ]; then
 	aocl binedit fpga.bin add .failing_clocks.rpt ./afu_fit.failing_clocks.rpt
