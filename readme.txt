@@ -10,9 +10,8 @@ for more detailed information.
 	CentOS 7.3 with the default Linux kernel 3.10
 
 2.  Software for FPGA/OpenCL compilation:
-	do not use 17.0 service packs for Quartus or OpenCL
-	Quartus Prime Pro Edition 17.0 build 290
-	Intel FPGA SDK for OpenCL Pro Edition	build 290
+	Quartus Prime Pro Edition 17.1.1 build 273
+	Intel FPGA SDK for OpenCL Pro Edition 17.1.1 build 273
 
 3.  Software for OpenCL runtime
 	system packages
@@ -24,7 +23,7 @@ for more detailed information.
 	OPAE software library
 		opae-src-0.3.0.tar.gz
 	Intel FPGA Runtime Environment for OpenCL Linux x86-64 RPM
-		aocl-rte-17.0.0-1.x86_64.rpm
+		aocl-pro-rte-17.1.1-273.x86_64.rpm
 
 4.  Note about initializing DCP for OpenCL:
 	must do "aocl program acl0 kernel.aocx" first
@@ -47,7 +46,7 @@ a.  Setting up BSP for AOCX compilation
 	aoc --list-boards
 	#make sure you see at least 1 DCP board in the list
 	#to use arc to compile, get these resources
-	arc shell acl/17.0,acds/17.0,qedition/pro,adapt/17.1,python
+	arc shell acl/17.1.1,acds/17.1.1,qedition/pro,adapt/17.1,python
 
 	aoc vector_add.cl
 	#you can also use '--board bsp_board_name' to specify a specific board variant
@@ -78,7 +77,7 @@ make -j4
 bsp_install_location/OpenCL_bsp_dcp/linux64/libexec/setup_permissions.sh
 
 #setup OpenCL
-sudo rpm -i /path_to_OpenCL_rte_rpm//aocl-rte-17.0.0-1.x86_64.rpm
+sudo rpm -i /path_to_OpenCL_rte_rpm/aocl-pro-rte-17.1.1-273.x86_64.rpm
 mkdir bsp_install_location
 tar xzf /path_to_bsp_package/dcp_OpenCL_bsp_*.tar.gz
 

@@ -21,8 +21,9 @@ if [ ! -f bin/vector_add_int.aocx ]; then
 	rm -fr vector_add_int_comp
 	mv bin/vector_add_int vector_add_int_comp
 fi
-
-aocl program acl0 bin/vector_add_int.aocx
+#aocl program acl0 bin/vector_add_int.aocx
+#aocl diagnose/program doesn't work on ARC - fb:532942
+$SCRIPT_DIR_PATH/../linux64/libexec/program acl0 bin/vector_add_int.aocx
 make
 cp ./bin/vector_add_int .
 cp bin/vector_add_int.aocx .

@@ -5,7 +5,6 @@ rm  -fr qsys_files/*
 cp -R $KDIR/sim_files/* ./qsys_files
 mkdir ./qsys_files_vhd
 mv qsys_files/*.vhd ./qsys_files_vhd
-#cp /swip_build/releases/acds/17.0/248/linux64/quartus/eda/sim_lib/*.vhd ./qsys_files_vhd
 
 
 (cat vlog_files_base.list ; find ./qsys_files | grep -v ./qsys_files/BBB_ ) > ./vlog_files.list

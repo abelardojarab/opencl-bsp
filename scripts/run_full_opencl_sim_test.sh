@@ -21,7 +21,9 @@ if [ ! -f bin/mem_bandwidth.aocx ]; then
 	rm -fr mem_bandwidth_comp
 	mv bin/mem_bandwidth mem_bandwidth_comp
 fi
-aocl program acl0 bin/mem_bandwidth.aocx
+#aocl program acl0 bin/mem_bandwidth.aocx
+#aocl diagnose/program doesn't work on ARC - fb:532942
+$SCRIPT_DIR_PATH/../linux64/libexec/program acl0 bin/mem_bandwidth.aocx
 make
 ./bin/mem_bandwidth 1
 #ENABLE_DCP_OPENCL_SVM=1 ./bin/mem_bandwidth 1

@@ -21,7 +21,9 @@ if [ ! -f bin/hello_world.aocx ]; then
 	rm -fr hello_world_comp
 	mv bin/hello_world hello_world_comp
 fi
-aocl program acl0 bin/hello_world.aocx
+#aocl program acl0 bin/hello_world.aocx
+#aocl diagnose/program doesn't work on ARC - fb:532942
+$SCRIPT_DIR_PATH/../linux64/libexec/program acl0 bin/hello_world.aocx
 make
 cp ./bin/hello_world .
 cp bin/hello_world.aocx .
