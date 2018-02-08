@@ -1,7 +1,6 @@
 *~
 *#
 *.marks
-build/
 release_build/
 example_designs/mem_bandwidth/bin/
 example_designs/mem_bandwidth/simulation.tar.gz

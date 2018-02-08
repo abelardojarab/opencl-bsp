@@ -2,9 +2,9 @@
 <board version="17.0" name="dcp_a10">
 
 
-  <compile name="green_top" project="dcp" revision="afu_fit" qsys_file="none" generic_kernel="1">
+  <compile name="green_top" project="dcp" revision="afu_opencl_kernel" qsys_file="none" generic_kernel="1">
     <generate cmd="echo"/>
-    <synthesize cmd="bash run.sh"/>
+    <synthesize cmd="bash build/run.sh"/>
     <auto_migrate platform_type="a10_ref" >
       <include fixes=""/>
       <exclude fixes=""/>

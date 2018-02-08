@@ -12,6 +12,14 @@
 # Intel or its authorized distributors.  Please refer to the applicable
 # agreement for further details.
 
+#get exact script path
+SCRIPT_PATH=`readlink -f ${BASH_SOURCE[0]}`
+#get director of script path
+SCRIPT_DIR_PATH="$(dirname $SCRIPT_PATH)"
+SCRIPT_DIR_PARENT_PATH="$(dirname $SCRIPT_DIR_PATH)"
+
+cd $SCRIPT_DIR_PATH
+
 ADAPT_PACKAGER_BIN=$ADAPT_DEST_ROOT/bin/packager
 if [ "$ADAPT_DEST_ROOT" == "" ]; then
 	ADAPT_PACKAGER_BIN="python ./tools/packager.pyz"
@@ -26,14 +34,16 @@ if [ $FLOW_SUCCESS != 0 ]; then
 	exit 1
 fi
 
-# Copy Blue bitstream library 
-# ===========================
-echo "Restoring Blue BS lib files"
-echo "==========================="
-
+#make sure bbs files exist
 if [ ! -f "dcp.qdb" ]; then
 	echo "ERROR: BSP is not setup"
 fi
+
+#copy quartus.ini
+cp ../quartus.ini .
+
+#import opencl kernel files
+quartus_sh -t scripts/import_opencl_kernel.tcl 
 
 #check for bypass/alternative flows
 if [ "$DCP_BYPASS_OPENCL_RUN_SCRIPT" != "" ]; then
@@ -46,24 +56,15 @@ quartus_sh -t add_bbb_to_pr_project.tcl
 
 #append kernel_system qsys/ip assignments to afu_fit revision
 rm -f kernel_system_qsf_append.txt
-cp afu_fit.qsf kernel_system_qsf_append.txt
 echo >> kernel_system_qsf_append.txt
-grep kernel_system.qsys afu_synth.qsf >> kernel_system_qsf_append.txt
-grep ip/kernel_system/ afu_synth.qsf >> kernel_system_qsf_append.txt
+grep -A10000 OPENCL_KERNEL_ASSIGNMENTS_START_HERE ../afu_opencl_kernel.qsf >> kernel_system_qsf_append.txt
 echo >> kernel_system_qsf_append.txt
-rm -f afu_fit.qsf
-mv kernel_system_qsf_append.txt afu_fit.qsf
+cat kernel_system_qsf_append.txt >> afu_fit.qsf
+cat kernel_system_qsf_append.txt >> afu_synth.qsf
 
-#need to design directory with timing files so that they are the same as blue 
-#bits
-rsync -rvua design/ ../design
-
-# generate board.qsys
-qsys-generate --synthesis=VERILOG -qpf=dcp -c=afu_synth kernel_system.qsys
-qsys-generate --synthesis=VERILOG -qpf=dcp -c=afu_synth board.qsys
 # compile project
 # =====================
-quartus_sh -t a10_partial_reconfig/flow.tcl -setup_script a10_partial_reconfig/setup.tcl -impl afu_fit
+quartus_sh -t a10_partial_reconfig/flow.tcl -nobasecheck -setup_script a10_partial_reconfig/setup.tcl -impl afu_fit
 FLOW_SUCCESS=$?
 
 # Report Timing
@@ -72,7 +73,7 @@ if [ $FLOW_SUCCESS -eq 0 ]
 then
 	quartus_sh -t scripts/adjust_plls_mcp.tcl
 else
-    echo "Persona compilation failed"
+    echo "ERROR: pll timing script failed."
     exit 1
 fi
 
@@ -81,7 +82,8 @@ BBS_ID_FILE="fme-ifc-id.txt"
 if [ -f "$BBS_ID_FILE" ]; then
 	FME_IFC_ID=`cat $BBS_ID_FILE`
 else
-	FME_IFC_ID="01234567-89AB-CDEF-0123-456789ABCDEF"
+    echo "ERROR: fme id not found."
+    exit 1
 fi
 
 PLL_METADATA=""
@@ -107,21 +109,25 @@ aocl binedit fpga.bin add .acl.gbs.gz ./afu_fit.gbs.gz
 
 if [ -f afu_fit.failing_clocks.rpt ]; then
 	aocl binedit fpga.bin add .failing_clocks.rpt ./afu_fit.failing_clocks.rpt
+	cp ./afu_fit.failing_clocks.rpt ../
 fi
 
 if [ -f afu_fit.failing_paths.rpt ]; then
 	aocl binedit fpga.bin add .failing_paths.rpt ./afu_fit.failing_paths.rpt
+	cp ./afu_fit.failing_clocks.rpt ../
 fi
 
 if [ ! -f fpga.bin ]; then
-	echo "FPGA compilation failed!"
+	echo "ERROR: no fpga.bin found.  FPGA compilation failed!"
 	exit 1
 fi
 
+#copy fpga.bin to parent directory so aoc flow can find it
+cp fpga.bin ../
+cp acl_quartus_report.txt ../
+
 echo ""
 echo "==========================================================================="
-echo "SKX-P PR AFU compilation complete"
-echo "*** DEFAULT (uClk_usr, uClk_usrDiv2) is (312.5 MHz, 156.25 MHz) ****"
-echo "AFU gbs file located at output_files/afu_fit.gbs"
+echo "OpenCL AFU compilation complete"
 echo "==========================================================================="
 echo ""

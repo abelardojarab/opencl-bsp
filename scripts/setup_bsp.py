@@ -142,12 +142,36 @@ def copy_glob(src, dst):
             shutil.copy2(i, dst)
 
 
+# symlink function that accepts globs and can overlay existing directories
+def symlink_glob(src, dst):
+    for i in glob.glob(src):
+        if os.path.isdir(i):
+            dst_dir_path = os.path.join(dst, os.path.basename(i))
+            if(not os.path.exists(dst_dir_path)):
+                os.mkdir(dst_dir_path)
+            symlink_glob(os.path.join(i, '*'), dst_dir_path)
+            # '.' files(hidden files) are not included in '*'
+            symlink_glob(os.path.join(i, '.*'), dst_dir_path)
+        else:
+            dst_link = os.path.join(dst, os.path.basename(i))
+            if(os.path.exists(dst_link)):
+                os.remove(dst_link)
+            os.symlink(i, dst_link)
+
+
 # take a glob path and remove the files
 def rm_glob(src, verbose=False):
     for i in glob.glob(src):
         os.remove(i)
         if(verbose):
             print "Removed: %s" % i
+
+
+# create a text file
+def create_text_file(dst, lines):
+    with open(dst, 'w') as f:
+        for line in lines:
+            f.write(line)
 
 
 # main work function for setting up bsp
@@ -170,6 +194,7 @@ def setup_bsp(platform, bsp_search_dirs, sim_mode=False, verbose=False,
 
     for bsp in bsp_info_map.keys():
         bsp_dir = bsp_info_map[bsp]['dir']
+        bsp_qsf_dir = os.path.join(bsp_dir, 'build')
 
         # handle overlay/patch to bsp hw
         if(overlay):
@@ -180,56 +205,86 @@ def setup_bsp(platform, bsp_search_dirs, sim_mode=False, verbose=False,
                 sys.exit(1)
             run_cmd("patch -f -p3 -i %s" % overlay_file, bsp_dir)
 
-        # create empty directories inside bsp_dir
-        output_files_dir = os.path.join(bsp_dir, 'output_files')
-        delete_and_mkdir(output_files_dir)
-
-        bsp_afu_dir = os.path.join(bsp_dir, 'afu')
-        delete_and_mkdir(bsp_afu_dir)
-
-        afu_interfaces_dir = os.path.join(bsp_afu_dir, 'interfaces')
-        delete_and_mkdir(afu_interfaces_dir)
-
         # copy empty afu template files to bsp_dir
-        copy_glob(os.path.join(platform_dir, 'lib', '*'), bsp_dir)
-        copy_glob(os.path.join(platform_dir, 'empty_afu', 'afu', '*'),
-                  bsp_afu_dir)
-        copy_glob(os.path.join(platform_dir, 'empty_afu', 'build', '*'),
-                  bsp_dir)
-
-        # clean up unneeded files
-        rm_glob(os.path.join(bsp_dir, '*.stp'), verbose=verbose)
-        rm_glob(os.path.join(bsp_dir, 'a10_partial_reconfig',
-                             'import_bbs_sdc.tcl'), verbose=verbose)
+        # an attempt to use lib instead of empty afu
+        # copy_glob(os.path.join(platform_dir, 'lib', 'build', '*'),
+        #       bsp_qsf_dir)
+        # copy_glob(os.path.join(platform_dir, 'lib', '*.txt'), bsp_qsf_dir)
+        # TODO: switch to new platform lib instead of AFU
+        copy_glob(os.path.join(platform_dir, 'fme*.txt'), bsp_qsf_dir)
+        copy_glob(os.path.join(platform_dir, 'empty_afu', '*'), bsp_dir)
+        output_files_path = os.path.join(bsp_qsf_dir, 'output_files')
+        rm_glob(os.path.join(output_files_path, '*.rpt'))
+        rm_glob(os.path.join(output_files_path, '*.jic'))
+        rm_glob(os.path.join(output_files_path, '*.rpd'))
+        rm_glob(os.path.join(output_files_path, '*.summary'))
+        rm_glob(os.path.join(output_files_path, '*.sld'))
+        rm_glob(os.path.join(output_files_path, 'timing_report', '*'))
 
         # add packager to opencl bsp to make bsp easier to use
         bsp_tools_dir = os.path.join(bsp_dir, 'tools')
         delete_and_mkdir(bsp_tools_dir)
         shutil.copy2(packager_bin, bsp_tools_dir)
 
-        shutil.rmtree(os.path.join(bsp_dir, 'design'), ignore_errors=True)
-        pr_design_artifacts_path = os.path.join(bsp_dir,
-                                                'pr_design_artifacts.tar.gz')
-
         # unzip pr artifacts
+        shutil.rmtree(os.path.join(bsp_dir, 'design'), ignore_errors=True)
+        pr_design_artifacts_path = os.path.join(platform_dir,
+                                                'pr_design_artifacts.tar.gz')
         tar = tarfile.open(pr_design_artifacts_path)
         tar.extractall(bsp_dir)
         tar.close()
-        os.remove(pr_design_artifacts_path)
+
+        # create hw directory for afu compatibility
+        # TODO: might need this for platform lib flow
+        # bsp_hw_dir = os.path.join(bsp_dir, 'hw')
+        # delete_and_mkdir(bsp_hw_dir)
+        # create_text_file(os.path.join(bsp_hw_dir, 'afu.qsf'),
+        #       ["# NOT USED\n"])
+        # #create platform qsf but leave empty for now
+        # create_text_file(os.path.join(bsp_qsf_dir, 'platform',
+        #     'platform_if_addenda.qsf'), ["# NOT USED\n"])
 
         # setup sim stuff if needed
         if(sim_mode):
-            copy_glob(os.path.join(PROJECT_PATH, 'ase', 'bsp', '*'),
-                      bsp_dir)
+            # these can be symlinked because we won't create packages with them
+            # sim_mode is internal only
+            symlink_glob(os.path.join(PROJECT_PATH, 'ase', 'bsp', '*'),
+                         bsp_qsf_dir)
+
+        # create quartus project revision for opencl kernel qsf
+        kernel_qsf_path = os.path.join(bsp_dir, 'afu_opencl_kernel.qsf')
+        shutil.copy2(os.path.join(bsp_qsf_dir, 'afu_synth.qsf'),
+                     kernel_qsf_path)
+        update_qsf_settings_for_opencl_kernel_qsf(kernel_qsf_path)
+
+        shutil.copy2(os.path.join(bsp_qsf_dir, 'dcp.qpf'), bsp_dir)
+        update_qpf_project_for_opencl_flow(os.path.join(bsp_dir, 'dcp.qpf'))
 
         # update quartus project files for opencl
-        update_qsf_settings_for_opencl_afu(os.path.join(bsp_dir,
+        update_qpf_project_for_afu(os.path.join(bsp_qsf_dir, 'dcp.qpf'))
+        update_qsf_settings_for_opencl_afu(os.path.join(bsp_qsf_dir,
                                                         'afu_synth.qsf'))
-        update_qsf_settings_for_opencl_afu(os.path.join(bsp_dir,
+        update_qsf_settings_for_opencl_afu(os.path.join(bsp_qsf_dir,
                                                         'afu_fit.qsf'))
-        update_qpf_project_for_opencl_afu(os.path.join(bsp_dir, 'dcp.qpf'))
+
+        # create manifest
+        create_manifest(bsp_dir)
 
 
+# remove lines with search_text in file
+def create_manifest(dst_dir):
+    files = []
+    for i in glob.glob(os.path.join(dst_dir, '*')):
+        filename = os.path.basename(i)
+        files.append("%s\n" % filename)
+    manifest_file = 'bsp_dir_filelist.txt'
+    files.append("%s\n" % manifest_file)
+    # add qdb so that it is not copied to build directory
+    files.append('qdb\n')
+    create_text_file(os.path.join(dst_dir, manifest_file), files)
+
+
+# remove lines with search_text in file
 def remove_lines_in_file(file_name, search_text):
     lines = []
     with open(file_name) as f:
@@ -243,6 +298,7 @@ def remove_lines_in_file(file_name, search_text):
             f.write(line)
 
 
+# replace search_text with replace_text in file
 def replace_lines_in_file(file_name, search_text, replace_text):
     lines = []
     with open(file_name) as f:
@@ -264,7 +320,7 @@ def chmod_plus_w(file_path):
 
 
 # update quartus project for opencl flow
-def update_qpf_project_for_opencl_afu(qpf_path):
+def update_qpf_project_for_opencl_flow(qpf_path):
     chmod_plus_w(qpf_path)
 
     # need to rewrite these lines so that opencl AOC qsys flow modifies the
@@ -276,9 +332,48 @@ def update_qpf_project_for_opencl_afu(qpf_path):
         f.write('\n')
         f.write('#YOU MUST PUT SYNTH REVISION FIRST SO THAT '
                 'AOC WILL DEFAULT TO THAT WITH qsys-script!\n')
-        f.write('PROJECT_REVISION = "afu_synth"\n')
-        f.write('PROJECT_REVISION = "afu_fit"\n')
+        f.write('PROJECT_REVISION = "afu_opencl_kernel"\n')
         f.write('PROJECT_REVISION = "dcp"\n')
+
+
+# update quartus project for afu compile flow
+def update_qpf_project_for_afu(qpf_path):
+    chmod_plus_w(qpf_path)
+
+    # need to rewrite these lines so that opencl AOC qsys flow modifies the
+    # correct project
+    remove_lines_in_file(qpf_path, 'PROJECT_REVISION')
+
+    with open(qpf_path, 'a') as f:
+        f.write('\n')
+        f.write('\n')
+        f.write('#YOU MUST PUT SYNTH REVISION FIRST SO THAT '
+                'AOC WILL DEFAULT TO THAT WITH qsys-script!\n')
+        f.write('PROJECT_REVISION = "afu_fit"\n')
+        f.write('PROJECT_REVISION = "afu_synth"\n')
+        f.write('PROJECT_REVISION = "dcp"\n')
+
+
+def update_qsf_settings_for_opencl_kernel_qsf(qsf_path):
+    # create stripped down version of qsf for opencl qsys flow
+    chmod_plus_w(qsf_path)
+
+    remove_lines_in_file(qsf_path, 'dcp_user_clocks.sdc')
+    remove_lines_in_file(qsf_path, 'SCJIO')
+
+    remove_lines_in_file(qsf_path, '..')
+    remove_lines_in_file(qsf_path, '.qsf')
+    remove_lines_in_file(qsf_path, '.tcl')
+    remove_lines_in_file(qsf_path, 'SOURCE')
+    remove_lines_in_file(qsf_path, 'SEARCH_PATH')
+    remove_lines_in_file(qsf_path, '_FILE ')
+
+    with open(qsf_path, 'a') as f:
+        f.write('\n')
+        f.write('\n')
+        f.write('##OPENCL_KERNEL_ASSIGNMENTS_START_HERE\n')
+        f.write('\n')
+        f.write('\n')
 
 
 def update_qsf_settings_for_opencl_afu(qsf_path):
@@ -293,7 +388,8 @@ def update_qsf_settings_for_opencl_afu(qsf_path):
         f.write("# AFU + MPF IPs\n")
         f.write("source afu_ip.qsf\n")
 
-    replace_lines_in_file(qsf_path, '../afu/', './afu/')
+    remove_lines_in_file(qsf_path, 'dcp_user_clocks.sdc')
+    remove_lines_in_file(qsf_path, 'SCJIO')
 
 
 # process command line and setup bsp flow

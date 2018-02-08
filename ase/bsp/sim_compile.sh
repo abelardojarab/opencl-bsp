@@ -32,7 +32,7 @@ find ddr_board -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -name "*.sv
 find ip/ddr_board -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -name "*.sv" | xargs cp -t ./sim_files
 
 find msgdma_bbb -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -name "*.sv" | xargs cp -t ./sim_files
-find ip/msgdma_bbb -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -name "*.sv" | xargs cp -t ./sim_files
+find ip/msgdma_bbb -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o - "*.sv" | xargs cp -t ./sim_files
 
 find kernel_hdl -type f | xargs cp -t ./sim_files
 
@@ -48,5 +48,8 @@ cp -rf extra_sim_files/global_routing.v ./sim_files/global_routing.v
 cp -rf bsp_logic.sv ./sim_files/bsp_logic.sv
 cp -fr BBB_* sim_files/    
 rm simulation.tar.gz
-tar -zcvf simulation.tar.gz sim_files sys_description.hex *.hex 
+tar -hzcvf simulation.tar.gz sim_files sys_description.hex *.hex 
 cp -rf simulation.tar.gz fpga.bin
+
+#copy fpga.bin to parent directory so aoc flow can find it
+cp fpga.bin ../

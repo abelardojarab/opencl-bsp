@@ -21,9 +21,8 @@ proc add_bbb_assignments { } {
 	source "$CCI_MPF_SRC/hw/par/qsf_cci_mpf_PAR_files.qsf"
 }
 
-project_open dcp
+project_open -revision afu_synth dcp
 
-set_current_revision afu_synth
 add_bbb_assignments
 export_assignments
 

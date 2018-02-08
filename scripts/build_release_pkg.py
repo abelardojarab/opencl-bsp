@@ -165,6 +165,7 @@ def copy_and_setup_bsp_hw_dirs(release_bsp_dir, bsp_info_map, rename_bsp_map):
                                                          'board_spec.xml'),
                                             old_name, new_name)
             setup_bsp.replace_lines_in_file(os.path.join(renamed_bsp_dir,
+                                                         'build',
                                                          'opencl_afu.json'),
                                             old_name, new_name)
             s = find_all_files_with_text(os.path.join(renamed_bsp_dir, "*"),
