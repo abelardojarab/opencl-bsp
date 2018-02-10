@@ -25,5 +25,6 @@ CC=`which gcc` CXX=`which g++` cmake -DUSE_MEMCPY_S=ON -DOPENCL_ASE_SIM=$SET_ASE
 make && make install
 
 if [ "$OPENCL_ASE_SIM" == "1" ]; then
-	cp -f $AOCL_BOARD_PACKAGE_ROOT/ase/scripts/program $AOCL_BOARD_PACKAGE_ROOT/linux64/libexec/program
+	rm -f $AOCL_BOARD_PACKAGE_ROOT/linux64/libexec/program
+	ln -s $AOCL_BOARD_PACKAGE_ROOT/ase/scripts/program $AOCL_BOARD_PACKAGE_ROOT/linux64/libexec/program
 fi

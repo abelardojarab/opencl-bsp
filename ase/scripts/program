@@ -43,7 +43,12 @@ if [ "$OPENCL_ASE_SIM" == "1" ]; then
 	#needed because ase now requires afu_platform_config script in the exe
 	#search path
 	export PATH=${OPAE_INSTALL_PATH}/bin:${PATH}
-	python ./scripts/generate_ase_environment.py dummy_rtl_dir dummy_vhd_dir
+	python ./scripts/generate_ase_environment.py -p discrete dummy_rtl_dir dummy_vhd_dir
+	
+	echo >> ase_sources.mk
+	echo "ASE_DISCRETE_EMIF_MODEL=EMIF_MODEL_BASIC" >> ase_sources.mk
+	#echo "ASE_DISCRETE_EMIF_MODEL=EMIF_MODEL_ADVANCED" >> ase_sources.mk
+	echo >> ase_sources.mk
 	
 	bash run_sim.sh
 

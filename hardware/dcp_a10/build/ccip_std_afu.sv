@@ -50,7 +50,6 @@ module ccip_std_afu(
   pck_cp2af_pwrState,        // CCI-P AFU Power State
   pck_cp2af_error,           // CCI-P Protocol Error Detected
   
-`ifdef INCLUDE_DDR4
   DDR4a_USERCLK,
   DDR4a_waitrequest,
   DDR4a_readdata,
@@ -71,7 +70,6 @@ module ccip_std_afu(
   DDR4b_write,
   DDR4b_read,
   DDR4b_byteenable,
-`endif
 
   // Interface structures
   pck_cp2af_sRx,             // CCI-P Rx Port
@@ -95,7 +93,6 @@ module ccip_std_afu(
 		pck_cp2af_softReset_q2 <= pck_cp2af_softReset_q;
 	end
 	
-`ifdef INCLUDE_DDR4 
 	input   wire                          DDR4a_USERCLK;
 	input   wire                          DDR4a_waitrequest;
 	input   wire [511:0]                  DDR4a_readdata;
@@ -116,71 +113,7 @@ module ccip_std_afu(
 	output  wire                          DDR4b_write;
 	output  wire                          DDR4b_read;
 	output  wire [63:0]                   DDR4b_byteenable;
-`else
-	wire          DDR4a_waitrequest;
-	wire [511:0]  DDR4a_readdata;
-	wire          DDR4a_readdatavalid;
-	wire [6:0]   DDR4a_burstcount;
-	wire [511:0] DDR4a_writedata;
-	wire [`OPENCL_MEMORY_ADDR_WIDTH-1:0]  DDR4a_address;
-	wire         DDR4a_write;
-	wire         DDR4a_read;
-	wire [63:0]  DDR4a_byteenable;
-	wire          DDR4b_waitrequest;
-	wire [511:0]  DDR4b_readdata;
-	wire          DDR4b_readdatavalid;
-	wire [6:0]   DDR4b_burstcount;
-	wire [511:0] DDR4b_writedata;
-	wire [`OPENCL_MEMORY_ADDR_WIDTH-1:0]  DDR4b_address;
-	wire [63:0]  DDR4b_byteenable;
-	wire         DDR4b_write;
-	wire         DDR4b_read;
-	
-	`timescale 1 ps / 1 ps
-	reg          DDR4a_USERCLK = 0;  
-	always begin
-		#1875 DDR4a_USERCLK = ~DDR4a_USERCLK;
-	end
-	
-	reg          DDR4b_USERCLK = 0;  
-	always begin
-		#1800 DDR4b_USERCLK = ~DDR4b_USERCLK;
-	end
-	
-	mem_sim_model #(
-		.AVMM_ADDR_WIDTH(`OPENCL_MEMORY_ADDR_WIDTH)
-		)
-		ddr4a_inst(
-		.clk(DDR4a_USERCLK),
-		.reset(pck_cp2af_softReset_q2),
-		.avmm_waitrequest(DDR4a_waitrequest),
-		.avmm_readdata(DDR4a_readdata),
-		.avmm_readdatavalid(DDR4a_readdatavalid),
-		.avmm_burstcount(DDR4a_burstcount),
-		.avmm_writedata(DDR4a_writedata),
-		.avmm_address(DDR4a_address),
-		.avmm_write(DDR4a_write),
-		.avmm_read(DDR4a_read),
-		.avmm_byteenable(DDR4a_byteenable)
-	);
-	
-	mem_sim_model #(
-		.AVMM_ADDR_WIDTH(`OPENCL_MEMORY_ADDR_WIDTH)
-		)
-		ddr4b_inst(
-		.clk(DDR4b_USERCLK),
-		.reset(pck_cp2af_softReset_q2),
-		.avmm_waitrequest(DDR4b_waitrequest),
-		.avmm_readdata(DDR4b_readdata),
-		.avmm_readdatavalid(DDR4b_readdatavalid),
-		.avmm_burstcount(DDR4b_burstcount),
-		.avmm_writedata(DDR4b_writedata),
-		.avmm_address(DDR4b_address),
-		.avmm_write(DDR4b_write),
-		.avmm_read(DDR4b_read),
-		.avmm_byteenable(DDR4b_byteenable)
-	);
-`endif
+
 	// Interface structures
 	input           t_if_ccip_Rx     pck_cp2af_sRx;           // CCI-P Rx Port
 	output          t_if_ccip_Tx     pck_af2cp_sTx;           // CCI-P Tx Port
