@@ -1,16 +1,5 @@
-diff --git a/hardware/dcp_a10/afu_ip.qsf b/hardware/dcp_a10/afu_ip.qsf
-index 6140e8c..12dccfe 100644
---- a/hardware/dcp_a10/afu_ip.qsf
-+++ b/hardware/dcp_a10/afu_ip.qsf
-@@ -1,3 +1,6 @@
-+#16gb ddr addressing
-+set_global_assignment -name VERILOG_MACRO "OPENCL_MEMORY_ADDR_WIDTH=27"
-+
- set_global_assignment -name SYSTEMVERILOG_FILE ./bsp_logic.sv
- set_global_assignment -name SYSTEMVERILOG_FILE ./ccip_std_afu.sv
- 
 diff --git a/hardware/dcp_a10/board_spec.xml b/hardware/dcp_a10/board_spec.xml
-index 1e6a42f..c1df7cb 100755
+index 0f94fef..74ae95b 100755
 --- a/hardware/dcp_a10/board_spec.xml
 +++ b/hardware/dcp_a10/board_spec.xml
 @@ -24,8 +24,8 @@
@@ -33,10 +22,21 @@ index 1e6a42f..c1df7cb 100755
      <kernel_clk_reset clk="board.kernel_clk" clk2x="board.kernel_clk2x" reset="board.kernel_reset"/>
    </interfaces>
  </board>
-diff --git a/hardware/dcp_a10/ddr_board.qsys b/hardware/dcp_a10/ddr_board.qsys
+diff --git a/hardware/dcp_a10/build/afu_ip.qsf b/hardware/dcp_a10/build/afu_ip.qsf
+index 6140e8c..12dccfe 100644
+--- a/hardware/dcp_a10/build/afu_ip.qsf
++++ b/hardware/dcp_a10/build/afu_ip.qsf
+@@ -1,3 +1,6 @@
++#16gb ddr addressing
++set_global_assignment -name VERILOG_MACRO "OPENCL_MEMORY_ADDR_WIDTH=27"
++
+ set_global_assignment -name SYSTEMVERILOG_FILE ./bsp_logic.sv
+ set_global_assignment -name SYSTEMVERILOG_FILE ./ccip_std_afu.sv
+ 
+diff --git a/hardware/dcp_a10/build/ddr_board.qsys b/hardware/dcp_a10/build/ddr_board.qsys
 index 3f0e2fa..2c836f3 100644
---- a/hardware/dcp_a10/ddr_board.qsys
-+++ b/hardware/dcp_a10/ddr_board.qsys
+--- a/hardware/dcp_a10/build/ddr_board.qsys
++++ b/hardware/dcp_a10/build/ddr_board.qsys
 @@ -296,11 +296,11 @@
                  <consumedSystemInfos>
                      <entry>
@@ -557,10 +557,10 @@ index 3f0e2fa..2c836f3 100644
    <parameter name="AUTO_UNIQUE_ID">ddr_board_msgdma_bbb_inst</parameter>
   </module>
   <connection
-diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_acl_memory_bank_divider_0.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_acl_memory_bank_divider_0.ip
+diff --git a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_acl_memory_bank_divider_0.ip b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_acl_memory_bank_divider_0.ip
 index feecd76..6e7f5fa 100644
---- a/hardware/dcp_a10/ip/ddr_board/ddr_board_acl_memory_bank_divider_0.ip
-+++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_acl_memory_bank_divider_0.ip
+--- a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_acl_memory_bank_divider_0.ip
++++ b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_acl_memory_bank_divider_0.ip
 @@ -86,7 +86,7 @@
          <spirit:parameter>
            <spirit:name>dataBitsPerSymbol</spirit:name>
@@ -692,10 +692,10 @@ index feecd76..6e7f5fa 100644
                      </entry>
                      <entry>
                          <key>MAX_SLAVE_DATA_WIDTH</key>
-diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_0.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_0.ip
+diff --git a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_0.ip b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_0.ip
 index b2c8407..530a36a 100644
---- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_0.ip
-+++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_0.ip
+--- a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_0.ip
++++ b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_0.ip
 @@ -423,7 +423,7 @@
          <spirit:parameter>
            <spirit:name>addressSpan</spirit:name>
@@ -789,10 +789,10 @@ index b2c8407..530a36a 100644
                      </entry>
                  </suppliedSystemInfos>
                  <consumedSystemInfos/>
-diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_1.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_1.ip
+diff --git a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_1.ip b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_1.ip
 index ebee6ee..d8738a5 100644
---- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_1.ip
-+++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_1.ip
+--- a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_1.ip
++++ b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_1.ip
 @@ -423,7 +423,7 @@
          <spirit:parameter>
            <spirit:name>addressSpan</spirit:name>
@@ -886,10 +886,10 @@ index ebee6ee..d8738a5 100644
                      </entry>
                  </suppliedSystemInfos>
                  <consumedSystemInfos/>
-diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_2.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_2.ip
+diff --git a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_2.ip b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_2.ip
 index 1890528..b9ae21d 100644
---- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_2.ip
-+++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_2.ip
+--- a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_2.ip
++++ b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_2.ip
 @@ -423,7 +423,7 @@
          <spirit:parameter>
            <spirit:name>addressSpan</spirit:name>
@@ -962,10 +962,10 @@ index 1890528..b9ae21d 100644
                      </entry>
                      <entry>
                          <key>addressUnits</key>
-diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_3.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_3.ip
+diff --git a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_3.ip b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_3.ip
 index 544e97d..52a6643 100644
---- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_3.ip
-+++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_3.ip
+--- a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_3.ip
++++ b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_3.ip
 @@ -423,7 +423,7 @@
          <spirit:parameter>
            <spirit:name>addressSpan</spirit:name>
@@ -1059,10 +1059,10 @@ index 544e97d..52a6643 100644
                      </entry>
                  </suppliedSystemInfos>
                  <consumedSystemInfos/>
-diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_4.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_4.ip
+diff --git a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_4.ip b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_4.ip
 index 92af1a3..bd651cb 100644
---- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_4.ip
-+++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_4.ip
+--- a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_4.ip
++++ b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_4.ip
 @@ -423,7 +423,7 @@
          <spirit:parameter>
            <spirit:name>addressSpan</spirit:name>
@@ -1135,10 +1135,10 @@ index 92af1a3..bd651cb 100644
                      </entry>
                      <entry>
                          <key>addressUnits</key>
-diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_5.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_5.ip
+diff --git a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_5.ip b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_5.ip
 index e729941..78ef2ad 100644
---- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_5.ip
-+++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_bridge_5.ip
+--- a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_5.ip
++++ b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_bridge_5.ip
 @@ -423,7 +423,7 @@
          <spirit:parameter>
            <spirit:name>addressSpan</spirit:name>
@@ -1232,10 +1232,10 @@ index e729941..78ef2ad 100644
                      </entry>
                  </suppliedSystemInfos>
                  <consumedSystemInfos/>
-diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_0.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_0.ip
+diff --git a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_0.ip b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_0.ip
 index 76f07ee..05279ae 100644
---- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_0.ip
-+++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_0.ip
+--- a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_0.ip
++++ b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_0.ip
 @@ -423,7 +423,7 @@
          <spirit:parameter>
            <spirit:name>addressSpan</spirit:name>
@@ -1329,10 +1329,10 @@ index 76f07ee..05279ae 100644
                      </entry>
                  </suppliedSystemInfos>
                  <consumedSystemInfos/>
-diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_1.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_1.ip
+diff --git a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_1.ip b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_1.ip
 index b4fc3a1..a4a5399 100644
---- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_1.ip
-+++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_1.ip
+--- a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_1.ip
++++ b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_1.ip
 @@ -423,7 +423,7 @@
          <spirit:parameter>
            <spirit:name>addressSpan</spirit:name>
@@ -1426,10 +1426,10 @@ index b4fc3a1..a4a5399 100644
                      </entry>
                  </suppliedSystemInfos>
                  <consumedSystemInfos/>
-diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_2.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_2.ip
+diff --git a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_2.ip b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_2.ip
 index 680a1dc..c4c3f90 100644
---- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_2.ip
-+++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_2.ip
+--- a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_2.ip
++++ b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_2.ip
 @@ -423,7 +423,7 @@
          <spirit:parameter>
            <spirit:name>addressSpan</spirit:name>
@@ -1523,10 +1523,10 @@ index 680a1dc..c4c3f90 100644
                      </entry>
                  </suppliedSystemInfos>
                  <consumedSystemInfos/>
-diff --git a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_4.ip b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_4.ip
+diff --git a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_4.ip b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_4.ip
 index 1f6ae10..59e8b4e 100644
---- a/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_4.ip
-+++ b/hardware/dcp_a10/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_4.ip
+--- a/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_4.ip
++++ b/hardware/dcp_a10/build/ip/ddr_board/ddr_board_mm_clock_crossing_bridge_4.ip
 @@ -423,7 +423,7 @@
          <spirit:parameter>
            <spirit:name>addressSpan</spirit:name>
