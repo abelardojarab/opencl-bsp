@@ -206,13 +206,10 @@ def setup_bsp(platform, bsp_search_dirs, sim_mode=False, verbose=False,
             run_cmd("patch -f -p3 -i %s" % overlay_file, bsp_dir)
 
         # copy empty afu template files to bsp_dir
-        # an attempt to use lib instead of empty afu
-        # copy_glob(os.path.join(platform_dir, 'lib', 'build', '*'),
-        #       bsp_qsf_dir)
-        # copy_glob(os.path.join(platform_dir, 'lib', '*.txt'), bsp_qsf_dir)
-        # TODO: switch to new platform lib instead of AFU
-        copy_glob(os.path.join(platform_dir, 'fme*.txt'), bsp_qsf_dir)
-        copy_glob(os.path.join(platform_dir, 'empty_afu', '*'), bsp_dir)
+        copy_glob(os.path.join(platform_dir, 'lib', 'build', '*'), bsp_qsf_dir)
+        copy_glob(os.path.join(platform_dir, 'lib', '*.txt'), bsp_qsf_dir)
+
+        # clean up junk in output_files from bbs compile
         output_files_path = os.path.join(bsp_qsf_dir, 'output_files')
         rm_glob(os.path.join(output_files_path, '*.rpt'))
         rm_glob(os.path.join(output_files_path, '*.jic'))
@@ -235,14 +232,40 @@ def setup_bsp(platform, bsp_search_dirs, sim_mode=False, verbose=False,
         tar.close()
 
         # create hw directory for afu compatibility
-        # TODO: might need this for platform lib flow
-        # bsp_hw_dir = os.path.join(bsp_dir, 'hw')
-        # delete_and_mkdir(bsp_hw_dir)
-        # create_text_file(os.path.join(bsp_hw_dir, 'afu.qsf'),
-        #       ["# NOT USED\n"])
-        # #create platform qsf but leave empty for now
-        # create_text_file(os.path.join(bsp_qsf_dir, 'platform',
-        #     'platform_if_addenda.qsf'), ["# NOT USED\n"])
+        bsp_hw_dir = os.path.join(bsp_dir, 'hw')
+        delete_and_mkdir(bsp_hw_dir)
+        # we don't use afu.qsf, so just put a stub in
+        create_text_file(os.path.join(bsp_hw_dir, 'afu.qsf'), ["# NOT USED\n"])
+
+        # find OPAE install path
+        opae_inst_path = os.path.join(os.environ["ADAPT_DEST_ROOT"], 'sw',
+                                      'opae_sdk_x')
+        if(not os.path.exists(opae_inst_path)):
+            # opae install path in adapt build is process of changing
+            # need to check old location as well
+            opae_inst_path = os.path.join(os.environ["ADAPT_DEST_ROOT"],
+                                          'opae_sdk_x')
+        if(not os.path.exists(opae_inst_path)):
+            print "ERROR: opae install path not found"
+            exit(1)
+
+        # setup environment for running afu_platform_config
+        os.environ["BBS_LIB_PATH"] = os.path.join(platform_dir, 'lib')
+        old_path = os.environ["PATH"]
+
+        os.environ["PATH"] += os.pathsep + os.path.join(opae_inst_path, 'bin')
+        bsp_platform_if_dir = os.path.join(bsp_qsf_dir, 'platform_if')
+        delete_and_mkdir(bsp_platform_if_dir)
+        opae_platform_if_path = os.path.join(opae_inst_path, 'share', 'opae',
+                                             'platform', 'platform_if')
+        copy_glob(os.path.join(opae_platform_if_path, "*"),
+                  bsp_platform_if_dir)
+        cfg_cmd = "afu_platform_config \
+                   --qsf  --ifc ccip_std_afu_avalon_mm_legacy_wires \
+                   --tgt ./build/platform discrete_pcie3_hssi40 \
+                   --platform_if platform_if"
+        run_cmd(cfg_cmd, bsp_dir)
+        os.environ["PATH"] = old_path
 
         # setup sim stuff if needed
         if(sim_mode):
