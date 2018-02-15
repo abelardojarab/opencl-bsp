@@ -20,12 +20,10 @@ SCRIPT_DIR_PARENT_PATH="$(dirname $SCRIPT_DIR_PATH)"
 
 cd $SCRIPT_DIR_PATH
 
-ADAPT_PACKAGER_BIN=$ADAPT_DEST_ROOT/bin/packager
-if [ "$ADAPT_DEST_ROOT" == "" ]; then
-	ADAPT_PACKAGER_BIN="python ./tools/packager.pyz"
-fi
-
-#test packager bin
+#test packager bin first to make sure it is available and working and fail
+#early if it can't run.
+#it would be frustrating to find out at the end of the compilation
+ADAPT_PACKAGER_BIN="python ./tools/packager.pyz"
 FLOW_SUCCESS=1
 $ADAPT_PACKAGER_BIN > /dev/null
 FLOW_SUCCESS=$?

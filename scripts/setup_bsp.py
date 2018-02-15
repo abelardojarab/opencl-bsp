@@ -222,7 +222,7 @@ def setup_bsp(platform, bsp_search_dirs, sim_mode=False, verbose=False,
         rm_glob(os.path.join(output_files_path, 'timing_report', '*'))
 
         # add packager to opencl bsp to make bsp easier to use
-        bsp_tools_dir = os.path.join(bsp_dir, 'tools')
+        bsp_tools_dir = os.path.join(bsp_qsf_dir, 'tools')
         delete_and_mkdir(bsp_tools_dir)
         shutil.copy2(packager_bin, bsp_tools_dir)
 
