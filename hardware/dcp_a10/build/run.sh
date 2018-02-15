@@ -54,10 +54,21 @@ fi
 #add BBBs to quartus pr project
 quartus_sh -t add_bbb_to_pr_project.tcl
 
+cp ../afu_opencl_kernel.qsf .
+
+qsys-generate -syn --quartus-project=dcp --rev=afu_opencl_kernel board.qsys
+# adding board.qsys and corresponding .ip parameterization files to opencl_bsp_ip.qsf
+qsys-archive --quartus-project=dcp --rev=afu_opencl_kernel board.qsys
+
+# generate kernel_system.qsys 
+# and add Qsys Pro generated files to "afu_opencl_kernel.qsf"
+qsys-generate -syn --quartus-project=dcp --rev=afu_opencl_kernel kernel_system.qsys
+qsys-archive --quartus-project=dcp --rev=afu_opencl_kernel kernel_system.qsys
+
 #append kernel_system qsys/ip assignments to afu_fit revision
 rm -f kernel_system_qsf_append.txt
 echo >> kernel_system_qsf_append.txt
-grep -A10000 OPENCL_KERNEL_ASSIGNMENTS_START_HERE ../afu_opencl_kernel.qsf >> kernel_system_qsf_append.txt
+grep -A10000 OPENCL_KERNEL_ASSIGNMENTS_START_HERE afu_opencl_kernel.qsf >> kernel_system_qsf_append.txt
 echo >> kernel_system_qsf_append.txt
 cat kernel_system_qsf_append.txt >> afu_fit.qsf
 cat kernel_system_qsf_append.txt >> afu_synth.qsf
