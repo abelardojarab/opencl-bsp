@@ -127,7 +127,11 @@ int main() {
   }
 
   // create the input buffer
+  #ifdef CL_CHANNEL_1_INTELFPGA
+  ddatain = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_CHANNEL_1_INTELFPGA, sizeof(unsigned) * vectorSize, NULL, &status);
+  #else
   ddatain = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_BANK_1_ALTERA, sizeof(unsigned) * vectorSize, NULL, &status);
+  #endif
   if(status != CL_SUCCESS) {
     dump_error("Failed clCreateBuffer.", status);
     freeResources();
@@ -135,7 +139,11 @@ int main() {
   }
 
   // create the input buffer
+  #ifdef CL_CHANNEL_2_INTELFPGA
+  ddataout = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_CHANNEL_2_INTELFPGA, sizeof(unsigned) * vectorSize, NULL, &status);
+  #else
   ddataout = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_BANK_2_ALTERA, sizeof(unsigned) * vectorSize, NULL, &status);
+  #endif
   if(status != CL_SUCCESS) {
     dump_error("Failed clCreateBuffer.", status);
     freeResources();

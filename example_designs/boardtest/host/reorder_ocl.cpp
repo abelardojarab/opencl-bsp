@@ -159,7 +159,11 @@ void ocl_transfer_to_device(
   kernel_dum = clCreateBuffer(context, CL_MEM_READ_ONLY, dum_size, NULL, &dum_status);
   if(dum_status != CL_SUCCESS) printf("Problem with creating dum buffer. \n");
   // "Randomly" assign a bank
+  #ifdef CL_CHANNEL_1_INTELFPGA
+  int bank = (src[0] & 0x800000) ? CL_CHANNEL_2_INTELFPGA : 0;
+  #else
   int bank = (src[0] & 0x800000) ? CL_MEM_BANK_2_ALTERA : 0;
+  #endif
 
   // create the input buffer
   *mem = clCreateBuffer(context, CL_MEM_READ_ONLY | bank, sizeof(unsigned int) * n, NULL, &status);

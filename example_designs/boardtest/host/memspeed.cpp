@@ -180,6 +180,17 @@ int memspeed (
 			cl_int memflags=0;
 
 			switch(b) {
+				#ifdef CL_CHANNEL_1_INTELFPGA
+					case 0: memflags |= CL_CHANNEL_1_INTELFPGA; break;
+					case 1: memflags |= CL_CHANNEL_2_INTELFPGA; break;
+					case 2: memflags |= CL_CHANNEL_3_INTELFPGA; break;
+					case 3: memflags |= CL_CHANNEL_4_INTELFPGA; break;
+					case 4: memflags |= CL_CHANNEL_5_INTELFPGA; break;
+					case 5: memflags |= CL_CHANNEL_6_INTELFPGA; break;
+					case 6: memflags |= CL_CHANNEL_7_INTELFPGA; break;
+						//case 7: There is no CL_CHANNEL_8_INTELFPGA!!!!
+					default: memflags |= CL_CHANNEL_1_INTELFPGA; break;
+				#else
 					case 0: memflags |= CL_MEM_BANK_1_ALTERA; break;
 					case 1: memflags |= CL_MEM_BANK_2_ALTERA; break;
 					case 2: memflags |= CL_MEM_BANK_3_ALTERA; break;
@@ -189,6 +200,7 @@ int memspeed (
 					case 6: memflags |= CL_MEM_BANK_7_ALTERA; break;
 						//case 7: There is no CL_MEM_BANK_8_ALTERA!!!!
 					default: memflags |= CL_MEM_BANK_1_ALTERA; break;
+				#endif
 			}
 			// create the input buffer
 			ddatain = clCreateBuffer(context, CL_MEM_READ_WRITE | memflags, sizeof(unsigned) * vectorSize, NULL, &status);
