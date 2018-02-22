@@ -249,23 +249,21 @@ def setup_bsp(platform, bsp_search_dirs, sim_mode=False, verbose=False,
             print "ERROR: opae install path not found"
             exit(1)
 
-        # setup environment for running afu_platform_config
+        # setup and run afu_platform_config
         os.environ["BBS_LIB_PATH"] = os.path.join(platform_dir, 'lib')
-        old_path = os.environ["PATH"]
-
-        os.environ["PATH"] += os.pathsep + os.path.join(opae_inst_path, 'bin')
         bsp_platform_if_dir = os.path.join(bsp_qsf_dir, 'platform_if')
         delete_and_mkdir(bsp_platform_if_dir)
         opae_platform_if_path = os.path.join(opae_inst_path, 'share', 'opae',
                                              'platform', 'platform_if')
         copy_glob(os.path.join(opae_platform_if_path, "*"),
                   bsp_platform_if_dir)
-        cfg_cmd = "afu_platform_config \
-                   --qsf  --ifc ccip_std_afu_avalon_mm_legacy_wires \
-                   --tgt ./build/platform discrete_pcie3_hssi40 \
-                   --platform_if platform_if"
+        afu_platform_config_bin = os.path.join(opae_inst_path, 'bin',
+                                               'afu_platform_config')
+        cfg_cmd = (afu_platform_config_bin + " "
+                   "--qsf  --ifc ccip_std_afu_avalon_mm_legacy_wires "
+                   "--tgt ./build/platform discrete_pcie3_hssi40 "
+                   "--platform_if platform_if")
         run_cmd(cfg_cmd, bsp_dir)
-        os.environ["PATH"] = old_path
 
         # setup sim stuff if needed
         if(sim_mode):
