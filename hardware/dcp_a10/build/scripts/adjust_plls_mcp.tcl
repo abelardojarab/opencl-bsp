@@ -339,6 +339,17 @@ set io_pin    [get_fitter_resource_usage -io_pin]
 set dsp       [get_fitter_resource_usage -resource "*DSP*"]
 set mem_bit   [get_fitter_resource_usage -mem_bit]
 set m9k       [get_fitter_resource_usage -resource "M?0K*"]
+
+set pll_1x_setting [expr int($k_fmax)]
+if { $fmax2 < 10000} {
+	#set the max frequency to 300 because 2x clock can't go higher than 600
+	set pll_1x_setting [expr min($pll_1x_setting,300) ]
+	set pll_2x_setting [expr int($pll_1x_setting * 2)]
+} else {
+	set pll_1x_setting [expr int($pll_1x_setting) ]
+	set pll_2x_setting [expr int($pll_1x_setting * 2)]
+}
+
 puts $outfile "ALUTs: $aluts"
 puts $outfile "Registers: $registers"
 puts $outfile "Logic utilization: $logicutil"
@@ -346,6 +357,7 @@ puts $outfile "I/O pins: $io_pin"
 puts $outfile "DSP blocks: $dsp"
 puts $outfile "Memory bits: $mem_bit"
 puts $outfile "RAM blocks: $m9k"
+puts $outfile "Actual clock freq: $pll_1x_setting"
 puts $outfile "Kernel fmax: $k_fmax"
 puts $outfile "1x clock fmax: $fmax1"
 puts $outfile "2x clock fmax: $fmax2"
@@ -365,16 +377,6 @@ close $outfile
 
 # write  file for kernel freq metadata
 set clockfile   [open "pll_metadata.txt" w]
-set pll_1x_setting [expr int($k_fmax)]
-if { $fmax2 < 10000} {
-	#set the max frequency to 300 because 2x clock can't go higher than 600
-	set pll_1x_setting [expr min($pll_1x_setting,300) ]
-	set pll_2x_setting [expr int($pll_1x_setting * 2)]
-} else {
-	set pll_1x_setting [expr int($pll_1x_setting) ]
-	set pll_2x_setting [expr int($pll_1x_setting * 2)]
-}
-
 puts $clockfile "clock-frequency-low:$pll_1x_setting clock-frequency-high:$pll_2x_setting"
 close $clockfile
 
