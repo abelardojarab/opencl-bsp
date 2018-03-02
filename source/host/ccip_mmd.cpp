@@ -306,9 +306,10 @@ int AOCL_MMD_CALL aocl_mmd_reprogram(int handle, void *data, size_t data_size)
 		{
 			ccip_mmd_dma_setup_check();
 			ccip_mmd_check_fme_driver_for_pr();
+			return AOCL_INVALID_HANDLE;
 		}
-		//ACL_DCP_ERROR_IF(res != FPGA_OK, return AOCL_INVALID_HANDLE, "FPGA programming failed!\n");
-      return handle;
+
+        return handle;
 	}
 
 	return AOCL_INVALID_HANDLE;

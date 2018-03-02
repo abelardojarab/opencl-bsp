@@ -137,7 +137,12 @@ int scan_devices ( const char * device_name )
          o_list_stream << "\n";
          o_list_stream << std::left << std::setw(20) << dev_name
                        << std::left << std::setw(18) << "Uninitialized"
-                       << "Not configured with OpenCL BSP.\n";
+                       << "OpenCL BSP not loaded. Must load BSP using command: \n"
+                       << std::left << std::setw(38) << " "
+                       << "'aocl program <device_name> <aocx_file>'\n"
+                       << std::left << std::setw(38) << " "
+                       << "before running OpenCL programs using this device\n";
+
       }
 
       // skip to next dev_name
@@ -246,7 +251,8 @@ int main (int argc, char *argv[])
    bsp_loaded = ccip_mmd_bsp_loaded(argv[1]);
    if ( !bsp_loaded ) {
       printf("\nBSP not loaded for Programmable Accelerator Card %s\n",argv[1]);
-      printf("Use 'aocl program <device_name> <aocx_file>' to initialize BSP\n\n");
+      printf("  * Run 'aocl diagnose' to determine device name for %s\n", argv[1]);
+      printf("  * Run 'aocl program <device_name> <aocx_file>' to initialize BSP\n\n");
       return DIAGNOSE_FAILED;
    }
 
