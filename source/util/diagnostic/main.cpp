@@ -71,6 +71,8 @@
 #define DEFAULT_MAXNUMBYTES (256ULL * INT_MB)
 #define DEFAULT_MINNUMBYTES (512ULL * INT_KB)
 
+#define DIAGNOSE_FAILED -1
+
 bool ccip_mmd_dma_setup_check();
 bool ccip_mmd_check_fme_driver_for_pr();
 bool ccip_mmd_bsp_loaded(const char *name);
@@ -121,30 +123,38 @@ int scan_devices ( const char * device_name )
 
       // print out the first row of the table when needed
       if( handle != -1 && !first_row_printed) {
-         o_list_stream << "\nPhys Dev Name  Status   Information\n";
+         o_list_stream << "\n";
+         o_list_stream << std::left << std::setw(20) << "Physical Dev Name"
+                       << std::left << std::setw(18) << "Status"
+                       << "Information\n";
          first_row_printed = 1;
       }
 
-      // when handle < -1, a supported device exists, but it failed the initial tests. 
+      num_active_boards++;
+
+      // when handle < -1 a DCP device exists but is not configured with OpenCL BSP
       if( handle < -1 ) {
-         o_list_stream << std::left << std::setw(14) << dev_name << "Uninitialized   Not configured with OpenCL BSP.\n";
          o_list_stream << "\n";
+         o_list_stream << std::left << std::setw(20) << dev_name
+                       << std::left << std::setw(18) << "Uninitialized"
+                       << "Not configured with OpenCL BSP.\n";
       }
 
       // skip to next dev_name
       if( handle < 0 ){   continue;   }
 
       // found a working supported device
-      num_active_boards++;
       o_list_stream << "\n";
       aocl_mmd_get_info(handle,AOCL_MMD_BOARD_NAME, sizeof(board_name), board_name, NULL);
-      o_list_stream << std::left << std::setw(25) << dev_name << "Passed   " << board_name << "\n";
+      o_list_stream << std::left << std::setw(20) << dev_name
+                    << std::left << std::setw(18) << "Passed   " << board_name << "\n";
 
       aocl_mmd_get_info(handle, AOCL_MMD_PCIE_INFO, sizeof(pcie_info), pcie_info, NULL);
-      o_list_stream << "                            PCIe " << pcie_info << "\n";
+      o_list_stream << std::left << std::setw(38) << " " << "PCIe " << pcie_info << "\n";
 
       aocl_mmd_get_info(handle, AOCL_MMD_TEMPERATURE, sizeof(float), &temperature,NULL);
-      o_list_stream << "                            FPGA temperature = " << temperature << " degrees C.\n";
+      o_list_stream << std::left << std::setw(38) << " "
+                    << "FPGA temperature = " << temperature << " degrees C.\n";
    }
 
    if(num_active_boards > 0) {
@@ -155,8 +165,7 @@ int scan_devices ( const char * device_name )
          o_list_stream << "      aocl diagnose <device_name>\n";
       }
    } else {
-      // TODO: better error message
-      o_list_stream << "\nFound no active device installed on the host machine.\n";
+      o_list_stream << "\nNo active device installed on the host machine.\n";
       o_list_stream << "      Please consult documentation for troubleshooting steps\n";
    }
 
@@ -183,7 +192,7 @@ int main (int argc, char *argv[])
    {
        printf("\nBASIC DCP DRIVER CHECK FAILED\n");
        printf("\nDIAGNOSTIC_FAILED\n");
-       return -1;
+       return DIAGNOSE_FAILED;
    }
 
    if(!ccip_mmd_check_fme_driver_for_pr())
@@ -198,20 +207,8 @@ int main (int argc, char *argv[])
        if( scan_devices(device_name) == 0 ){
            printf("\nDIAGNOSTIC_PASSED\n");
        } else {
-           // P4 changelist 4849231 changed the behavior of 'aocl diagnose' so that
-           // it checks for 'DIAGNOSTIC_PASSED' to be printed when probing for the
-           // number of devices.  This is apparently a workaround for Windows.
-           // However, it causes a problem for DCP because DCP may not have active
-           // devices prior to running 'aocl program'.  So it is reasonable for
-           // 'aocl diagnose' to fail to find active devices, yet for 'aocl program'
-           // to attempt to load an aocx file to activate the device.
-           //
-           // For now the workaround is to simply print 'DIAGNOSTIC_PASSED' even
-           // when it fails.  This satisifies 'aocl program' and allows programming
-           // to complete successfully.
-           printf("\nWorkaround for 17.1 change must print : 'DIAGNOSTIC_PASSED'\n");
            printf("\nDIAGNOSTIC_FAILED\n");
-           return 0;
+           return DIAGNOSE_FAILED;
        }
        return 0;
    }
@@ -243,14 +240,14 @@ int main (int argc, char *argv[])
       printf("Unable to open the device %s.\n", argv[1]);
       printf("Please make sure you have provided a proper <device_name>.\n");
       printf("  Expected device names = %s\n", boards_name);
-      return -1;
+      return DIAGNOSE_FAILED;
    }
 
    bsp_loaded = ccip_mmd_bsp_loaded(argv[1]);
    if ( !bsp_loaded ) {
       printf("\nBSP not loaded for Programmable Accelerator Card %s\n",argv[1]);
       printf("Use 'aocl program <device_name> <aocx_file>' to initialize BSP\n\n");
-      return 0;
+      return DIAGNOSE_FAILED;
    }
 
 
@@ -366,9 +363,5 @@ int main (int argc, char *argv[])
    delete[] readspeed;
    delete[] writespeed;
 
-   // * Always return 0 because 'aocl' wrapper program may print debugging message that
-   // * does not apply to DCP.
-   // * Wrapper code is at: //acds/main/acl/sysgen/lib/acl/Command.pm
-   //return (result) ? 0 : -1;
-   return 0;
+   return (result) ? 0 : DIAGNOSE_FAILED;
 }

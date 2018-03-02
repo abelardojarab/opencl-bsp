@@ -557,7 +557,6 @@ int AOCL_MMD_CALL aocl_mmd_open(const char *name)
       }
    } else {
       handle = ~handle;
-      printf("handle is: %d\n", handle);
    }
 	return handle;
 }
