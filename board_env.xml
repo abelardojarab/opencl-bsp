@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<board_env version="17.0" name="jtag">
+<board_env version="17.1" name="dcp_bsp">
   <hardware dir="hardware" default="dcp_a10"></hardware>
   <platform name="linux64">
     <mmdlib>%b/linux64/lib/libintel_opae_mmd.so</mmdlib>
