@@ -99,50 +99,51 @@ CcipDevice::CcipDevice(uint64_t obj_id):
    uint32_t num_matches;
    
    if (uuid_parse(DCP_OPENCL_DDR_AFU_ID, guid) < 0) {
-      fprintf(stderr, "Error parsing guid '%s'\n", DCP_OPENCL_DDR_AFU_ID);
-      return;
+      throw std::runtime_error(std::string("Error parsing guid ") + 
+                               std::string( DCP_OPENCL_DDR_AFU_ID));
    }
 
    res = fpgaGetProperties(NULL, &filter);
    if(res != FPGA_OK) {
-      fprintf(stderr, "Error creating properties object\n");
-      return;
+      throw std::runtime_error(std::string("Error creating properties object: ") +
+                               std::string(fpgaErrStr(res)));
    }
 
    res = fpgaPropertiesSetObjectType(filter, FPGA_ACCELERATOR);
    if(res != FPGA_OK) {
-      fprintf(stderr, "Error setting object type\n");
-      return;
+      throw std::runtime_error(std::string("Error setting object type: ") + 
+                               std::string(fpgaErrStr(res)));
    }
 
    res = fpgaPropertiesSetObjectID(filter, obj_id);
    if(res != FPGA_OK) {
-      fprintf(stderr, "Error setting object ID: %s\n", fpgaErrStr(res));
-      return;
+      throw std::runtime_error(std::string("Error setting object ID: ") + 
+                               std::string(fpgaErrStr(res)));
    }
 
    res = fpgaEnumerate(&filter, 1, &afc_token, 1, &num_matches);
    if(res != FPGA_OK) {
-      fprintf(stderr, "Error enumerating AFCs: %s\n", fpgaErrStr(res));
+      throw std::runtime_error(std::string("Error enumerating AFCs: ") + 
+                               std::string(fpgaErrStr(res)));
       return;
    }
 
    if(num_matches < 1) {
-      fprintf(stderr, "AFC not found\n");
       res = fpgaDestroyProperties(&filter);
-      return;
+      throw std::runtime_error("AFC not found");
    }
 
    res = fpgaOpen(afc_token, &afc_handle, 0);
    if(res != FPGA_OK) {
-      fprintf(stderr, "Error opening AFC: %s\n", fpgaErrStr(res));
-      return;
+      throw std::runtime_error(std::string("Error opening AFC: ") + 
+                               std::string(fpgaErrStr(res)));
    }
 
    fpga_properties prop = nullptr;
    res = fpgaGetProperties(afc_token, &prop);
    if(res != FPGA_OK) {
-      fprintf(stderr, "Error reading properties: %s\n", fpgaErrStr(res));
+      throw std::runtime_error(std::string("Error reading properties: ") +
+                               std::string(fpgaErrStr(res)));
    }
 
    if(prop) {
@@ -154,7 +155,7 @@ CcipDevice::CcipDevice(uint64_t obj_id):
       if(res != FPGA_OK) {
          fprintf(stderr, "Error reading device: '%s'\n", fpgaErrStr(res));
       }
-      fpgaPropertiesGetFunction(prop, &function);
+      res = fpgaPropertiesGetFunction(prop, &function);
       if(res != FPGA_OK) {
          fprintf(stderr, "Error reading function: '%s'\n", fpgaErrStr(res));
       }
@@ -205,7 +206,7 @@ bool CcipDevice::initialize_bsp()
 
 	fpga_result res = fpgaMapMMIO(afc_handle, 0, NULL);
 	if(res != FPGA_OK) {
-		fprintf(stderr, "Error mapping MMIO space: %d\n", res);
+		fprintf(stderr, "Error mapping MMIO space: %s\n", fpgaErrStr(res));
 		return false;
 	}
 	mmio_is_mapped = true;
@@ -213,7 +214,7 @@ bool CcipDevice::initialize_bsp()
 	/* Reset AFC */
 	res = fpgaReset(afc_handle);
 	if(res != FPGA_OK) {
-		fprintf(stderr, "Error resetting AFC: %d\n", res);
+		fprintf(stderr, "Error resetting AFC: %s\n", fpgaErrStr(res));
 		return false;
 	}
 	AFU_RESET_DELAY();
@@ -416,15 +417,15 @@ void CcipDevice::event_update_fn(aocl_mmd_op_t op, int status)
 
 int CcipDevice::read_block(aocl_mmd_op_t op, int mmd_interface, void *host_addr, size_t offset, size_t size)
 {
-	int status = -1;
+	fpga_result res;
 
 	// The mmd_interface is defined as the base address of the MMIO write.  Access
 	// to memory requires special functionality.  Otherwise do direct MMIO read of
 	// base address + offset
 	if(mmd_interface == AOCL_MMD_MEMORY) {
-		status = dma_h->read_memory(op, static_cast<uint64_t *>(host_addr), offset, size);
+		res = dma_h->read_memory(op, static_cast<uint64_t *>(host_addr), offset, size);
 	} else {
-		status = read_mmio(host_addr, mmd_interface + offset, size);
+		res = read_mmio(host_addr, mmd_interface + offset, size);
 		
 		if(op) {
 			//TODO: check what status value should really be instead of just using 0
@@ -434,8 +435,8 @@ int CcipDevice::read_block(aocl_mmd_op_t op, int mmd_interface, void *host_addr,
 	}
 
 	//TODO: check what status values aocl wants and also parse the result
-	if(status != FPGA_OK) {
-		DEBUG_PRINT("read_block error code: %d\n", status);
+	if(res != FPGA_OK) {
+		fprintf(stderr,"fpgaReadMMIO error: %s\n", fpgaErrStr(res));
 		return -1;
 	} else {
 		return 0;
@@ -444,14 +445,14 @@ int CcipDevice::read_block(aocl_mmd_op_t op, int mmd_interface, void *host_addr,
 
 int CcipDevice::write_block(aocl_mmd_op_t op, int mmd_interface, const void *host_addr, size_t offset, size_t size)
 {
-	int status = -1;
+	fpga_result res;
 
 	// The mmd_interface is defined as the base address of the MMIO write.  Access
 	// to memory requires special functionality.  Otherwise do direct MMIO write
 	if(mmd_interface == AOCL_MMD_MEMORY) {
-		status = dma_h->write_memory(op, static_cast<const uint64_t *>(host_addr), offset, size);
+		res = dma_h->write_memory(op, static_cast<const uint64_t *>(host_addr), offset, size);
 	} else {
-		status = write_mmio(host_addr, mmd_interface + offset, size);
+		res = write_mmio(host_addr, mmd_interface + offset, size);
 		
 		if(op) {
 			//TODO: check what 'status' value should really be.  Right now just
@@ -461,8 +462,8 @@ int CcipDevice::write_block(aocl_mmd_op_t op, int mmd_interface, const void *hos
 	}
 
 	//TODO: check what status values aocl wants and also parse the result
-	if(status != FPGA_OK) {
-		DEBUG_PRINT("write_block error code: %d\n", status);
+	if(res != FPGA_OK) {
+		fprintf(stderr, "fpgaWriteMMIO error: %s\n", fpgaErrStr(res));
 		return -1;
 	} else {
 		return 0;
@@ -513,7 +514,7 @@ int CcipDevice::copy_block(aocl_mmd_op_t op,
 	return status;
 }
 
-int CcipDevice::read_mmio(void *host_addr, size_t mmio_addr, size_t size)
+fpga_result CcipDevice::read_mmio(void *host_addr, size_t mmio_addr, size_t size)
 {
 	fpga_result res = FPGA_OK;
 
@@ -555,7 +556,7 @@ int CcipDevice::read_mmio(void *host_addr, size_t mmio_addr, size_t size)
 }
 
 
-int CcipDevice::write_mmio(const void *host_addr, size_t mmio_addr, size_t size)
+fpga_result CcipDevice::write_mmio(const void *host_addr, size_t mmio_addr, size_t size)
 {
 	fpga_result res = FPGA_OK;
 

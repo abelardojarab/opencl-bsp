@@ -160,8 +160,8 @@ class CcipDevice final
 	char *mmd_copy_buffer;
 
 	// Helper functions
-	int read_mmio(void *host_addr, size_t dev_addr, size_t size);
-	int write_mmio(const void *host_addr, size_t dev_addr, size_t size);
+	fpga_result read_mmio(void *host_addr, size_t dev_addr, size_t size);
+	fpga_result write_mmio(const void *host_addr, size_t dev_addr, size_t size);
 };
 
 #endif // _CCIP_MMD_DEVICE_H
