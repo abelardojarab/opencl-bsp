@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 
 #include <safe_string/safe_string.h>
 #include "memcpy_s_fast.h"
@@ -66,6 +67,7 @@ mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle) :
 	msgdma_bbb_base_addr(0)
 {
 	#ifndef DISABLE_DMA
+	bind_to_node();
 	fpga_result res;
 	res = fpgaDmaOpen(m_fpga_handle, &dma_h);
 	if(res != FPGA_OK) {
@@ -87,6 +89,8 @@ mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle) :
 	if(!m_dma_work_thread->initialized())
 		return;
 	#endif
+
+	unbind_from_node();
 	
 	m_initialized = true;
 }
@@ -114,6 +118,8 @@ void mmd_dma::reinit_dma()
 	
 	if(dma_h) {
 		m_initialized = false;
+
+		bind_to_node();
 		
 		fpga_result res;
 		res = fpgaDmaClose(dma_h);
@@ -128,6 +134,8 @@ void mmd_dma::reinit_dma()
 			fprintf(stderr, "Error initializing DMA: %d\n", res);
 			return;
 		}
+
+		unbind_from_node();
 		
 		m_initialized = true;
 	}
@@ -152,6 +160,13 @@ int mmd_dma::do_dma(dma_work_item &item)
 
 	int res = 0;
 	assert(item.rd_host_addr != NULL || item.wr_host_addr != NULL);
+
+	// Tell the kernel we'll need these and they're sequential
+	uint64_t addr = item.rd_host_addr ? (uint64_t)item.rd_host_addr : (uint64_t)item.wr_host_addr;
+	addr = addr & ~((uint64_t)getpagesize() - 1);	// Align to page boundary
+	size_t remainder = ((size_t)getpagesize() - (addr & getpagesize())) & ~(getpagesize() - 1);
+	madvise((void *)addr, item.size + remainder, MADV_SEQUENTIAL);
+
 	if(item.rd_host_addr) {
 		res = read_memory(item.rd_host_addr, item.dev_addr, item.size);
 	} else {
@@ -283,6 +298,40 @@ int mmd_dma::read_memory_mmio_unaligned(void *host_addr, size_t dev_addr, size_t
 	memcpy_s_fast(host_addr, size, ((char *)(&read_tmp))+shift, size);
 	
 	return FPGA_OK;
+}
+
+// Bind this thread to the set of CPUs local to the FPGA.  Also bind its memory policy
+void intel_opae_mmd::mmd_dma::bind_to_node(void)
+{
+	if (-1 == afu_numa_node)
+		return;
+
+	if (sched_setaffinity(0, CPU_SETSIZE, &afu_cpuset)) {
+		perror("sched_setaffinity");
+	}
+
+	unsigned long nodemask = (1 << afu_numa_node);
+	if (set_mempolicy(MPOL_BIND | MPOL_F_STATIC_NODES, &nodemask, sizeof(nodemask))) {
+		perror("set_mempolicy");
+		return;
+	}
+}
+
+// Remove the binding of the CPUs and memory allocation
+void intel_opae_mmd::mmd_dma::unbind_from_node(void)
+{
+	if (-1 == afu_numa_node)
+		return;
+
+	if (sched_setaffinity(0, CPU_SETSIZE, &process_cpuset)) {
+		perror("sched_setaffinity");
+	}
+
+	unsigned long nodemask = (1 << afu_numa_node);
+	if (set_mempolicy(MPOL_DEFAULT, NULL, 0)) {
+		perror("set_mempolicy");
+		return;
+	}
 }
 
 int mmd_dma::read_memory_mmio(uint64_t *host_addr, size_t dev_addr, size_t size)

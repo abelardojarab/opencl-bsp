@@ -18,6 +18,12 @@
 #ifndef _MMD_DMA_H
 #define _MMD_DMA_H
 
+#pragma push_macro("_GNU_SOURCE")
+#undef _GNU_SOURCE
+#define _GNU_SOURCE
+#include <sched.h>
+#pragma pop_macro("_GNU_SOURCE")
+
 #include <opae/fpga.h>
 
 #include <mutex>
@@ -43,6 +49,12 @@ public:
 	int do_dma(dma_work_item &item);
 
 	void set_status_handler(aocl_mmd_status_handler_fn fn, void *user_data);
+	void set_numa_params(int numa_node, cpu_set_t *numa_cpuset, cpu_set_t *proc_cpuset)
+	{
+		afu_numa_node = numa_node;
+		memcpy(&afu_cpuset, numa_cpuset, CPU_SETSIZE);
+		memcpy(&process_cpuset, proc_cpuset, CPU_SETSIZE);
+	}
 	
 	//used after reconfigation
 	void reinit_dma();
@@ -56,6 +68,9 @@ private:
 	int write_memory_mmio(const uint64_t *host_addr, size_t dev_addr, size_t size);
 	int write_memory_mmio_unaligned(const uint64_t *host_addr, size_t dev_addr, size_t size);
 	int read_memory_mmio_unaligned(void *host_addr, size_t dev_addr, size_t size);
+
+	void bind_to_node(void);
+	void unbind_from_node(void);
 
 	void event_update_fn(aocl_mmd_op_t op, int status);
 
@@ -72,6 +87,10 @@ private:
 
 	fpga_dma_handle   dma_h;
 	uint64_t          msgdma_bbb_base_addr;
+
+	int afu_numa_node;
+	cpu_set_t afu_cpuset;
+	cpu_set_t process_cpuset;
 
 	//not used and not implemented
 	mmd_dma (mmd_dma& other);

@@ -23,8 +23,15 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include <string>
+
+#pragma push_macro("_GNU_SOURCE")
+#undef _GNU_SOURCE
+#define _GNU_SOURCE
+#include <sched.h>
+#pragma pop_macro("_GNU_SOURCE")
 
 #include <uuid/uuid.h>
 #include <opae/fpga.h>
@@ -142,7 +149,12 @@ class CcipDevice final
    // available
    std::string fme_sysfs_temp_path;
    bool fme_sysfs_temp_initialized;
+   int fme_numa_node;
+   cpu_set_t fme_cpuset;
+   cpu_set_t process_cpuset;
    void initialize_fme_sysfs();
+
+   void initialize_local_cpus_sysfs();
 
    uint8_t bus;
    uint8_t device;
