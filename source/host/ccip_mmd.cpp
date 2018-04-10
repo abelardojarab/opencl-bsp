@@ -506,6 +506,7 @@ int AOCL_MMD_CALL aocl_mmd_open(const char *name)
       }
       handle = dev->get_mmd_handle();
       bsp_devices[handle] = dev;
+      obj_handle_map[obj_id] = handle;
    } 
 
    assert(dev);
