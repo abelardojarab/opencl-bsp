@@ -98,6 +98,9 @@ private:
 
 	numa_params numa;
 
+	int use_DMA_work_thread;
+	int enable_NUMA_affinity;
+
 	//not used and not implemented
 	mmd_dma (mmd_dma& other);
 	mmd_dma& operator= (const mmd_dma& other);

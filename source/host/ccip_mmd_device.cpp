@@ -227,15 +227,11 @@ void CcipDevice::initialize_local_cpus_sysfs() {
 		return;
 	}
 
-	unsigned int i; for(i = 0; i < sizeof(cpu_set_t) / sizeof(numa.process_cpuset.__bits[0]); i++) printf("proc cpuset[%d] = %08lx\n", i, numa.process_cpuset.__bits[i]); fflush(stdout);
-
 	FILE *tmp;
 	tmp = fopen(localnumapath, "r");
 	if (tmp) {
 		if (1 != fscanf(tmp, "%x", &numa.afu_numa_node))
 		{
-			numa.afu_numa_node = -1;
-			printf("Can't read\n"); fflush(stdout);
 			numa.afu_numa_node = -1;
 		}
 		fclose(tmp);
@@ -249,8 +245,6 @@ void CcipDevice::initialize_local_cpus_sysfs() {
 		unsigned long cpunum = 0;
 
 		nread = getline(&cpustr, &len, tmp);
-
-		printf("getline - string is '%s'\n", cpustr);fflush(stdout);
 
 		if (-1 == nread) {
 			return;
@@ -284,11 +278,9 @@ void CcipDevice::initialize_local_cpus_sysfs() {
 		fclose(tmp);
 	}
 
-	for(i = 0; i < sizeof(cpu_set_t) / sizeof(numa.afu_cpuset.__bits[0]); i++) printf("numa cpuset[%d] = %08lx\n", i, numa.afu_cpuset.__bits[i]); fflush(stdout);
 	if (CPU_EQUAL(&numa.afu_cpuset, &numa.process_cpuset))
 	{
 		numa.afu_numa_node = -1;	// Only a single NUMA node
-		printf("Nodesets are equal\n"); fflush(stdout);
 	}
 }
 
