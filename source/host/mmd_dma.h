@@ -67,6 +67,9 @@ public:
 	//used after reconfigation
 	void reinit_dma();
 
+	void bind_to_node(void);
+	void unbind_from_node(void);
+
 private:
 	// Helper functions
 	int enqueue_dma(dma_work_item &item);
@@ -76,9 +79,6 @@ private:
 	int write_memory_mmio(const uint64_t *host_addr, size_t dev_addr, size_t size);
 	int write_memory_mmio_unaligned(const uint64_t *host_addr, size_t dev_addr, size_t size);
 	int read_memory_mmio_unaligned(void *host_addr, size_t dev_addr, size_t size);
-
-	void bind_to_node(void);
-	void unbind_from_node(void);
 
 	void event_update_fn(aocl_mmd_op_t op, int status);
 

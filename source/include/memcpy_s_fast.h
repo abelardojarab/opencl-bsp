@@ -18,10 +18,29 @@
 #ifndef MEMCPY_S_FAST_H
 #define MEMCPY_S_FAST_H_
 
-#ifdef MEMCPY_S_FAST_USE_MEMCPY_S
-#define memcpy_s_fast(a,b,c,d) memcpy_s(a,b,c,d)
-#else
-#define memcpy_s_fast(a,b,c,d) memcpy(a,c,d)
+// Consistency check
+#if defined(MEMCPY_S_FAST_USE_MEMCPY_S) && defined(MEMCPY_S_FAST_USE_LOCAL_MEMCPY)
+#error "Cannot set both MEMCPY_S_FAST_USE_MEMCPY_S and MEMCPY_S_FAST_USE_LOCAL_MEMCPY"
 #endif
 
-#endif
+#ifdef MEMCPY_S_FAST_USE_LOCAL_MEMCPY
+#ifdef __cplusplus
+extern "C" {
+#endif	// __cplusplus
+	extern void *local_memcpy(void *dst, const void *src, size_t size);
+#ifdef __cplusplus
+	}
+#endif	// __cplusplus
+#endif // MEMCPY_S_FAST_USE_LOCAL_MEMCPY
+
+#ifdef MEMCPY_S_FAST_USE_MEMCPY_S
+#define memcpy_s_fast(a,b,c,d) memcpy_s(a,b,c,d)
+#else	// MEMCPY_S_FAST_USE_MEMCPY_S
+#ifdef MEMCPY_S_FAST_USE_LOCAL_MEMCPY
+#define memcpy_s_fast(a,b,c,d) local_memcpy(a,c,d)
+#else	// MEMCPY_S_FAST_USE_LOCAL_MEMCPY
+#define memcpy_s_fast(a,b,c,d) memcpy(a,c,d)
+#endif	// MEMCPY_S_FAST_USE_MEMCPY
+#endif	// MEMCPY_S_FAST_USE_MEMCPY_S
+
+#endif	// MEMCPY_S_FAST_H

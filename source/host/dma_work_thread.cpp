@@ -38,6 +38,9 @@ dma_work_thread::dma_work_thread(mmd_dma &mmd_dma_arg) :
 	m_thread_wake_event = new eventfd_wrapper();
 	if(!m_thread_wake_event->initialized())
 		return;
+
+	// Bind this thread (and children) to the proper NUMA node
+	m_mmd_dma.bind_to_node();
 	m_thread = new std::thread(work_thread, std::ref(*this));
 	
 	m_initialized = true;
@@ -63,6 +66,8 @@ dma_work_thread::~dma_work_thread()
 		delete m_thread_wake_event;
 		m_thread_wake_event = NULL;
 	}
+
+	m_mmd_dma.unbind_from_node();
 	
 	m_initialized = false;
 }
