@@ -743,7 +743,6 @@ static fpga_result _read_memory_mmio_unaligned(fpga_dma_handle dma_h,
 	//overlay our data
 	local_memcpy((void *)host_addr, ((char *)(&read_tmp)) + shift, count);
 
-out:
 	return res;
 }
 
@@ -796,7 +795,6 @@ static fpga_result _write_memory_mmio_unaligned(fpga_dma_handle dma_h,
 	if (res != FPGA_OK)
 		return res;
 
-out:
 	return res;
 }
 
@@ -1599,15 +1597,12 @@ fpga_result fpgaDmaTransferSync(fpga_dma_handle dma_h, uint64_t dst,
 	return res;
 }
 
-#define UNUSED(...) (void)(__VA_ARGS__)
-
 fpga_result fpgaDmaTransferAsync(fpga_dma_handle dma, uint64_t dst,
 	uint64_t src, size_t count,
 	fpga_dma_transfer_t type,
 	fpga_dma_transfer_cb cb, void *context)
 {
 	// TODO
-	UNUSED(dma, dst, src, count, type, cb, context);
 	return FPGA_NOT_SUPPORTED;
 }
 

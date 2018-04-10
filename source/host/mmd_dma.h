@@ -36,10 +36,18 @@ namespace intel_opae_mmd {
 
 class eventfd_wrapper;
 
+class numa_params final
+{
+public:
+	int afu_numa_node;
+	cpu_set_t afu_cpuset;
+	cpu_set_t process_cpuset;
+};  // numa_params
+
 class mmd_dma final
 {
 public:
-	mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle);
+	mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle, numa_params numa);
 	~mmd_dma();
 
 	bool initialized() { return m_initialized; }
@@ -49,11 +57,11 @@ public:
 	int do_dma(dma_work_item &item);
 
 	void set_status_handler(aocl_mmd_status_handler_fn fn, void *user_data);
-	void set_numa_params(int numa_node, cpu_set_t *numa_cpuset, cpu_set_t *proc_cpuset)
+	void set_numa_params(numa_params &params)
 	{
-		afu_numa_node = numa_node;
-		memcpy(&afu_cpuset, numa_cpuset, CPU_SETSIZE);
-		memcpy(&process_cpuset, proc_cpuset, CPU_SETSIZE);
+		numa.afu_numa_node = params.afu_numa_node;
+		memcpy(&numa.afu_cpuset, &params.afu_cpuset, sizeof(cpu_set_t));
+		memcpy(&numa.process_cpuset, &params.process_cpuset, sizeof(cpu_set_t));
 	}
 	
 	//used after reconfigation
@@ -88,9 +96,7 @@ private:
 	fpga_dma_handle   dma_h;
 	uint64_t          msgdma_bbb_base_addr;
 
-	int afu_numa_node;
-	cpu_set_t afu_cpuset;
-	cpu_set_t process_cpuset;
+	numa_params numa;
 
 	//not used and not implemented
 	mmd_dma (mmd_dma& other);

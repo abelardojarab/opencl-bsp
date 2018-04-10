@@ -79,8 +79,7 @@ CcipDevice::CcipDevice(uint64_t obj_id):
    filter(NULL),
    afc_token(NULL),
    dma_h(NULL),
-   mmd_copy_buffer(NULL),
-   fme_numa_node(-1)
+   mmd_copy_buffer(NULL)
 {
    // Note that this constructor is not thread-safe because next_mmd_handle
    // is shared between all class instances
@@ -90,6 +89,7 @@ CcipDevice::CcipDevice(uint64_t obj_id):
    else
       next_mmd_handle++;
 
+  numa.afu_numa_node = -1;
   mmd_copy_buffer = (char *)malloc(MMD_COPY_BUFFER_SIZE);
   if(mmd_copy_buffer == NULL) {
   	  fprintf(stderr, "malloc failed for mmd_copy_buffer\n");
@@ -208,9 +208,9 @@ void CcipDevice::initialize_local_cpus_sysfs() {
 	char localnumapath[MAX_LEN];
 	char localcpupath[MAX_LEN];
 
-	fme_numa_node = -1;
-	CPU_ZERO(&process_cpuset);
-	CPU_ZERO(&fme_cpuset);
+	numa.afu_numa_node = -1;
+	CPU_ZERO(&numa.process_cpuset);
+	CPU_ZERO(&numa.afu_cpuset);
 
 	// HACK: currently ObjectID is constructed using its lower 20 bits
 	// as the device minor number.  The device minor number also matches
@@ -222,16 +222,22 @@ void CcipDevice::initialize_local_cpus_sysfs() {
 	snprintf(localnumapath, MAX_LEN, "/sys/class/fpga/intel-fpga-dev.%d/device/numa_node", dev_num);
 	snprintf(localcpupath, MAX_LEN, "/sys/class/fpga/intel-fpga-dev.%d/device/local_cpus", dev_num);
 
-	if (-1 == sched_getaffinity(0, sizeof(fme_cpuset), &process_cpuset)) {
+	if (-1 == sched_getaffinity(0, sizeof(cpu_set_t), &numa.process_cpuset)) {
 		perror("sched_getaffinity");
 		return;
 	}
 
+	unsigned int i; for(i = 0; i < sizeof(cpu_set_t) / sizeof(numa.process_cpuset.__bits[0]); i++) printf("proc cpuset[%d] = %08lx\n", i, numa.process_cpuset.__bits[i]); fflush(stdout);
+
 	FILE *tmp;
 	tmp = fopen(localnumapath, "r");
 	if (tmp) {
-		if (1 != fscanf(tmp, "%x", &fme_numa_node))
-			fme_numa_node = -1;
+		if (1 != fscanf(tmp, "%x", &numa.afu_numa_node))
+		{
+			numa.afu_numa_node = -1;
+			printf("Can't read\n"); fflush(stdout);
+			numa.afu_numa_node = -1;
+		}
 		fclose(tmp);
 	}
 
@@ -243,6 +249,8 @@ void CcipDevice::initialize_local_cpus_sysfs() {
 		unsigned long cpunum = 0;
 
 		nread = getline(&cpustr, &len, tmp);
+
+		printf("getline - string is '%s'\n", cpustr);fflush(stdout);
 
 		if (-1 == nread) {
 			return;
@@ -262,13 +270,13 @@ void CcipDevice::initialize_local_cpus_sysfs() {
 			default:
 				assert(isxdigit(cpustr[ndx]));
 				unsigned long val = strtol(&cpustr[ndx], NULL, 16);
-				if (val & 0x1) CPU_SET(cpunum, &fme_cpuset);
+				if (val & 0x1) CPU_SET(cpunum, &numa.afu_cpuset);
 				cpunum++;
-				if (val & 0x2) CPU_SET(cpunum, &fme_cpuset);
+				if (val & 0x2) CPU_SET(cpunum, &numa.afu_cpuset);
 				cpunum++;
-				if (val & 0x4) CPU_SET(cpunum, &fme_cpuset);
+				if (val & 0x4) CPU_SET(cpunum, &numa.afu_cpuset);
 				cpunum++;
-				if (val & 0x8) CPU_SET(cpunum, &fme_cpuset);
+				if (val & 0x8) CPU_SET(cpunum, &numa.afu_cpuset);
 				cpunum++;
 			}
 		}
@@ -276,8 +284,12 @@ void CcipDevice::initialize_local_cpus_sysfs() {
 		fclose(tmp);
 	}
 
-	if (CPU_EQUAL(&fme_cpuset, &process_cpuset))
-		fme_numa_node = -1;	// Only a single NUMA node
+	for(i = 0; i < sizeof(cpu_set_t) / sizeof(numa.afu_cpuset.__bits[0]); i++) printf("numa cpuset[%d] = %08lx\n", i, numa.afu_cpuset.__bits[i]); fflush(stdout);
+	if (CPU_EQUAL(&numa.afu_cpuset, &numa.process_cpuset))
+	{
+		numa.afu_numa_node = -1;	// Only a single NUMA node
+		printf("Nodesets are equal\n"); fflush(stdout);
+	}
 }
 
 bool CcipDevice::initialize_bsp()
@@ -301,15 +313,12 @@ bool CcipDevice::initialize_bsp()
 	}
 	AFU_RESET_DELAY();
 	
-	dma_h = new mmd_dma(afc_handle, mmd_handle);
+	dma_h = new mmd_dma(afc_handle, mmd_handle, numa);
 	if(!dma_h->initialized())
 	{
 		fprintf(stderr, "Error initializing mmd dma\n");
 		return false;
 	}
-
-	// Tell it about NUMA
-	dma_h->set_numa_params(fme_numa_node, &fme_cpuset, &process_cpuset);
 	
 	kernel_interrupt_thread = new KernelInterrupt(afc_handle, mmd_handle);
 	

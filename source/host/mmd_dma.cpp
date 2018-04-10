@@ -55,7 +55,7 @@ using namespace intel_opae_mmd;
 #endif
 
 
-mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle) :
+mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle, numa_params numas) :
 	m_initialized(false),
 	m_dma_work_thread(NULL),
 	m_dma_op_mutex(),
@@ -66,6 +66,10 @@ mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle) :
 	dma_h(NULL),
 	msgdma_bbb_base_addr(0)
 {
+	set_numa_params(numas);
+	printf("Constructor: numa node is 0x%x\n", numas.afu_numa_node);
+	unsigned int i; for(i = 0; i < sizeof(cpu_set_t) / sizeof(numas.process_cpuset.__bits[0]); i++) printf("constructor cpuset[%d] = %08lx\n", i, numas.process_cpuset.__bits[i]); fflush(stdout);
+	for(i = 0; i < sizeof(cpu_set_t) / sizeof(numas.afu_cpuset.__bits[0]); i++) printf("constructor afu cpuset[%d] = %08lx\n", i, numas.afu_cpuset.__bits[i]); fflush(stdout);
 	#ifndef DISABLE_DMA
 	bind_to_node();
 	fpga_result res;
@@ -303,35 +307,40 @@ int mmd_dma::read_memory_mmio_unaligned(void *host_addr, size_t dev_addr, size_t
 // Bind this thread to the set of CPUs local to the FPGA.  Also bind its memory policy
 void intel_opae_mmd::mmd_dma::bind_to_node(void)
 {
-	if (-1 == afu_numa_node)
+	if (-1 == numa.afu_numa_node)
 		return;
 
-	if (sched_setaffinity(0, CPU_SETSIZE, &afu_cpuset)) {
+	int i;
+	for(i = 0; i < 16; i++) printf("cpuset[%d] = 0x%lx\n", i, numa.afu_cpuset.__bits[i]);
+	if (sched_setaffinity(0, sizeof(cpu_set_t), &numa.afu_cpuset)) {
 		perror("sched_setaffinity");
 	}
 
-	unsigned long nodemask = (1 << afu_numa_node);
+#if 0
+	unsigned long nodemask = (1 << numa.afu_numa_node);
 	if (set_mempolicy(MPOL_BIND | MPOL_F_STATIC_NODES, &nodemask, sizeof(nodemask))) {
 		perror("set_mempolicy");
 		return;
 	}
+#endif
 }
 
 // Remove the binding of the CPUs and memory allocation
 void intel_opae_mmd::mmd_dma::unbind_from_node(void)
 {
-	if (-1 == afu_numa_node)
+	if (-1 == numa.afu_numa_node)
 		return;
 
-	if (sched_setaffinity(0, CPU_SETSIZE, &process_cpuset)) {
+	if (sched_setaffinity(0, sizeof(cpu_set_t), &numa.process_cpuset)) {
 		perror("sched_setaffinity");
 	}
 
-	unsigned long nodemask = (1 << afu_numa_node);
+#if 0
 	if (set_mempolicy(MPOL_DEFAULT, NULL, 0)) {
 		perror("set_mempolicy");
 		return;
 	}
+#endif
 }
 
 int mmd_dma::read_memory_mmio(uint64_t *host_addr, size_t dev_addr, size_t size)

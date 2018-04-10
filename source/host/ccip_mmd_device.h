@@ -149,9 +149,7 @@ class CcipDevice final
    // available
    std::string fme_sysfs_temp_path;
    bool fme_sysfs_temp_initialized;
-   int fme_numa_node;
-   cpu_set_t fme_cpuset;
-   cpu_set_t process_cpuset;
+   intel_opae_mmd::numa_params numa;
    void initialize_fme_sysfs();
 
    void initialize_local_cpus_sysfs();
