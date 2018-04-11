@@ -12,6 +12,7 @@
 # Intel or its authorized distributors.  Please refer to the applicable
 # agreement for further details.
 
+old_errexit="$(shopt -po errexit)"
 set -e
 
 echo "\
@@ -48,4 +49,4 @@ sudo chmod 666 /sys/class/fpga/intel-fpga-dev.*/intel-fpga-port.*/errors/clear
 echo "sudo chmod 666 /dev/intel-fpga-fme.*"
 sudo chmod 666 /dev/intel-fpga-fme.*
 
-set +e
+eval "$old_errexit"
