@@ -71,28 +71,28 @@ static CcipDevice *get_device(int handle)
 	}
 }
 
-
 // Interface for programing device that does not have a BSP loaded
 int ccip_mmd_device_reprogram(const char *device_name, void *data,
 			      size_t data_size)
 {
-   uint64_t obj_id = CcipDevice::parse_board_name(device_name);
-   
-   int handle = get_handle(obj_id);
-   if(handle == -1) {
-      CcipDevice *dev = nullptr;
-      try {
-          dev = new CcipDevice(obj_id);
-      } catch(std::runtime_error &e) {
-          std::cerr << e.what() << std::endl;
-          exit(-1);
-      }
-      handle = dev->get_mmd_handle();
-      bsp_devices[handle] = dev;
-      obj_handle_map[obj_id] = handle;
-   }
-   
-   return aocl_mmd_reprogram(handle, data, data_size); 
+	uint64_t obj_id = CcipDevice::parse_board_name(device_name);
+
+	int handle = get_handle(obj_id);
+	if (handle == -1) {
+		CcipDevice *dev = nullptr;
+		try {
+			dev = new CcipDevice(obj_id);
+		}
+		catch(std::runtime_error & e) {
+			std::cerr << e.what() << std::endl;
+			exit(-1);
+		}
+		handle = dev->get_mmd_handle();
+		bsp_devices[handle] = dev;
+		obj_handle_map[obj_id] = handle;
+	}
+
+	return aocl_mmd_reprogram(handle, data, data_size);
 }
 
 // Interface for checking if AFU has BSP loaded
@@ -118,27 +118,30 @@ bool ccip_mmd_bsp_loaded(const char *name)
 
 static unsigned int get_offline_num_acl_boards()
 {
-   fpga_result res = FPGA_OK;
-   uint32_t num_matches = 0;
-   fpga_properties   filter;
+	fpga_result res = FPGA_OK;
+	uint32_t num_matches = 0;
+	fpga_properties filter;
 
-   res = fpgaGetProperties(NULL, &filter);
-   if(res != FPGA_OK) {
-      fprintf(stderr, "Error creating properties object: %s\n", fpgaErrStr(res));
-      goto out;
-   }
+	res = fpgaGetProperties(NULL, &filter);
+	if (res != FPGA_OK) {
+		fprintf(stderr, "Error creating properties object: %s\n",
+			fpgaErrStr(res));
+		goto out;
+	}
 
-   res = fpgaPropertiesSetObjectType(filter, FPGA_ACCELERATOR);
-   if(res != FPGA_OK) {
-      fprintf(stderr, "Error setting object type: %s\n", fpgaErrStr(res));
-      goto out;
-   }
+	res = fpgaPropertiesSetObjectType(filter, FPGA_ACCELERATOR);
+	if (res != FPGA_OK) {
+		fprintf(stderr, "Error setting object type: %s\n",
+			fpgaErrStr(res));
+		goto out;
+	}
 
-   res = fpgaEnumerate(&filter, 1, NULL, 0, &num_matches);
-   if(res != FPGA_OK) {
-      fprintf(stderr, "Error enumerating AFCs: %s\n", fpgaErrStr(res));
-      goto out;
-   }
+	res = fpgaEnumerate(&filter, 1, NULL, 0, &num_matches);
+	if (res != FPGA_OK) {
+		fprintf(stderr, "Error enumerating AFCs: %s\n",
+			fpgaErrStr(res));
+		goto out;
+	}
 
  out:
 	if (filter)
@@ -150,85 +153,86 @@ static unsigned int get_offline_num_acl_boards()
 
 static std::string get_offline_board_names()
 {
-   fpga_guid dcp_guid;
-   fpga_result res = FPGA_OK;
-   uint32_t num_matches = 0;
-   fpga_properties   filter = nullptr;
-   fpga_properties   prop = nullptr;
-   std::string boards = std::string();
-   std::ostringstream board_name;
-   fpga_token *toks = nullptr;
-   fpga_guid afu_guid;
-   uint64_t obj_id;
-   
-   if (uuid_parse(DCP_OPENCL_DDR_AFU_ID, dcp_guid) < 0) {
-      fprintf(stderr, "Error parsing guid '%s'\n", DCP_OPENCL_DDR_AFU_ID);
-      goto cleanup;
-   }
+	fpga_guid dcp_guid;
+	fpga_result res = FPGA_OK;
+	uint32_t num_matches = 0;
+	fpga_properties filter = nullptr;
+	fpga_properties prop = nullptr;
+	std::string boards = std::string();
+	std::ostringstream board_name;
+	fpga_token *toks = nullptr;
+	fpga_guid afu_guid;
+	uint64_t obj_id;
 
-   res = fpgaGetProperties(NULL, &filter);
-   if(res != FPGA_OK) {
-      fprintf(stderr, "Error creating properties object: %s\n", fpgaErrStr(res));
-      goto cleanup;
-   }
+	if (uuid_parse(DCP_OPENCL_DDR_AFU_ID, dcp_guid) < 0) {
+		fprintf(stderr, "Error parsing guid '%s'\n",
+			DCP_OPENCL_DDR_AFU_ID);
+		goto cleanup;
+	}
 
-   res = fpgaPropertiesSetObjectType(filter, FPGA_ACCELERATOR);
-   if(res != FPGA_OK) {
-      fprintf(stderr, "Error setting object type: %s\n", fpgaErrStr(res));
-      goto cleanup;
-   }
+	res = fpgaGetProperties(NULL, &filter);
+	if (res != FPGA_OK) {
+		fprintf(stderr, "Error creating properties object: %s\n",
+			fpgaErrStr(res));
+		goto cleanup;
+	}
 
-   res = fpgaEnumerate(&filter, 1, NULL, 0, &num_matches);
-   if(res != FPGA_OK) {
-      fprintf(stderr, "Error enumerating AFCs: %s\n", fpgaErrStr(res));
-      goto cleanup;
-   }
+	res = fpgaPropertiesSetObjectType(filter, FPGA_ACCELERATOR);
+	if (res != FPGA_OK) {
+		fprintf(stderr, "Error setting object type: %s\n",
+			fpgaErrStr(res));
+		goto cleanup;
+	}
 
-   toks = static_cast<fpga_token *>(malloc(num_matches * sizeof(fpga_token)));
-   if(toks == NULL) {
-      fprintf(stderr, "Error allocating memory\n");
-      goto cleanup;
-   }
-   
-   res = fpgaEnumerate(&filter, 1, toks, num_matches, &num_matches); 
-   if(res != FPGA_OK) {
-      fprintf(stderr, "Error enumerating AFCs: %s\n", fpgaErrStr(res));
-      goto cleanup;
-   }
+	res = fpgaEnumerate(&filter, 1, NULL, 0, &num_matches);
+	if (res != FPGA_OK) {
+		fprintf(stderr, "Error enumerating AFCs: %s\n",
+			fpgaErrStr(res));
+		goto cleanup;
+	}
 
-   for(unsigned int i = 0; i < num_matches; i++) {
-      if(prop)
-         fpgaDestroyProperties(&prop);
-      res = fpgaGetProperties(toks[i], &prop);
-      if(res == FPGA_OK) {
-         res = fpgaPropertiesGetGUID(prop, &afu_guid);
-         if(res != FPGA_OK) {
-            fprintf(stderr, "Error reading GUID: %s\n", fpgaErrStr(res));
-            break;
-         }
+	toks =
+	    static_cast <
+	    fpga_token * >(malloc(num_matches * sizeof(fpga_token)));
+	if (toks == NULL) {
+		fprintf(stderr, "Error allocating memory\n");
+		goto cleanup;
+	}
 
-         res = fpgaPropertiesGetObjectID(prop, &obj_id);
-         if(res != FPGA_OK) {
-            fprintf(stderr, "Error reading object ID: %s\n", fpgaErrStr(res));
-            break;
-         }
-         boards.append(CcipDevice::get_board_name(BSP_NAME, obj_id));
-         if( i < num_matches - 1)
-            boards.append(";");
-      } else {
-         fprintf(stderr,"Error reading properties: %s\n", fpgaErrStr(res));
-      }
-   }
+	res = fpgaEnumerate(&filter, 1, toks, num_matches, &num_matches);
+	if (res != FPGA_OK) {
+		fprintf(stderr, "Error enumerating AFCs: %s\n",
+			fpgaErrStr(res));
+		goto cleanup;
+	}
 
-cleanup:
-   if(prop)
-      fpgaDestroyProperties(&prop);
-   if(filter)
-      fpgaDestroyProperties(&filter);
-   if(toks)
-      free(toks);
-   return boards;
-}
+	for (unsigned int i = 0; i < num_matches; i++) {
+		if (prop)
+			fpgaDestroyProperties(&prop);
+		res = fpgaGetProperties(toks[i], &prop);
+		if (res == FPGA_OK) {
+			res = fpgaPropertiesGetGUID(prop, &afu_guid);
+			if (res != FPGA_OK) {
+				fprintf(stderr, "Error reading GUID: %s\n",
+					fpgaErrStr(res));
+				break;
+			}
+
+			res = fpgaPropertiesGetObjectID(prop, &obj_id);
+			if (res != FPGA_OK) {
+				fprintf(stderr, "Error reading object ID: %s\n",
+					fpgaErrStr(res));
+				break;
+			}
+			boards.append(CcipDevice::get_board_name
+				      (BSP_NAME, obj_id));
+			if (i < num_matches - 1)
+				boards.append(";");
+		} else {
+			fprintf(stderr, "Error reading properties: %s\n",
+				fpgaErrStr(res));
+		}
+	}
 
  cleanup:
 	if (prop)
@@ -240,8 +244,7 @@ cleanup:
 	return boards;
 }
 
-AOCL_MMD_CALL void *aocl_mmd_shared_mem_alloc(int handle, size_t size,
-					      unsigned long long
+AOCL_MMD_CALL void *aocl_mmd_shared_mem_alloc(int handle, size_t size, unsigned long long
 					      *device_ptr_out)
 {
 	fprintf(stderr, "aocl_mmd_shared_mem_alloc is not implemented\n");
@@ -294,27 +297,31 @@ int AOCL_MMD_CALL aocl_mmd_reprogram(int handle, void *data, size_t data_size)
 					      &acl_gbs_gz_contents)) {
 		void *gbs_data = NULL;
 		size_t gbs_data_size = 0;
-		int ret = inf(acl_gbs_gz_contents, acl_gbs_gz_len, &gbs_data, &gbs_data_size);
+		int ret = inf(acl_gbs_gz_contents, acl_gbs_gz_len, &gbs_data,
+			      &gbs_data_size);
 
-		if(ret != Z_OK) {
-          fprintf(stderr,"aocl_mmd_reprogram error: GBS decompression failed!\n");
-          free(gbs_data);
-          return AOCL_INVALID_HANDLE;
-      }
-		
-		int res = afu->program_bitstream(static_cast<uint8_t *>(gbs_data), gbs_data_size);
+		if (ret != Z_OK) {
+			fprintf(stderr,
+				"aocl_mmd_reprogram error: GBS decompression failed!\n");
+			free(gbs_data);
+			return AOCL_INVALID_HANDLE;
+		}
+
+		int res =
+		    afu->program_bitstream(static_cast < uint8_t * >(gbs_data),
+					   gbs_data_size);
 		free(gbs_data);
-		
-		if ( pkg ) {
-            acl_pkg_close_file(pkg);
-        }
-		if ( fpga_bin_pkg ) {
-            acl_pkg_close_file(fpga_bin_pkg);
-        }
-		
-		if(res == 0) {
+
+		if (pkg) {
+			acl_pkg_close_file(pkg);
+		}
+		if (fpga_bin_pkg) {
+			acl_pkg_close_file(fpga_bin_pkg);
+		}
+
+		if (res == 0) {
 			return handle;
-        }
+		}
 	}
 
 	return AOCL_INVALID_HANDLE;
@@ -332,7 +339,6 @@ int AOCL_MMD_CALL aocl_mmd_yield(int handle)
 	return 0;
 }
 
-
 // Macros used for acol_mmd_get_offline_info and aocl_mmd_get_info
 #define RESULT_INT(X) {*((int*)param_value) = X; if (param_size_ret) *param_size_ret=sizeof(int);}
 #define RESULT_STR(X) do { \
@@ -348,7 +354,7 @@ int aocl_mmd_get_offline_info(aocl_mmd_offline_info_t requested_info_id,
 {
 	int mem_type_info = (int)AOCL_MMD_PHYSICAL_MEMORY;
 
-   unsigned int num_acl_boards;
+	unsigned int num_acl_boards;
 
 	switch (requested_info_id) {
 	case AOCL_MMD_VERSION:
@@ -399,8 +405,8 @@ int aocl_mmd_get_info(int handle,
 	case AOCL_MMD_BOARD_NAME:
 		{
 			std::ostringstream board_name;
-			board_name << "PAC Arria 10 Platform" << " (" << dev->
-			    get_dev_name() << ")";
+			board_name << "PAC Arria 10 Platform" << " (" <<
+			    dev->get_dev_name() << ")";
 			RESULT_STR(board_name.str().c_str());
 			break;
 		}
@@ -523,38 +529,38 @@ int AOCL_MMD_CALL aocl_mmd_copy(int handle,
 int AOCL_MMD_CALL aocl_mmd_open(const char *name)
 {
 	DEBUG_PRINT("Opening device: %s\n", name);
- 
-   uint64_t obj_id = CcipDevice::parse_board_name(name);
-   if(!obj_id) {
-      return AOCL_INVALID_HANDLE;
-   }
 
-   int handle = get_handle(obj_id);
-   CcipDevice *dev = nullptr;
-   if(handle > 0) {
-      dev = get_device(handle);
-   } else {
-      try {
-      dev = new CcipDevice(obj_id);
-      } catch(std::runtime_error &e) {
-          std::cerr << e.what() << std::endl;
-          exit(-1);
-      }
-      handle = dev->get_mmd_handle();
-      bsp_devices[handle] = dev;
-      obj_handle_map[obj_id] = handle;
-   } 
+	uint64_t obj_id = CcipDevice::parse_board_name(name);
+	if (!obj_id) {
+		return AOCL_INVALID_HANDLE;
+	}
 
-   assert(dev);
-   if(dev->bsp_loaded()) { 
-      if(!dev->initialize_bsp())
-      {
-      	  handle = ~handle;
-      	  fprintf(stderr, "Error initializing bsp\n");
-      }
-   } else {
-      handle = ~handle;
-   }
+	int handle = get_handle(obj_id);
+	CcipDevice *dev = nullptr;
+	if (handle > 0) {
+		dev = get_device(handle);
+	} else {
+		try {
+			dev = new CcipDevice(obj_id);
+		}
+		catch(std::runtime_error & e) {
+			std::cerr << e.what() << std::endl;
+			exit(-1);
+		}
+		handle = dev->get_mmd_handle();
+		bsp_devices[handle] = dev;
+		obj_handle_map[obj_id] = handle;
+	}
+
+	assert(dev);
+	if (dev->bsp_loaded()) {
+		if (!dev->initialize_bsp()) {
+			handle = ~handle;
+			fprintf(stderr, "Error initializing bsp\n");
+		}
+	} else {
+		handle = ~handle;
+	}
 	return handle;
 }
 

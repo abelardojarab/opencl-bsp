@@ -85,9 +85,8 @@ m_mmd_handle(mmd_handle), dma_h(NULL), msgdma_bbb_base_addr(0)
 
 	//need base address for address span extender
 	uint64_t dfh_size = 0;
-	bool found_dfh =
-	    find_dfh_by_guid(m_fpga_handle, MSGDMA_BBB_GUID,
-			     &msgdma_bbb_base_addr, &dfh_size);
+	bool found_dfh = find_dfh_by_guid(m_fpga_handle, MSGDMA_BBB_GUID,
+					  &msgdma_bbb_base_addr, &dfh_size);
 	if (!found_dfh || dfh_size != MSGDMA_BBB_SIZE) {
 		fprintf(stderr, "Error initializing DMA\n");
 		return;
@@ -161,7 +160,7 @@ void mmd_dma::event_update_fn(aocl_mmd_op_t op, int status)
 			    status);
 }
 
-fpga_result mmd_dma::do_dma(dma_work_item &item)
+fpga_result mmd_dma::do_dma(dma_work_item & item)
 {
 	//main dma function needs to be thread safe because dma csr operations
 	//are not thread safe
@@ -199,7 +198,8 @@ fpga_result mmd_dma::do_dma(dma_work_item &item)
 fpga_result mmd_dma::enqueue_dma(dma_work_item & item)
 {
 	if (use_DMA_work_thread) {
-                return static_cast<fpga_result>(m_dma_work_thread->enqueue_dma(item));
+		return static_cast < fpga_result >
+		    (m_dma_work_thread->enqueue_dma(item));
 	} else {
 		//if work thread is not enabled, then blocking mode is always used.
 		bind_to_node();
@@ -221,7 +221,8 @@ int mmd_dma::read_memory(aocl_mmd_op_t op, uint64_t * host_addr,
 	return enqueue_dma(item);
 }
 
-fpga_result mmd_dma::write_memory(aocl_mmd_op_t op, const uint64_t *host_addr, size_t dev_addr, size_t size)
+fpga_result mmd_dma::write_memory(aocl_mmd_op_t op, const uint64_t * host_addr,
+				  size_t dev_addr, size_t size)
 {
 	dma_work_item item;
 	item.op = op;
@@ -233,11 +234,13 @@ fpga_result mmd_dma::write_memory(aocl_mmd_op_t op, const uint64_t *host_addr, s
 	return enqueue_dma(item);
 }
 
-fpga_result mmd_dma::read_memory(uint64_t *host_addr, size_t dev_addr, size_t size)
+fpga_result mmd_dma::read_memory(uint64_t * host_addr, size_t dev_addr,
+				 size_t size)
 {
-	DCP_DEBUG_DMA("DCP DEBUG: read_memory %p %lx %ld\n", host_addr, dev_addr, size);
+	DCP_DEBUG_DMA("DCP DEBUG: read_memory %p %lx %ld\n", host_addr,
+		      dev_addr, size);
 	fpga_result res = FPGA_OK;
-	
+
 	//check for alignment
 	if (dev_addr % DMA_ALIGNMENT != 0) {
 		//check for mmio alignment
@@ -272,9 +275,9 @@ fpga_result mmd_dma::read_memory(uint64_t *host_addr, size_t dev_addr, size_t si
 #ifdef DISABLE_DMA
 	res = read_memory_mmio(host_addr, dev_addr, dma_size);
 #else
-	res =
-	    fpgaDmaTransferSync(dma_h, (uint64_t) host_addr /*dst */ ,
-				dev_addr /*src */ , dma_size, FPGA_TO_HOST_MM);
+	res = fpgaDmaTransferSync(dma_h, (uint64_t) host_addr /*dst */ ,
+				  dev_addr /*src */ , dma_size,
+				  FPGA_TO_HOST_MM);
 #endif
 	if (res != FPGA_OK)
 		return res;
@@ -296,11 +299,13 @@ fpga_result mmd_dma::read_memory(uint64_t *host_addr, size_t dev_addr, size_t si
 	return FPGA_OK;
 }
 
-fpga_result mmd_dma::read_memory_mmio_unaligned(void *host_addr, size_t dev_addr, size_t size)
+fpga_result mmd_dma::read_memory_mmio_unaligned(void *host_addr,
+						size_t dev_addr, size_t size)
 {
-	DCP_DEBUG_DMA("DCP DEBUG: read_memory_mmio_unaligned %p %lx %ld\n", host_addr, dev_addr, size);
+	DCP_DEBUG_DMA("DCP DEBUG: read_memory_mmio_unaligned %p %lx %ld\n",
+		      host_addr, dev_addr, size);
 	fpga_result res = FPGA_OK;
-	
+
 	uint64_t shift = dev_addr % 8;
 
 	assert(size + shift <= 8);
@@ -366,7 +371,8 @@ void intel_opae_mmd::mmd_dma::unbind_from_node(void)
 #endif
 }
 
-fpga_result mmd_dma::read_memory_mmio(uint64_t *host_addr, size_t dev_addr, size_t size)
+fpga_result mmd_dma::read_memory_mmio(uint64_t * host_addr, size_t dev_addr,
+				      size_t size)
 {
 	DCP_DEBUG_DMA("DCP DEBUG: read_memory_mmio %p %lx %ld\n", host_addr,
 		      dev_addr, size);
@@ -417,11 +423,13 @@ fpga_result mmd_dma::read_memory_mmio(uint64_t *host_addr, size_t dev_addr, size
 	return FPGA_OK;
 }
 
-fpga_result mmd_dma::write_memory(const uint64_t *host_addr, size_t dev_addr, size_t size)
+fpga_result mmd_dma::write_memory(const uint64_t * host_addr, size_t dev_addr,
+				  size_t size)
 {
-	DCP_DEBUG_DMA("DCP DEBUG: write_memory %p %lx %ld\n", host_addr, dev_addr, size);
+	DCP_DEBUG_DMA("DCP DEBUG: write_memory %p %lx %ld\n", host_addr,
+		      dev_addr, size);
 	fpga_result res = FPGA_OK;
-	
+
 	//check for alignment
 	if (dev_addr % DMA_ALIGNMENT != 0) {
 		//check for mmio alignment
@@ -459,10 +467,9 @@ fpga_result mmd_dma::write_memory(const uint64_t *host_addr, size_t dev_addr, si
 #ifdef DISABLE_DMA
 	res = write_memory_mmio(host_addr, dev_addr, dma_size);
 #else
-	res =
-	    fpgaDmaTransferSync(dma_h, dev_addr /*dst */ ,
-				(uint64_t) host_addr /*src */ , dma_size,
-				HOST_TO_FPGA_MM);
+	res = fpgaDmaTransferSync(dma_h, dev_addr /*dst */ ,
+				  (uint64_t) host_addr /*src */ , dma_size,
+				  HOST_TO_FPGA_MM);
 #endif
 	if (res != FPGA_OK)
 		return res;
@@ -484,11 +491,13 @@ fpga_result mmd_dma::write_memory(const uint64_t *host_addr, size_t dev_addr, si
 	return FPGA_OK;
 }
 
-fpga_result mmd_dma::write_memory_mmio_unaligned(const uint64_t *host_addr, size_t dev_addr, size_t size)
+fpga_result mmd_dma::write_memory_mmio_unaligned(const uint64_t * host_addr,
+						 size_t dev_addr, size_t size)
 {
-	DCP_DEBUG_DMA("DCP DEBUG: write_memory_mmio_unaligned %p %lx %ld\n", host_addr, dev_addr, size);
+	DCP_DEBUG_DMA("DCP DEBUG: write_memory_mmio_unaligned %p %lx %ld\n",
+		      host_addr, dev_addr, size);
 	fpga_result res = FPGA_OK;
-	
+
 	uint64_t shift = dev_addr % 8;
 
 	assert(size + shift <= 8);
@@ -527,10 +536,12 @@ fpga_result mmd_dma::write_memory_mmio_unaligned(const uint64_t *host_addr, size
 	return FPGA_OK;
 }
 
-fpga_result mmd_dma::write_memory_mmio(const uint64_t *host_addr, size_t dev_addr, size_t size)
+fpga_result mmd_dma::write_memory_mmio(const uint64_t * host_addr,
+				       size_t dev_addr, size_t size)
 {
-	DCP_DEBUG_DMA("DCP DEBUG: write_memory_mmio %p %lx %ld\n", host_addr, dev_addr, size);
-	
+	DCP_DEBUG_DMA("DCP DEBUG: write_memory_mmio %p %lx %ld\n", host_addr,
+		      dev_addr, size);
+
 	fpga_result res = FPGA_OK;
 	uint64_t cur_mem_page = dev_addr & ~MEM_WINDOW_SPAN_MASK;
 	res =

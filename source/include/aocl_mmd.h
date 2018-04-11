@@ -347,8 +347,7 @@ extern "C" {
  * Returns: The pointer value to be used by the host to access the shared
  * memory if successful, otherwise NULL.
  */
-	AOCL_MMD_CALL void *aocl_mmd_shared_mem_alloc(int handle, size_t size,
-						      unsigned long long
+	AOCL_MMD_CALL void *aocl_mmd_shared_mem_alloc(int handle, size_t size, unsigned long long
 						      *device_ptr_out) WEAK;
 
 /* Shared memory de-allocator

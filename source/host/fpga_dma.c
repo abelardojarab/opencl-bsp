@@ -1210,8 +1210,7 @@ fpga_result transferHostToFpga(fpga_dma_handle dma_h, uint64_t dst,
 				    _do_dma(dma_h,
 					    (dst +
 					     dma_chunks * FPGA_DMA_BUF_SIZE),
-					    dma_h->
-					    dma_buf_iova[0] |
+					    dma_h->dma_buf_iova[0] |
 					    FPGA_DMA_HOST_MASK, dma_tx_bytes, 1,
 					    type, true /*intr_en */ );
 				ON_ERR_GOTO(res, out,
