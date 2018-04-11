@@ -20,7 +20,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif	// __cplusplus
+#endif				// __cplusplus
 
 // Constants needed in memcpy routines
 	// Arbitrary crossover point for using SSE2 over rep movsb
@@ -55,15 +55,14 @@ do { \
 #define error_print(...)
 #endif
 
+	typedef void *(*memcpy_fn_t) (void *dst, size_t max, const void *src,
+				      size_t len);
 
-typedef void *(*memcpy_fn_t)(void *dst, size_t max, const void *src, size_t len);
-
-extern memcpy_fn_t p_memcpy;
+	extern memcpy_fn_t p_memcpy;
 
 #define memcpy_s_fast(a,b,c,d) p_memcpy(a,b,c,d)
 
 #ifdef __cplusplus
 }
-#endif	// __cplusplus
-
-#endif	// MEMCPY_S_FAST_H
+#endif				// __cplusplus
+#endif				// MEMCPY_S_FAST_H

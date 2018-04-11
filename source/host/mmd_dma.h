@@ -34,79 +34,85 @@
 
 namespace intel_opae_mmd {
 
-class eventfd_wrapper;
+	class eventfd_wrapper;
 
-class numa_params final
-{
-public:
-	int afu_numa_node;
-	cpu_set_t afu_cpuset;
-	cpu_set_t process_cpuset;
-};  // numa_params
+	class numa_params final {
+ public:
+		int afu_numa_node;
+		cpu_set_t afu_cpuset;
+		cpu_set_t process_cpuset;
+	};			// numa_params
 
-class mmd_dma final
-{
-public:
-	mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle, numa_params numa);
-	~mmd_dma();
+	class mmd_dma final {
+ public:
+		mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle,
+			numa_params numa);
+		~mmd_dma();
 
-	bool initialized() { return m_initialized; }
+		bool initialized() {
+			return m_initialized;
+		} int read_memory(aocl_mmd_op_t op, uint64_t * host_addr,
+				  size_t dev_addr, size_t size);
+		int write_memory(aocl_mmd_op_t op, const uint64_t * host_addr,
+				 size_t dev_addr, size_t size);
+		int do_dma(dma_work_item & item);
 
-	int read_memory(aocl_mmd_op_t op, uint64_t *host_addr, size_t dev_addr, size_t size);
-	int write_memory(aocl_mmd_op_t op, const uint64_t *host_addr, size_t dev_addr, size_t size);
-	int do_dma(dma_work_item &item);
+		void set_status_handler(aocl_mmd_status_handler_fn fn,
+					void *user_data);
+		void set_numa_params(numa_params & params) {
+			numa.afu_numa_node = params.afu_numa_node;
+			memcpy(&numa.afu_cpuset, &params.afu_cpuset,
+			       sizeof(cpu_set_t));
+			memcpy(&numa.process_cpuset, &params.process_cpuset,
+			       sizeof(cpu_set_t));
+		}
+		//used after reconfigation void reinit_dma();
 
-	void set_status_handler(aocl_mmd_status_handler_fn fn, void *user_data);
-	void set_numa_params(numa_params &params)
-	{
-		numa.afu_numa_node = params.afu_numa_node;
-		memcpy(&numa.afu_cpuset, &params.afu_cpuset, sizeof(cpu_set_t));
-		memcpy(&numa.process_cpuset, &params.process_cpuset, sizeof(cpu_set_t));
-	}
-	
-	//used after reconfigation
-	void reinit_dma();
+		void bind_to_node(void);
+		void unbind_from_node(void);
 
-	void bind_to_node(void);
-	void unbind_from_node(void);
+ private:
+		// Helper functions
+		int enqueue_dma(dma_work_item & item);
+		int read_memory(uint64_t * host_addr, size_t dev_addr,
+				size_t size);
+		int write_memory(const uint64_t * host_addr, size_t dev_addr,
+				 size_t size);
+		int read_memory_mmio(uint64_t * host_addr, size_t dev_addr,
+				     size_t size);
+		int write_memory_mmio(const uint64_t * host_addr,
+				      size_t dev_addr, size_t size);
+		int write_memory_mmio_unaligned(const uint64_t * host_addr,
+						size_t dev_addr, size_t size);
+		int read_memory_mmio_unaligned(void *host_addr, size_t dev_addr,
+					       size_t size);
 
-private:
-	// Helper functions
-	int enqueue_dma(dma_work_item &item);
-	int read_memory(uint64_t *host_addr, size_t dev_addr, size_t size);
-	int write_memory(const uint64_t *host_addr, size_t dev_addr, size_t size);
-	int read_memory_mmio(uint64_t *host_addr, size_t dev_addr, size_t size);
-	int write_memory_mmio(const uint64_t *host_addr, size_t dev_addr, size_t size);
-	int write_memory_mmio_unaligned(const uint64_t *host_addr, size_t dev_addr, size_t size);
-	int read_memory_mmio_unaligned(void *host_addr, size_t dev_addr, size_t size);
+		void event_update_fn(aocl_mmd_op_t op, int status);
 
-	void event_update_fn(aocl_mmd_op_t op, int status);
+		bool m_initialized;
 
-	bool m_initialized;
+		dma_work_thread *m_dma_work_thread;
+		std::mutex m_dma_op_mutex;
 
-	dma_work_thread *m_dma_work_thread;
-	std::mutex m_dma_op_mutex;
+		aocl_mmd_status_handler_fn m_status_handler_fn;
+		void *m_status_handler_user_data;
 
-	aocl_mmd_status_handler_fn m_status_handler_fn;
-	void *m_status_handler_user_data;
+		fpga_handle m_fpga_handle;
+		int m_mmd_handle;
 
-	fpga_handle m_fpga_handle;
-	int m_mmd_handle;
+		fpga_dma_handle dma_h;
+		uint64_t msgdma_bbb_base_addr;
 
-	fpga_dma_handle   dma_h;
-	uint64_t          msgdma_bbb_base_addr;
+		numa_params numa;
 
-	numa_params numa;
+		int use_DMA_work_thread;
+		int enable_NUMA_affinity;
 
-	int use_DMA_work_thread;
-	int enable_NUMA_affinity;
+		//not used and not implemented
+		mmd_dma(mmd_dma & other);
+		mmd_dma & operator=(const mmd_dma & other);
+	};			// class mmd_dma
 
-	//not used and not implemented
-	mmd_dma (mmd_dma& other);
-	mmd_dma& operator= (const mmd_dma& other);
-}; // class mmd_dma
+};				// namespace intel_opae_mmd
 
-}; // namespace intel_opae_mmd
-
-#endif // _MMD_DMA_H
-
+#endif				// _MMD_DMA_H

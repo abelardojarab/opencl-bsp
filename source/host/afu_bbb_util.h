@@ -39,83 +39,82 @@
 #define DFH_FEATURE_IS_AFU(dfh) (DFH_FEATURE(dfh) == 1)
 #define DFH_FEATURE_NEXT(dfh) ((dfh >> 16) & 0xffffff)
 
-static bool find_dfh_by_guid(fpga_handle afc_handle, 
-	uint64_t find_id_l, uint64_t find_id_h, 
-	uint64_t *result_offset = NULL, uint64_t *result_next_offset = NULL)
+static bool find_dfh_by_guid(fpga_handle afc_handle,
+			     uint64_t find_id_l, uint64_t find_id_h,
+			     uint64_t * result_offset =
+			     NULL, uint64_t * result_next_offset = NULL)
 {
-	if(result_offset)
+	if (result_offset)
 		*result_offset = 0;
-	if(result_next_offset)
+	if (result_next_offset)
 		*result_next_offset = 0;
-	
-	if(find_id_l == 0)
+
+	if (find_id_l == 0)
 		return 0;
-	if(find_id_l == 0)
+	if (find_id_l == 0)
 		return 0;
 
 	uint64_t offset = 0;
 	uint64_t dfh = 0;
-	
-	do
-	{
+
+	do {
 		fpgaReadMMIO64(afc_handle, 0, offset, &dfh);
 
 		int is_bbb = DFH_FEATURE_IS_BBB(dfh);
 		int is_afu = DFH_FEATURE_IS_AFU(dfh);
-		
-		if(is_afu || is_bbb)
-		{
+
+		if (is_afu || is_bbb) {
 			uint64_t id_l = 0;
 			uint64_t id_h = 0;
-			fpgaReadMMIO64(afc_handle, 0, offset+8, &id_l);
-			fpgaReadMMIO64(afc_handle, 0, offset+16, &id_h);
-			if(find_id_l == id_l && find_id_h == id_h)
-			{
-				if(result_offset)
+			fpgaReadMMIO64(afc_handle, 0, offset + 8, &id_l);
+			fpgaReadMMIO64(afc_handle, 0, offset + 16, &id_h);
+			if (find_id_l == id_l && find_id_h == id_h) {
+				if (result_offset)
 					*result_offset = offset;
-				if(result_next_offset)
-					*result_next_offset = DFH_FEATURE_NEXT(dfh);
+				if (result_next_offset)
+					*result_next_offset =
+					    DFH_FEATURE_NEXT(dfh);
 				return 1;
 			}
 		}
-		
+
 		offset += DFH_FEATURE_NEXT(dfh);
-	} while(!DFH_FEATURE_EOL(dfh));
-	
+	} while (!DFH_FEATURE_EOL(dfh));
+
 	return 0;
 }
 
-static bool find_dfh_by_guid(fpga_handle afc_handle, 
-	const char *guid_str,
-	uint64_t *result_offset = NULL, uint64_t *result_next_offset = NULL)
+static bool find_dfh_by_guid(fpga_handle afc_handle,
+			     const char *guid_str,
+			     uint64_t * result_offset =
+			     NULL, uint64_t * result_next_offset = NULL)
 {
-	fpga_guid          guid;
+	fpga_guid guid;
 
 	if (uuid_parse(guid_str, guid) < 0)
 		return 0;
-	
+
 	uint32_t i;
 	uint32_t s;
-	
+
 	uint64_t find_id_l = 0;
 	uint64_t find_id_h = 0;
-	
+
 	// The API expects the MSB of the GUID at [0] and the LSB at [15].
 	s = 64;
 	for (i = 0; i < 8; ++i) {
 		s -= 8;
 		find_id_h = ((find_id_h << 8) | (0xff & guid[i]));
 	}
-	
+
 	s = 64;
 	for (i = 0; i < 8; ++i) {
 		s -= 8;
 		find_id_l = ((find_id_l << 8) | (0xff & guid[8 + i]));
 	}
-	
-	return find_dfh_by_guid(afc_handle, find_id_l, find_id_h, 
-		result_offset, result_next_offset);
+
+	return find_dfh_by_guid(afc_handle, find_id_l, find_id_h,
+				result_offset, result_next_offset);
 }
 
-#endif // __AFU_BBB_UTIL_H__
-
+#endif				// __AFU_BBB_UTIL_H__

@@ -94,12 +94,12 @@ do {\
 *
 */
 static fpga_result MMIOWrite64Blk(fpga_dma_handle dma_h, uint64_t device,
-	uint64_t host, uint64_t bytes)
+				  uint64_t host, uint64_t bytes)
 {
 	assert(IS_ALIGNED_QWORD(device));
 	assert(IS_ALIGNED_QWORD(bytes));
 
-	uint64_t *haddr = (uint64_t *)host;
+	uint64_t *haddr = (uint64_t *) host;
 	uint64_t i;
 	fpga_result res = FPGA_OK;
 
@@ -108,12 +108,12 @@ static fpga_result MMIOWrite64Blk(fpga_dma_handle dma_h, uint64_t device,
 #endif
 
 	debug_print("copying %lld bytes from 0x%p to 0x%p\n",
-		(long long int)bytes, haddr, (void *)device);
+		    (long long int)bytes, haddr, (void *)device);
 	for (i = 0; i < bytes / sizeof(uint64_t); i++) {
 #ifdef USE_ASE
 		res =
-			fpgaWriteMMIO64(dma_h->fpga_h, dma_h->mmio_num, device,
-				*haddr);
+		    fpgaWriteMMIO64(dma_h->fpga_h, dma_h->mmio_num, device,
+				    *haddr);
 		ON_ERR_RETURN(res, "fpgaWriteMMIO64");
 		haddr++;
 		device += sizeof(uint64_t);
@@ -136,12 +136,12 @@ static fpga_result MMIOWrite64Blk(fpga_dma_handle dma_h, uint64_t device,
 *
 */
 static fpga_result MMIOWrite32Blk(fpga_dma_handle dma_h, uint64_t device,
-	uint64_t host, uint64_t bytes)
+				  uint64_t host, uint64_t bytes)
 {
 	assert(IS_ALIGNED_DWORD(device));
 	assert(IS_ALIGNED_DWORD(bytes));
 
-	uint32_t *haddr = (uint32_t *)host;
+	uint32_t *haddr = (uint32_t *) host;
 	uint64_t i;
 	fpga_result res = FPGA_OK;
 
@@ -150,12 +150,12 @@ static fpga_result MMIOWrite32Blk(fpga_dma_handle dma_h, uint64_t device,
 #endif
 
 	debug_print("copying %lld bytes from 0x%p to 0x%p\n",
-		(long long int)bytes, haddr, (void *)device);
+		    (long long int)bytes, haddr, (void *)device);
 	for (i = 0; i < bytes / sizeof(uint32_t); i++) {
 #ifdef USE_ASE
 		res =
-			fpgaWriteMMIO32(dma_h->fpga_h, dma_h->mmio_num, device,
-				*haddr);
+		    fpgaWriteMMIO32(dma_h->fpga_h, dma_h->mmio_num, device,
+				    *haddr);
 		ON_ERR_RETURN(res, "fpgaWriteMMIO32");
 		haddr++;
 		device += sizeof(uint32_t);
@@ -178,12 +178,12 @@ static fpga_result MMIOWrite32Blk(fpga_dma_handle dma_h, uint64_t device,
 *
 */
 static fpga_result MMIORead64Blk(fpga_dma_handle dma_h, uint64_t device,
-	uint64_t host, uint64_t bytes)
+				 uint64_t host, uint64_t bytes)
 {
 	assert(IS_ALIGNED_QWORD(device));
 	assert(IS_ALIGNED_QWORD(bytes));
 
-	uint64_t *haddr = (uint64_t *)host;
+	uint64_t *haddr = (uint64_t *) host;
 	uint64_t i;
 	fpga_result res = FPGA_OK;
 
@@ -192,12 +192,12 @@ static fpga_result MMIORead64Blk(fpga_dma_handle dma_h, uint64_t device,
 #endif
 
 	debug_print("copying %lld bytes from 0x%p to 0x%p\n",
-		(long long int)bytes, (void *)device, haddr);
+		    (long long int)bytes, (void *)device, haddr);
 	for (i = 0; i < bytes / sizeof(uint64_t); i++) {
 #ifdef USE_ASE
 		res =
-			fpgaReadMMIO64(dma_h->fpga_h, dma_h->mmio_num, device,
-				haddr);
+		    fpgaReadMMIO64(dma_h->fpga_h, dma_h->mmio_num, device,
+				   haddr);
 		ON_ERR_RETURN(res, "fpgaReadMMIO64");
 		haddr++;
 		device += sizeof(uint64_t);
@@ -220,12 +220,12 @@ static fpga_result MMIORead64Blk(fpga_dma_handle dma_h, uint64_t device,
 *
 */
 static fpga_result MMIORead32Blk(fpga_dma_handle dma_h, uint64_t device,
-	uint64_t host, uint64_t bytes)
+				 uint64_t host, uint64_t bytes)
 {
 	assert(IS_ALIGNED_DWORD(device));
 	assert(IS_ALIGNED_DWORD(bytes));
 
-	uint32_t *haddr = (uint32_t *)host;
+	uint32_t *haddr = (uint32_t *) host;
 	uint64_t i;
 	fpga_result res = FPGA_OK;
 
@@ -234,12 +234,12 @@ static fpga_result MMIORead32Blk(fpga_dma_handle dma_h, uint64_t device,
 #endif
 
 	debug_print("copying %lld bytes from 0x%p to 0x%p\n",
-		(long long int)bytes, (void *)device, haddr);
+		    (long long int)bytes, (void *)device, haddr);
 	for (i = 0; i < bytes / sizeof(uint32_t); i++) {
 #ifdef USE_ASE
 		res =
-			fpgaReadMMIO32(dma_h->fpga_h, dma_h->mmio_num, device,
-				haddr);
+		    fpgaReadMMIO32(dma_h->fpga_h, dma_h->mmio_num, device,
+				   haddr);
 		ON_ERR_RETURN(res, "fpgaReadMMIO32");
 		haddr++;
 		device += sizeof(uint32_t);
@@ -284,8 +284,8 @@ static inline void _switch_to_ase_page(fpga_dma_handle dma_h, uint64_t addr)
 
 	if (requested_page != dma_h->cur_ase_page) {
 		MMIOWrite64Blk(dma_h, ASE_CNTL_BASE(dma_h),
-			(uint64_t)& requested_page,
-			sizeof(requested_page));
+			       (uint64_t) & requested_page,
+			       sizeof(requested_page));
 		dma_h->cur_ase_page = requested_page;
 	}
 }
@@ -300,7 +300,7 @@ static inline void _switch_to_ase_page(fpga_dma_handle dma_h, uint64_t addr)
 *
 */
 static fpga_result _send_descriptor(fpga_dma_handle dma_h,
-	msgdma_ext_desc_t * desc)
+				    msgdma_ext_desc_t * desc)
 {
 	fpga_result res = FPGA_OK;
 	msgdma_status_t status = { 0 };
@@ -316,15 +316,15 @@ static fpga_result _send_descriptor(fpga_dma_handle dma_h,
 	debug_print("desc.wr_address_ext %x\n", desc->wr_address_ext);
 
 	debug_print("SGDMA_CSR_BASE = %lx SGDMA_DESC_BASE=%lx\n",
-		dma_h->dma_csr_base, dma_h->dma_desc_base);
+		    dma_h->dma_csr_base, dma_h->dma_desc_base);
 
 #ifdef CHECK_DELAYS
 	bool first = true;
 #endif
 	do {
 		res =
-			MMIORead32Blk(dma_h, CSR_STATUS(dma_h),
-			(uint64_t)& status.reg, sizeof(status.reg));
+		    MMIORead32Blk(dma_h, CSR_STATUS(dma_h),
+				  (uint64_t) & status.reg, sizeof(status.reg));
 		ON_ERR_GOTO(res, out, "MMIORead32Blk");
 #ifdef CHECK_DELAYS
 		if (first && status.st.desc_buf_full) {
@@ -335,11 +335,11 @@ static fpga_result _send_descriptor(fpga_dma_handle dma_h,
 	} while (status.st.desc_buf_full);
 
 	res =
-		MMIOWrite64Blk(dma_h, dma_h->dma_desc_base, (uint64_t)desc,
-			sizeof(*desc));
+	    MMIOWrite64Blk(dma_h, dma_h->dma_desc_base, (uint64_t) desc,
+			   sizeof(*desc));
 	ON_ERR_GOTO(res, out, "MMIOWrite64Blk");
 
-out:
+ out:
 	return res;
 }
 
@@ -358,8 +358,8 @@ out:
 *
 */
 static fpga_result _do_dma(fpga_dma_handle dma_h, uint64_t dst, uint64_t src,
-	int count, int is_last_desc,
-	fpga_dma_transfer_t type, bool intr_en)
+			   int count, int is_last_desc,
+			   fpga_dma_transfer_t type, bool intr_en)
 {
 	msgdma_ext_desc_t desc = { 0 };
 	fpga_result res = FPGA_OK;
@@ -368,8 +368,8 @@ static fpga_result _do_dma(fpga_dma_handle dma_h, uint64_t dst, uint64_t src,
 
 	// src, dst and count must be 64-byte aligned
 	if (dst % FPGA_DMA_ALIGN_BYTES != 0 ||
-		src % FPGA_DMA_ALIGN_BYTES != 0 ||
-		count % FPGA_DMA_ALIGN_BYTES != 0) {
+	    src % FPGA_DMA_ALIGN_BYTES != 0 ||
+	    count % FPGA_DMA_ALIGN_BYTES != 0) {
 		return FPGA_INVALID_PARAM;
 	}
 	// these fields are fixed for all DMA transfers
@@ -408,11 +408,11 @@ static fpga_result _do_dma(fpga_dma_handle dma_h, uint64_t dst, uint64_t src,
 	else {
 		// need to determine if the CCIP (host) address is aligned to 4CL (256B).  When 0 the CCIP address is aligned.
 		alignment_offset =
-			(type ==
-				HOST_TO_FPGA_MM) ? (src % (4 *
-					FPGA_DMA_ALIGN_BYTES)) : (dst %
-					(4 *
-						FPGA_DMA_ALIGN_BYTES));
+		    (type ==
+		     HOST_TO_FPGA_MM) ? (src % (4 *
+						FPGA_DMA_ALIGN_BYTES)) : (dst %
+									  (4 *
+									   FPGA_DMA_ALIGN_BYTES));
 
 		// not aligned to 4CL so performing a short transfer to get aligned
 		if (alignment_offset != 0) {
@@ -421,20 +421,19 @@ static fpga_result _do_dma(fpga_dma_handle dma_h, uint64_t dst, uint64_t src,
 			desc.wr_burst_count = 1;
 			desc.rd_burst_count = 1;
 			desc.rd_address_ext =
-				(src >> 32) & FPGA_DMA_MASK_32_BIT;
+			    (src >> 32) & FPGA_DMA_MASK_32_BIT;
 			desc.wr_address_ext =
-				(dst >> 32) & FPGA_DMA_MASK_32_BIT;
+			    (dst >> 32) & FPGA_DMA_MASK_32_BIT;
 
 			// count isn't large enough to hit next 4CL boundary
 			if (((4 * FPGA_DMA_ALIGN_BYTES) - alignment_offset) >=
-				count) {
+			    count) {
 				segment_size = count;
 				count = 0;	// only had to transfer count amount of data to reach the end of the provided buffer
-			}
-			else {
+			} else {
 				segment_size =
-					(4 * FPGA_DMA_ALIGN_BYTES) -
-					alignment_offset;
+				    (4 * FPGA_DMA_ALIGN_BYTES) -
+				    alignment_offset;
 				src += segment_size;
 				dst += segment_size;
 				count -= segment_size;	// subtract the segment size from count since the transfer below will bring us into 4CL alignment
@@ -455,9 +454,9 @@ static fpga_result _do_dma(fpga_dma_handle dma_h, uint64_t dst, uint64_t src,
 			desc.wr_burst_count = 4;
 			desc.rd_burst_count = 4;
 			desc.rd_address_ext =
-				(src >> 32) & FPGA_DMA_MASK_32_BIT;
+			    (src >> 32) & FPGA_DMA_MASK_32_BIT;
 			desc.wr_address_ext =
-				(dst >> 32) & FPGA_DMA_MASK_32_BIT;
+			    (dst >> 32) & FPGA_DMA_MASK_32_BIT;
 
 			// buffer ends on 4CL boundary
 			if ((count % (4 * FPGA_DMA_ALIGN_BYTES)) == 0) {
@@ -487,9 +486,9 @@ static fpga_result _do_dma(fpga_dma_handle dma_h, uint64_t dst, uint64_t src,
 			desc.wr_burst_count = 1;
 			desc.rd_burst_count = 1;
 			desc.rd_address_ext =
-				(src >> 32) & FPGA_DMA_MASK_32_BIT;
+			    (src >> 32) & FPGA_DMA_MASK_32_BIT;
 			desc.wr_address_ext =
-				(dst >> 32) & FPGA_DMA_MASK_32_BIT;
+			    (dst >> 32) & FPGA_DMA_MASK_32_BIT;
 			if (intr_en)
 				desc.control.transfer_irq_en = 1;
 			// will post short transfer to move the remainder of the buffer
@@ -499,7 +498,7 @@ static fpga_result _do_dma(fpga_dma_handle dma_h, uint64_t dst, uint64_t src,
 
 	}			// end of FPGA --> Host or Host --> FPGA transfer
 
-out:
+ out:
 	return res;
 }
 
@@ -516,7 +515,7 @@ fpga_result fpgaDmaOpen(fpga_handle fpga, fpga_dma_handle * dma_p)
 		return FPGA_INVALID_PARAM;
 	}
 	// init the dma handle
-	dma_h = (fpga_dma_handle)malloc(sizeof(struct _dma_handle_t));
+	dma_h = (fpga_dma_handle) malloc(sizeof(struct _dma_handle_t));
 	if (!dma_h) {
 		return FPGA_NO_MEMORY;
 	}
@@ -532,7 +531,7 @@ fpga_result fpgaDmaOpen(fpga_handle fpga, fpga_dma_handle * dma_p)
 	bool dma_found = false;
 
 #ifndef USE_ASE
-	res = fpgaMapMMIO(dma_h->fpga_h, 0, (uint64_t **)& dma_h->mmio_va);
+	res = fpgaMapMMIO(dma_h->fpga_h, 0, (uint64_t **) & dma_h->mmio_va);
 	ON_ERR_GOTO(res, out, "fpgaMapMMIO");
 #endif
 
@@ -541,21 +540,21 @@ fpga_result fpgaDmaOpen(fpga_handle fpga, fpga_dma_handle * dma_p)
 	do {
 		// Read the next feature header
 		res =
-			MMIORead64Blk(dma_h, offset, (uint64_t)& dfh, sizeof(dfh));
+		    MMIORead64Blk(dma_h, offset, (uint64_t) & dfh, sizeof(dfh));
 		ON_ERR_GOTO(res, out, "MMIORead64Blk");
 
 		if (_fpga_dma_feature_is_bbb(dfh.dfh) &&
-			(dfh.feature_uuid_lo == FPGA_DMA_UUID_L) &&
-			(dfh.feature_uuid_hi == FPGA_DMA_UUID_H)
-			) {
+		    (dfh.feature_uuid_lo == FPGA_DMA_UUID_L) &&
+		    (dfh.feature_uuid_hi == FPGA_DMA_UUID_H)
+		    ) {
 			// Found one. Record it.
 			dma_h->dma_base = offset;
 			dma_h->dma_csr_base = dma_h->dma_base + FPGA_DMA_CSR;
 			dma_h->dma_desc_base = dma_h->dma_base + FPGA_DMA_DESC;
 			dma_h->dma_ase_cntl_base =
-				dma_h->dma_base + FPGA_DMA_ADDR_SPAN_EXT_CNTL;
+			    dma_h->dma_base + FPGA_DMA_ADDR_SPAN_EXT_CNTL;
 			dma_h->dma_ase_data_base =
-				dma_h->dma_base + FPGA_DMA_ADDR_SPAN_EXT_DATA;
+			    dma_h->dma_base + FPGA_DMA_ADDR_SPAN_EXT_DATA;
 			dma_found = true;
 			break;
 		}
@@ -569,8 +568,7 @@ fpga_result fpgaDmaOpen(fpga_handle fpga, fpga_dma_handle * dma_p)
 	if (dma_found) {
 		*dma_p = dma_h;
 		res = FPGA_OK;
-	}
-	else {
+	} else {
 		*dma_p = NULL;
 		res = FPGA_NOT_FOUND;
 		goto out;
@@ -579,34 +577,34 @@ fpga_result fpgaDmaOpen(fpga_handle fpga, fpga_dma_handle * dma_p)
 	// Buffer size must be page aligned for prepareBuffer
 	for (i = 0; i < FPGA_DMA_MAX_BUF; i++) {
 		res =
-			fpgaPrepareBuffer(dma_h->fpga_h, FPGA_DMA_BUF_SIZE,
-			(void **)&(dma_h->dma_buf_ptr[i]),
-				&dma_h->dma_buf_wsid[i], 0);
+		    fpgaPrepareBuffer(dma_h->fpga_h, FPGA_DMA_BUF_SIZE,
+				      (void **)&(dma_h->dma_buf_ptr[i]),
+				      &dma_h->dma_buf_wsid[i], 0);
 		ON_ERR_GOTO(res, out, "fpgaPrepareBuffer");
 
 		// Make sure it's actually allocated
 		dma_h->dma_buf_ptr[i][0] = 0xff;
-		madvise((void *)dma_h->dma_buf_ptr[i], FPGA_DMA_BUF_SIZE, MADV_SEQUENTIAL);
-
+		madvise((void *)dma_h->dma_buf_ptr[i], FPGA_DMA_BUF_SIZE,
+			MADV_SEQUENTIAL);
 
 		res =
-			fpgaGetIOAddress(dma_h->fpga_h, dma_h->dma_buf_wsid[i],
-				&dma_h->dma_buf_iova[i]);
+		    fpgaGetIOAddress(dma_h->fpga_h, dma_h->dma_buf_wsid[i],
+				     &dma_h->dma_buf_iova[i]);
 		ON_ERR_GOTO(res, rel_buf, "fpgaGetIOAddress");
 	}
 
 	// Allocate magic number buffer
 	res =
-		fpgaPrepareBuffer(dma_h->fpga_h, FPGA_DMA_ALIGN_BYTES,
-		(void **)&(dma_h->magic_buf), &dma_h->magic_wsid,
-			0);
+	    fpgaPrepareBuffer(dma_h->fpga_h, FPGA_DMA_ALIGN_BYTES,
+			      (void **)&(dma_h->magic_buf), &dma_h->magic_wsid,
+			      0);
 	ON_ERR_GOTO(res, out, "fpgaPrepareBuffer");
 
 	dma_h->magic_buf[0] = 0xff;
 
 	res =
-		fpgaGetIOAddress(dma_h->fpga_h, dma_h->magic_wsid,
-			&dma_h->magic_iova);
+	    fpgaGetIOAddress(dma_h->fpga_h, dma_h->magic_wsid,
+			     &dma_h->magic_iova);
 	ON_ERR_GOTO(res, rel_buf, "fpgaGetIOAddress");
 	memset((void *)dma_h->magic_buf, 0, FPGA_DMA_ALIGN_BYTES);
 
@@ -614,8 +612,8 @@ fpga_result fpgaDmaOpen(fpga_handle fpga, fpga_dma_handle * dma_p)
 	msgdma_ctrl_t ctrl = { 0 };
 	ctrl.ct.global_intr_en_mask = 1;
 	res =
-		MMIOWrite32Blk(dma_h, CSR_CONTROL(dma_h), (uint64_t)& ctrl.reg,
-			sizeof(ctrl.reg));
+	    MMIOWrite32Blk(dma_h, CSR_CONTROL(dma_h), (uint64_t) & ctrl.reg,
+			   sizeof(ctrl.reg));
 	ON_ERR_GOTO(res, rel_buf, "MMIOWrite32Blk");
 
 	// register interrupt event handle
@@ -623,22 +621,22 @@ fpga_result fpgaDmaOpen(fpga_handle fpga, fpga_dma_handle * dma_p)
 	ON_ERR_GOTO(res, rel_buf, "fpgaCreateEventHandle");
 
 	res =
-		fpgaRegisterEvent(dma_h->fpga_h, FPGA_EVENT_INTERRUPT, dma_h->eh,
-			0 /*vector id */);
+	    fpgaRegisterEvent(dma_h->fpga_h, FPGA_EVENT_INTERRUPT, dma_h->eh,
+			      0 /*vector id */ );
 	ON_ERR_GOTO(res, destroy_eh, "fpgaRegisterEvent");
 
 	return FPGA_OK;
 
-destroy_eh:
+ destroy_eh:
 	res = fpgaDestroyEventHandle(&dma_h->eh);
 	ON_ERR_GOTO(res, rel_buf, "fpgaDestroyEventHandle");
 
-rel_buf:
+ rel_buf:
 	for (i = 0; i < FPGA_DMA_MAX_BUF; i++) {
 		res = fpgaReleaseBuffer(dma_h->fpga_h, dma_h->dma_buf_wsid[i]);
 		ON_ERR_GOTO(res, out, "fpgaReleaseBuffer");
 	}
-out:
+ out:
 	if (!dma_found)
 		free(dma_h);
 	return res;
@@ -656,9 +654,9 @@ out:
 *
 */
 static fpga_result _read_memory_mmio_unaligned(fpga_dma_handle dma_h,
-	uint64_t dev_addr,
-	uint64_t host_addr,
-	uint64_t count)
+					       uint64_t dev_addr,
+					       uint64_t host_addr,
+					       uint64_t count)
 {
 	fpga_result res = FPGA_OK;
 
@@ -672,18 +670,19 @@ static fpga_result _read_memory_mmio_unaligned(fpga_dma_handle dma_h,
 
 	_switch_to_ase_page(dma_h, dev_addr);
 	uint64_t dev_aligned_addr =
-		(dev_addr - shift) & DMA_ADDR_SPAN_EXT_WINDOW_MASK;
+	    (dev_addr - shift) & DMA_ADDR_SPAN_EXT_WINDOW_MASK;
 
 	//read data from device memory
 	uint64_t read_tmp = 0;
 	res =
-		MMIORead64Blk(dma_h, ASE_DATA_BASE(dma_h) + dev_aligned_addr,
-		(uint64_t)& read_tmp, sizeof(read_tmp));
+	    MMIORead64Blk(dma_h, ASE_DATA_BASE(dma_h) + dev_aligned_addr,
+			  (uint64_t) & read_tmp, sizeof(read_tmp));
 	if (res != FPGA_OK)
 		return res;
 
 	//overlay our data
-	memcpy_s_fast((void *)host_addr, count, ((char *)(&read_tmp)) + shift, count);
+	memcpy_s_fast((void *)host_addr, count, ((char *)(&read_tmp)) + shift,
+		      count);
 
 	return res;
 }
@@ -700,9 +699,9 @@ static fpga_result _read_memory_mmio_unaligned(fpga_dma_handle dma_h,
 *
 */
 static fpga_result _write_memory_mmio_unaligned(fpga_dma_handle dma_h,
-	uint64_t dev_addr,
-	uint64_t host_addr,
-	uint64_t count)
+						uint64_t dev_addr,
+						uint64_t host_addr,
+						uint64_t count)
 {
 	fpga_result res = FPGA_OK;
 
@@ -716,24 +715,25 @@ static fpga_result _write_memory_mmio_unaligned(fpga_dma_handle dma_h,
 
 	_switch_to_ase_page(dma_h, dev_addr);
 	uint64_t dev_aligned_addr =
-		(dev_addr -
-		(dev_addr % QWORD_BYTES)) & DMA_ADDR_SPAN_EXT_WINDOW_MASK;
+	    (dev_addr -
+	     (dev_addr % QWORD_BYTES)) & DMA_ADDR_SPAN_EXT_WINDOW_MASK;
 
 	//read data from device memory
 	uint64_t read_tmp = 0;
 	res =
-		MMIORead64Blk(dma_h, ASE_DATA_BASE(dma_h) + dev_aligned_addr,
-		(uint64_t)& read_tmp, sizeof(read_tmp));
+	    MMIORead64Blk(dma_h, ASE_DATA_BASE(dma_h) + dev_aligned_addr,
+			  (uint64_t) & read_tmp, sizeof(read_tmp));
 	if (res != FPGA_OK)
 		return res;
 
 	//overlay our data
-	memcpy_s_fast(((char *)(&read_tmp)) + shift, count, (void *)host_addr, count);
+	memcpy_s_fast(((char *)(&read_tmp)) + shift, count, (void *)host_addr,
+		      count);
 
 	//write back to device
 	res =
-		MMIOWrite64Blk(dma_h, ASE_DATA_BASE(dma_h) + dev_aligned_addr,
-		(uint64_t)& read_tmp, sizeof(read_tmp));
+	    MMIOWrite64Blk(dma_h, ASE_DATA_BASE(dma_h) + dev_aligned_addr,
+			   (uint64_t) & read_tmp, sizeof(read_tmp));
 	if (res != FPGA_OK)
 		return res;
 
@@ -752,7 +752,7 @@ static fpga_result _write_memory_mmio_unaligned(fpga_dma_handle dma_h,
 *
 */
 static fpga_result _write_memory_mmio(fpga_dma_handle dma_h, uint64_t * dst_ptr,
-	uint64_t * src_ptr, uint64_t * count)
+				      uint64_t * src_ptr, uint64_t * count)
 {
 	fpga_result res = FPGA_OK;
 
@@ -774,8 +774,8 @@ static fpga_result _write_memory_mmio(fpga_dma_handle dma_h, uint64_t * dst_ptr,
 		_switch_to_ase_page(dma_h, dst);
 		offset = dst & DMA_ADDR_SPAN_EXT_WINDOW_MASK;
 		res =
-			MMIOWrite32Blk(dma_h, ASE_DATA_BASE(dma_h) + offset,
-			(uint64_t)src, DWORD_BYTES);
+		    MMIOWrite32Blk(dma_h, ASE_DATA_BASE(dma_h) + offset,
+				   (uint64_t) src, DWORD_BYTES);
 		ON_ERR_RETURN(res, "MMIOWrite32Blk");
 		src += DWORD_BYTES;
 		dst += DWORD_BYTES;
@@ -791,14 +791,14 @@ static fpga_result _write_memory_mmio(fpga_dma_handle dma_h, uint64_t * dst_ptr,
 	while (align_bytes >= QWORD_BYTES) {
 		uint64_t left_in_page = (-dst) & DMA_ADDR_SPAN_EXT_WINDOW_MASK;
 		uint64_t size_to_copy =
-			min(left_in_page, (align_bytes & ~(QWORD_BYTES - 1)));
+		    min(left_in_page, (align_bytes & ~(QWORD_BYTES - 1)));
 		if (size_to_copy < QWORD_BYTES)
 			break;
 		_switch_to_ase_page(dma_h, dst);
 		offset = dst & DMA_ADDR_SPAN_EXT_WINDOW_MASK;
 		res =
-			MMIOWrite64Blk(dma_h, ASE_DATA_BASE(dma_h) + offset,
-			(uint64_t)src, size_to_copy);
+		    MMIOWrite64Blk(dma_h, ASE_DATA_BASE(dma_h) + offset,
+				   (uint64_t) src, size_to_copy);
 		ON_ERR_RETURN(res, "MMIOWrite64Blk");
 		src += size_to_copy;
 		dst += size_to_copy;
@@ -810,8 +810,8 @@ static fpga_result _write_memory_mmio(fpga_dma_handle dma_h, uint64_t * dst_ptr,
 		_switch_to_ase_page(dma_h, dst);
 		offset = dst & DMA_ADDR_SPAN_EXT_WINDOW_MASK;
 		res =
-			MMIOWrite32Blk(dma_h, ASE_DATA_BASE(dma_h) + offset,
-			(uint64_t)src, DWORD_BYTES);
+		    MMIOWrite32Blk(dma_h, ASE_DATA_BASE(dma_h) + offset,
+				   (uint64_t) src, DWORD_BYTES);
 		ON_ERR_RETURN(res, "MMIOWrite32Blk");
 		src += DWORD_BYTES;
 		dst += DWORD_BYTES;
@@ -838,7 +838,7 @@ static fpga_result _write_memory_mmio(fpga_dma_handle dma_h, uint64_t * dst_ptr,
 *
 */
 static fpga_result _ase_host_to_fpga(fpga_dma_handle dma_h, uint64_t * dst_ptr,
-	uint64_t * src_ptr, uint64_t count)
+				     uint64_t * src_ptr, uint64_t count)
 {
 	fpga_result res = FPGA_OK;
 	uint64_t dst = *dst_ptr;
@@ -847,7 +847,7 @@ static fpga_result _ase_host_to_fpga(fpga_dma_handle dma_h, uint64_t * dst_ptr,
 	uint64_t unaligned_size = 0;
 
 	debug_print("dst_ptr = %08lx , count = %08lx, src = %08lx \n", *dst_ptr,
-		count, *src_ptr);
+		    count, *src_ptr);
 
 	//Aligns address to 8 byte using dst masking method
 	if (!IS_ALIGNED_DWORD(dst) && !IS_ALIGNED_QWORD(dst)) {
@@ -855,8 +855,8 @@ static fpga_result _ase_host_to_fpga(fpga_dma_handle dma_h, uint64_t * dst_ptr,
 		if (unaligned_size > count_left)
 			unaligned_size = count_left;
 		res =
-			_write_memory_mmio_unaligned(dma_h, dst, src,
-				unaligned_size);
+		    _write_memory_mmio_unaligned(dma_h, dst, src,
+						 unaligned_size);
 		if (res != FPGA_OK)
 			return res;
 		count_left -= unaligned_size;
@@ -897,7 +897,7 @@ static fpga_result _ase_host_to_fpga(fpga_dma_handle dma_h, uint64_t * dst_ptr,
 *
 */
 static fpga_result _read_memory_mmio(fpga_dma_handle dma_h, uint64_t * src_ptr,
-	uint64_t * dst_ptr, uint64_t * count)
+				     uint64_t * dst_ptr, uint64_t * count)
 {
 	fpga_result res = FPGA_OK;
 
@@ -919,8 +919,8 @@ static fpga_result _read_memory_mmio(fpga_dma_handle dma_h, uint64_t * src_ptr,
 		_switch_to_ase_page(dma_h, src);
 		offset = src & DMA_ADDR_SPAN_EXT_WINDOW_MASK;
 		res =
-			MMIORead32Blk(dma_h, ASE_DATA_BASE(dma_h) + offset,
-			(uint64_t)dst, DWORD_BYTES);
+		    MMIORead32Blk(dma_h, ASE_DATA_BASE(dma_h) + offset,
+				  (uint64_t) dst, DWORD_BYTES);
 		ON_ERR_RETURN(res, "MMIORead32Blk");
 		src += DWORD_BYTES;
 		dst += DWORD_BYTES;
@@ -936,14 +936,14 @@ static fpga_result _read_memory_mmio(fpga_dma_handle dma_h, uint64_t * src_ptr,
 	while (align_bytes >= QWORD_BYTES) {
 		uint64_t left_in_page = (-src) & DMA_ADDR_SPAN_EXT_WINDOW_MASK;
 		uint64_t size_to_copy =
-			min(left_in_page, (align_bytes & ~(QWORD_BYTES - 1)));
+		    min(left_in_page, (align_bytes & ~(QWORD_BYTES - 1)));
 		if (size_to_copy < QWORD_BYTES)
 			break;
 		_switch_to_ase_page(dma_h, src);
 		offset = src & DMA_ADDR_SPAN_EXT_WINDOW_MASK;
 		res =
-			MMIORead64Blk(dma_h, ASE_DATA_BASE(dma_h) + offset,
-			(uint64_t)dst, size_to_copy);
+		    MMIORead64Blk(dma_h, ASE_DATA_BASE(dma_h) + offset,
+				  (uint64_t) dst, size_to_copy);
 		ON_ERR_RETURN(res, "MMIORead64Blk");
 		src += size_to_copy;
 		dst += size_to_copy;
@@ -955,8 +955,8 @@ static fpga_result _read_memory_mmio(fpga_dma_handle dma_h, uint64_t * src_ptr,
 		_switch_to_ase_page(dma_h, src);
 		offset = src & DMA_ADDR_SPAN_EXT_WINDOW_MASK;
 		res =
-			MMIORead32Blk(dma_h, ASE_DATA_BASE(dma_h) + offset,
-			(uint64_t)dst, DWORD_BYTES);
+		    MMIORead32Blk(dma_h, ASE_DATA_BASE(dma_h) + offset,
+				  (uint64_t) dst, DWORD_BYTES);
 		ON_ERR_RETURN(res, "MMIORead32Blk");
 		src += DWORD_BYTES;
 		dst += DWORD_BYTES;
@@ -983,7 +983,7 @@ static fpga_result _read_memory_mmio(fpga_dma_handle dma_h, uint64_t * src_ptr,
 *
 */
 static fpga_result _ase_fpga_to_host(fpga_dma_handle dma_h, uint64_t * src_ptr,
-	uint64_t * dst_ptr, uint64_t count)
+				     uint64_t * dst_ptr, uint64_t count)
 {
 	fpga_result res = FPGA_OK;
 	uint64_t src = *src_ptr;
@@ -992,7 +992,7 @@ static fpga_result _ase_fpga_to_host(fpga_dma_handle dma_h, uint64_t * src_ptr,
 	uint64_t unaligned_size = 0;
 
 	debug_print("dst_ptr = %08lx , count = %08lx, src = %08lx \n", *dst_ptr,
-		count, *src_ptr);
+		    count, *src_ptr);
 
 	//Aligns address to 8 byte using src masking method
 	if (!IS_ALIGNED_DWORD(src) && !IS_ALIGNED_QWORD(src)) {
@@ -1000,8 +1000,8 @@ static fpga_result _ase_fpga_to_host(fpga_dma_handle dma_h, uint64_t * src_ptr,
 		if (unaligned_size > count_left)
 			unaligned_size = count_left;
 		res =
-			_read_memory_mmio_unaligned(dma_h, src, dst,
-				unaligned_size);
+		    _read_memory_mmio_unaligned(dma_h, src, dst,
+						unaligned_size);
 		if (res != FPGA_OK)
 			return res;
 		count_left -= unaligned_size;
@@ -1036,8 +1036,8 @@ static fpga_result clear_interrupt(fpga_dma_handle dma_h)
 	msgdma_status_t status = { 0 };
 	status.st.irq = 1;
 
-	return MMIOWrite32Blk(dma_h, CSR_STATUS(dma_h), (uint64_t)& status.reg,
-		sizeof(status.reg));
+	return MMIOWrite32Blk(dma_h, CSR_STATUS(dma_h), (uint64_t) & status.reg,
+			      sizeof(status.reg));
 }
 
 static fpga_result poll_interrupt(fpga_dma_handle dma_h)
@@ -1060,20 +1060,17 @@ static fpga_result poll_interrupt(fpga_dma_handle dma_h)
 		fprintf(stderr, "Poll error errno = %s\n", strerror(errno));
 		res = FPGA_EXCEPTION;
 		goto out;
-	}
-	else if (poll_res == 0) {
+	} else if (poll_res == 0) {
 		fprintf(stderr, "Poll(interrupt) timeout \n");
 		res = FPGA_EXCEPTION;
-	}
-	else {
+	} else {
 		uint64_t count = 0;
 		ssize_t bytes_read = read(pfd.fd, &count, sizeof(count));
 		if (bytes_read > 0) {
 			debug_print("Poll success. Return = %d, count = %d\n",
-				poll_res, (int)count);
+				    poll_res, (int)count);
 			res = FPGA_OK;
-		}
-		else {
+		} else {
 			fprintf(stderr, "Error: poll failed read: %s\n",
 				bytes_read >
 				0 ? strerror(errno) : "zero bytes read");
@@ -1081,7 +1078,7 @@ static fpga_result poll_interrupt(fpga_dma_handle dma_h)
 		}
 	}
 
-out:
+ out:
 	clear_interrupt(dma_h);
 	return res;
 }
@@ -1092,22 +1089,22 @@ static fpga_result _issue_magic(fpga_dma_handle dma_h)
 	*(dma_h->magic_buf) = 0x0ULL;
 
 	res =
-		_do_dma(dma_h, dma_h->magic_iova | FPGA_DMA_WF_HOST_MASK,
-			FPGA_DMA_WF_ROM_MAGIC_NO_MASK, 64, 1, FPGA_TO_HOST_MM,
-			true /*intr_en */);
+	    _do_dma(dma_h, dma_h->magic_iova | FPGA_DMA_WF_HOST_MASK,
+		    FPGA_DMA_WF_ROM_MAGIC_NO_MASK, 64, 1, FPGA_TO_HOST_MM,
+		    true /*intr_en */ );
 	return res;
 }
 
 static void _wait_magic(fpga_dma_handle dma_h)
 {
 	poll_interrupt(dma_h);
-	while (*(dma_h->magic_buf) != FPGA_DMA_WF_MAGIC_NO);
+	while (*(dma_h->magic_buf) != FPGA_DMA_WF_MAGIC_NO) ;
 	*(dma_h->magic_buf) = 0x0ULL;
 }
 
 fpga_result transferHostToFpga(fpga_dma_handle dma_h, uint64_t dst,
-	uint64_t src, size_t count,
-	fpga_dma_transfer_t type)
+			       uint64_t src, size_t count,
+			       fpga_dma_transfer_t type)
 {
 	fpga_result res = FPGA_OK;
 	uint64_t i = 0;
@@ -1116,22 +1113,21 @@ fpga_result transferHostToFpga(fpga_dma_handle dma_h, uint64_t dst,
 	uint64_t align_bytes = 0;
 	int issued_intr = 0;
 	debug_print("Host To Fpga ----------- src = %08lx, dst = %08lx \n", src,
-		dst);
+		    dst);
 	if (!IS_DMA_ALIGNED(dst)) {
 		if (count_left < FPGA_DMA_ALIGN_BYTES) {
 			res = _ase_host_to_fpga(dma_h, &dst, &src, count_left);
 			ON_ERR_GOTO(res, out,
-				"HOST_TO_FPGA_MM Transfer failed\n");
+				    "HOST_TO_FPGA_MM Transfer failed\n");
 			return res;
-		}
-		else {
+		} else {
 			aligned_addr =
-				((dst / FPGA_DMA_ALIGN_BYTES) +
-					1) * FPGA_DMA_ALIGN_BYTES;
+			    ((dst / FPGA_DMA_ALIGN_BYTES) +
+			     1) * FPGA_DMA_ALIGN_BYTES;
 			align_bytes = aligned_addr - dst;
 			res = _ase_host_to_fpga(dma_h, &dst, &src, align_bytes);
 			ON_ERR_GOTO(res, out,
-				"HOST_TO_FPGA_MM Transfer failed\n");
+				    "HOST_TO_FPGA_MM Transfer failed\n");
 			count_left = count_left - align_bytes;
 		}
 	}
@@ -1139,52 +1135,51 @@ fpga_result transferHostToFpga(fpga_dma_handle dma_h, uint64_t dst,
 		uint32_t dma_chunks = count_left / FPGA_DMA_BUF_SIZE;
 		count_left -= (dma_chunks * FPGA_DMA_BUF_SIZE);
 		debug_print
-		("DMA TX : dma chuncks = %d, count_left = %08lx, dst = %08lx, src = %08lx \n",
-			dma_chunks, count_left, dst, src);
+		    ("DMA TX : dma chuncks = %d, count_left = %08lx, dst = %08lx, src = %08lx \n",
+		     dma_chunks, count_left, dst, src);
 
 		for (i = 0; i < dma_chunks; i++) {
 			// constant size transfer, no length check required for memcpy
-			memcpy_s_fast(dma_h->dma_buf_ptr[i % FPGA_DMA_MAX_BUF], FPGA_DMA_BUF_SIZE,
-				(void *)(src + i * FPGA_DMA_BUF_SIZE),
-				FPGA_DMA_BUF_SIZE);
+			memcpy_s_fast(dma_h->dma_buf_ptr[i % FPGA_DMA_MAX_BUF],
+				      FPGA_DMA_BUF_SIZE,
+				      (void *)(src + i * FPGA_DMA_BUF_SIZE),
+				      FPGA_DMA_BUF_SIZE);
 			if ((i % (FPGA_DMA_MAX_BUF / 2) ==
-				(FPGA_DMA_MAX_BUF / 2) - 1)
-				|| i == (dma_chunks - 1) /*last descriptor */) {
+			     (FPGA_DMA_MAX_BUF / 2) - 1)
+			    || i == (dma_chunks - 1) /*last descriptor */ ) {
 				if (i == (FPGA_DMA_MAX_BUF / 2) - 1) {
 					res =
-						_do_dma(dma_h,
-						(dst +
-							i * FPGA_DMA_BUF_SIZE),
-							dma_h->dma_buf_iova[i %
-							FPGA_DMA_MAX_BUF]
-							| FPGA_DMA_HOST_MASK,
-							FPGA_DMA_BUF_SIZE, 0, type,
-							true);
-				}
-				else {
+					    _do_dma(dma_h,
+						    (dst +
+						     i * FPGA_DMA_BUF_SIZE),
+						    dma_h->dma_buf_iova[i %
+									FPGA_DMA_MAX_BUF]
+						    | FPGA_DMA_HOST_MASK,
+						    FPGA_DMA_BUF_SIZE, 0, type,
+						    true);
+				} else {
 					if (issued_intr)
 						poll_interrupt(dma_h);
 					res =
-						_do_dma(dma_h,
-						(dst +
-							i * FPGA_DMA_BUF_SIZE),
-							dma_h->dma_buf_iova[i %
-							FPGA_DMA_MAX_BUF]
-							| FPGA_DMA_HOST_MASK,
-							FPGA_DMA_BUF_SIZE, 0, type,
-							true /*intr_en */);
+					    _do_dma(dma_h,
+						    (dst +
+						     i * FPGA_DMA_BUF_SIZE),
+						    dma_h->dma_buf_iova[i %
+									FPGA_DMA_MAX_BUF]
+						    | FPGA_DMA_HOST_MASK,
+						    FPGA_DMA_BUF_SIZE, 0, type,
+						    true /*intr_en */ );
 				}
 				issued_intr = 1;
-			}
-			else {
+			} else {
 				res =
-					_do_dma(dma_h,
-					(dst + i * FPGA_DMA_BUF_SIZE),
-						dma_h->dma_buf_iova[i %
-						FPGA_DMA_MAX_BUF]
-						| FPGA_DMA_HOST_MASK,
-						FPGA_DMA_BUF_SIZE, 0, type,
-						false /*intr_en */);
+				    _do_dma(dma_h,
+					    (dst + i * FPGA_DMA_BUF_SIZE),
+					    dma_h->dma_buf_iova[i %
+								FPGA_DMA_MAX_BUF]
+					    | FPGA_DMA_HOST_MASK,
+					    FPGA_DMA_BUF_SIZE, 0, type,
+					    false /*intr_en */ );
 			}
 		}
 		if (issued_intr) {
@@ -1193,57 +1188,59 @@ fpga_result transferHostToFpga(fpga_dma_handle dma_h, uint64_t dst,
 		}
 		if (count_left) {
 			uint64_t dma_tx_bytes =
-				(count_left / FPGA_DMA_ALIGN_BYTES) *
-				FPGA_DMA_ALIGN_BYTES;
+			    (count_left / FPGA_DMA_ALIGN_BYTES) *
+			    FPGA_DMA_ALIGN_BYTES;
 			if (dma_tx_bytes != 0) {
 				debug_print
-				("dma_tx_bytes = %08lx  was transfered using DMA\n",
-					dma_tx_bytes);
+				    ("dma_tx_bytes = %08lx  was transfered using DMA\n",
+				     dma_tx_bytes);
 				if (dma_tx_bytes > FPGA_DMA_BUF_SIZE) {
 					res = FPGA_NO_MEMORY;
 					ON_ERR_GOTO(res, out,
-						"Illegal transfer size\n");
+						    "Illegal transfer size\n");
 				}
 
-				memcpy_s_fast(dma_h->dma_buf_ptr[0], dma_tx_bytes,
-					(void *)(src +
-						dma_chunks *
-						FPGA_DMA_BUF_SIZE),
-					dma_tx_bytes);
+				memcpy_s_fast(dma_h->dma_buf_ptr[0],
+					      dma_tx_bytes,
+					      (void *)(src +
+						       dma_chunks *
+						       FPGA_DMA_BUF_SIZE),
+					      dma_tx_bytes);
 				res =
-					_do_dma(dma_h,
-					(dst +
-						dma_chunks * FPGA_DMA_BUF_SIZE),
-						dma_h->dma_buf_iova[0] |
-						FPGA_DMA_HOST_MASK, dma_tx_bytes, 1,
-						type, true /*intr_en */);
+				    _do_dma(dma_h,
+					    (dst +
+					     dma_chunks * FPGA_DMA_BUF_SIZE),
+					    dma_h->
+					    dma_buf_iova[0] |
+					    FPGA_DMA_HOST_MASK, dma_tx_bytes, 1,
+					    type, true /*intr_en */ );
 				ON_ERR_GOTO(res, out,
-					"HOST_TO_FPGA_MM Transfer failed\n");
+					    "HOST_TO_FPGA_MM Transfer failed\n");
 				poll_interrupt(dma_h);
 			}
 			count_left -= dma_tx_bytes;
 			if (count_left) {
 				dst =
-					dst + dma_chunks * FPGA_DMA_BUF_SIZE +
-					dma_tx_bytes;
+				    dst + dma_chunks * FPGA_DMA_BUF_SIZE +
+				    dma_tx_bytes;
 				src =
-					src + dma_chunks * FPGA_DMA_BUF_SIZE +
-					dma_tx_bytes;
+				    src + dma_chunks * FPGA_DMA_BUF_SIZE +
+				    dma_tx_bytes;
 				res =
-					_ase_host_to_fpga(dma_h, &dst, &src,
-						count_left);
+				    _ase_host_to_fpga(dma_h, &dst, &src,
+						      count_left);
 				ON_ERR_GOTO(res, out,
-					"HOST_TO_FPGA_MM Transfer failed\n");
+					    "HOST_TO_FPGA_MM Transfer failed\n");
 			}
 		}
 	}
-out:
+ out:
 	return res;
 }
 
 fpga_result transferFpgaToHost(fpga_dma_handle dma_h, uint64_t dst,
-	uint64_t src, size_t count,
-	fpga_dma_transfer_t type)
+			       uint64_t src, size_t count,
+			       fpga_dma_transfer_t type)
 {
 	fpga_result res = FPGA_OK;
 	uint64_t i = 0;
@@ -1254,22 +1251,21 @@ fpga_result transferFpgaToHost(fpga_dma_handle dma_h, uint64_t dst,
 	int wf_issued = 0;
 
 	debug_print("FPGA To Host ----------- src = %08lx, dst = %08lx \n", src,
-		dst);
+		    dst);
 	if (!IS_DMA_ALIGNED(src)) {
 		if (count_left < FPGA_DMA_ALIGN_BYTES) {
 			res = _ase_fpga_to_host(dma_h, &src, &dst, count_left);
 			ON_ERR_GOTO(res, out,
-				"FPGA_TO_HOST_MM Transfer failed");
+				    "FPGA_TO_HOST_MM Transfer failed");
 			return res;
-		}
-		else {
+		} else {
 			aligned_addr =
-				((src / FPGA_DMA_ALIGN_BYTES) +
-					1) * FPGA_DMA_ALIGN_BYTES;
+			    ((src / FPGA_DMA_ALIGN_BYTES) +
+			     1) * FPGA_DMA_ALIGN_BYTES;
 			align_bytes = aligned_addr - src;
 			res = _ase_fpga_to_host(dma_h, &src, &dst, align_bytes);
 			ON_ERR_GOTO(res, out,
-				"FPGA_TO_HOST_MM Transfer failed");
+				    "FPGA_TO_HOST_MM Transfer failed");
 			count_left = count_left - align_bytes;
 		}
 	}
@@ -1277,52 +1273,52 @@ fpga_result transferFpgaToHost(fpga_dma_handle dma_h, uint64_t dst,
 		uint32_t dma_chunks = count_left / FPGA_DMA_BUF_SIZE;
 		count_left -= (dma_chunks * FPGA_DMA_BUF_SIZE);
 		debug_print
-		("DMA TX : dma chunks = %d, count_left = %08lx, dst = %08lx, src = %08lx \n",
-			dma_chunks, count_left, dst, src);
+		    ("DMA TX : dma chunks = %d, count_left = %08lx, dst = %08lx, src = %08lx \n",
+		     dma_chunks, count_left, dst, src);
 		assert(FPGA_DMA_MAX_BUF >= 8);
 		uint64_t pending_buf = 0;
 		for (i = 0; i < dma_chunks; i++) {
 			res =
-				_do_dma(dma_h,
-					dma_h->dma_buf_iova[i %
-					(FPGA_DMA_MAX_BUF)] |
-					FPGA_DMA_HOST_MASK,
-					(src + i * FPGA_DMA_BUF_SIZE),
-					FPGA_DMA_BUF_SIZE, 1, type,
-					false /*intr_en */);
+			    _do_dma(dma_h,
+				    dma_h->dma_buf_iova[i %
+							(FPGA_DMA_MAX_BUF)] |
+				    FPGA_DMA_HOST_MASK,
+				    (src + i * FPGA_DMA_BUF_SIZE),
+				    FPGA_DMA_BUF_SIZE, 1, type,
+				    false /*intr_en */ );
 			ON_ERR_GOTO(res, out,
-				"FPGA_TO_HOST_MM Transfer failed");
+				    "FPGA_TO_HOST_MM Transfer failed");
 
 			const int num_pending = i - pending_buf + 1;
 			if (num_pending == (FPGA_DMA_MAX_BUF / 2)) {	//Enters this loop only once,after first batch of descriptors.
 				res = _issue_magic(dma_h);
 				ON_ERR_GOTO(res, out,
-					"Magic number issue failed");
+					    "Magic number issue failed");
 				wf_issued = 1;
 			}
 			if (num_pending > (FPGA_DMA_MAX_BUF - 1)
-				|| i == (dma_chunks - 1) /*last descriptor */) {
+			    || i == (dma_chunks - 1) /*last descriptor */ ) {
 				if (wf_issued) {
 					_wait_magic(dma_h);
 					for (j = 0; j < (FPGA_DMA_MAX_BUF / 2);
-						j++) {
+					     j++) {
 						// constant size transfer; no length check required
 						memcpy_s_fast((void *)(dst +
-							pending_buf
-							*
-							FPGA_DMA_BUF_SIZE),
-							FPGA_DMA_BUF_SIZE,
-							dma_h->dma_buf_ptr
-							[pending_buf %
-							(FPGA_DMA_MAX_BUF)],
-							FPGA_DMA_BUF_SIZE);
+								       pending_buf
+								       *
+								       FPGA_DMA_BUF_SIZE),
+							      FPGA_DMA_BUF_SIZE,
+							      dma_h->dma_buf_ptr
+							      [pending_buf %
+							       (FPGA_DMA_MAX_BUF)],
+							      FPGA_DMA_BUF_SIZE);
 						pending_buf++;
 					}
 					wf_issued = 0;
 				}
 				res = _issue_magic(dma_h);
 				ON_ERR_GOTO(res, out,
-					"Magic number issue failed");
+					    "Magic number issue failed");
 				wf_issued = 1;
 			}
 		}
@@ -1334,177 +1330,176 @@ fpga_result transferFpgaToHost(fpga_dma_handle dma_h, uint64_t dst,
 		while (pending_buf < dma_chunks) {
 			// constant size transfer; no length check required
 			memcpy_s_fast((void *)(dst +
-				pending_buf * FPGA_DMA_BUF_SIZE),
-				FPGA_DMA_BUF_SIZE,
-				dma_h->dma_buf_ptr[pending_buf %
-				(FPGA_DMA_MAX_BUF)],
-				FPGA_DMA_BUF_SIZE);
+					       pending_buf * FPGA_DMA_BUF_SIZE),
+				      FPGA_DMA_BUF_SIZE,
+				      dma_h->dma_buf_ptr[pending_buf %
+							 (FPGA_DMA_MAX_BUF)],
+				      FPGA_DMA_BUF_SIZE);
 			pending_buf++;
 		}
 		if (count_left > 0) {
 			uint64_t dma_tx_bytes =
-				(count_left / FPGA_DMA_ALIGN_BYTES) *
-				FPGA_DMA_ALIGN_BYTES;
+			    (count_left / FPGA_DMA_ALIGN_BYTES) *
+			    FPGA_DMA_ALIGN_BYTES;
 			if (dma_tx_bytes != 0) {
 				debug_print
-				("dma_tx_bytes = %08lx  was transfered using DMA\n",
-					dma_tx_bytes);
+				    ("dma_tx_bytes = %08lx  was transfered using DMA\n",
+				     dma_tx_bytes);
 				res =
-					_do_dma(dma_h,
-						dma_h->dma_buf_iova[0] |
-						FPGA_DMA_HOST_MASK,
-						(src +
-							dma_chunks * FPGA_DMA_BUF_SIZE),
-						dma_tx_bytes, 1, type,
-						false /*intr_en */);
+				    _do_dma(dma_h,
+					    dma_h->dma_buf_iova[0] |
+					    FPGA_DMA_HOST_MASK,
+					    (src +
+					     dma_chunks * FPGA_DMA_BUF_SIZE),
+					    dma_tx_bytes, 1, type,
+					    false /*intr_en */ );
 				ON_ERR_GOTO(res, out,
-					"FPGA_TO_HOST_MM Transfer failed");
+					    "FPGA_TO_HOST_MM Transfer failed");
 				res = _issue_magic(dma_h);
 				ON_ERR_GOTO(res, out,
-					"Magic number issue failed");
+					    "Magic number issue failed");
 				_wait_magic(dma_h);
 				if (dma_tx_bytes > FPGA_DMA_BUF_SIZE) {
 					res = FPGA_NO_MEMORY;
 					ON_ERR_GOTO(res, out,
-						"Illegal transfer size\n");
+						    "Illegal transfer size\n");
 				}
 				memcpy_s_fast((void *)(dst +
-					dma_chunks *
-					FPGA_DMA_BUF_SIZE),
-					dma_tx_bytes,
-					dma_h->dma_buf_ptr[0],
-					dma_tx_bytes);
+						       dma_chunks *
+						       FPGA_DMA_BUF_SIZE),
+					      dma_tx_bytes,
+					      dma_h->dma_buf_ptr[0],
+					      dma_tx_bytes);
 			}
 			count_left -= dma_tx_bytes;
 			if (count_left) {
 				dst =
-					dst + dma_chunks * FPGA_DMA_BUF_SIZE +
-					dma_tx_bytes;
+				    dst + dma_chunks * FPGA_DMA_BUF_SIZE +
+				    dma_tx_bytes;
 				src =
-					src + dma_chunks * FPGA_DMA_BUF_SIZE +
-					dma_tx_bytes;
+				    src + dma_chunks * FPGA_DMA_BUF_SIZE +
+				    dma_tx_bytes;
 				res =
-					_ase_fpga_to_host(dma_h, &src, &dst,
-						count_left);
+				    _ase_fpga_to_host(dma_h, &src, &dst,
+						      count_left);
 				ON_ERR_GOTO(res, out,
-					"FPGA_TO_HOST_MM Transfer failed");
+					    "FPGA_TO_HOST_MM Transfer failed");
 			}
 		}
 	}
-out:
+ out:
 	return res;
 }
 
 fpga_result transferFpgaToFpga(fpga_dma_handle dma_h, uint64_t dst,
-	uint64_t src, size_t count,
-	fpga_dma_transfer_t type)
+			       uint64_t src, size_t count,
+			       fpga_dma_transfer_t type)
 {
 	fpga_result res = FPGA_OK;
 	uint64_t i = 0;
 	uint64_t count_left = count;
 	uint64_t *tmp_buf = NULL;
 	if (IS_DMA_ALIGNED(dst) &&
-		IS_DMA_ALIGNED(src) && IS_DMA_ALIGNED(count_left)) {
+	    IS_DMA_ALIGNED(src) && IS_DMA_ALIGNED(count_left)) {
 		uint32_t dma_chunks = count_left / FPGA_DMA_BUF_SIZE;
 		count_left -= (dma_chunks * FPGA_DMA_BUF_SIZE);
 		debug_print
-		("!!!FPGA to FPGA!!! TX :dma chunks = %d, count = %08lx, dst = %08lx, src = %08lx \n",
-			dma_chunks, count_left, dst, src);
+		    ("!!!FPGA to FPGA!!! TX :dma chunks = %d, count = %08lx, dst = %08lx, src = %08lx \n",
+		     dma_chunks, count_left, dst, src);
 
 		for (i = 0; i < dma_chunks; i++) {
 			res =
-				_do_dma(dma_h, (dst + i * FPGA_DMA_BUF_SIZE),
-				(src + i * FPGA_DMA_BUF_SIZE),
-					FPGA_DMA_BUF_SIZE, 0, type,
-					false /*intr_en */);
+			    _do_dma(dma_h, (dst + i * FPGA_DMA_BUF_SIZE),
+				    (src + i * FPGA_DMA_BUF_SIZE),
+				    FPGA_DMA_BUF_SIZE, 0, type,
+				    false /*intr_en */ );
 			ON_ERR_GOTO(res, out,
-				"FPGA_TO_FPGA_MM Transfer failed");
+				    "FPGA_TO_FPGA_MM Transfer failed");
 			if ((i + 1) % FPGA_DMA_MAX_BUF == 0
-				|| i == (dma_chunks - 1) /*last descriptor */) {
+			    || i == (dma_chunks - 1) /*last descriptor */ ) {
 				res = _issue_magic(dma_h);
 				ON_ERR_GOTO(res, out,
-					"Magic number issue failed");
+					    "Magic number issue failed");
 				_wait_magic(dma_h);
 			}
 		}
 		if (count_left > 0) {
 			debug_print
-			("Count_left = %08lx  was transfered using DMA\n",
-				count_left);
+			    ("Count_left = %08lx  was transfered using DMA\n",
+			     count_left);
 			res =
-				_do_dma(dma_h,
-				(dst + dma_chunks * FPGA_DMA_BUF_SIZE),
-					(src + dma_chunks * FPGA_DMA_BUF_SIZE),
-					count_left, 1, type, false /*intr_en */);
+			    _do_dma(dma_h,
+				    (dst + dma_chunks * FPGA_DMA_BUF_SIZE),
+				    (src + dma_chunks * FPGA_DMA_BUF_SIZE),
+				    count_left, 1, type, false /*intr_en */ );
 			ON_ERR_GOTO(res, out,
-				"FPGA_TO_FPGA_MM Transfer failed");
+				    "FPGA_TO_FPGA_MM Transfer failed");
 			res = _issue_magic(dma_h);
 			ON_ERR_GOTO(res, out, "Magic number issue failed");
 			_wait_magic(dma_h);
 		}
-	}
-	else {
+	} else {
 		if ((src < dst) && (src + count_left >= dst)) {
 			debug_print
-			("Overlapping addresses, Provide correct dst address\n");
+			    ("Overlapping addresses, Provide correct dst address\n");
 			return FPGA_NOT_SUPPORTED;
 		}
 		uint32_t tx_chunks = count_left / FPGA_DMA_BUF_ALIGN_SIZE;
 		count_left -= (tx_chunks * FPGA_DMA_BUF_ALIGN_SIZE);
 		debug_print
-		("!!!FPGA to FPGA TX!!! : tx chunks = %d, count = %08lx, dst = %08lx, src = %08lx \n",
-			tx_chunks, count_left, dst, src);
-		tmp_buf = (uint64_t *)malloc(FPGA_DMA_BUF_ALIGN_SIZE);
+		    ("!!!FPGA to FPGA TX!!! : tx chunks = %d, count = %08lx, dst = %08lx, src = %08lx \n",
+		     tx_chunks, count_left, dst, src);
+		tmp_buf = (uint64_t *) malloc(FPGA_DMA_BUF_ALIGN_SIZE);
 		for (i = 0; i < tx_chunks; i++) {
 			res =
-				transferFpgaToHost(dma_h, (uint64_t)tmp_buf,
-				(src +
-					i * FPGA_DMA_BUF_ALIGN_SIZE),
-					FPGA_DMA_BUF_ALIGN_SIZE,
-					FPGA_TO_HOST_MM);
+			    transferFpgaToHost(dma_h, (uint64_t) tmp_buf,
+					       (src +
+						i * FPGA_DMA_BUF_ALIGN_SIZE),
+					       FPGA_DMA_BUF_ALIGN_SIZE,
+					       FPGA_TO_HOST_MM);
 			ON_ERR_GOTO(res, out_spl,
-				"FPGA_TO_FPGA_MM Transfer failed");
+				    "FPGA_TO_FPGA_MM Transfer failed");
 			res =
-				transferHostToFpga(dma_h,
-				(dst +
-					i * FPGA_DMA_BUF_ALIGN_SIZE),
-					(uint64_t)tmp_buf,
-					FPGA_DMA_BUF_ALIGN_SIZE,
-					HOST_TO_FPGA_MM);
+			    transferHostToFpga(dma_h,
+					       (dst +
+						i * FPGA_DMA_BUF_ALIGN_SIZE),
+					       (uint64_t) tmp_buf,
+					       FPGA_DMA_BUF_ALIGN_SIZE,
+					       HOST_TO_FPGA_MM);
 			ON_ERR_GOTO(res, out_spl,
-				"FPGA_TO_FPGA_MM Transfer failed");
+				    "FPGA_TO_FPGA_MM Transfer failed");
 		}
 		if (count_left > 0) {
 			res =
-				transferFpgaToHost(dma_h, (uint64_t)tmp_buf,
-				(src +
-					tx_chunks *
-					FPGA_DMA_BUF_ALIGN_SIZE),
-					count_left, FPGA_TO_HOST_MM);
+			    transferFpgaToHost(dma_h, (uint64_t) tmp_buf,
+					       (src +
+						tx_chunks *
+						FPGA_DMA_BUF_ALIGN_SIZE),
+					       count_left, FPGA_TO_HOST_MM);
 			ON_ERR_GOTO(res, out_spl,
-				"FPGA_TO_FPGA_MM Transfer failed");
+				    "FPGA_TO_FPGA_MM Transfer failed");
 			res =
-				transferHostToFpga(dma_h,
-				(dst +
-					tx_chunks *
-					FPGA_DMA_BUF_ALIGN_SIZE),
-					(uint64_t)tmp_buf, count_left,
-					HOST_TO_FPGA_MM);
+			    transferHostToFpga(dma_h,
+					       (dst +
+						tx_chunks *
+						FPGA_DMA_BUF_ALIGN_SIZE),
+					       (uint64_t) tmp_buf, count_left,
+					       HOST_TO_FPGA_MM);
 			ON_ERR_GOTO(res, out_spl,
-				"FPGA_TO_FPGA_MM Transfer failed");
+				    "FPGA_TO_FPGA_MM Transfer failed");
 		}
 		free(tmp_buf);
 	}
-out:
+ out:
 	return res;
-out_spl:
+ out_spl:
 	free(tmp_buf);
 	return res;
 }
 
 fpga_result fpgaDmaTransferSync(fpga_dma_handle dma_h, uint64_t dst,
-	uint64_t src, size_t count,
-	fpga_dma_transfer_t type)
+				uint64_t src, size_t count,
+				fpga_dma_transfer_t type)
 {
 
 	fpga_result res = FPGA_OK;
@@ -1516,8 +1511,8 @@ fpga_result fpgaDmaTransferSync(fpga_dma_handle dma_h, uint64_t dst,
 		return FPGA_INVALID_PARAM;
 
 	if (!
-		(type == HOST_TO_FPGA_MM || type == FPGA_TO_HOST_MM
-			|| type == FPGA_TO_FPGA_MM))
+	    (type == HOST_TO_FPGA_MM || type == FPGA_TO_HOST_MM
+	     || type == FPGA_TO_FPGA_MM))
 		return FPGA_NOT_SUPPORTED;
 
 	if (!dma_h->fpga_h)
@@ -1525,17 +1520,14 @@ fpga_result fpgaDmaTransferSync(fpga_dma_handle dma_h, uint64_t dst,
 
 	if (type == HOST_TO_FPGA_MM) {
 		res =
-			transferHostToFpga(dma_h, dst, src, count, HOST_TO_FPGA_MM);
-	}
-	else if (type == FPGA_TO_HOST_MM) {
+		    transferHostToFpga(dma_h, dst, src, count, HOST_TO_FPGA_MM);
+	} else if (type == FPGA_TO_HOST_MM) {
 		res =
-			transferFpgaToHost(dma_h, dst, src, count, FPGA_TO_HOST_MM);
-	}
-	else if (type == FPGA_TO_FPGA_MM) {
+		    transferFpgaToHost(dma_h, dst, src, count, FPGA_TO_HOST_MM);
+	} else if (type == FPGA_TO_FPGA_MM) {
 		res =
-			transferFpgaToFpga(dma_h, dst, src, count, FPGA_TO_FPGA_MM);
-	}
-	else {
+		    transferFpgaToFpga(dma_h, dst, src, count, FPGA_TO_FPGA_MM);
+	} else {
 		return FPGA_NOT_SUPPORTED;
 	}
 
@@ -1543,9 +1535,9 @@ fpga_result fpgaDmaTransferSync(fpga_dma_handle dma_h, uint64_t dst,
 }
 
 fpga_result fpgaDmaTransferAsync(fpga_dma_handle dma, uint64_t dst,
-	uint64_t src, size_t count,
-	fpga_dma_transfer_t type,
-	fpga_dma_transfer_cb cb, void *context)
+				 uint64_t src, size_t count,
+				 fpga_dma_transfer_t type,
+				 fpga_dma_transfer_cb cb, void *context)
 {
 	// TODO
 	return FPGA_NOT_SUPPORTED;
@@ -1580,11 +1572,11 @@ fpga_result fpgaDmaClose(fpga_dma_handle dma_h)
 	msgdma_ctrl_t ctrl = { 0 };
 	ctrl.ct.global_intr_en_mask = 0;
 	res =
-		MMIOWrite32Blk(dma_h, CSR_CONTROL(dma_h), (uint64_t)& ctrl.reg,
-			sizeof(ctrl.reg));
+	    MMIOWrite32Blk(dma_h, CSR_CONTROL(dma_h), (uint64_t) & ctrl.reg,
+			   sizeof(ctrl.reg));
 	ON_ERR_GOTO(res, out, "MMIOWrite32Blk");
 
-out:
+ out:
 	free((void *)dma_h);
 	return res;
 }

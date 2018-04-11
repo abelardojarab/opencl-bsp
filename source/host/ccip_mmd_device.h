@@ -81,91 +81,91 @@
 
 enum {
 	AOCL_IRQ_POLLING_BASE = 0x0100,	//CSR to polling interrupt status
-	AOCL_IRQ_MASKING_BASE = 0x0108, //CSR to set/unset interrupt mask
+	AOCL_IRQ_MASKING_BASE = 0x0108,	//CSR to set/unset interrupt mask
 	AOCL_MMD_KERNEL = 0x4000,	/* Control interface into kernel interface */
 	AOCL_MMD_MEMORY = 0x100000	/* Data interface to device memory */
 };
 
 enum AfuStatu {
-   CCIP_MMD_INVALID_ID = 0,
-   CCIP_MMD_BSP,
-   CCIP_MMD_AFU
+	CCIP_MMD_INVALID_ID = 0,
+	CCIP_MMD_BSP,
+	CCIP_MMD_AFU
 };
 
-class CcipDevice final
-{
-	public:
+class CcipDevice final {
+ public:
 	CcipDevice(uint64_t);
-   CcipDevice(const CcipDevice&) =delete;
-   CcipDevice& operator=(const CcipDevice&) =delete;
+	CcipDevice(const CcipDevice &) = delete;
+	 CcipDevice & operator=(const CcipDevice &) = delete;
 	~CcipDevice();
 
-   static std::string get_board_name(std::string prefix, uint64_t obj_id);
-   static uint64_t parse_board_name(const char *board_name);
+	static std::string get_board_name(std::string prefix, uint64_t obj_id);
+	static uint64_t parse_board_name(const char *board_name);
 
-   int get_mmd_handle()         { return mmd_handle; }
-   uint64_t get_fpga_obj_id()   { return fpga_obj_id; }
-   std::string get_dev_name()   { return mmd_dev_name; }
-   std::string get_bdf();
-   float get_temperature();
+	int get_mmd_handle() {
+		return mmd_handle;
+	} uint64_t get_fpga_obj_id() {
+		return fpga_obj_id;
+	}
+	std::string get_dev_name() {
+		return mmd_dev_name;
+	}
+	std::string get_bdf();
+	float get_temperature();
 
-   int program_bitstream(uint8_t *data, size_t data_size);
-   bool initialize_bsp();
-	void set_kernel_interrupt(aocl_mmd_interrupt_handler_fn fn, void* user_data);
-	void set_status_handler(aocl_mmd_status_handler_fn fn, void* user_data);
+	int program_bitstream(uint8_t * data, size_t data_size);
+	bool initialize_bsp();
+	void set_kernel_interrupt(aocl_mmd_interrupt_handler_fn fn,
+				  void *user_data);
+	void set_status_handler(aocl_mmd_status_handler_fn fn, void *user_data);
 	int yield();
 	void event_update_fn(aocl_mmd_op_t op, int status);
-   bool bsp_loaded();
+	bool bsp_loaded();
 
 	int read_block(aocl_mmd_op_t op,
-			int mmd_interface,
-			void *host_addr,
-			size_t dev_addr,
-			size_t size);
+		       int mmd_interface,
+		       void *host_addr, size_t dev_addr, size_t size);
 
 	int write_block(aocl_mmd_op_t op,
 			int mmd_interface,
-			const void *host_addr,
-			size_t dev_addr,
-			size_t size);
+			const void *host_addr, size_t dev_addr, size_t size);
 
 	int copy_block(aocl_mmd_op_t op,
-		int mmd_interface,
-		size_t src_offset, size_t dst_offset,
-		size_t size);
+		       int mmd_interface,
+		       size_t src_offset, size_t dst_offset, size_t size);
 
-	private:
-   static int next_mmd_handle;
+ private:
+	static int next_mmd_handle;
 
-   int mmd_handle;
-   uint64_t fpga_obj_id;
-   std::string mmd_dev_name;
-   intel_opae_mmd::KernelInterrupt *kernel_interrupt_thread;
+	int mmd_handle;
+	uint64_t fpga_obj_id;
+	std::string mmd_dev_name;
+	intel_opae_mmd::KernelInterrupt * kernel_interrupt_thread;
 	aocl_mmd_status_handler_fn event_update;
 	void *event_update_user_data;
 
-   // HACK: use the sysfs path to read temperature value
-   // this should be replaced with OPAE call once that is
-   // available
-   std::string fme_sysfs_temp_path;
-   bool fme_sysfs_temp_initialized;
-   intel_opae_mmd::numa_params numa;
-   void initialize_fme_sysfs();
+	// HACK: use the sysfs path to read temperature value
+	// this should be replaced with OPAE call once that is
+	// available
+	std::string fme_sysfs_temp_path;
+	bool fme_sysfs_temp_initialized;
+	intel_opae_mmd::numa_params numa;
+	void initialize_fme_sysfs();
 
-   void initialize_local_cpus_sysfs();
+	void initialize_local_cpus_sysfs();
 
-   uint8_t bus;
-   uint8_t device;
-   uint8_t function;
+	uint8_t bus;
+	uint8_t device;
+	uint8_t function;
 
-   bool afu_initialized;
+	bool afu_initialized;
 	bool bsp_initialized;
 	bool mmio_is_mapped;
 
-	fpga_handle       afc_handle;
-	fpga_properties   filter;
-	fpga_token        afc_token;
-	intel_opae_mmd::mmd_dma *dma_h;
+	fpga_handle afc_handle;
+	fpga_properties filter;
+	fpga_token afc_token;
+	intel_opae_mmd::mmd_dma * dma_h;
 
 	char *mmd_copy_buffer;
 
@@ -174,4 +174,4 @@ class CcipDevice final
 	int write_mmio(const void *host_addr, size_t dev_addr, size_t size);
 };
 
-#endif // _CCIP_MMD_DEVICE_H
+#endif				// _CCIP_MMD_DEVICE_H

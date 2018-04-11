@@ -42,7 +42,6 @@ static void *memcpy_setup(void *dst, size_t max, const void *src, size_t n);
 
 memcpy_fn_t p_memcpy = memcpy_setup;	// Initial value points to setup routine
 
-
 /**
 * SSE2_memcpy
 *
@@ -65,26 +64,25 @@ static void *SSE2_memcpy(void *dst, size_t max, const void *src, size_t n)
 		if (n >= MIN_SSE2_SIZE)	// Arbitrary crossover performance point
 		{
 			debug_print("copying 0x%lx bytes with SSE2\n",
-				(uint64_t)ALIGN_TO_CL(n));
+				    (uint64_t) ALIGN_TO_CL(n));
 			aligned_block_copy_sse2((int64_t * __restrict) dst,
-				(int64_t * __restrict) src,
-				ALIGN_TO_CL(n));
-			ldst = (void *)((uint64_t)dst + ALIGN_TO_CL(n));
-			lsrc = (void *)((uint64_t)src + ALIGN_TO_CL(n));
+						(int64_t * __restrict) src,
+						ALIGN_TO_CL(n));
+			ldst = (void *)((uint64_t) dst + ALIGN_TO_CL(n));
+			lsrc = (void *)((uint64_t) src + ALIGN_TO_CL(n));
 			n -= ALIGN_TO_CL(n);
 		}
-	}
-	else {
+	} else {
 		if (n >= MIN_SSE2_SIZE)	// Arbitrary crossover performance point
 		{
 			debug_print
-			("copying 0x%lx bytes (unaligned) with SSE2\n",
-				(uint64_t)ALIGN_TO_CL(n));
+			    ("copying 0x%lx bytes (unaligned) with SSE2\n",
+			     (uint64_t) ALIGN_TO_CL(n));
 			unaligned_block_copy_sse2((int64_t * __restrict) dst,
-				(int64_t * __restrict) src,
-				ALIGN_TO_CL(n));
-			ldst = (void *)((uint64_t)dst + ALIGN_TO_CL(n));
-			lsrc = (void *)((uint64_t)src + ALIGN_TO_CL(n));
+						  (int64_t * __restrict) src,
+						  ALIGN_TO_CL(n));
+			ldst = (void *)((uint64_t) dst + ALIGN_TO_CL(n));
+			lsrc = (void *)((uint64_t) src + ALIGN_TO_CL(n));
 			n -= ALIGN_TO_CL(n);
 		}
 	}
@@ -93,9 +91,9 @@ static void *SSE2_memcpy(void *dst, size_t max, const void *src, size_t n)
 		register unsigned long int dummy;
 		debug_print("copying 0x%lx bytes with REP MOVSB\n", n);
 		__asm__ __volatile__("rep movsb\n":"=&D"(ldst), "=&S"(lsrc),
-			"=&c"(dummy)
-			: "0"(ldst), "1"(lsrc), "2"(n)
-			: "memory");
+				     "=&c"(dummy)
+				     :"0"(ldst), "1"(lsrc), "2"(n)
+				     :"memory");
 	}
 
 	return dst;
@@ -140,14 +138,12 @@ static void *memcpy_setup(void *dst, size_t max, const void *src, size_t n)
 	{
 		p_memcpy = memcpy_wrap;
 	}
-	
-	if (secure_getenv(USE_MEMCPY_S_ENV) != NULL)
-	{
-		p_memcpy = (memcpy_fn_t)memcpy_s;
+
+	if (secure_getenv(USE_MEMCPY_S_ENV) != NULL) {
+		p_memcpy = (memcpy_fn_t) memcpy_s;
 	}
-	
-	if (secure_getenv(USE_MEMCPY_SSE2_ENV) != NULL)
-	{
+
+	if (secure_getenv(USE_MEMCPY_SSE2_ENV) != NULL) {
 		p_memcpy = SSE2_memcpy;
 	}
 

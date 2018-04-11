@@ -50,7 +50,7 @@ extern "C" {
 
 #ifndef WEAK
 #if defined(_WIN32)
-#define WEAK 
+#define WEAK
 #else
 #define WEAK  __attribute__((weak))
 #endif
@@ -94,13 +94,12 @@ extern "C" {
 #define AOCL_MMD_SVM_FINE_GRAIN_BUFFER (1 << 2)
 #define AOCL_MMD_SVM_FINE_GRAIN_SYSTEM (1 << 3)
 
-typedef void* aocl_mmd_op_t;
+	typedef void *aocl_mmd_op_t;
 
-typedef struct {
-   unsigned lo; /* 32 least significant bits of time value. */
-   unsigned hi; /* 32 most significant bits of time value. */
-} aocl_mmd_timestamp_t;
-
+	typedef struct {
+		unsigned lo;	/* 32 least significant bits of time value. */
+		unsigned hi;	/* 32 most significant bits of time value. */
+	} aocl_mmd_timestamp_t;
 
 /* Defines the set of characteristics that can be probed about the board before
  * opening a device.  The type of data returned by each is specified in
@@ -115,20 +114,20 @@ typedef struct {
  *   for each board name returned in AOCL_MMD_BOARD_NAMES.
  *
  * */
-typedef enum {
-   AOCL_MMD_VERSION = 0,       /* Version of MMD (char*)*/
-   AOCL_MMD_NUM_BOARDS = 1,    /* Number of candidate boards (int)*/
-   AOCL_MMD_BOARD_NAMES = 2,   /* Names of boards available delimiter=; (char*)*/
-   AOCL_MMD_VENDOR_NAME = 3,   /* Name of vendor (char*) */
-   AOCL_MMD_VENDOR_ID = 4,     /* An integer ID for the vendor (int) */
-   AOCL_MMD_USES_YIELD = 5,    /* 1 if yield must be called to poll hw (int) */
-   /* The following can be combined in a bit field: 
-    * AOCL_MMD_PHYSICAL_MEMORY, AOCL_MMD_SVM_COARSE_GRAIN_BUFFER, AOCL_MMD_SVM_FINE_GRAIN_BUFFER, AOCL_MMD_SVM_FINE_GRAIN_SYSTEM.
-    * Prior to 14.1, all existing devices supported physical memory and no types of SVM memory, so this
-    * is the default when this operation returns '0' for board MMDs with a version prior to 14.1
-    */
-   AOCL_MMD_MEM_TYPES_SUPPORTED = 6, 
-} aocl_mmd_offline_info_t;
+	typedef enum {
+		AOCL_MMD_VERSION = 0,	/* Version of MMD (char*) */
+		AOCL_MMD_NUM_BOARDS = 1,	/* Number of candidate boards (int) */
+		AOCL_MMD_BOARD_NAMES = 2,	/* Names of boards available delimiter=; (char*) */
+		AOCL_MMD_VENDOR_NAME = 3,	/* Name of vendor (char*) */
+		AOCL_MMD_VENDOR_ID = 4,	/* An integer ID for the vendor (int) */
+		AOCL_MMD_USES_YIELD = 5,	/* 1 if yield must be called to poll hw (int) */
+		/* The following can be combined in a bit field: 
+		 * AOCL_MMD_PHYSICAL_MEMORY, AOCL_MMD_SVM_COARSE_GRAIN_BUFFER, AOCL_MMD_SVM_FINE_GRAIN_BUFFER, AOCL_MMD_SVM_FINE_GRAIN_SYSTEM.
+		 * Prior to 14.1, all existing devices supported physical memory and no types of SVM memory, so this
+		 * is the default when this operation returns '0' for board MMDs with a version prior to 14.1
+		 */
+		AOCL_MMD_MEM_TYPES_SUPPORTED = 6,
+	} aocl_mmd_offline_info_t;
 
 /* Defines the set of characteristics that can be probed about the board after
  * opening a device.  This can involve communication to the device 
@@ -143,20 +142,22 @@ typedef enum {
  * then return -1
  *
  * */
-typedef enum {
-   AOCL_MMD_NUM_KERNEL_INTERFACES = 1,  /* Number of Kernel interfaces (int) */
-   AOCL_MMD_KERNEL_INTERFACES = 2,      /* Kernel interface (int*) */
-   AOCL_MMD_PLL_INTERFACES = 3,         /* Kernel clk handles (int*) */
-   AOCL_MMD_MEMORY_INTERFACE = 4,       /* Global memory handle (int) */
-   AOCL_MMD_TEMPERATURE = 5,            /* Temperature measurement (float) */
-   AOCL_MMD_PCIE_INFO = 6,              /* PCIe information (char*) */
-   AOCL_MMD_BOARD_NAME = 7,             /* Name of board (char*) */
-   AOCL_MMD_BOARD_UNIQUE_ID = 8,        /* Unique ID of board (int) */
-} aocl_mmd_info_t;
+	typedef enum {
+		AOCL_MMD_NUM_KERNEL_INTERFACES = 1,	/* Number of Kernel interfaces (int) */
+		AOCL_MMD_KERNEL_INTERFACES = 2,	/* Kernel interface (int*) */
+		AOCL_MMD_PLL_INTERFACES = 3,	/* Kernel clk handles (int*) */
+		AOCL_MMD_MEMORY_INTERFACE = 4,	/* Global memory handle (int) */
+		AOCL_MMD_TEMPERATURE = 5,	/* Temperature measurement (float) */
+		AOCL_MMD_PCIE_INFO = 6,	/* PCIe information (char*) */
+		AOCL_MMD_BOARD_NAME = 7,	/* Name of board (char*) */
+		AOCL_MMD_BOARD_UNIQUE_ID = 8,	/* Unique ID of board (int) */
+	} aocl_mmd_info_t;
 
-typedef void (*aocl_mmd_interrupt_handler_fn)( int handle, void* user_data );
-typedef void (*aocl_mmd_status_handler_fn)( int handle, void* user_data, aocl_mmd_op_t op, int status );
-
+	typedef void (*aocl_mmd_interrupt_handler_fn) (int handle,
+						       void *user_data);
+	typedef void (*aocl_mmd_status_handler_fn) (int handle, void *user_data,
+						    aocl_mmd_op_t op,
+						    int status);
 
 /* Get information about the board using the enum aocl_mmd_offline_info_t for
  * offline info (called without a handle), and the enum aocl_mmd_info_t for
@@ -177,18 +178,18 @@ typedef void (*aocl_mmd_status_handler_fn)( int handle, void* user_data, aocl_mm
  *
  * Returns: a negative value to indicate error.
  */
-AOCL_MMD_CALL int aocl_mmd_get_offline_info(
-    aocl_mmd_offline_info_t requested_info_id,
-    size_t param_value_size,
-    void* param_value,
-    size_t* param_size_ret ) WEAK;
+	AOCL_MMD_CALL int aocl_mmd_get_offline_info(aocl_mmd_offline_info_t
+						    requested_info_id,
+						    size_t param_value_size,
+						    void *param_value,
+						    size_t *
+						    param_size_ret) WEAK;
 
-AOCL_MMD_CALL int aocl_mmd_get_info(
-    int handle,
-    aocl_mmd_info_t requested_info_id,
-    size_t param_value_size,
-    void* param_value,
-    size_t* param_size_ret ) WEAK;
+	AOCL_MMD_CALL int aocl_mmd_get_info(int handle,
+					    aocl_mmd_info_t requested_info_id,
+					    size_t param_value_size,
+					    void *param_value,
+					    size_t * param_size_ret) WEAK;
 
 /* Open and initialize the named device.  
  *
@@ -204,12 +205,12 @@ AOCL_MMD_CALL int aocl_mmd_get_info(
  * runtime will proceed to open other known devices, hence the MMD mustn't
  * exit the application if an open call fails.
  */
-AOCL_MMD_CALL int aocl_mmd_open(const char *name) WEAK; 
+	AOCL_MMD_CALL int aocl_mmd_open(const char *name) WEAK;
 
 /* Close an opened device, by its handle.
  * Returns: 0 on success, negative values on error. 
  */
-AOCL_MMD_CALL int aocl_mmd_close(int handle) WEAK;
+	AOCL_MMD_CALL int aocl_mmd_close(int handle) WEAK;
 
 /* Set the interrupt handler for the opened device.
  * The interrupt handler is called whenever the client needs to be notified
@@ -225,7 +226,10 @@ AOCL_MMD_CALL int aocl_mmd_close(int handle) WEAK;
  *
  * Returns: 0 if successful, negative on error
  */
-AOCL_MMD_CALL int aocl_mmd_set_interrupt_handler( int handle, aocl_mmd_interrupt_handler_fn fn, void* user_data ) WEAK;
+	AOCL_MMD_CALL int aocl_mmd_set_interrupt_handler(int handle,
+							 aocl_mmd_interrupt_handler_fn
+							 fn,
+							 void *user_data) WEAK;
 
 /* Set the operation status handler for the opened device.
  * The operation status handler is called with
@@ -239,7 +243,9 @@ AOCL_MMD_CALL int aocl_mmd_set_interrupt_handler( int handle, aocl_mmd_interrupt
  *
  * Returns: 0 if successful, negative on error
  */
-AOCL_MMD_CALL int aocl_mmd_set_status_handler( int handle, aocl_mmd_status_handler_fn fn, void* user_data ) WEAK;
+	AOCL_MMD_CALL int aocl_mmd_set_status_handler(int handle,
+						      aocl_mmd_status_handler_fn
+						      fn, void *user_data) WEAK;
 
 /* If AOCL_MMD_USES_YIELD is 1, this function is called when the host is idle
  * and hence possibly waiting for events to be processed by the device.  
@@ -252,7 +258,7 @@ AOCL_MMD_CALL int aocl_mmd_set_status_handler( int handle, aocl_mmd_status_handl
  *
  * NOTE: yield may be called continuously as long as it reports that it has useful work
  */
-AOCL_MMD_CALL int aocl_mmd_yield(int handle) WEAK;
+	AOCL_MMD_CALL int aocl_mmd_yield(int handle) WEAK;
 
 /* Read, write and copy operations on a single interface.
  * If op is NULL
@@ -283,23 +289,21 @@ AOCL_MMD_CALL int aocl_mmd_yield(int handle) WEAK;
  * The return value is 0 if the operation launch was successful, and
  * negative otherwise.
  */
-AOCL_MMD_CALL int aocl_mmd_read(
-      int handle,
-      aocl_mmd_op_t op,
-      size_t len,
-      void* dst,
-      int mmd_interface, size_t offset ) WEAK;
-AOCL_MMD_CALL int aocl_mmd_write(
-      int handle,
-      aocl_mmd_op_t op,
-      size_t len,
-      const void* src,
-      int mmd_interface, size_t offset ) WEAK;
-AOCL_MMD_CALL int aocl_mmd_copy(
-      int handle,
-      aocl_mmd_op_t op,
-      size_t len,
-      int mmd_interface, size_t src_offset, size_t dst_offset ) WEAK;
+	AOCL_MMD_CALL int aocl_mmd_read(int handle,
+					aocl_mmd_op_t op,
+					size_t len,
+					void *dst,
+					int mmd_interface, size_t offset) WEAK;
+	AOCL_MMD_CALL int aocl_mmd_write(int handle,
+					 aocl_mmd_op_t op,
+					 size_t len,
+					 const void *src,
+					 int mmd_interface, size_t offset) WEAK;
+	AOCL_MMD_CALL int aocl_mmd_copy(int handle,
+					aocl_mmd_op_t op,
+					size_t len,
+					int mmd_interface, size_t src_offset,
+					size_t dst_offset) WEAK;
 
 /* Reprogram the device 
  *
@@ -321,7 +325,8 @@ AOCL_MMD_CALL int aocl_mmd_copy(
  * Returns: the new non-negative integer handle for the board, otherwise a 
  * negative value to indicate error.
  */
-AOCL_MMD_CALL int aocl_mmd_reprogram( int handle, void * user_data , size_t size) WEAK;
+	AOCL_MMD_CALL int aocl_mmd_reprogram(int handle, void *user_data,
+					     size_t size) WEAK;
 
 /* Shared memory allocator
  * Allocates memory that is shared between the host and the FPGA.  The 
@@ -342,7 +347,9 @@ AOCL_MMD_CALL int aocl_mmd_reprogram( int handle, void * user_data , size_t size
  * Returns: The pointer value to be used by the host to access the shared
  * memory if successful, otherwise NULL.
  */
-AOCL_MMD_CALL void * aocl_mmd_shared_mem_alloc( int handle, size_t size, unsigned long long *device_ptr_out ) WEAK;
+	AOCL_MMD_CALL void *aocl_mmd_shared_mem_alloc(int handle, size_t size,
+						      unsigned long long
+						      *device_ptr_out) WEAK;
 
 /* Shared memory de-allocator
  * Frees previously allocated shared memory.  If shared memory is not supported,
@@ -354,10 +361,10 @@ AOCL_MMD_CALL void * aocl_mmd_shared_mem_alloc( int handle, size_t size, unsigne
  *   size     - the size of the shared memory to free. Must match the size
  *              originally passed to aocl_mmd_shared_mem_alloc
  */
-AOCL_MMD_CALL void aocl_mmd_shared_mem_free ( int handle, void* host_ptr, size_t size ) WEAK;
+	AOCL_MMD_CALL void aocl_mmd_shared_mem_free(int handle, void *host_ptr,
+						    size_t size) WEAK;
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif

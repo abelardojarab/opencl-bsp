@@ -202,7 +202,7 @@ typedef union {
 	};
 } msgdma_desc_ctrl_t;
 
-typedef struct __attribute__((__packed__)) {
+typedef struct __attribute__ ((__packed__)) {
 	//0x0
 	uint32_t rd_address;
 	//0x4

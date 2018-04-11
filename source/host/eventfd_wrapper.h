@@ -24,57 +24,57 @@
 namespace intel_opae_mmd {
 
 //simple wrapper class for managing eventfd objects
-class eventfd_wrapper final
-{
-public:
-	eventfd_wrapper()
-	{
-		m_initialized = false;
+	class eventfd_wrapper final {
+ public:
+		eventfd_wrapper() {
+			m_initialized = false;
 
-		m_fd = eventfd(0, 0);
-		if (m_fd < 0) {
-			fprintf(stderr, "eventfd : %s", strerror(errno));
-			return;
-		}
-	
-		m_initialized = true;
-	}
-	
-	~eventfd_wrapper()
-	{
-		if(m_initialized)
-		{
-			if (close(m_fd) < 0) {
-				fprintf(stderr, "eventfd : %s", strerror(errno));
+			m_fd = eventfd(0, 0);
+			if (m_fd < 0) {
+				fprintf(stderr, "eventfd : %s",
+					strerror(errno));
+				return;
+			}
+
+			m_initialized = true;
+		} ~eventfd_wrapper() {
+			if (m_initialized) {
+				if (close(m_fd) < 0) {
+					fprintf(stderr, "eventfd : %s",
+						strerror(errno));
+				}
 			}
 		}
-	}
-	
-	bool notify()
-	{
-		uint64_t count = 1;
-		ssize_t res = write(m_fd, &count, sizeof(count));
-		if (res < 0) {
-			fprintf(stderr, "eventfd : %s", strerror(errno));
-			return false;
+
+		bool notify() {
+			uint64_t count = 1;
+			ssize_t res = write(m_fd, &count, sizeof(count));
+			if (res < 0) {
+				fprintf(stderr, "eventfd : %s",
+					strerror(errno));
+				return false;
+			}
+
+			return true;
 		}
-		
-		return true;
-	}
-	
-	int get_fd() { return m_fd; }
-	bool initialized() { return m_initialized; }
 
-private:
-	//not used and not implemented
-	eventfd_wrapper (eventfd_wrapper& other);
-	eventfd_wrapper& operator= (const eventfd_wrapper& other);
-	
-	//member varaibles
-	int m_fd;
-	int m_initialized;
-}; // class eventfd_wrapper
+		int get_fd() {
+			return m_fd;
+		}
+		bool initialized() {
+			return m_initialized;
+		}
 
-}; // namespace intel_opae_mmd
+ private:
+		//not used and not implemented
+		eventfd_wrapper(eventfd_wrapper & other);
+		eventfd_wrapper & operator=(const eventfd_wrapper & other);
 
-#endif // _EVENTFD_WRAPPER_H
+		//member varaibles
+		int m_fd;
+		int m_initialized;
+	};			// class eventfd_wrapper
+
+};				// namespace intel_opae_mmd
+
+#endif				// _EVENTFD_WRAPPER_H
