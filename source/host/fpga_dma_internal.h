@@ -100,10 +100,6 @@
 #define FPGA_DMA_ALIGN_BYTES 64
 #define IS_DMA_ALIGNED(addr) (addr%FPGA_DMA_ALIGN_BYTES==0)
 
-#define CACHE_LINE_SIZE 64
-#define ALIGN_TO_CL(x) ((uint64_t)(x) & ~(CACHE_LINE_SIZE - 1))
-#define IS_CL_ALIGNED(x) (((uint64_t)(x) & (CACHE_LINE_SIZE - 1)) == 0)
-
 #define CSR_BASE(dma_handle) ((uint64_t)dma_handle->dma_csr_base)
 #define ASE_DATA_BASE(dma_handle) ((uint64_t)dma_handle->dma_ase_data_base)
 #define ASE_CNTL_BASE(dma_handle) ((uint64_t)dma_handle->dma_ase_cntl_base)

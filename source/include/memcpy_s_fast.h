@@ -30,6 +30,31 @@ extern "C" {
 #define USE_MEMCPY_S_ENV	"PAC_MEMCPY_S"
 #define USE_MEMCPY_SSE2_ENV	"PAC_SSE2_MEMCPY"
 
+#define CACHE_LINE_SIZE 64
+#define ALIGN_TO_CL(x) ((uint64_t)(x) & ~(CACHE_LINE_SIZE - 1))
+#define IS_CL_ALIGNED(x) (((uint64_t)(x) & (CACHE_LINE_SIZE - 1)) == 0)
+
+	// Convenience macros
+#ifdef DEBUG_MEM
+#define debug_print(fmt, ...) \
+do { \
+	if (FPGA_DMA_DEBUG) {\
+		fprintf(stderr, "%s (%d) : ", __FUNCTION__, __LINE__); \
+		fprintf(stderr, fmt, ##__VA_ARGS__); \
+	} \
+} while (0)
+
+#define error_print(fmt, ...) \
+do { \
+	fprintf(stderr, "%s (%d) : ", __FUNCTION__, __LINE__); \
+	fprintf(stderr, fmt, ##__VA_ARGS__); \
+	err_cnt++; \
+ } while (0)
+#else
+#define debug_print(...)
+#define error_print(...)
+#endif
+
 
 typedef void *(*memcpy_fn_t)(void *dst, size_t max, const void *src, size_t len);
 

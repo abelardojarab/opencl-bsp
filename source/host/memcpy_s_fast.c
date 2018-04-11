@@ -24,13 +24,21 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,  EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#pragma push_macro("_GNU_SOURCE")
+#undef _GNU_SOURCE
+#define _GNU_SOURCE
+
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include <assert.h>
 #include <safe_string/safe_string.h>
 #include "memcpy_s_fast.h"
+#include "x86-sse2.h"
 
-void *memcpy_setup(void *dst, size_t max, const void *src, size_t n);
+#pragma pop_macro("_GNU_SOURCE")
+
+static void *memcpy_setup(void *dst, size_t max, const void *src, size_t n);
 
 memcpy_fn_t p_memcpy = memcpy_setup;	// Initial value points to setup routine
 
