@@ -81,104 +81,98 @@ mmio_is_mapped(false),
 afc_handle(NULL),
 filter(NULL), afc_token(NULL), dma_h(NULL), mmd_copy_buffer(NULL)
 {
-	// Note that this constructor is not thread-safe because next_mmd_handle
-	// is shared between all class instances
-	mmd_handle = next_mmd_handle;
-	if (next_mmd_handle == std::numeric_limits < int >::max())
-		next_mmd_handle = 1;
-	else
-		next_mmd_handle++;
+   // Note that this constructor is not thread-safe because next_mmd_handle
+   // is shared between all class instances
+   mmd_handle = next_mmd_handle;
+   if(next_mmd_handle == std::numeric_limits<int>::max())
+      next_mmd_handle = 1;
+   else
+      next_mmd_handle++;
 
-	numa.afu_numa_node = -1;
-	mmd_copy_buffer = (char *)malloc(MMD_COPY_BUFFER_SIZE);
-	if (mmd_copy_buffer == NULL) {
-		fprintf(stderr, "malloc failed for mmd_copy_buffer\n");
-		return;
-	}
+  mmd_copy_buffer = (char *)malloc(MMD_COPY_BUFFER_SIZE);
+  if(mmd_copy_buffer == NULL) {
+  	  fprintf(stderr, "malloc failed for mmd_copy_buffer\n");
+  	  return;
+  }
+  
+   fpga_guid guid;
+   fpga_result res = FPGA_OK;
+   uint32_t num_matches;
+   
+   if (uuid_parse(DCP_OPENCL_DDR_AFU_ID, guid) < 0) {
+      throw std::runtime_error(std::string("Error parsing guid ") + 
+                               std::string( DCP_OPENCL_DDR_AFU_ID));
+   }
 
-	fpga_guid guid;
-	fpga_result res = FPGA_OK;
-	uint32_t num_matches;
+   res = fpgaGetProperties(NULL, &filter);
+   if(res != FPGA_OK) {
+      throw std::runtime_error(std::string("Error creating properties object: ") +
+                               std::string(fpgaErrStr(res)));
+   }
 
-	if (uuid_parse(DCP_OPENCL_DDR_AFU_ID, guid) < 0) {
-		fprintf(stderr, "Error parsing guid '%s'\n",
-			DCP_OPENCL_DDR_AFU_ID);
-		return;
-	}
+   res = fpgaPropertiesSetObjectType(filter, FPGA_ACCELERATOR);
+   if(res != FPGA_OK) {
+      throw std::runtime_error(std::string("Error setting object type: ") + 
+                               std::string(fpgaErrStr(res)));
+   }
 
-	res = fpgaGetProperties(NULL, &filter);
-	if (res != FPGA_OK) {
-		fprintf(stderr, "Error creating properties object\n");
-		return;
-	}
+   res = fpgaPropertiesSetObjectID(filter, obj_id);
+   if(res != FPGA_OK) {
+      throw std::runtime_error(std::string("Error setting object ID: ") + 
+                               std::string(fpgaErrStr(res)));
+   }
 
-	res = fpgaPropertiesSetObjectType(filter, FPGA_ACCELERATOR);
-	if (res != FPGA_OK) {
-		fprintf(stderr, "Error setting object type\n");
-		return;
-	}
+   res = fpgaEnumerate(&filter, 1, &afc_token, 1, &num_matches);
+   if(res != FPGA_OK) {
+      throw std::runtime_error(std::string("Error enumerating AFCs: ") + 
+                               std::string(fpgaErrStr(res)));
+      return;
+   }
 
-	res = fpgaPropertiesSetObjectID(filter, obj_id);
-	if (res != FPGA_OK) {
-		fprintf(stderr, "Error setting object ID: %s\n",
-			fpgaErrStr(res));
-		return;
-	}
+   if(num_matches < 1) {
+      res = fpgaDestroyProperties(&filter);
+      throw std::runtime_error("AFC not found");
+   }
 
-	res = fpgaEnumerate(&filter, 1, &afc_token, 1, &num_matches);
-	if (res != FPGA_OK) {
-		fprintf(stderr, "Error enumerating AFCs: %s\n",
-			fpgaErrStr(res));
-		return;
-	}
+   res = fpgaOpen(afc_token, &afc_handle, 0);
+   if(res != FPGA_OK) {
+      throw std::runtime_error(std::string("Error opening AFC: ") + 
+                               std::string(fpgaErrStr(res)));
+   }
 
-	if (num_matches < 1) {
-		fprintf(stderr, "AFC not found\n");
-		res = fpgaDestroyProperties(&filter);
-		return;
-	}
+   fpga_properties prop = nullptr;
+   res = fpgaGetProperties(afc_token, &prop);
+   if(res != FPGA_OK) {
+      throw std::runtime_error(std::string("Error reading properties: ") +
+                               std::string(fpgaErrStr(res)));
+   }
 
-	res = fpgaOpen(afc_token, &afc_handle, 0);
-	if (res != FPGA_OK) {
-		fprintf(stderr, "Error opening AFC: %s\n", fpgaErrStr(res));
-		return;
-	}
+   if(prop) {
+      res = fpgaPropertiesGetBus(prop, &bus);
+      if(res != FPGA_OK) {
+         fprintf(stderr, "Error reading bus: '%s'\n", fpgaErrStr(res));
+      }
+      res = fpgaPropertiesGetDevice(prop, &device);
+      if(res != FPGA_OK) {
+         fprintf(stderr, "Error reading device: '%s'\n", fpgaErrStr(res));
+      }
+      res = fpgaPropertiesGetFunction(prop, &function);
+      if(res != FPGA_OK) {
+         fprintf(stderr, "Error reading function: '%s'\n", fpgaErrStr(res));
+      }
+      fpgaDestroyProperties(&prop);
+   }
 
-	fpga_properties prop = nullptr;
-	res = fpgaGetProperties(afc_token, &prop);
-	if (res != FPGA_OK) {
-		fprintf(stderr, "Error reading properties: %s\n",
-			fpgaErrStr(res));
-	}
-
-	if (prop) {
-		res = fpgaPropertiesGetBus(prop, &bus);
-		if (res != FPGA_OK) {
-			fprintf(stderr, "Error reading bus: '%s'\n",
-				fpgaErrStr(res));
-		}
-		res = fpgaPropertiesGetDevice(prop, &device);
-		if (res != FPGA_OK) {
-			fprintf(stderr, "Error reading device: '%s'\n",
-				fpgaErrStr(res));
-		}
-		fpgaPropertiesGetFunction(prop, &function);
-		if (res != FPGA_OK) {
-			fprintf(stderr, "Error reading function: '%s'\n",
-				fpgaErrStr(res));
-		}
-		fpgaDestroyProperties(&prop);
-	}
-	// HACK: for now read temperature directly from sysfs.  Initialization
-	// logic encapsulted here so it can easily removed laster
-	initialize_fme_sysfs();
+   // HACK: for now read temperature directly from sysfs.  Initialization
+   // logic encapsulted here so it can easily removed laster
+   initialize_fme_sysfs();
 
 	// HACK: for now read numa node and local_cpus directly from sysfs.
 	// Initialization logic encapsulted here so it can easily removed laster
 	initialize_local_cpus_sysfs();
 
-	mmd_dev_name = get_board_name(BSP_NAME, obj_id);
-	afu_initialized = true;
+   mmd_dev_name = get_board_name(BSP_NAME, obj_id);
+   afu_initialized = true;
 }
 
 void CcipDevice::initialize_fme_sysfs()
@@ -301,16 +295,16 @@ bool CcipDevice::initialize_bsp()
 	}
 
 	fpga_result res = fpgaMapMMIO(afc_handle, 0, NULL);
-	if (res != FPGA_OK) {
-		fprintf(stderr, "Error mapping MMIO space: %d\n", res);
+	if(res != FPGA_OK) {
+		fprintf(stderr, "Error mapping MMIO space: %s\n", fpgaErrStr(res));
 		return false;
 	}
 	mmio_is_mapped = true;
 
 	/* Reset AFC */
 	res = fpgaReset(afc_handle);
-	if (res != FPGA_OK) {
-		fprintf(stderr, "Error resetting AFC: %d\n", res);
+	if(res != FPGA_OK) {
+		fprintf(stderr, "Error resetting AFC: %s\n", fpgaErrStr(res));
 		return false;
 	}
 	AFU_RESET_DELAY();
@@ -511,20 +505,17 @@ void CcipDevice::event_update_fn(aocl_mmd_op_t op, int status)
 int CcipDevice::read_block(aocl_mmd_op_t op, int mmd_interface, void *host_addr,
 			   size_t offset, size_t size)
 {
-	int status = -1;
+	fpga_result res;
 
 	// The mmd_interface is defined as the base address of the MMIO write.  Access
 	// to memory requires special functionality.  Otherwise do direct MMIO read of
 	// base address + offset
-	if (mmd_interface == AOCL_MMD_MEMORY) {
-		status =
-		    dma_h->read_memory(op,
-				       static_cast < uint64_t * >(host_addr),
-				       offset, size);
+	if(mmd_interface == AOCL_MMD_MEMORY) {
+		res = dma_h->read_memory(op, static_cast<uint64_t *>(host_addr), offset, size);
 	} else {
-		status = read_mmio(host_addr, mmd_interface + offset, size);
-
-		if (op) {
+		res = read_mmio(host_addr, mmd_interface + offset, size);
+		
+		if(op) {
 			//TODO: check what status value should really be instead of just using 0
 			//Also handle case when op is NULL
 			this->event_update_fn(op, 0);
@@ -532,8 +523,8 @@ int CcipDevice::read_block(aocl_mmd_op_t op, int mmd_interface, void *host_addr,
 	}
 
 	//TODO: check what status values aocl wants and also parse the result
-	if (status != FPGA_OK) {
-		DEBUG_PRINT("read_block error code: %d\n", status);
+	if(res != FPGA_OK) {
+		fprintf(stderr,"fpgaReadMMIO error: %s\n", fpgaErrStr(res));
 		return -1;
 	} else {
 		return 0;
@@ -543,20 +534,16 @@ int CcipDevice::read_block(aocl_mmd_op_t op, int mmd_interface, void *host_addr,
 int CcipDevice::write_block(aocl_mmd_op_t op, int mmd_interface,
 			    const void *host_addr, size_t offset, size_t size)
 {
-	int status = -1;
+	fpga_result res;
 
 	// The mmd_interface is defined as the base address of the MMIO write.  Access
 	// to memory requires special functionality.  Otherwise do direct MMIO write
-	if (mmd_interface == AOCL_MMD_MEMORY) {
-		status =
-		    dma_h->write_memory(op,
-					static_cast <
-					const uint64_t * >(host_addr), offset,
-					size);
+	if(mmd_interface == AOCL_MMD_MEMORY) {
+		res = dma_h->write_memory(op, static_cast<const uint64_t *>(host_addr), offset, size);
 	} else {
-		status = write_mmio(host_addr, mmd_interface + offset, size);
-
-		if (op) {
+		res = write_mmio(host_addr, mmd_interface + offset, size);
+		
+		if(op) {
 			//TODO: check what 'status' value should really be.  Right now just
 			//using 0 as was done in previous CCIP MMD.  Also handle case if op is NULL
 			this->event_update_fn(op, 0);
@@ -564,8 +551,8 @@ int CcipDevice::write_block(aocl_mmd_op_t op, int mmd_interface,
 	}
 
 	//TODO: check what status values aocl wants and also parse the result
-	if (status != FPGA_OK) {
-		DEBUG_PRINT("write_block error code: %d\n", status);
+	if(res != FPGA_OK) {
+		fprintf(stderr, "fpgaWriteMMIO error: %s\n", fpgaErrStr(res));
 		return -1;
 	} else {
 		return 0;
@@ -622,7 +609,7 @@ int CcipDevice::copy_block(aocl_mmd_op_t op,
 	return status;
 }
 
-int CcipDevice::read_mmio(void *host_addr, size_t mmio_addr, size_t size)
+fpga_result CcipDevice::read_mmio(void *host_addr, size_t mmio_addr, size_t size)
 {
 	fpga_result res = FPGA_OK;
 
@@ -664,7 +651,7 @@ int CcipDevice::read_mmio(void *host_addr, size_t mmio_addr, size_t size)
 	return res;
 }
 
-int CcipDevice::write_mmio(const void *host_addr, size_t mmio_addr, size_t size)
+fpga_result CcipDevice::write_mmio(const void *host_addr, size_t mmio_addr, size_t size)
 {
 	fpga_result res = FPGA_OK;
 

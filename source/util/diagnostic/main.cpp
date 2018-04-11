@@ -193,19 +193,6 @@ int main (int argc, char *argv[])
        device_name=argv[i];
    }
 
-   if(!ccip_mmd_dma_setup_check())
-   {
-       printf("\nBASIC DCP DRIVER CHECK FAILED\n");
-       printf("\nDIAGNOSTIC_FAILED\n");
-       return DIAGNOSE_FAILED;
-   }
-
-   if(!ccip_mmd_check_fme_driver_for_pr())
-   {
-       printf("\nWARNING: DCP PR device files are not available.\n");
-       printf("\nWARNING: 'aocl program' is not available.\n");
-   }
-
    // we scan all the device installed on the host machine and print
    // preliminary information about all or just the one specified
    if ( (!probe && device_name == NULL) || (probe && device_name != NULL) ) {

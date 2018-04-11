@@ -51,11 +51,12 @@ namespace intel_opae_mmd {
 
 		bool initialized() {
 			return m_initialized;
-		} int read_memory(aocl_mmd_op_t op, uint64_t * host_addr,
-				  size_t dev_addr, size_t size);
-		int write_memory(aocl_mmd_op_t op, const uint64_t * host_addr,
+		};
+                fpga_result read_memory(aocl_mmd_op_t op, uint64_t * host_addr,
+				size_t dev_addr, size_t size);
+		fpga_result write_memory(aocl_mmd_op_t op, const uint64_t * host_addr,
 				 size_t dev_addr, size_t size);
-		int do_dma(dma_work_item & item);
+		fpga_result do_dma(dma_work_item & item);
 
 		void set_status_handler(aocl_mmd_status_handler_fn fn,
 					void *user_data);
@@ -65,26 +66,27 @@ namespace intel_opae_mmd {
 			       sizeof(cpu_set_t));
 			memcpy(&numa.process_cpuset, &params.process_cpuset,
 			       sizeof(cpu_set_t));
-		}
-		//used after reconfigation void reinit_dma();
+		};
+		//used after reconfigation
+                void reinit_dma();
 
 		void bind_to_node(void);
 		void unbind_from_node(void);
 
  private:
 		// Helper functions
-		int enqueue_dma(dma_work_item & item);
-		int read_memory(uint64_t * host_addr, size_t dev_addr,
+		fpga_result enqueue_dma(dma_work_item & item);
+		fpga_result read_memory(uint64_t * host_addr, size_t dev_addr,
 				size_t size);
-		int write_memory(const uint64_t * host_addr, size_t dev_addr,
+		fpga_result write_memory(const uint64_t * host_addr, size_t dev_addr,
 				 size_t size);
-		int read_memory_mmio(uint64_t * host_addr, size_t dev_addr,
+		fpga_result read_memory_mmio(uint64_t * host_addr, size_t dev_addr,
 				     size_t size);
-		int write_memory_mmio(const uint64_t * host_addr,
+		fpga_result write_memory_mmio(const uint64_t * host_addr,
 				      size_t dev_addr, size_t size);
-		int write_memory_mmio_unaligned(const uint64_t * host_addr,
+		fpga_result write_memory_mmio_unaligned(const uint64_t * host_addr,
 						size_t dev_addr, size_t size);
-		int read_memory_mmio_unaligned(void *host_addr, size_t dev_addr,
+		fpga_result read_memory_mmio_unaligned(void *host_addr, size_t dev_addr,
 					       size_t size);
 
 		void event_update_fn(aocl_mmd_op_t op, int status);

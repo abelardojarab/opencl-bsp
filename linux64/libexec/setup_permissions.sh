@@ -47,3 +47,5 @@ echo "sudo chmod 666 /sys/class/fpga/intel-fpga-dev.*/intel-fpga-port.*/errors/c
 sudo chmod 666 /sys/class/fpga/intel-fpga-dev.*/intel-fpga-port.*/errors/clear
 echo "sudo chmod 666 /dev/intel-fpga-fme.*"
 sudo chmod 666 /dev/intel-fpga-fme.*
+
+set +e
