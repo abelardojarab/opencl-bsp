@@ -208,7 +208,7 @@ fpga_result mmd_dma::enqueue_dma(dma_work_item & item)
 	}
 }
 
-int mmd_dma::read_memory(aocl_mmd_op_t op, uint64_t * host_addr,
+fpga_result mmd_dma::read_memory(aocl_mmd_op_t op, uint64_t * host_addr,
 			 size_t dev_addr, size_t size)
 {
 	dma_work_item item;
