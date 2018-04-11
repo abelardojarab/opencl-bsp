@@ -74,8 +74,6 @@ mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle, numa_params numas)
 
 	set_numa_params(numas);
 
-	use_libc_memcpy = (secure_getenv(USE_MEMCPY_ENV) != NULL);	// If in env, use libc memcpy
-
 	use_DMA_work_thread = 0;
 	#ifndef DISABLE_DMA
 
@@ -286,7 +284,7 @@ int mmd_dma::read_memory(uint64_t *host_addr, size_t dev_addr, size_t size)
 		return res;
 
 	DCP_DEBUG_DMA("DCP DEBUG: host_addr=%p, dev_addr=%lx, size=%ld\n", host_addr, dev_addr, size);
-	DCP_DEBUG_DMA("DCP DEBUG: remainder=%ld, dma_size=%ld, size=%d\n", remainder, dma_size, size);
+	DCP_DEBUG_DMA("DCP DEBUG: remainder=%ld, dma_size=%ld, size=%ld\n", remainder, dma_size, size);
 
 	DCP_DEBUG_DMA("DCP DEBUG: mmd_dma::read_memory done!\n");
 	return FPGA_OK;

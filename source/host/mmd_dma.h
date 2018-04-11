@@ -98,7 +98,6 @@ private:
 
 	numa_params numa;
 
-	int use_libc_memcpy;
 	int use_DMA_work_thread;
 	int enable_NUMA_affinity;
 
