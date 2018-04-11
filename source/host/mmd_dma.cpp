@@ -34,6 +34,7 @@ using namespace intel_opae_mmd;
 //Otherwise, a separate thread will be spawned to handle DMA requests.
 #define DISABLE_DMA_WORK_THREAD_ENV	"PAC_DISABLE_DMA_WORK_THREAD"
 #define DISABLE_NUMA_AFFINITY_ENV	"PAC_DISABLE_NUMA_AFFINITY"
+#define USE_MEMCPY_ENV	"PAC_LIBC_MEMCPY"
 
 //disable dma and only use mmio.  this is very slow.
 //#define DISABLE_DMA
@@ -73,6 +74,8 @@ mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle, numa_params numas)
 		numas.afu_numa_node = -1;	// Disables sched_setaffinity calls
 
 	set_numa_params(numas);
+
+	use_libc_memcpy = (secure_getenv(USE_MEMCPY_ENV) != NULL);	// If in env, use libc memcpy
 
 	use_DMA_work_thread = 0;
 	#ifndef DISABLE_DMA

@@ -20,7 +20,7 @@
 
 // Consistency check
 #if defined(MEMCPY_S_FAST_USE_MEMCPY_S) && defined(MEMCPY_S_FAST_USE_LOCAL_MEMCPY)
-#error "Cannot set both MEMCPY_S_FAST_USE_MEMCPY_S and MEMCPY_S_FAST_USE_LOCAL_MEMCPY"
+#undef MEMCPY_S_FAST_USE_MEMCPY_S
 #endif
 
 #ifdef MEMCPY_S_FAST_USE_LOCAL_MEMCPY
