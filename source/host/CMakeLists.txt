@@ -13,6 +13,7 @@ set(MMD_SRC
    fpga_dma.c
    kernel_interrupt.cpp
    mmd_dma.cpp
+   memcpy_s_fast.c
    test_perm.cpp
    zlib_inflate.c
    x86-sse2.S

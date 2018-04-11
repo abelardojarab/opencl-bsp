@@ -18,29 +18,27 @@
 #ifndef MEMCPY_S_FAST_H
 #define MEMCPY_S_FAST_H_
 
-// Consistency check
-#if defined(MEMCPY_S_FAST_USE_MEMCPY_S) && defined(MEMCPY_S_FAST_USE_LOCAL_MEMCPY)
-#undef MEMCPY_S_FAST_USE_MEMCPY_S
-#endif
-
-#ifdef MEMCPY_S_FAST_USE_LOCAL_MEMCPY
 #ifdef __cplusplus
 extern "C" {
 #endif	// __cplusplus
-	extern void *local_memcpy(void *dst, const void *src, size_t size);
-#ifdef __cplusplus
-	}
-#endif	// __cplusplus
-#endif // MEMCPY_S_FAST_USE_LOCAL_MEMCPY
 
-#ifdef MEMCPY_S_FAST_USE_MEMCPY_S
-#define memcpy_s_fast(a,b,c,d) memcpy_s(a,b,c,d)
-#else	// MEMCPY_S_FAST_USE_MEMCPY_S
-#ifdef MEMCPY_S_FAST_USE_LOCAL_MEMCPY
-#define memcpy_s_fast(a,b,c,d) local_memcpy(a,c,d)
-#else	// MEMCPY_S_FAST_USE_LOCAL_MEMCPY
-#define memcpy_s_fast(a,b,c,d) memcpy(a,c,d)
-#endif	// MEMCPY_S_FAST_USE_MEMCPY
-#endif	// MEMCPY_S_FAST_USE_MEMCPY_S
+// Constants needed in memcpy routines
+	// Arbitrary crossover point for using SSE2 over rep movsb
+#define MIN_SSE2_SIZE 4096
+	// Environment variables to experiment with different memcpy routines
+#define USE_MEMCPY_ENV		"PAC_LIBC_MEMCPY"
+#define USE_MEMCPY_S_ENV	"PAC_MEMCPY_S"
+#define USE_MEMCPY_SSE2_ENV	"PAC_SSE2_MEMCPY"
+
+
+typedef void *(*memcpy_fn_t)(void *dst, size_t max, const void *src, size_t len);
+
+extern memcpy_fn_t p_memcpy;
+
+#define memcpy_s_fast(a,b,c,d) p_memcpy(a,b,c,d)
+
+#ifdef __cplusplus
+}
+#endif	// __cplusplus
 
 #endif	// MEMCPY_S_FAST_H

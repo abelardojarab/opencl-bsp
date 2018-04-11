@@ -32,10 +32,6 @@
 #ifndef __FPGA_DMA_INT_H__
 #define __FPGA_DMA_INT_H__
 
-#ifdef _WIN32
-#define __attribute__(...)
-#endif
-
 #include <opae/fpga.h>
 #include "x86-sse2.h"
 
@@ -104,7 +100,6 @@
 #define FPGA_DMA_ALIGN_BYTES 64
 #define IS_DMA_ALIGNED(addr) (addr%FPGA_DMA_ALIGN_BYTES==0)
 
-#define MIN_SSE2_SIZE 4096
 #define CACHE_LINE_SIZE 64
 #define ALIGN_TO_CL(x) ((uint64_t)(x) & ~(CACHE_LINE_SIZE - 1))
 #define IS_CL_ALIGNED(x) (((uint64_t)(x) & (CACHE_LINE_SIZE - 1)) == 0)

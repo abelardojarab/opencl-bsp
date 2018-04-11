@@ -34,7 +34,6 @@ using namespace intel_opae_mmd;
 //Otherwise, a separate thread will be spawned to handle DMA requests.
 #define DISABLE_DMA_WORK_THREAD_ENV	"PAC_DISABLE_DMA_WORK_THREAD"
 #define DISABLE_NUMA_AFFINITY_ENV	"PAC_DISABLE_NUMA_AFFINITY"
-#define USE_MEMCPY_ENV	"PAC_LIBC_MEMCPY"
 
 //disable dma and only use mmio.  this is very slow.
 //#define DISABLE_DMA
