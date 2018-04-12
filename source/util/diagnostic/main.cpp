@@ -92,6 +92,22 @@ bool check_results(unsigned int * buf, unsigned int * output, unsigned n)
   return result;
 }
 
+unsigned get_device_number( const char * device_name)
+{
+   static char boards_name[MMD_STRING_RETURN_SIZE];
+   aocl_mmd_get_offline_info(AOCL_MMD_BOARD_NAMES, sizeof(boards_name), boards_name, NULL);
+   char *dev;
+   int num = 0;
+   for(dev = strtok(boards_name, ";"); dev != NULL; dev = strtok(NULL, ";")) {
+	if (strcmp(dev, device_name) == 0) {
+	   return num;
+	} else{
+	   num++;
+	}
+   }
+   return 0;
+}
+
 #define MMD_STRING_RETURN_SIZE 1024
 
 int scan_devices ( const char * device_name )
@@ -185,11 +201,11 @@ int main (int argc, char *argv[])
 {
    char * device_name = NULL;
    bool probe = false;
-   
+
    for ( int i = 1 ; i < argc; i ++ ) {
-     if (strcmp(argv[i],"-probe") == 0) 
+     if (strcmp(argv[i],"-probe") == 0)
        probe = true;
-     else 
+     else
        device_name=argv[i];
    }
 
@@ -275,7 +291,8 @@ int main (int argc, char *argv[])
        buf[j]=unsigned(rand()*rand());
 
    //FIXME: should not assume one CL device
-   unsigned dev_num = 0;  // Assume only one CL device
+   unsigned dev_num;  // Assume only one CL device
+   dev_num = get_device_number( device_name );
 
    ocl_device_init(dev_num,maxbytes);
 
