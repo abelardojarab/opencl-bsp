@@ -250,7 +250,14 @@ def setup_bsp(platform, bsp_search_dirs, sim_mode=False, verbose=False,
             exit(1)
 
         # setup and run afu_platform_config
-        os.environ["BBS_LIB_PATH"] = os.path.join(platform_dir, 'lib')
+        platform_lib_dir = os.path.join(platform_dir, 'lib')
+        platform_db_dir = os.path.join(platform_lib_dir,
+                                       'platform', 'platform_db')
+        os.environ["BBS_LIB_PATH"] = platform_lib_dir
+        if("OPAE_PLATFORM_DB_PATH" in os.environ):
+            os.environ["OPAE_PLATFORM_DB_PATH"] += ":" + platform_db_dir
+        else:
+            os.environ["OPAE_PLATFORM_DB_PATH"] = platform_db_dir
         bsp_platform_if_dir = os.path.join(bsp_qsf_dir, 'platform_if')
         delete_and_mkdir(bsp_platform_if_dir)
         opae_platform_if_path = os.path.join(opae_inst_path, 'share', 'opae',
@@ -259,10 +266,18 @@ def setup_bsp(platform, bsp_search_dirs, sim_mode=False, verbose=False,
                   bsp_platform_if_dir)
         afu_platform_config_bin = os.path.join(opae_inst_path, 'bin',
                                                'afu_platform_config')
+
+        # Read the FME class name from the standard location
+        plat_class_file = os.path.join(platform_lib_dir,
+                                       'fme-platform-class.txt')
+        with open(plat_class_file) as f:
+            plat_class_name = f.read().strip()
+
         cfg_cmd = (afu_platform_config_bin + " "
                    "--qsf  --ifc ccip_std_afu_avalon_mm_legacy_wires "
-                   "--tgt ./build/platform discrete_pcie3_hssi40 "
-                   "--platform_if platform_if")
+                   "--tgt ./build/platform "
+                   "--platform_if platform_if " +
+                   plat_class_name)
         run_cmd(cfg_cmd, bsp_dir)
 
         # setup sim stuff if needed
