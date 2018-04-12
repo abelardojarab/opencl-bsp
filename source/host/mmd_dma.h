@@ -34,91 +34,79 @@
 
 namespace intel_opae_mmd {
 
-	class eventfd_wrapper;
+class eventfd_wrapper;
 
-	class numa_params final {
- public:
-		int afu_numa_node;
-		cpu_set_t afu_cpuset;
-		cpu_set_t process_cpuset;
-	};			// numa_params
+class numa_params final
+{
+public:
+	int afu_numa_node;
+	cpu_set_t afu_cpuset;
+	cpu_set_t process_cpuset;
+};  // numa_params
 
-	class mmd_dma final {
- public:
-		mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle,
-			numa_params numa);
-		~mmd_dma();
+class mmd_dma final
+{
+public:
+	mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle, numa_params numa);
+	~mmd_dma();
 
-		bool initialized() {
-			return m_initialized;
-		};
-		fpga_result read_memory(aocl_mmd_op_t op, uint64_t * host_addr,
-					size_t dev_addr, size_t size);
-		fpga_result write_memory(aocl_mmd_op_t op,
-					 const uint64_t * host_addr,
-					 size_t dev_addr, size_t size);
-		fpga_result do_dma(dma_work_item & item);
+	bool initialized() { return m_initialized; }
 
-		void set_status_handler(aocl_mmd_status_handler_fn fn,
-					void *user_data);
-		void set_numa_params(numa_params & params) {
-			numa.afu_numa_node = params.afu_numa_node;
-			memcpy(&numa.afu_cpuset, &params.afu_cpuset,
-			       sizeof(cpu_set_t));
-			memcpy(&numa.process_cpuset, &params.process_cpuset,
-			       sizeof(cpu_set_t));
-		};
-		//used after reconfigation
-		void reinit_dma();
+	fpga_result read_memory(aocl_mmd_op_t op, uint64_t *host_addr, size_t dev_addr, size_t size);
+	fpga_result write_memory(aocl_mmd_op_t op, const uint64_t *host_addr, size_t dev_addr, size_t size);
+	fpga_result do_dma(dma_work_item &item);
 
-		void bind_to_node(void);
-		void unbind_from_node(void);
+	void set_status_handler(aocl_mmd_status_handler_fn fn, void *user_data);
+	void set_numa_params(numa_params &params)
+	{
+		numa.afu_numa_node = params.afu_numa_node;
+		memcpy(&numa.afu_cpuset, &params.afu_cpuset, sizeof(cpu_set_t));
+		memcpy(&numa.process_cpuset, &params.process_cpuset, sizeof(cpu_set_t));
+	}
+	
+	//used after reconfigation
+	void reinit_dma();
 
- private:
-		// Helper functions
-		fpga_result enqueue_dma(dma_work_item & item);
-		fpga_result read_memory(uint64_t * host_addr, size_t dev_addr,
-					size_t size);
-		fpga_result write_memory(const uint64_t * host_addr,
-					 size_t dev_addr, size_t size);
-		fpga_result read_memory_mmio(uint64_t * host_addr,
-					     size_t dev_addr, size_t size);
-		fpga_result write_memory_mmio(const uint64_t * host_addr,
-					      size_t dev_addr, size_t size);
-		fpga_result write_memory_mmio_unaligned(const uint64_t *
-							host_addr,
-							size_t dev_addr,
-							size_t size);
-		fpga_result read_memory_mmio_unaligned(void *host_addr,
-						       size_t dev_addr,
-						       size_t size);
+	void bind_to_node(void);
+	void unbind_from_node(void);
 
-		void event_update_fn(aocl_mmd_op_t op, int status);
+private:
+	// Helper functions
+	fpga_result enqueue_dma(dma_work_item &item);
+	fpga_result read_memory(uint64_t *host_addr, size_t dev_addr, size_t size);
+	fpga_result write_memory(const uint64_t *host_addr, size_t dev_addr, size_t size);
+	fpga_result read_memory_mmio(uint64_t *host_addr, size_t dev_addr, size_t size);
+	fpga_result write_memory_mmio(const uint64_t *host_addr, size_t dev_addr, size_t size);
+	fpga_result write_memory_mmio_unaligned(const uint64_t *host_addr, size_t dev_addr, size_t size);
+	fpga_result read_memory_mmio_unaligned(void *host_addr, size_t dev_addr, size_t size);
 
-		bool m_initialized;
+	void event_update_fn(aocl_mmd_op_t op, int status);
 
-		dma_work_thread *m_dma_work_thread;
-		std::mutex m_dma_op_mutex;
+	bool m_initialized;
 
-		aocl_mmd_status_handler_fn m_status_handler_fn;
-		void *m_status_handler_user_data;
+	dma_work_thread *m_dma_work_thread;
+	std::mutex m_dma_op_mutex;
 
-		fpga_handle m_fpga_handle;
-		int m_mmd_handle;
+	aocl_mmd_status_handler_fn m_status_handler_fn;
+	void *m_status_handler_user_data;
 
-		fpga_dma_handle dma_h;
-		uint64_t msgdma_bbb_base_addr;
+	fpga_handle m_fpga_handle;
+	int m_mmd_handle;
 
-		numa_params numa;
+	fpga_dma_handle   dma_h;
+	uint64_t          msgdma_bbb_base_addr;
 
-		int use_DMA_work_thread;
-		int enable_NUMA_affinity;
+	numa_params numa;
 
-		//not used and not implemented
-		mmd_dma(mmd_dma & other);
-		mmd_dma & operator=(const mmd_dma & other);
-	};			// class mmd_dma
+	int use_DMA_work_thread;
+	int enable_NUMA_affinity;
 
-};				// namespace intel_opae_mmd
+	//not used and not implemented
+	mmd_dma (mmd_dma& other);
+	mmd_dma& operator= (const mmd_dma& other);
+}; // class mmd_dma
 
-#endif				// _MMD_DMA_H
+}; // namespace intel_opae_mmd
+
+#endif // _MMD_DMA_H
+

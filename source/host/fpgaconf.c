@@ -74,12 +74,12 @@ void print_msg(unsigned int verbosity, const char *s)
  *
  * @returns the total number of FPGAs matching the interface ID
  */
-int find_fpga(struct find_fpga_target target, fpga_token * fpga)
+int find_fpga(struct find_fpga_target target, fpga_token *fpga)
 {
-	fpga_properties filter = NULL;
-	uint32_t num_matches;
-	fpga_result res;
-	int retval = -1;
+	fpga_properties    filter = NULL;
+	uint32_t           num_matches;
+	fpga_result        res;
+	int                retval = -1;
 
 	/* Get number of FPGAs in system */
 	res = fpgaGetProperties(NULL, &filter);
@@ -112,20 +112,20 @@ int find_fpga(struct find_fpga_target target, fpga_token * fpga)
 	ON_ERR_GOTO(res, out_destroy, "enumerating FPGAs");
 
 	if (num_matches > 0) {
-		retval = (int)num_matches;	/* FPGA found */
+		retval = (int) num_matches; /* FPGA found */
 	} else {
-		retval = 0;	/* no FPGA found */
+		retval = 0; /* no FPGA found */
 	}
 
- out_destroy:
-	res = fpgaDestroyProperties(&filter);	/* not needed anymore */
+out_destroy:
+	res = fpgaDestroyProperties(&filter); /* not needed anymore */
 	ON_ERR_GOTO(res, out_err, "destroying properties object");
- out_err:
+out_err:
 	return retval;
 }
 
 int program_bitstream(fpga_token token,
-		      uint32_t slot_num, struct bitstream_info *info)
+		uint32_t slot_num, struct bitstream_info *info)
 {
 	fpga_handle handle;
 	fpga_result res;
@@ -135,9 +135,7 @@ int program_bitstream(fpga_token token,
 	ON_ERR_GOTO(res, out_err, "opening FPGA");
 
 	print_msg(1, "Writing bitstream");
-	res =
-	    fpgaReconfigureSlot(handle, slot_num, info->data, info->data_len,
-				0);
+	res = fpgaReconfigureSlot(handle, slot_num, info->data, info->data_len, 0);
 	ON_ERR_GOTO(res, out_close, "writing bitstream to FPGA");
 
 	print_msg(2, "Closing FPGA");
@@ -145,19 +143,19 @@ int program_bitstream(fpga_token token,
 	ON_ERR_GOTO(res, out_err, "closing FPGA");
 	return 1;
 
- out_close:
+out_close:
 	res = fpgaClose(handle);
 	ON_ERR_GOTO(res, out_err, "closing FPGA");
- out_err:
+out_err:
 	return -1;
 }
 
-int program_gbs_bitstream(fpga_token fpga, uint8_t * gbs_data, size_t gbs_len)
+int program_gbs_bitstream(fpga_token fpga, uint8_t *gbs_data, size_t gbs_len)
 {
 	int res;
 	int retval = 0;
 	struct bitstream_info info;
-	uint32_t slot_num = 0;	/* currently, we don't support multiple slots */
+	uint32_t slot_num = 0; /* currently, we don't support multiple slots */
 
 	info.data = gbs_data;
 	info.data_len = gbs_len;
@@ -172,6 +170,6 @@ int program_gbs_bitstream(fpga_token fpga, uint8_t * gbs_data, size_t gbs_len)
 	print_msg(1, "Done");
 
 	/* clean up */
- out_exit:
+out_exit:
 	return retval;
 }

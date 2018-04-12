@@ -47,17 +47,19 @@ extern "C" {
 * or memory-mapped. Streaming interfaces are not currently
 * supported.
 */
-	typedef enum {
-		HOST_TO_FPGA_MM = 0,	//Memory mapped FPGA interface
-		FPGA_TO_HOST_MM,	//Memory mapped FPGA interface
-		FPGA_TO_FPGA_MM,	//Memory mapped FPGA interface
-		FPGA_MAX_TRANSFER_TYPE,
-	} fpga_dma_transfer_t;
+typedef enum {
+	HOST_TO_FPGA_MM = 0, //Memory mapped FPGA interface
+	FPGA_TO_HOST_MM, //Memory mapped FPGA interface
+	FPGA_TO_FPGA_MM, //Memory mapped FPGA interface
+	FPGA_MAX_TRANSFER_TYPE,
+}fpga_dma_transfer_t;
 
-	typedef struct _dma_handle_t *fpga_dma_handle;
+typedef struct _dma_handle_t *fpga_dma_handle;
+
 
 // Callback for asynchronous DMA transfers
-	typedef void (*fpga_dma_transfer_cb) (void *context);
+typedef void (*fpga_dma_transfer_cb)(void *context);
+
 
 /**
 * fpgaDmaOpen
@@ -69,7 +71,7 @@ extern "C" {
 * @param[out] dma  DMA object handle
 * @returns         FPGA_OK on success, return code otherwise
 */
-	fpga_result fpgaDmaOpen(fpga_handle fpga, fpga_dma_handle * dma);
+fpga_result fpgaDmaOpen(fpga_handle fpga, fpga_dma_handle *dma);
 
 /**
 * fpgaDmaTransferSync
@@ -91,9 +93,8 @@ extern "C" {
 * @return fpga_result FPGA_OK on success, return code otherwise
 *
 */
-	fpga_result fpgaDmaTransferSync(fpga_dma_handle dma, uint64_t dst,
-					uint64_t src, size_t count,
-					fpga_dma_transfer_t type);
+fpga_result fpgaDmaTransferSync(fpga_dma_handle dma, uint64_t dst, uint64_t src, size_t count,
+										  fpga_dma_transfer_t type);
 
 /**
 * fpgaDmaTransferAsync (Not supported)
@@ -117,11 +118,8 @@ extern "C" {
 * @return fpga_result FPGA_OK on success, return code otherwise
 *
 */
-	fpga_result fpgaDmaTransferAsync(fpga_dma_handle dma, uint64_t dst,
-					 uint64_t src, size_t count,
-					 fpga_dma_transfer_t type,
-					 fpga_dma_transfer_cb cb,
-					 void *context);
+fpga_result fpgaDmaTransferAsync(fpga_dma_handle dma, uint64_t dst, uint64_t src, size_t count,
+										fpga_dma_transfer_t type, fpga_dma_transfer_cb cb, void *context);
 
 /**
 * fpgaDmaClose
@@ -131,9 +129,10 @@ extern "C" {
 * @param[in] dma   DMA object handle
 * @returns         FPGA_OK on success, return code otherwise
 */
-	fpga_result fpgaDmaClose(fpga_dma_handle dma);
+fpga_result fpgaDmaClose(fpga_dma_handle dma);
 
 #ifdef __cplusplus
 }
 #endif
-#endif				// __FPGA_DMA_H__
+
+#endif // __FPGA_DMA_H__

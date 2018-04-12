@@ -41,12 +41,12 @@ extern "C" {
  *
  * You can combine other modes with ACL_PKG_SHOW_* to control messages.
  */
-#define ACL_PKG_READ          (1<<0)	/* Only reading the package */
-#define ACL_PKG_READ_WRITE    (1<<1)	/* Expect to read and write the binary. File must already exist. */
-#define ACL_PKG_CREATE        (1<<2)	/* Also creating.  Can only be used with ACL_PKG_READ_WRITE */
+#define ACL_PKG_READ          (1<<0)  /* Only reading the package */
+#define ACL_PKG_READ_WRITE    (1<<1)  /* Expect to read and write the binary. File must already exist. */
+#define ACL_PKG_CREATE        (1<<2)  /* Also creating.  Can only be used with ACL_PKG_READ_WRITE */
 
-#define ACL_PKG_SHOW_ERROR    (1<<8)	/*print errors to stderr */
-#define ACL_PKG_SHOW_INFO     (1<<9)	/*print info messages to stdout */
+#define ACL_PKG_SHOW_ERROR    (1<<8)  /*print errors to stderr*/
+#define ACL_PKG_SHOW_INFO     (1<<9) /*print info messages to stdout*/
 
 #define ACL_PKG_SECTION_ACL_VERSION    ".acl.version"
 #define ACL_PKG_SECTION_ACL_BUILD      ".acl.build"
@@ -82,66 +82,61 @@ extern "C" {
 /* Minimum alignment in memory. */
 #define ACL_PKG_MIN_SECTION_ALIGNMENT  128
 
+
 /* printf format for printing size_t on both platforms */
 #if defined(_MSC_VER)
-#define SIZE_T    "%Iu"
-#define SSIZE_T   "%Id"
-#define PTRDIFF_T "%Id"
+  #define SIZE_T    "%Iu"
+  #define SSIZE_T   "%Id"
+  #define PTRDIFF_T "%Id"
 #elif defined(__GNUC__)
-#define SIZE_T    "%zu"
-#define SSIZE_T   "%zd"
-#define PTRDIFF_T "%zd"
+  #define SIZE_T    "%zu"
+  #define SSIZE_T   "%zd"
+  #define PTRDIFF_T "%zd"
 #endif
 
+
 /* Open and close the pkg file */
-	struct acl_pkg_file *acl_pkg_open_file(const char *fname, int mode);
+struct acl_pkg_file *acl_pkg_open_file (const char *fname, int mode);
 /* You can call close on a NULL pointer: it will do nothing.
  * Closing the package file will also free its memory, so you better lose
  * the pointer reference.
  */
-	void acl_pkg_close_file(struct acl_pkg_file *pkg);
+void acl_pkg_close_file (struct acl_pkg_file *pkg);
 
 /* Set message output mode: show_mode is some combination of the bits
  * in ACL_PKG_SHOW_INFO and ACL_PKG_SHOW_ERROR
  */
-	void acl_pkg_set_show_mode(struct acl_pkg_file *pkg, int show_mode);
+void acl_pkg_set_show_mode( struct acl_pkg_file* pkg, int show_mode );
 
 /* Open memory image of pkg file. Only good for reading! 
  * The show_mode argument is an OR combination of zero or more of
  *    ACL_PKG_SHOW_INFO,
  *    ACL_PKG_SHOW_ERROR.
- */
-	struct acl_pkg_file *acl_pkg_open_file_from_memory(char *pkg_image,
-							   size_t
-							   pkg_image_size,
-							   int show_mode);
+ */ 
+struct acl_pkg_file *acl_pkg_open_file_from_memory (char *pkg_image, size_t pkg_image_size, int show_mode);
+
 
 /* Does the given named section exist?
  * Returns 1 for yes, 0 for no.
  * If the section exists, and size_ret is not-NULL, then the size (in bytes) of the
  * section is stored into *size_ret. The size does NOT include NULL terminator, just like strlen().
  */
-	int acl_pkg_section_exists(const struct acl_pkg_file *pkg,
-				   const char *sect_name, size_t * size_ret);
+int acl_pkg_section_exists (const struct acl_pkg_file *pkg, const char *sect_name, size_t* size_ret);
 
 /* Return list of ALL (useful) section names in the package. 
  * The buffer must be pre-allocated by the caller upto max_len bytes.
  * Each section name is separated by '\n'
  * Returns 1 on success, 0 on failure.
  */
-	int acl_pkg_section_names(const struct acl_pkg_file *pkg, char *buf,
-				  size_t max_len);
+int acl_pkg_section_names (const struct acl_pkg_file *pkg, char *buf, size_t max_len);
+
 
 /* Add a new section with specified content.
  * If a section with such name already exists, nothing is done. 
  * Returns 0 on failure, non-zero on success.
  */
-	int acl_pkg_add_data_section(struct acl_pkg_file *pkg,
-				     const char *sect_name, const void *content,
-				     size_t len);
-	int acl_pkg_add_data_section_from_file(struct acl_pkg_file *pkg,
-					       const char *sect_name,
-					       const char *in_file);
+int acl_pkg_add_data_section           (struct acl_pkg_file *pkg, const char *sect_name, const void* content, size_t len);
+int acl_pkg_add_data_section_from_file (struct acl_pkg_file *pkg, const char *sect_name, const char *in_file);
 
 /* Read content of an existing section.
  * For read_section(), the buffer must be pre-allocated by caller to hold at least len bytes.
@@ -149,11 +144,8 @@ extern "C" {
  * must be one larger than the value returned by acl_pkg_section_exists.
  * Returns 0 on failure, non-zero on success.
  */
-	int acl_pkg_read_section(const struct acl_pkg_file *pkg,
-				 const char *sect_name, char *buf, size_t len);
-	int acl_pkg_read_section_into_file(struct acl_pkg_file *pkg,
-					   const char *sect_name,
-					   const char *out_file);
+int acl_pkg_read_section              (const struct acl_pkg_file *pkg, const char *sect_name, char *buf, size_t len);
+int acl_pkg_read_section_into_file    (struct acl_pkg_file *pkg, const char *sect_name, const char *out_file);
 
 /* Get a transient pointer to a section's data, via buf_ptr.
  * The pointer is transient: It might move if you update the package in any way.
@@ -161,33 +153,27 @@ extern "C" {
  * don't have to allocate space to copy into.
  * Returns 0 on failure, non-zero on success.
  */
-	int acl_pkg_read_section_transient(const struct acl_pkg_file *pkg,
-					   const char *sect_name,
-					   char **buf_ptr);
+int acl_pkg_read_section_transient(const struct acl_pkg_file *pkg, const char *sect_name, char** buf_ptr);
 
 /* Update content of an existing section.
  * Old content is discarded. The section must already exist.
  * Returns 0 on failure, non-zero on success.
  */
-	int acl_pkg_update_section(struct acl_pkg_file *pkg,
-				   const char *sect_name,
-				   const void *new_content, size_t new_len);
-	int acl_pkg_update_section_from_file(struct acl_pkg_file *pkg,
-					     const char *sect_name,
-					     const char *in_file);
+int acl_pkg_update_section            (struct acl_pkg_file *pkg, const char *sect_name, const void *new_content, size_t new_len);
+int acl_pkg_update_section_from_file  (struct acl_pkg_file *pkg, const char *sect_name, const char *in_file);
 
 /* List all pkg sections to stdout.
  * Returns 0 on failure, non-zero on success.
  */
-	int acl_pkg_list_file_sections(struct acl_pkg_file *pkg);
+int acl_pkg_list_file_sections   (struct acl_pkg_file *pkg);
 
 /* Read full content of file into a buffer.
  * The buffer is allocated by this function but must be freed by the caller.
  * File length is returned in the second argument */
-	void *acl_pkg_read_file_into_buffer(const char *in_file,
-					    size_t * file_size_out);
+void *acl_pkg_read_file_into_buffer (const char *in_file, size_t *file_size_out);
 
 #ifdef __cplusplus
 }
 #endif
-#endif				/* PKG_FILE_EDITOR_H */
+
+#endif /* PKG_FILE_EDITOR_H */

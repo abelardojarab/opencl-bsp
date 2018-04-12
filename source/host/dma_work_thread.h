@@ -29,45 +29,47 @@
 namespace intel_opae_mmd {
 
 //forward class definitions
-	class eventfd_wrapper;
-	class mmd_dma;
+class eventfd_wrapper;
+class mmd_dma;
 
-	class dma_work_item {
- public:
-		aocl_mmd_op_t op;
-		uint64_t *rd_host_addr;
-		const uint64_t *wr_host_addr;
-		size_t dev_addr;
-		size_t size;
-	};
+class dma_work_item
+{
+public:
+	aocl_mmd_op_t op;
+	uint64_t *rd_host_addr;
+	const uint64_t *wr_host_addr;
+	size_t dev_addr;
+	size_t size;
+};
 
-	class dma_work_thread final {
- public:
-		dma_work_thread(mmd_dma & mmd_dma_arg);
-		~dma_work_thread();
+class dma_work_thread final
+{
+public:
+	dma_work_thread(mmd_dma &mmd_dma_arg);
+	~dma_work_thread();
 
-		bool initialized() {
-			return m_initialized;
-		} int enqueue_dma(dma_work_item & item);
-		int do_dma(dma_work_item & item);
+	bool initialized() { return m_initialized; }
 
- private:
-		static void work_thread(dma_work_thread & obj);
+	int enqueue_dma(dma_work_item &item);
+	int do_dma(dma_work_item &item);
+	
+private:
+	static void work_thread(dma_work_thread &obj);
 
-		bool m_initialized;
+	bool m_initialized;
+	
+	eventfd_wrapper *m_thread_wake_event;
+	std::thread *m_thread;
+	std::mutex m_work_queue_mutex;
+	std::queue<dma_work_item> m_work_queue;
 
-		eventfd_wrapper *m_thread_wake_event;
-		 std::thread * m_thread;
-		 std::mutex m_work_queue_mutex;
-		 std::queue < dma_work_item > m_work_queue;
+	mmd_dma &m_mmd_dma;
+	
+	//not used and not implemented
+	dma_work_thread (dma_work_thread& other);
+	dma_work_thread& operator= (const dma_work_thread& other);
+}; // class dma_work_thread
 
-		 mmd_dma & m_mmd_dma;
+}; // namespace intel_opae_mmd
 
-		//not used and not implemented
-		 dma_work_thread(dma_work_thread & other);
-		 dma_work_thread & operator=(const dma_work_thread & other);
-	};			// class dma_work_thread
-
-};				// namespace intel_opae_mmd
-
-#endif				// _DMA_WORK_THREAD_H
+#endif // _DMA_WORK_THREAD_H

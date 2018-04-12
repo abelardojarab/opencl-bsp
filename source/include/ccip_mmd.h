@@ -25,7 +25,6 @@
 // loads the aocx using OPAE.  Note that the function is not thread-safe
 // and will not have aoc locking.  It should *not* be used in conjunction
 // with OpenCL API calls.
-int ccip_mmd_device_reprogram(const char *device_name, void *data,
-			      size_t data_size);
+int ccip_mmd_device_reprogram(const char *device_name, void *data, size_t data_size);
 
-#endif				//CCIP_MMD_H
+#endif //CCIP_MMD_H
