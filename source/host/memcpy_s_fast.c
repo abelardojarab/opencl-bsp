@@ -136,19 +136,21 @@ static void *memcpy_setup(void *dst, size_t max, const void *src, size_t n)
 	// Default to SSE2_memcpy
 	p_memcpy = SSE2_memcpy;
 
-	if (secure_getenv(USE_MEMCPY_ENV) != NULL)	// If in env, use libc memcpy
+	char *pmemcpy = secure_getenv(USE_MEMCPY_ENV);
+	if (pmemcpy)
 	{
-		p_memcpy = memcpy_wrap;
-	}
-	
-	if (secure_getenv(USE_MEMCPY_S_ENV) != NULL)
-	{
-		p_memcpy = (memcpy_fn_t)memcpy_s;
-	}
-	
-	if (secure_getenv(USE_MEMCPY_SSE2_ENV) != NULL)
-	{
-		p_memcpy = SSE2_memcpy;
+		if (!strcasecmp(pmemcpy, "libc"))
+		{
+			p_memcpy = memcpy_wrap;
+		}
+		else if (!strcasecmp(pmemcpy, "sse2"))
+		{
+			p_memcpy = SSE2_memcpy;
+		}
+		else if (!strcasecmp(pmemcpy, "memcpy_s"))
+		{
+			p_memcpy = (memcpy_fn_t)memcpy_s;
+		}
 	}
 
 	return p_memcpy(dst, max, src, n);

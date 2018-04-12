@@ -25,10 +25,8 @@ extern "C" {
 // Constants needed in memcpy routines
 	// Arbitrary crossover point for using SSE2 over rep movsb
 #define MIN_SSE2_SIZE 4096
-	// Environment variables to experiment with different memcpy routines
-#define USE_MEMCPY_ENV		"PAC_LIBC_MEMCPY"
-#define USE_MEMCPY_S_ENV	"PAC_MEMCPY_S"
-#define USE_MEMCPY_SSE2_ENV	"PAC_SSE2_MEMCPY"
+	// Environment variable to experiment with different memcpy routines
+#define USE_MEMCPY_ENV		"PAC_MEMCPY"
 
 #define CACHE_LINE_SIZE 64
 #define ALIGN_TO_CL(x) ((uint64_t)(x) & ~(CACHE_LINE_SIZE - 1))

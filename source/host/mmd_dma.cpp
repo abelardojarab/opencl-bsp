@@ -32,8 +32,8 @@ using namespace intel_opae_mmd;
 
 //Environment variable that, if set, disables spawning of a separate dma work thread.
 //Otherwise, a separate thread will be spawned to handle DMA requests.
-#define DISABLE_DMA_WORK_THREAD_ENV	"PAC_DISABLE_DMA_WORK_THREAD"
-#define DISABLE_NUMA_AFFINITY_ENV	"PAC_DISABLE_NUMA_AFFINITY"
+#define DISABLE_DMA_WORK_THREAD_ENV	"PAC_DMA_WORK_THREAD"
+#define DISABLE_NUMA_AFFINITY_ENV	"PAC_NUMA_AFFINITY"
 
 //disable dma and only use mmio.  this is very slow.
 //#define DISABLE_DMA
@@ -68,16 +68,32 @@ mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle, numa_params numas)
 	dma_h(NULL),
 	msgdma_bbb_base_addr(0)
 {
-	enable_NUMA_affinity = (secure_getenv(DISABLE_NUMA_AFFINITY_ENV) == NULL);
-	if (!enable_NUMA_affinity)
+	enable_NUMA_affinity = 1;	// Set defaults
+	use_DMA_work_thread = 0;
+	char *numa_env = secure_getenv(DISABLE_NUMA_AFFINITY_ENV);
+	if (!strcasecmp(numa_env, "yes"))
+	{
+		enable_NUMA_affinity = 1;
+	}
+	if (!strcasecmp(numa_env, "no"))
+	{
+		enable_NUMA_affinity = 0;
 		numas.afu_numa_node = -1;	// Disables sched_setaffinity calls
+	}
 
 	set_numa_params(numas);
 
-	use_DMA_work_thread = 0;
 	#ifndef DISABLE_DMA
 
-	use_DMA_work_thread = (secure_getenv(DISABLE_DMA_WORK_THREAD_ENV) == NULL);	// If not in env, enable work thread
+	char *thread_env = secure_getenv(DISABLE_DMA_WORK_THREAD_ENV);
+	if (!strcasecmp(thread_env, "yes"))
+	{
+		use_DMA_work_thread = 1;
+	}
+	if (!strcasecmp(thread_env, "no"))
+	{
+		use_DMA_work_thread = 0;
+	}
 
 	bind_to_node();
 	fpga_result res;
