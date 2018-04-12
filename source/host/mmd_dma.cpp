@@ -18,6 +18,8 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
+#include <stdlib.h>
 
 #include <safe_string/safe_string.h>
 #include "memcpy_s_fast.h"
@@ -28,9 +30,10 @@
 
 using namespace intel_opae_mmd;
 
-//enables a separate dma work thread.  otherwise DMA operations will be 
-//blocking
-#define ENABLE_DMA_WORK_THREAD
+//Environment variable that, if set, disables spawning of a separate dma work thread.
+//Otherwise, a separate thread will be spawned to handle DMA requests.
+#define DISABLE_DMA_WORK_THREAD_ENV	"PAC_DMA_WORK_THREAD"
+#define DISABLE_NUMA_AFFINITY_ENV	"PAC_NUMA_AFFINITY"
 
 //disable dma and only use mmio.  this is very slow.
 //#define DISABLE_DMA
@@ -54,7 +57,7 @@ using namespace intel_opae_mmd;
 #endif
 
 
-mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle) :
+mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle, numa_params numas) :
 	m_initialized(false),
 	m_dma_work_thread(NULL),
 	m_dma_op_mutex(),
@@ -65,7 +68,34 @@ mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle) :
 	dma_h(NULL),
 	msgdma_bbb_base_addr(0)
 {
+	enable_NUMA_affinity = 1;	// Set defaults
+	use_DMA_work_thread = 0;
+	char *numa_env = secure_getenv(DISABLE_NUMA_AFFINITY_ENV);
+	if (!strcasecmp(numa_env, "yes"))
+	{
+		enable_NUMA_affinity = 1;
+	}
+	if (!strcasecmp(numa_env, "no"))
+	{
+		enable_NUMA_affinity = 0;
+		numas.afu_numa_node = -1;	// Disables sched_setaffinity calls
+	}
+
+	set_numa_params(numas);
+
 	#ifndef DISABLE_DMA
+
+	char *thread_env = secure_getenv(DISABLE_DMA_WORK_THREAD_ENV);
+	if (!strcasecmp(thread_env, "yes"))
+	{
+		use_DMA_work_thread = 1;
+	}
+	if (!strcasecmp(thread_env, "no"))
+	{
+		use_DMA_work_thread = 0;
+	}
+
+	bind_to_node();
 	fpga_result res;
 	res = fpgaDmaOpen(m_fpga_handle, &dma_h);
 	if(res != FPGA_OK) {
@@ -82,11 +112,14 @@ mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle) :
 		return;
 	}
 	
-	#ifdef ENABLE_DMA_WORK_THREAD
-	m_dma_work_thread = new dma_work_thread(*this);
-	if(!m_dma_work_thread->initialized())
-		return;
-	#endif
+	if (use_DMA_work_thread)
+	{
+		m_dma_work_thread = new dma_work_thread(*this);
+		if (!m_dma_work_thread->initialized())
+			return;
+	}
+
+	unbind_from_node();
 	
 	m_initialized = true;
 }
@@ -114,6 +147,8 @@ void mmd_dma::reinit_dma()
 	
 	if(dma_h) {
 		m_initialized = false;
+
+		bind_to_node();
 		
 		fpga_result res;
 		res = fpgaDmaClose(dma_h);
@@ -128,6 +163,8 @@ void mmd_dma::reinit_dma()
 			fprintf(stderr, "Error initializing DMA: %d\n", res);
 			return;
 		}
+
+		unbind_from_node();
 		
 		m_initialized = true;
 	}
@@ -152,6 +189,13 @@ fpga_result mmd_dma::do_dma(dma_work_item &item)
 
 	fpga_result res = FPGA_OK;
 	assert(item.rd_host_addr != NULL || item.wr_host_addr != NULL);
+
+	// Tell the kernel we'll need these and they're sequential
+	uint64_t addr = item.rd_host_addr ? (uint64_t)item.rd_host_addr : (uint64_t)item.wr_host_addr;
+	addr = addr & ~((uint64_t)getpagesize() - 1);	// Align to page boundary
+	size_t remainder = ((size_t)getpagesize() - (addr & getpagesize())) & ~(getpagesize() - 1);
+	madvise((void *)addr, item.size + remainder, MADV_SEQUENTIAL);
+
 	if(item.rd_host_addr) {
 		res = read_memory(item.rd_host_addr, item.dev_addr, item.size);
 	} else {
@@ -171,12 +215,16 @@ fpga_result mmd_dma::do_dma(dma_work_item &item)
 
 fpga_result mmd_dma::enqueue_dma(dma_work_item &item)
 {
-#ifdef ENABLE_DMA_WORK_THREAD
-	return static_cast<fpga_result>(m_dma_work_thread->enqueue_dma(item));
-#else
-	//if work thread is not enabled, then blocking mode is always used.
-	return do_dma(item);
-#endif
+	if (use_DMA_work_thread) {
+                return static_cast<fpga_result>(m_dma_work_thread->enqueue_dma(item));
+	}
+	else
+	{
+		//if work thread is not enabled, then blocking mode is always used.
+		bind_to_node();
+		return do_dma(item);
+		unbind_from_node();
+	}
 }
 
 fpga_result mmd_dma::read_memory(aocl_mmd_op_t op, uint64_t *host_addr, size_t dev_addr, size_t size)
@@ -251,8 +299,8 @@ fpga_result mmd_dma::read_memory(uint64_t *host_addr, size_t dev_addr, size_t si
 	if(res != FPGA_OK)
 		return res;
 
-	DCP_DEBUG_DMA("DCP DEBUG: host_addr=%lx, dev_addr=%lx, size=%d\n", host_addr, dev_addr, size);
-	DCP_DEBUG_DMA("DCP DEBUG: remainder=%d, dma_size=%d, size=%d\n", remainder, dma_size, size);
+	DCP_DEBUG_DMA("DCP DEBUG: host_addr=%p, dev_addr=%lx, size=%ld\n", host_addr, dev_addr, size);
+	DCP_DEBUG_DMA("DCP DEBUG: remainder=%ld, dma_size=%ld, size=%ld\n", remainder, dma_size, size);
 
 	DCP_DEBUG_DMA("DCP DEBUG: mmd_dma::read_memory done!\n");
 	return FPGA_OK;
@@ -283,6 +331,43 @@ fpga_result mmd_dma::read_memory_mmio_unaligned(void *host_addr, size_t dev_addr
 	memcpy_s_fast(host_addr, size, ((char *)(&read_tmp))+shift, size);
 	
 	return FPGA_OK;
+}
+
+// Bind this thread to the set of CPUs local to the FPGA.  Also bind its memory policy
+void intel_opae_mmd::mmd_dma::bind_to_node(void)
+{
+	if (-1 == numa.afu_numa_node)
+		return;
+
+	if (sched_setaffinity(0, sizeof(cpu_set_t), &numa.afu_cpuset)) {
+		perror("sched_setaffinity");
+	}
+
+#if 0	// Leave in for now.  Would like to mbind() the thread.  MPOL_LOCAL (default) forces local memory allocs
+	unsigned long nodemask = (1 << numa.afu_numa_node);
+	if (set_mempolicy(MPOL_BIND | MPOL_F_STATIC_NODES, &nodemask, sizeof(nodemask))) {
+		perror("set_mempolicy");
+		return;
+	}
+#endif
+}
+
+// Remove the binding of the CPUs and memory allocation
+void intel_opae_mmd::mmd_dma::unbind_from_node(void)
+{
+	if (-1 == numa.afu_numa_node)
+		return;
+
+	if (sched_setaffinity(0, sizeof(cpu_set_t), &numa.process_cpuset)) {
+		perror("sched_setaffinity");
+	}
+
+#if 0	// Leave in for now.
+	if (set_mempolicy(MPOL_DEFAULT, NULL, 0)) {
+		perror("set_mempolicy");
+		return;
+	}
+#endif
 }
 
 fpga_result mmd_dma::read_memory_mmio(uint64_t *host_addr, size_t dev_addr, size_t size)
@@ -375,8 +460,8 @@ fpga_result mmd_dma::write_memory(const uint64_t *host_addr, size_t dev_addr, si
 	if(res != FPGA_OK)
 		return res;
 
-	DCP_DEBUG_DMA("DCP DEBUG: host_addr=%lx, dev_addr=%lx, size=%d\n", host_addr, dev_addr, size);
-	DCP_DEBUG_DMA("DCP DEBUG: remainder=%d, dma_size=%d, size=%d\n", remainder, dma_size, size);
+	DCP_DEBUG_DMA("DCP DEBUG: host_addr=%p, dev_addr=%lx, size=%ld\n", host_addr, dev_addr, size);
+	DCP_DEBUG_DMA("DCP DEBUG: remainder=%ld, dma_size=%ld, size=%ld\n", remainder, dma_size, size);
 
 	DCP_DEBUG_DMA("DCP DEBUG: mmd_dma::write_memory done!\n");
 	return FPGA_OK;

@@ -18,6 +18,12 @@
 #ifndef _MMD_DMA_H
 #define _MMD_DMA_H
 
+#pragma push_macro("_GNU_SOURCE")
+#undef _GNU_SOURCE
+#define _GNU_SOURCE
+#include <sched.h>
+#pragma pop_macro("_GNU_SOURCE")
+
 #include <opae/fpga.h>
 
 #include <mutex>
@@ -30,10 +36,18 @@ namespace intel_opae_mmd {
 
 class eventfd_wrapper;
 
+class numa_params final
+{
+public:
+	int afu_numa_node;
+	cpu_set_t afu_cpuset;
+	cpu_set_t process_cpuset;
+};  // numa_params
+
 class mmd_dma final
 {
 public:
-	mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle);
+	mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle, numa_params numa);
 	~mmd_dma();
 
 	bool initialized() { return m_initialized; }
@@ -43,9 +57,18 @@ public:
 	fpga_result do_dma(dma_work_item &item);
 
 	void set_status_handler(aocl_mmd_status_handler_fn fn, void *user_data);
+	void set_numa_params(numa_params &params)
+	{
+		numa.afu_numa_node = params.afu_numa_node;
+		memcpy(&numa.afu_cpuset, &params.afu_cpuset, sizeof(cpu_set_t));
+		memcpy(&numa.process_cpuset, &params.process_cpuset, sizeof(cpu_set_t));
+	}
 	
 	//used after reconfigation
 	void reinit_dma();
+
+	void bind_to_node(void);
+	void unbind_from_node(void);
 
 private:
 	// Helper functions
@@ -72,6 +95,11 @@ private:
 
 	fpga_dma_handle   dma_h;
 	uint64_t          msgdma_bbb_base_addr;
+
+	numa_params numa;
+
+	int use_DMA_work_thread;
+	int enable_NUMA_affinity;
 
 	//not used and not implemented
 	mmd_dma (mmd_dma& other);

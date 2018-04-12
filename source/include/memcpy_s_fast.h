@@ -18,10 +18,50 @@
 #ifndef MEMCPY_S_FAST_H
 #define MEMCPY_S_FAST_H_
 
-#ifdef MEMCPY_S_FAST_USE_MEMCPY_S
-#define memcpy_s_fast(a,b,c,d) memcpy_s(a,b,c,d)
+#ifdef __cplusplus
+extern "C" {
+#endif	// __cplusplus
+
+// Constants needed in memcpy routines
+	// Arbitrary crossover point for using SSE2 over rep movsb
+#define MIN_SSE2_SIZE 4096
+	// Environment variable to experiment with different memcpy routines
+#define USE_MEMCPY_ENV		"PAC_MEMCPY"
+
+#define CACHE_LINE_SIZE 64
+#define ALIGN_TO_CL(x) ((uint64_t)(x) & ~(CACHE_LINE_SIZE - 1))
+#define IS_CL_ALIGNED(x) (((uint64_t)(x) & (CACHE_LINE_SIZE - 1)) == 0)
+
+	// Convenience macros
+#ifdef DEBUG_MEM
+#define debug_print(fmt, ...) \
+do { \
+	if (FPGA_DMA_DEBUG) {\
+		fprintf(stderr, "%s (%d) : ", __FUNCTION__, __LINE__); \
+		fprintf(stderr, fmt, ##__VA_ARGS__); \
+	} \
+} while (0)
+
+#define error_print(fmt, ...) \
+do { \
+	fprintf(stderr, "%s (%d) : ", __FUNCTION__, __LINE__); \
+	fprintf(stderr, fmt, ##__VA_ARGS__); \
+	err_cnt++; \
+ } while (0)
 #else
-#define memcpy_s_fast(a,b,c,d) memcpy(a,c,d)
+#define debug_print(...)
+#define error_print(...)
 #endif
 
-#endif
+
+typedef void *(*memcpy_fn_t)(void *dst, size_t max, const void *src, size_t len);
+
+extern memcpy_fn_t p_memcpy;
+
+#define memcpy_s_fast(a,b,c,d) p_memcpy(a,b,c,d)
+
+#ifdef __cplusplus
+}
+#endif	// __cplusplus
+
+#endif	// MEMCPY_S_FAST_H

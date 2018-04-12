@@ -22,6 +22,7 @@
 #include <sstream>
 #include <limits>
 #include <fstream>
+#include <unistd.h>
 
 #include <safe_string/safe_string.h>
 #include "memcpy_s_fast.h"
@@ -88,6 +89,7 @@ CcipDevice::CcipDevice(uint64_t obj_id):
    else
       next_mmd_handle++;
 
+  numa.afu_numa_node = -1;
   mmd_copy_buffer = (char *)malloc(MMD_COPY_BUFFER_SIZE);
   if(mmd_copy_buffer == NULL) {
   	  fprintf(stderr, "malloc failed for mmd_copy_buffer\n");
@@ -166,6 +168,10 @@ CcipDevice::CcipDevice(uint64_t obj_id):
    // logic encapsulted here so it can easily removed laster
    initialize_fme_sysfs();
 
+   // HACK: for now read numa node and local_cpus directly from sysfs.
+   // Initialization logic encapsulted here so it can easily removed laster
+   initialize_local_cpus_sysfs();
+
    mmd_dev_name = get_board_name(BSP_NAME, obj_id);
    afu_initialized = true;
 }
@@ -198,6 +204,87 @@ void CcipDevice::initialize_fme_sysfs() {
    }
 }
 
+void CcipDevice::initialize_local_cpus_sysfs() {
+	const int MAX_LEN = 250;
+	char localnumapath[MAX_LEN];
+	char localcpupath[MAX_LEN];
+
+	numa.afu_numa_node = -1;
+	CPU_ZERO(&numa.process_cpuset);
+	CPU_ZERO(&numa.afu_cpuset);
+
+	// HACK: currently ObjectID is constructed using its lower 20 bits
+	// as the device minor number.  The device minor number also matches
+	// the device ID in sysfs.  This is a simple way to construct a path
+	// to the device FME using information that is already available (object_id).
+	// Eventually this code should be replaced with a direct call to OPAE C API,
+	// but API does not currently expose the device temperature.
+	int dev_num = 0xFFFFF & fpga_obj_id;
+	snprintf(localnumapath, MAX_LEN, "/sys/class/fpga/intel-fpga-dev.%d/device/numa_node", dev_num);
+	snprintf(localcpupath, MAX_LEN, "/sys/class/fpga/intel-fpga-dev.%d/device/local_cpus", dev_num);
+
+	if (-1 == sched_getaffinity(0, sizeof(cpu_set_t), &numa.process_cpuset)) {
+		perror("sched_getaffinity");
+		return;
+	}
+
+	FILE *tmp;
+	tmp = fopen(localnumapath, "r");
+	if (tmp) {
+		if (1 != fscanf(tmp, "%x", &numa.afu_numa_node))
+		{
+			numa.afu_numa_node = -1;
+		}
+		fclose(tmp);
+	}
+
+	tmp = fopen(localcpupath, "r");
+	if (tmp) {
+		char *cpustr = NULL;
+		size_t len = 0;
+		ssize_t nread;
+		unsigned long cpunum = 0;
+
+		nread = getline(&cpustr, &len, tmp);
+
+		if (-1 == nread) {
+			return;
+		}
+
+		// Convert a mask into cpus in the set
+		int ndx;
+		for (ndx = nread; ndx >= 0; ndx--)
+		{
+			switch (cpustr[ndx])
+			{
+			case '\n':
+			case ',':
+			case '\0':
+				cpustr[ndx] = '\0';
+				continue;
+			default:
+				assert(isxdigit(cpustr[ndx]));
+				unsigned long val = strtol(&cpustr[ndx], NULL, 16);
+				if (val & 0x1) CPU_SET(cpunum, &numa.afu_cpuset);
+				cpunum++;
+				if (val & 0x2) CPU_SET(cpunum, &numa.afu_cpuset);
+				cpunum++;
+				if (val & 0x4) CPU_SET(cpunum, &numa.afu_cpuset);
+				cpunum++;
+				if (val & 0x8) CPU_SET(cpunum, &numa.afu_cpuset);
+				cpunum++;
+			}
+		}
+
+		fclose(tmp);
+	}
+
+	if (CPU_EQUAL(&numa.afu_cpuset, &numa.process_cpuset))
+	{
+		numa.afu_numa_node = -1;	// Only a single NUMA node
+	}
+}
+
 bool CcipDevice::initialize_bsp()
 {
    if(bsp_initialized) {
@@ -219,7 +306,7 @@ bool CcipDevice::initialize_bsp()
 	}
 	AFU_RESET_DELAY();
 	
-	dma_h = new mmd_dma(afc_handle, mmd_handle);
+	dma_h = new mmd_dma(afc_handle, mmd_handle, numa);
 	if(!dma_h->initialized())
 	{
 		fprintf(stderr, "Error initializing mmd dma\n");
