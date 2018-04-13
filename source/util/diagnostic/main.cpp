@@ -92,13 +92,16 @@ bool check_results(unsigned int * buf, unsigned int * output, unsigned n)
   return result;
 }
 
+#define MMD_STRING_RETURN_SIZE 1024
+
 unsigned get_device_number( const char * device_name)
 {
    static char boards_name[MMD_STRING_RETURN_SIZE];
    aocl_mmd_get_offline_info(AOCL_MMD_BOARD_NAMES, sizeof(boards_name), boards_name, NULL);
    char *dev;
+   char *boards = boards_name;
    int num = 0;
-   for(dev = strtok(boards_name, ";"); dev != NULL; dev = strtok(NULL, ";")) {
+   for(dev = strtok_r(boards, ";", &boards); dev != NULL; dev = strtok_r(NULL, ";", &boards)) {
 	if (strcmp(dev, device_name) == 0) {
 	   return num;
 	} else{
@@ -108,7 +111,6 @@ unsigned get_device_number( const char * device_name)
    return 0;
 }
 
-#define MMD_STRING_RETURN_SIZE 1024
 
 int scan_devices ( const char * device_name )
 {
@@ -132,7 +134,8 @@ int scan_devices ( const char * device_name )
    int         first_row_printed = 0;
    int         num_active_boards = 0;
    float       temperature;
-   for(dev_name = strtok(boards_name, ";"); dev_name != NULL; dev_name = strtok(NULL, ";")) {
+   char	      *boards;
+   for(dev_name = strtok_r(boards, ";", &boards); dev_name != NULL; dev_name = strtok_r(NULL, ";", &boards)) {
       if ( device_name != NULL && strcmp(dev_name,device_name) != 0 ) continue;
 
       handle = aocl_mmd_open(dev_name);
@@ -230,7 +233,8 @@ int main (int argc, char *argv[])
    char *dev_name;
    bool device_exists = false;
    bool bsp_loaded = false;
-   for(dev_name = strtok(boards_name, ";"); dev_name != NULL; dev_name = strtok(NULL, ";")) {
+   char *boards = boards_name;
+   for(dev_name = strtok_r(boards, ";", &boards); dev_name != NULL; dev_name = strtok_r(NULL, ";", &boards)) {
       if ( probe )
          printf("%s\n",dev_name);
       else
@@ -282,7 +286,7 @@ int main (int argc, char *argv[])
 
    unsigned int *buf = (unsigned int*) acl_util_aligned_malloc (maxints * sizeof(unsigned int));
    unsigned int *output = (unsigned int*) acl_util_aligned_malloc (maxints * sizeof(unsigned int));
-  
+
    // Create sequence: 0 rand1 ~2 rand2 4 ...
    for (unsigned j=0; j<maxints; j++)
      if (j%2==0)
@@ -290,8 +294,7 @@ int main (int argc, char *argv[])
      else
        buf[j]=unsigned(rand()*rand());
 
-   //FIXME: should not assume one CL device
-   unsigned dev_num;  // Assume only one CL device
+   unsigned dev_num;
    dev_num = get_device_number( device_name );
 
    ocl_device_init(dev_num,maxbytes);
