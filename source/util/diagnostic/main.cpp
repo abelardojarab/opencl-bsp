@@ -101,7 +101,7 @@ unsigned get_device_number( const char * device_name)
    char *dev;
    char *boards = boards_name;
    int num = 0;
-   for(dev = strtok_r(boards, ";", &boards); dev != NULL; dev = strtok_r(NULL, ";", &boards)) {
+   for(dev = strtok_r(boards_name, ";", &boards); dev != NULL; dev = strtok_r(NULL, ";", &boards)) {
 	if (strcmp(dev, device_name) == 0) {
 	   return num;
 	} else{
@@ -135,7 +135,7 @@ int scan_devices ( const char * device_name )
    int         num_active_boards = 0;
    float       temperature;
    char	      *boards;
-   for(dev_name = strtok_r(boards, ";", &boards); dev_name != NULL; dev_name = strtok_r(NULL, ";", &boards)) {
+   for(dev_name = strtok_r(boards_name, ";", &boards); dev_name != NULL; dev_name = strtok_r(NULL, ";", &boards)) {
       if ( device_name != NULL && strcmp(dev_name,device_name) != 0 ) continue;
 
       handle = aocl_mmd_open(dev_name);
@@ -234,7 +234,7 @@ int main (int argc, char *argv[])
    bool device_exists = false;
    bool bsp_loaded = false;
    char *boards = boards_name;
-   for(dev_name = strtok_r(boards, ";", &boards); dev_name != NULL; dev_name = strtok_r(NULL, ";", &boards)) {
+   for(dev_name = strtok_r(boards_name, ";", &boards); dev_name != NULL; dev_name = strtok_r(NULL, ";", &boards)) {
       if ( probe )
          printf("%s\n",dev_name);
       else
