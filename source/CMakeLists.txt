@@ -49,7 +49,7 @@ link_directories("${ALTERAOCLSDKROOT}/host/linux64/lib")
 link_directories("${CMAKE_SOURCE_DIR}/../linux64/lib")
 link_directories("${CMAKE_SOURCE_DIR}/host/lib")
 link_directories("${CMAKE_BINARY_DIR}/host")
-link_directories("${OPAE_INSTALL_PATH}/lib")
+link_directories("${OPAE_INSTALL_PATH}/lib64")
 
 option(OPENCL_ASE_SIM "Build for ASE simulation" OFF)
 if(OPENCL_ASE_SIM)
