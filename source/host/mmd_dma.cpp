@@ -71,14 +71,17 @@ mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle, numa_params numas)
 	enable_NUMA_affinity = 1;	// Set defaults
 	use_DMA_work_thread = 0;
 	char *numa_env = secure_getenv(DISABLE_NUMA_AFFINITY_ENV);
-	if (!strcasecmp(numa_env, "yes"))
+	if (numa_env)
 	{
-		enable_NUMA_affinity = 1;
-	}
-	if (!strcasecmp(numa_env, "no"))
-	{
-		enable_NUMA_affinity = 0;
-		numas.afu_numa_node = -1;	// Disables sched_setaffinity calls
+		if (!strcasecmp(numa_env, "yes"))
+		{
+			enable_NUMA_affinity = 1;
+		}
+		if (!strcasecmp(numa_env, "no"))
+		{
+			enable_NUMA_affinity = 0;
+			numas.afu_numa_node = -1;	// Disables sched_setaffinity calls
+		}
 	}
 
 	set_numa_params(numas);
@@ -86,13 +89,16 @@ mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle, numa_params numas)
 	#ifndef DISABLE_DMA
 
 	char *thread_env = secure_getenv(DISABLE_DMA_WORK_THREAD_ENV);
-	if (!strcasecmp(thread_env, "yes"))
+	if (thread_env)
 	{
-		use_DMA_work_thread = 1;
-	}
-	if (!strcasecmp(thread_env, "no"))
-	{
-		use_DMA_work_thread = 0;
+		if (!strcasecmp(thread_env, "yes"))
+		{
+			use_DMA_work_thread = 1;
+		}
+		if (!strcasecmp(thread_env, "no"))
+		{
+			use_DMA_work_thread = 0;
+		}
 	}
 
 	bind_to_node();
