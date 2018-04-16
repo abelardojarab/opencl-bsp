@@ -70,7 +70,7 @@ mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle, numa_params numas)
 {
 	enable_NUMA_affinity = 1;	// Set defaults
 	use_DMA_work_thread = 0;
-	char *numa_env = secure_getenv(DISABLE_NUMA_AFFINITY_ENV);
+	char *numa_env = getenv(DISABLE_NUMA_AFFINITY_ENV);
 	if (numa_env)
 	{
 		if (!strcasecmp(numa_env, "yes"))
@@ -88,7 +88,7 @@ mmd_dma::mmd_dma(fpga_handle fpga_handle_arg, int mmd_handle, numa_params numas)
 
 	#ifndef DISABLE_DMA
 
-	char *thread_env = secure_getenv(DISABLE_DMA_WORK_THREAD_ENV);
+	char *thread_env = getenv(DISABLE_DMA_WORK_THREAD_ENV);
 	if (thread_env)
 	{
 		if (!strcasecmp(thread_env, "yes"))

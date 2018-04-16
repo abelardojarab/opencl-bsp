@@ -136,7 +136,7 @@ static void *memcpy_setup(void *dst, size_t max, const void *src, size_t n)
 	// Default to SSE2_memcpy
 	p_memcpy = SSE2_memcpy;
 
-	char *pmemcpy = secure_getenv(USE_MEMCPY_ENV);
+	char *pmemcpy = getenv(USE_MEMCPY_ENV);
 	if (pmemcpy)
 	{
 		if (!strcasecmp(pmemcpy, "libc"))
