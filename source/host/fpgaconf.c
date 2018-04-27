@@ -135,7 +135,7 @@ int program_bitstream(fpga_token token,
 	ON_ERR_GOTO(res, out_err, "opening FPGA");
 
 	print_msg(1, "Writing bitstream");
-	res = fpgaReconfigureSlot(handle, slot_num, info->data, info->data_len, 0);
+	res = fpgaReconfigureSlot(handle, slot_num, info->data, info->data_len, FPGA_RECONF_FORCE);
 	ON_ERR_GOTO(res, out_close, "writing bitstream to FPGA");
 
 	print_msg(2, "Closing FPGA");
