@@ -39,8 +39,8 @@ DEFAULT_PLATFORM = setup_bsp.DEFAULT_PLATFORM
 
 DEFAULT_BSP_DIR_NAME = 'opencl_bsp'
 
-# use a stable OPAE release
-OPAE_GIT_BRANCH = 'dcp_1_0_beta_rc1'
+# use master-x OPAE for master opencl-bsp branch
+OPAE_GIT_BRANCH = 'master-x'
 
 
 def setup_sw_packages(opae_branch=None, sim_mode=None):
