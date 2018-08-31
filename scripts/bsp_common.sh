@@ -43,7 +43,7 @@ export QUARTUS_HOME=$QUARTUS_ROOTDIR
 export ASE_WORKDIR=./temp_simulation/ase/work/
 export MPF_INSTALL_PATH=$BUILD_DIR/mpf
 export ASE_SRC_PATH=$OPAE_SRC_PATH/ase
-ACDS_ARC_RESOURCES="acl/17.1.1,acds/17.1.1,qedition/pro,adapt"
+ACDS_ARC_RESOURCES="acl/17.1.1,acds/swip_apps/avl_vm/acds_patched/17.1.1/acds,qedition/pro,adapt"
 SIM_ARC_RESOURCES="vcs,vcs-vcsmx-lic/vrtn-dev"
 SW_BUILD_ARC_RESOURCES="gcc/4.8.2,python,cmake/3.7.2,boost,doxygen/1.8.11"
 

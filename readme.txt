@@ -10,7 +10,8 @@ for more detailed information.
 	CentOS 7.3 with the default Linux kernel 3.10
 
 2.  Software for FPGA/OpenCL compilation:
-	Quartus Prime Pro Edition 17.1.1 build 273
+	Patched version of Quartus Prime Pro contains bug-fixes for Arria 10 Partial Reconfiguration
+	Quartus Prime Pro Version 17.1.1 Build 273 12/19/2017 Patches 1.36,1.38 SJ Pro Edition
 	Intel FPGA SDK for OpenCL Pro Edition 17.1.1 build 273
 
 3.  Software for OpenCL runtime
@@ -46,7 +47,7 @@ a.  Setting up BSP for AOCX compilation
 	aoc --list-boards
 	#make sure you see at least 1 DCP board in the list
 	#to use arc to compile, get these resources
-	arc shell acl/17.1.1,acds/17.1.1,qedition/pro,adapt/17.1,python
+	arc shell acl/17.1.1,acds/swip_apps/avl_vm/acds_patched/17.1.1/acds,qedition/pro,adapt/18.1,python
 
 	aoc vector_add.cl
 	#you can also use '--board bsp_board_name' to specify a specific board variant
