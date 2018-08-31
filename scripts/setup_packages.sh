@@ -8,6 +8,13 @@ SCRIPT_DIR_PATH="$(dirname $SCRIPT_PATH)"
 #exit early and return error code if there is a problem
 set -e
 
+# use master-x OPAE for master opencl-bsp branch
+#OPAE_GIT_BRANCH = 'master-x'
+if [ -z "$OPAE_GIT_BRANCH" ]; then
+    OPAE_GIT_BRANCH="rewind/master-x/2018-08-27"
+fi
+echo "setup_packages.sh OPAE_GIT_BRANCH is $OPAE_GIT_BRANCH"
+
 #check for OPAE
 if [ ! -d "$OPAE_INSTALL_PATH" ]; then
   echo "OPAE_INSTALL_PATH does not exist.  need to build"
