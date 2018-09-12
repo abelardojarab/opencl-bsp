@@ -1,7 +1,7 @@
-date 07/21/17
+date 04/25/18
 
 1.  Introduction:
-This is an internal release of OpenCL DCP for testing for the July 31st release.  This is not the final release.  Please DO NOT REDISTRIBUTE to anyone without permission from DCP management(David Munday)!  This package is designed to be an add-on to the June 30th, 2017 DCP pre-alpha release.  You must have that installed to use this package.
+This is an internal release of OpenCL DCP for testing for the X release.  This is not the final release.  Please DO NOT REDISTRIBUTE to anyone without permission from DCP management!  This package is designed to be an add-on to the June 30th, 2017 DCP pre-alpha release.  You must have that installed to use this package.
 
 2.  DCP OpenCL overview
 	DCP bsp does not support SVM(Shared virtual memory)
@@ -35,6 +35,8 @@ This is an internal release of OpenCL DCP for testing for the July 31st release.
 		no limitations
 
 4.  updates
+    4-25-18
+        Branched to support S10 on DCP2.0.
 	7-21-17
 		removed some unneccessary adapters in bsp
 		updated resource counts in board xml

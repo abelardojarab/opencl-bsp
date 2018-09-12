@@ -16,8 +16,15 @@ echo ase sim compile flow
 rm -fr sim_files
 mkdir sim_files
 
-qsys-generate --synthesis=VERILOG -qpf=dcp -c=afu_synth kernel_system.qsys
-qsys-generate --synthesis=VERILOG -qpf=dcp -c=afu_synth board.qsys
+if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
+then
+    PROJECT_REVISION="afu_default"
+else
+    PROJECT_REVISION="afu_synth"
+fi
+
+qsys-generate --synthesis=VERILOG -qpf=dcp -c=$PROJECT_REVISION kernel_system.qsys
+qsys-generate --synthesis=VERILOG -qpf=dcp -c=$PROJECT_REVISION board.qsys
 
 find ccip_iface/ip -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -name "*.sv" | xargs cp -t ./sim_files
 find ccip_iface/ccip_avmm_bridge -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -name "*.sv" | xargs cp -t ./sim_files
@@ -36,6 +43,11 @@ find ip/msgdma_bbb -name synth | xargs -n1 -IAAA find AAA -name "*.v" -o -name "
 
 find kernel_hdl -type f | xargs cp -t ./sim_files
 
+if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
+then
+    find . -name "*.vhd" -type f | grep dspba | xargs cp -t ./sim_files
+fi
+
 find ./ip/*.v | xargs cp -t ./sim_files
 find ./ip/*.sv | xargs cp -t  ./sim_files
 
@@ -45,6 +57,11 @@ cp -rf ccip_std_afu.sv ./sim_files/ccip_std_afu.sv
 find *.sv  | xargs cp -t ./sim_files
 
 cp -rf extra_sim_files/global_routing.v ./sim_files/global_routing.v
+if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
+then
+    #HACK needed for acl_ecc.svh because of VCS compilation issues
+    cp -rf extra_sim_files/acl_ecc.svh ./sim_files/
+fi
 cp -rf bsp_logic.sv ./sim_files/bsp_logic.sv
 cp -fr BBB_* sim_files/    
 rm simulation.tar.gz

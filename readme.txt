@@ -10,7 +10,12 @@ for more detailed information.
 	CentOS 7.3 with the default Linux kernel 3.10
 
 2.  Software for FPGA/OpenCL compilation:
-	Patched version of Quartus Prime Pro contains bug-fixes for Arria 10 Partial Reconfiguration
+  dcp_s10 | Statix 10 
+	Quartus Prime Pro Edition 18.0.1 build 261
+	Intel FPGA SDK for OpenCL Pro Edition 18.0.1 build 261
+  
+  dcp_a10 | Arria 10
+  Patched version of Quartus Prime Pro contains bug-fixes for Arria 10 Partial Reconfiguration
 	Quartus Prime Pro Version 17.1.1 Build 273 12/19/2017 Patches 1.36,1.38 SJ Pro Edition
 	Intel FPGA SDK for OpenCL Pro Edition 17.1.1 build 273
 
@@ -24,7 +29,7 @@ for more detailed information.
 	OPAE software library
 		opae-src-0.3.0.tar.gz
 	Intel FPGA Runtime Environment for OpenCL Linux x86-64 RPM
-		aocl-pro-rte-17.1.1-273.x86_64.rpm
+		aocl-pro-rte-18.0-189.x86_64.rpm
 
 4.  Note about initializing DCP for OpenCL:
 	must do "aocl program acl0 kernel.aocx" first
@@ -44,9 +49,13 @@ a.  Setting up BSP for AOCX compilation
 	cd /path/to/put/bsp/
 	tar xzf dcp_OpenCL_bsp_*.tar.gz
 	export AOCL_BOARD_PACKAGE_ROOT=/path/to/put/bsp/dcp_OpenCL_bsp
-	aoc --list-boards
+	aoc -list-boards
 	#make sure you see at least 1 DCP board in the list
 	#to use arc to compile, get these resources
+  dcp_s10 | Stratix 10
+	arc shell acl/18.0.1/261,acds/18.0/189,qedition/pro,adapt/18.0.1/261,python
+  
+  dcp_a10 | Arria 10
 	arc shell acl/17.1.1,acds/swip_apps/avl_vm/acds_patched/17.1.1/acds,qedition/pro,adapt/18.1,python
 
 	aoc vector_add.cl

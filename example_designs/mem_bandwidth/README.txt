@@ -75,7 +75,7 @@ To compile the kernel, run:
 where <board> matches the board you have in your system. If you are unsure
 of the board name, use the following command to list available boards:
 
-  aoc --list-boards
+  aoc -list-boards
 
 This compilation command can also be used to target the emulator by adding 
 the -march=emulator flag.

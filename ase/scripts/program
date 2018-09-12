@@ -50,6 +50,13 @@ if [ "$OPENCL_ASE_SIM" == "1" ]; then
 	#echo "ASE_DISCRETE_EMIF_MODEL=EMIF_MODEL_ADVANCED" >> ase_sources.mk
 	echo >> ase_sources.mk
 	
+	if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
+	then
+		echo 'SNPS_VLOGAN_OPT?=' >> ase_sources.mk
+		echo 'SNPS_VLOGAN_OPT+= -assert svaext +incdir+./qsys_files' >> ase_sources.mk
+		echo >> ase_sources.mk
+	fi
+	
 	bash run_sim.sh
 
 else

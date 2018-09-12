@@ -1,6 +1,6 @@
 # !/usr/bin/env python
 
-# (C) 2017 Intel Corporation. All rights reserved.
+# (C) 2018 Intel Corporation. All rights reserved.
 # Your use of Intel Corporation's design tools, logic functions and other
 # software and tools, and its AMPP partner logic functions, and any output
 # files any of the foregoing (including device programming or simulation
@@ -31,11 +31,13 @@ import tarfile
 
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 PROJECT_PATH = os.path.dirname(os.path.abspath(SCRIPT_PATH))
-DEFAULT_BSP = 'dcp_a10'
+os.environ["DCP_BSP_TARGET"] = "dcp_a10" if ("DCP_BSP_TARGET" not in os.environ) else os.environ["DCP_BSP_TARGET"]
+THIS_IS_S10_BSP = 1 if (("DCP_BSP_TARGET" in os.environ) and (os.environ["DCP_BSP_TARGET"] == "dcp_s10" or os.environ["DCP_BSP_TARGET"] == "pac_s10_dc")) else 0
+DEFAULT_BSP = 'dcp_s10' if THIS_IS_S10_BSP else 'dcp_a10'
 DEFAULT_BSP_DIR = os.path.join(PROJECT_PATH, 'hardware')
-DEFAULT_PLATFORM = "dcp_1.0-rc"
-
-
+DEFAULT_PLATFORM = "dcp_2.0-dc" if THIS_IS_S10_BSP else "dcp_1.0-rc"
+PLATFORM_CONFIG_IFC_TYPE = "ccip_std_afu_avalon_mm" if THIS_IS_S10_BSP else "ccip_std_afu_avalon_mm_legacy_wires"
+DBG = 0
 # get bsp list by searching a list of directories.
 # BSPs are identified as diretories with board_spec.xml
 # searches these paths:
@@ -106,6 +108,8 @@ def run_cmd(cmd, path=None):
     if(path):
         old_cwd = os.getcwd()
         os.chdir(path)
+    if(DBG):
+        print "run_cmd cmd is %s" % cmd
     process = subprocess.Popen(cmd,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
@@ -126,6 +130,8 @@ def run_cmd(cmd, path=None):
 def delete_and_mkdir(dir_path):
     shutil.rmtree(dir_path, ignore_errors=True)
     os.mkdir(dir_path)
+    if(DBG):
+        print "delete and remake %s" % dir_path
 
 
 # copy function that accepts globs and can overlay existing directories
@@ -139,6 +145,8 @@ def copy_glob(src, dst):
             # '.' files(hidden files) are not included in '*'
             copy_glob(os.path.join(i, '.*'), dst_dir_path)
         else:
+            if(DBG):
+                print "copy_glob: src is %s; dst is %s" % (i, dst)
             shutil.copy2(i, dst)
 
 
@@ -157,13 +165,15 @@ def symlink_glob(src, dst):
             if(os.path.exists(dst_link)):
                 os.remove(dst_link)
             os.symlink(i, dst_link)
+            if(DBG):
+                print "create symlink src: %s    dest: %s   dest_link: %s" % (src, dst, dst_link)
 
 
 # take a glob path and remove the files
 def rm_glob(src, verbose=False):
     for i in glob.glob(src):
         os.remove(i)
-        if(verbose):
+        if(DBG):
             print "Removed: %s" % i
 
 
@@ -177,6 +187,7 @@ def create_text_file(dst, lines):
 # main work function for setting up bsp
 def setup_bsp(platform, bsp_search_dirs, sim_mode=False, verbose=False,
               debug=False, overlay=None):
+    print "dcp-bsp-target is %s" % os.environ["DCP_BSP_TARGET"]
     packager_bin = get_packager_bin()
     platform_dir = get_platform_dir(platform)
 
@@ -193,118 +204,151 @@ def setup_bsp(platform, bsp_search_dirs, sim_mode=False, verbose=False,
         print "bsp_info_map %s\n" % bsp_info_map
 
     for bsp in bsp_info_map.keys():
-        bsp_dir = bsp_info_map[bsp]['dir']
-        bsp_qsf_dir = os.path.join(bsp_dir, 'build')
-
-        # handle overlay/patch to bsp hw
-        if(overlay):
-            overlay_file = os.path.join(PROJECT_PATH, 'overlays',
-                                        "%s.patch" % overlay)
-            if(not os.path.exists(overlay_file)):
-                print "ERROR: overlay %s path not found" % overlay_file
-                sys.exit(1)
-            run_cmd("patch -f -p3 -i %s" % overlay_file, bsp_dir)
-
-        # copy empty afu template files to bsp_dir
-        copy_glob(os.path.join(platform_dir, 'lib', 'build', '*'), bsp_qsf_dir)
-        copy_glob(os.path.join(platform_dir, 'lib', '*.txt'), bsp_qsf_dir)
-
-        # clean up junk in output_files from bbs compile
-        output_files_path = os.path.join(bsp_qsf_dir, 'output_files')
-        rm_glob(os.path.join(output_files_path, '*.rpt'))
-        rm_glob(os.path.join(output_files_path, '*.jic'))
-        rm_glob(os.path.join(output_files_path, '*.rpd'))
-        rm_glob(os.path.join(output_files_path, '*.summary'))
-        rm_glob(os.path.join(output_files_path, '*.sld'))
-        rm_glob(os.path.join(output_files_path, 'timing_report', '*'))
-
-        # add packager to opencl bsp to make bsp easier to use
-        bsp_tools_dir = os.path.join(bsp_qsf_dir, 'tools')
-        delete_and_mkdir(bsp_tools_dir)
-        shutil.copy2(packager_bin, bsp_tools_dir)
-
-        # unzip pr artifacts
-        shutil.rmtree(os.path.join(bsp_dir, 'design'), ignore_errors=True)
-        pr_design_artifacts_path = os.path.join(platform_dir,
-                                                'pr_design_artifacts.tar.gz')
-        tar = tarfile.open(pr_design_artifacts_path)
-        tar.extractall(bsp_dir)
-        tar.close()
-
-        # create hw directory for afu compatibility
-        bsp_hw_dir = os.path.join(bsp_dir, 'hw')
-        delete_and_mkdir(bsp_hw_dir)
-        # we don't use afu.qsf, so just put a stub in
-        create_text_file(os.path.join(bsp_hw_dir, 'afu.qsf'), ["# NOT USED\n"])
-
-        # find OPAE install path
-        opae_inst_path = os.path.join(os.environ["ADAPT_DEST_ROOT"], 'sw',
-                                      'opae_sdk_x')
-        if(not os.path.exists(opae_inst_path)):
-            # opae install path in adapt build is process of changing
-            # need to check old location as well
-            opae_inst_path = os.path.join(os.environ["ADAPT_DEST_ROOT"],
-                                          'opae_sdk_x')
-        if(not os.path.exists(opae_inst_path)):
-            print "ERROR: opae install path not found"
-            exit(1)
-
-        # setup and run afu_platform_config
-        platform_lib_dir = os.path.join(platform_dir, 'lib')
-        platform_db_dir = os.path.join(platform_lib_dir,
-                                       'platform', 'platform_db')
-        os.environ["BBS_LIB_PATH"] = platform_lib_dir
-        if("OPAE_PLATFORM_DB_PATH" in os.environ):
-            os.environ["OPAE_PLATFORM_DB_PATH"] += ":" + platform_db_dir
+        if (bsp == os.environ["DCP_BSP_TARGET"]):
+            print "Only building the DCP_BSP_TARGET which is %s." % os.environ["DCP_BSP_TARGET"]
+            bsp_dir = bsp_info_map[bsp]['dir']
+            bsp_qsf_dir = os.path.join(bsp_dir, 'build')
+            
+            if(DBG):
+                print "bsp_qsf_dir is %s\n" % bsp_qsf_dir
+    
+            # handle overlay/patch to bsp hw
+            if(overlay):
+                overlay_file = os.path.join(PROJECT_PATH, 'overlays',
+                                            "%s.patch" % overlay)
+                if(not os.path.exists(overlay_file)):
+                    print "ERROR: overlay %s path not found" % overlay_file
+                    sys.exit(1)
+                run_cmd("patch -f -p3 -i %s" % overlay_file, bsp_dir)
+    
+            # copy empty afu template files to bsp_dir
+            copy_glob(os.path.join(platform_dir, 'lib', 'build', '*'), bsp_qsf_dir)
+            copy_glob(os.path.join(platform_dir, 'lib', '*.txt'), bsp_qsf_dir)
+    
+            # clean up junk in output_files from bbs compile
+            output_files_path = os.path.join(bsp_qsf_dir, 'output_files')
+            rm_glob(os.path.join(output_files_path, '*.rpt'))
+            rm_glob(os.path.join(output_files_path, '*.jic'))
+            rm_glob(os.path.join(output_files_path, '*.rpd'))
+            rm_glob(os.path.join(output_files_path, '*.summary'))
+            rm_glob(os.path.join(output_files_path, '*.sld'))
+            rm_glob(os.path.join(output_files_path, 'timing_report', '*'))
+    
+            # add packager to opencl bsp to make bsp easier to use
+            bsp_tools_dir = os.path.join(bsp_qsf_dir, 'tools')
+            delete_and_mkdir(bsp_tools_dir)
+            shutil.copy2(packager_bin, bsp_tools_dir)
+    
+            # unzip pr artifacts
+            shutil.rmtree(os.path.join(bsp_dir, 'design'), ignore_errors=True)
+            pr_design_artifacts_path = os.path.join(platform_dir,
+                                                    'pr_design_artifacts.tar.gz')
+            tar = tarfile.open(pr_design_artifacts_path)
+            tar.extractall(bsp_dir)
+            tar.close()
+    
+            # create hw directory for afu compatibility
+            bsp_hw_dir = os.path.join(bsp_dir, 'hw')
+            delete_and_mkdir(bsp_hw_dir)
+            # we don't use afu.qsf, so just put a stub in
+            create_text_file(os.path.join(bsp_hw_dir, 'afu.qsf'), ["# NOT USED\n"])
+    
+            # find OPAE install path
+            opae_inst_path = os.path.join(os.environ["ADAPT_DEST_ROOT"], 'sw',
+                                        'opae_sdk_x')
+            if(not os.path.exists(opae_inst_path)):
+                # opae install path in adapt build is process of changing
+                # need to check old location as well
+                opae_inst_path = os.path.join(os.environ["ADAPT_DEST_ROOT"],
+                                            'opae_sdk_x')
+            if(not os.path.exists(opae_inst_path)):
+                print "ERROR: opae install path not found"
+                exit(1)
+    
+            # setup and run afu_platform_config
+            platform_lib_dir = os.path.join(platform_dir, 'lib')
+            platform_db_dir = os.path.join(platform_lib_dir,
+                                        'platform', 'platform_db')
+            os.environ["BBS_LIB_PATH"] = platform_lib_dir
+            if("OPAE_PLATFORM_DB_PATH" in os.environ):
+                os.environ["OPAE_PLATFORM_DB_PATH"] += ":" + platform_db_dir
+            else:
+                os.environ["OPAE_PLATFORM_DB_PATH"] = platform_db_dir
+            bsp_platform_if_dir = os.path.join(bsp_qsf_dir, 'platform_if')
+            if(DBG):
+                print "bsp_platform_if_dir is %s\n" % bsp_platform_if_dir
+            delete_and_mkdir(bsp_platform_if_dir)
+            opae_platform_if_path = os.path.join(opae_inst_path, 'share', 'opae',
+                                                'platform', 'platform_if')
+            copy_glob(os.path.join(opae_platform_if_path, "*"),
+                    bsp_platform_if_dir)
+            afu_platform_config_bin = os.path.join(opae_inst_path, 'bin',
+                                                'afu_platform_config')
+    
+            # Read the FME class name from the standard location
+            plat_class_file = os.path.join(platform_lib_dir,
+                                        'fme-platform-class.txt')
+            with open(plat_class_file) as f:
+                plat_class_name = f.read().strip()
+    
+            cfg_cmd = (afu_platform_config_bin + " "
+                    "--qsf  --ifc " + PLATFORM_CONFIG_IFC_TYPE +
+                    " --tgt ./build/platform "
+                    "--platform_if platform_if " +
+                    plat_class_name)
+            run_cmd(cfg_cmd, bsp_dir)
+    
+            # setup sim stuff if needed
+            if(sim_mode):
+                # these can be symlinked because we won't create packages with them
+                # sim_mode is internal only
+                symlink_glob(os.path.join(PROJECT_PATH, 'ase', 'bsp', '*'),
+                            bsp_qsf_dir)
+    
+            # create quartus project revision for opencl kernel qsf
+            kernel_qsf_path = os.path.join(bsp_dir, 'afu_opencl_kernel.qsf')
+            if(DBG):
+                print "kernel_qsf_path is %s\n" % kernel_qsf_path
+            if THIS_IS_S10_BSP:
+                shutil.copy2(os.path.join(bsp_qsf_dir, 'afu_default.qsf'),
+                        kernel_qsf_path)
+            else:
+                shutil.copy2(os.path.join(bsp_qsf_dir, 'afu_synth.qsf'),
+                        kernel_qsf_path)
+                
+            if(DBG):
+                print "copy %s afu_default.qsf to %s\n" % (bsp_qsf_dir, kernel_qsf_path)
+            update_qsf_settings_for_opencl_kernel_qsf(kernel_qsf_path)
+            if(DBG):
+                print "update qsf setting for opencl-kernel-qsf"
+    
+            shutil.copy2(os.path.join(bsp_qsf_dir, 'dcp.qpf'), bsp_dir)
+            if(DBG):
+                print "copy %s dcp.qpf to %s" % (bsp_qsf_dir, bsp_dir)
+            update_qpf_project_for_opencl_flow(os.path.join(bsp_dir, 'dcp.qpf'))
+            if(DBG):
+                print "update qpf project for opencl flow of %s .dcp.qpf\n" % bsp_dir
+    
+            # update quartus project files for opencl
+            update_qpf_project_for_afu(os.path.join(bsp_qsf_dir, 'dcp.qpf'))
+            if(DBG):
+                print "update qpf project for afu %s /dcp.qpf\n" % bsp_qsf_dir
+            if THIS_IS_S10_BSP:
+                update_qsf_settings_for_opencl_afu(os.path.join(bsp_qsf_dir,
+                                                            'afu_default.qsf'))
+            else:
+                update_qsf_settings_for_opencl_afu(os.path.join(bsp_qsf_dir,
+                                                            'afu_synth.qsf'))
+                update_qsf_settings_for_opencl_afu(os.path.join(bsp_qsf_dir,
+                                                            'afu_fit.qsf'))
+                
+            if(DBG):
+                print "update qsf settings for opencl afu %s /afu_default.qsf\n" % bsp_qsf_dir
+    
+            # create manifest
+            create_manifest(bsp_dir)
         else:
-            os.environ["OPAE_PLATFORM_DB_PATH"] = platform_db_dir
-        bsp_platform_if_dir = os.path.join(bsp_qsf_dir, 'platform_if')
-        delete_and_mkdir(bsp_platform_if_dir)
-        opae_platform_if_path = os.path.join(opae_inst_path, 'share', 'opae',
-                                             'platform', 'platform_if')
-        copy_glob(os.path.join(opae_platform_if_path, "*"),
-                  bsp_platform_if_dir)
-        afu_platform_config_bin = os.path.join(opae_inst_path, 'bin',
-                                               'afu_platform_config')
-
-        # Read the FME class name from the standard location
-        plat_class_file = os.path.join(platform_lib_dir,
-                                       'fme-platform-class.txt')
-        with open(plat_class_file) as f:
-            plat_class_name = f.read().strip()
-
-        cfg_cmd = (afu_platform_config_bin + " "
-                   "--qsf  --ifc ccip_std_afu_avalon_mm_legacy_wires "
-                   "--tgt ./build/platform "
-                   "--platform_if platform_if " +
-                   plat_class_name)
-        run_cmd(cfg_cmd, bsp_dir)
-
-        # setup sim stuff if needed
-        if(sim_mode):
-            # these can be symlinked because we won't create packages with them
-            # sim_mode is internal only
-            symlink_glob(os.path.join(PROJECT_PATH, 'ase', 'bsp', '*'),
-                         bsp_qsf_dir)
-
-        # create quartus project revision for opencl kernel qsf
-        kernel_qsf_path = os.path.join(bsp_dir, 'afu_opencl_kernel.qsf')
-        shutil.copy2(os.path.join(bsp_qsf_dir, 'afu_synth.qsf'),
-                     kernel_qsf_path)
-        update_qsf_settings_for_opencl_kernel_qsf(kernel_qsf_path)
-
-        shutil.copy2(os.path.join(bsp_qsf_dir, 'dcp.qpf'), bsp_dir)
-        update_qpf_project_for_opencl_flow(os.path.join(bsp_dir, 'dcp.qpf'))
-
-        # update quartus project files for opencl
-        update_qpf_project_for_afu(os.path.join(bsp_qsf_dir, 'dcp.qpf'))
-        update_qsf_settings_for_opencl_afu(os.path.join(bsp_qsf_dir,
-                                                        'afu_synth.qsf'))
-        update_qsf_settings_for_opencl_afu(os.path.join(bsp_qsf_dir,
-                                                        'afu_fit.qsf'))
-
-        # create manifest
-        create_manifest(bsp_dir)
+            print "Not building non-DCP_BSP_TARGET BSP %s" % bsp
 
 
 # remove lines with search_text in file
@@ -312,6 +356,7 @@ def create_manifest(dst_dir):
     files = []
     for i in glob.glob(os.path.join(dst_dir, '*')):
         filename = os.path.basename(i)
+        print "create-manifest: filename is %s" % filename
         files.append("%s\n" % filename)
     manifest_file = 'bsp_dir_filelist.txt'
     files.append("%s\n" % manifest_file)
@@ -379,16 +424,22 @@ def update_qpf_project_for_afu(qpf_path):
     # need to rewrite these lines so that opencl AOC qsys flow modifies the
     # correct project
     remove_lines_in_file(qpf_path, 'PROJECT_REVISION')
-
-    with open(qpf_path, 'a') as f:
-        f.write('\n')
-        f.write('\n')
-        f.write('#YOU MUST PUT SYNTH REVISION FIRST SO THAT '
-                'AOC WILL DEFAULT TO THAT WITH qsys-script!\n')
-        f.write('PROJECT_REVISION = "afu_fit"\n')
-        f.write('PROJECT_REVISION = "afu_synth"\n')
-        f.write('PROJECT_REVISION = "dcp"\n')
-
+    
+    if (THIS_IS_S10_BSP):
+        with open(qpf_path, 'a') as f:
+            f.write('\n')
+            f.write('\n')
+            f.write('PROJECT_REVISION = "afu_default"\n')
+            f.write('PROJECT_REVISION = "dcp"\n')
+    else:
+        with open(qpf_path, 'a') as f:
+            f.write('\n')
+            f.write('\n')
+            f.write('#YOU MUST PUT SYNTH REVISION FIRST SO THAT '
+                    'AOC WILL DEFAULT TO THAT WITH qsys-script!\n')
+            f.write('PROJECT_REVISION = "afu_fit"\n')
+            f.write('PROJECT_REVISION = "afu_synth"\n')
+            f.write('PROJECT_REVISION = "dcp"\n')
 
 def update_qsf_settings_for_opencl_kernel_qsf(qsf_path):
     # create stripped down version of qsf for opencl qsys flow
@@ -446,10 +497,13 @@ def main():
                         default=[DEFAULT_BSP_DIR],
                         help='set bsp search directories')
 
+    print "environment variable DCP_BSP_TARGET is %s " % os.environ["DCP_BSP_TARGET"]
     args = parser.parse_args()
 
     if(args.debug):
         print "ARGS: ", args
+        global DBG
+        DBG = 1
 
     sim_mode = False
     if("OPENCL_ASE_SIM" in os.environ):

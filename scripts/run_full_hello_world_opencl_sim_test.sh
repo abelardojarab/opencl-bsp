@@ -4,6 +4,14 @@ SCRIPT_PATH=`readlink -f ${BASH_SOURCE[0]}`
 #get director of script path
 SCRIPT_DIR_PATH="$(dirname $SCRIPT_PATH)"
 
+if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
+then
+	TARGET_BSP="dcp_s10"
+else
+	TARGET_BSP="dcp_a10"
+	export DCP_BSP_TARGET="dcp_a10"
+fi
+
 . $SCRIPT_DIR_PATH/bsp_common.sh
 
 export OPENCL_ASE_SIM=1
@@ -12,11 +20,17 @@ setup_arc_for_script $@
 $SCRIPT_DIR_PATH/setup_packages.sh
 python $SCRIPT_DIR_PATH/setup_bsp.py -v
 
-cd $ROOT_PROJECT_PATH/example_designs/hello_world
+if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
+then
+	cd $ROOT_PROJECT_PATH/example_designs/hello_world
+else
+	cd $ROOT_PROJECT_PATH/example_designs_a10/hello_world
+fi
+
 rm -fr bin/hello_world
 if [ ! -f bin/hello_world.aocx ]; then
 	echo "Running AOC..."
-	aoc device/hello_world.cl --board dcp_a10 -o bin/hello_world.aocx
+	aoc device/hello_world.cl -board=$TARGET_BSP -o bin/hello_world.aocx
 	#aoc device/hello_world.cl --board skx_fpga_dcp_svm -o bin/hello_world.aocx
 	rm -fr hello_world_comp
 	mv bin/hello_world hello_world_comp

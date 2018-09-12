@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-Copyright (C) 2013-2015 Altera Corporation, San Jose, California, USA. All rights reserved.
+Copyright (C) 2013-2018 Altera Corporation, San Jose, California, USA. All rights reserved.
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
 software and associated documentation files (the "Software"), to deal in the Software
 without restriction, including without limitation the rights to use, copy, modify, merge,
@@ -25,19 +25,19 @@ by the laws of the United States of America.
 <head>
 <meta charset="utf-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-<title>Vector Add: Altera&reg; OpenCL&trade; Design Example</title>
+<title>Vector Add: Intel FPGA&reg; OpenCL&trade; Design Example</title>
 <link rel="stylesheet" href="../common/readme.css" type="text/css">
 </head>
 <body>
 <h1>
-<div class="preheading">Altera<sup>&reg;</sup> OpenCL&trade; Design Example</div>
+<div class="preheading">Intel FPGA<sup>&reg;</sup> OpenCL&trade; Design Example</div>
 Vector Add
 </h1>
 
 <p>This readme file for the Vector Add OpenCL Design Example contains
 information about the design example package. For more examples, please
-visit the <a href="http://www.altera.com/support/examples/opencl/opencl.html">
-Altera OpenCL Design Examples page</a>.</p>
+visit the <a href="https://www.altera.com/products/design-software/embedded-software-developers/opencl/developer-zone.html">
+Intel FPGA OpenCL Design Examples page</a>.</p>
 <nav>
 <h2>Contents</h2>
 <ul>
@@ -49,7 +49,7 @@ Altera OpenCL Design Examples page</a>.</p>
 <li><a href="#Running_the_Host_Program">Running the Host Program</a></li>
 <li><a href="#Release_History">Release History</a></li>
 <li><a href="#Legal">Legal</a></li>
-<li><a href="#Contacting_Altera">Contacting Altera</a></li>
+<li><a href="#Contacting_Intel">Contacting Intel</a></li>
 </ul>
 </nav>
 <section>
@@ -74,7 +74,7 @@ Altera OpenCL Design Examples page</a>.</p>
 <tr>
   <th rowspan="3">Requirement</th>
   <th rowspan="3">Version</th>
-<th colspan="2">OpenCL Kernel</th><th colspan="4">Host Program</th></tr><tr><th rowspan="2">Hardware<br/>Compile</th><th rowspan="2">Emulation<br/>Compile</th><th colspan="2">Hardware</th><th colspan="2">Emulation</th></tr><tr><th>Compile</th><th>Run</th><th>Compile</th><th>Run</th></tr></thead><tbody><tr><td>Altera Complete Design Suite <small>(Quartus II)</small></td><td>15.0 or later</td><td class="req">&#x02713;</td><td class="req">&#x02713;</td><td></td><td></td><td class="unsupported" rowspan="7" colspan="2">Emulation is not supported on the ARM processor. To use emulation, please use an example design package suitable for your development environment.</td></tr><tr><td>Altera SDK for OpenCL</td><td>15.0 or later</td><td class="req">&#x02713;</td><td class="req">&#x02713;</td><td class="req" rowspan="2">&#x02713;<div class="either">(either)</div></td><td></td></tr><tr><td>Altera Runtime Environment for OpenCL</td><td>15.0 or later</td><td></td><td></td><td class="req">&#x02713;</td></tr><tr><td>Board Support Package</td><td>15.0-compatible</td><td class="req">&#x02713;</td><td class="req">&#x02713;</td><td class="req">&#x02713;</td><td class="req">&#x02713;</td></tr><tr><td>Board Hardware</td><td>-</td><td></td><td></td><td></td><td class="req">&#x02713;</td></tr><tr><td>Altera SoC Embedded Design Suite <small>(ARM cross-compiler)</small></td><td>15.0</td><td></td><td></td><td class="req">&#x02713;</td><td class="req">&#x02713;</td></tr><tr><td>GNU Make</td><td>3.8.1 or later</td><td></td><td></td><td class="req">&#x02713;</td><td></td></tr></tbody>
+<th colspan="2">OpenCL Kernel</th><th colspan="4">Host Program</th></tr><tr><th rowspan="2">Hardware<br/>Compile</th><th rowspan="2">Emulation<br/>Compile</th><th colspan="2">Hardware</th><th colspan="2">Emulation</th></tr><tr><th>Compile</th><th>Run</th><th>Compile</th><th>Run</th></tr></thead><tbody><tr><td>Quartus Prime Design Software <small>(Quartus II)</small></td><td>16.1 or later</td><td class="req">&#x02713;</td><td class="req">&#x02713;</td><td></td><td></td><td></td><td></td></tr><tr><td>Intel(R) FPGA SDK for OpenCL(TM)</td><td>16.1 or later</td><td class="req">&#x02713;</td><td class="req">&#x02713;</td><td class="req" rowspan="2">&#x02713;<div class="either">(either)</div></td><td class="req" rowspan="2">&#x02713;<div class="either">(either)</div></td><td class="req" rowspan="2">&#x02713;<div class="either">(either)</div></td><td class="req" rowspan="2">&#x02713;<div class="either">(either)</div></td></tr><tr><td>Intel(R) FPGA Runtime Environment for OpenCL(TM)</td><td>16.1 or later</td><td></td><td></td></tr><tr><td>Board Support Package</td><td>16.1-compatible</td><td class="req">&#x02713;</td><td class="req">&#x02713;</td><td class="req">&#x02713;</td><td class="req">&#x02713;</td><td class="req">&#x02713;</td><td class="req">&#x02713;</td></tr><tr><td>Board Hardware</td><td>-</td><td></td><td></td><td></td><td class="req">&#x02713;</td><td></td><td></td></tr><tr><td>gcc</td><td>4.4.7 or later</td><td></td><td></td><td class="req">&#x02713;</td><td class="req">&#x02713;</td><td class="req">&#x02713;</td><td class="req">&#x02713;</td></tr><tr><td>GNU Make</td><td>3.8.1 or later</td><td></td><td></td><td class="req">&#x02713;</td><td></td><td class="req">&#x02713;</td><td></td></tr></tbody>
 </table>
 
 </section>
@@ -134,7 +134,12 @@ Altera OpenCL Design Examples page</a>.</p>
     </p>
 <p>If you are unsure of the boards available, use the following command to list
 available boards:</p>
-<div class="command">aoc --list-boards</div>
+<div class="command">aoc -list-boards</div>
+<section>
+<h3>Compiling for Emulator</h3>
+<p>To use the emulation flow, the compilation command just needs to be modified slightly:</p>
+<div class="command">aoc <span class="highlight nowrap">-march=emulator</span> device/vector_add.cl -o bin/vector_add.aocx --board &lt;<i>board</i>&gt;</div>
+</section>
 
 </section>
 
@@ -142,7 +147,32 @@ available boards:</p>
 <a id="Compiling_the_Host_Program"><h2>Compiling the Host Program</h2></a>
 <p>To compile the host program, run:</p>
 <div class="command">make</div>
-<p>The compiled host program will be located at <span class="mono">bin/vector_add</span>.</p>
+<p>The compiled host program will be located at <span class="mono">bin/host</span>.</p>
+<section>
+<h3>Host Preprocessor Definitions</h3>
+<p>The host program has the following preprocessor definitions:</p>
+<table class="host-defines parameters">
+<thead>
+<tr>
+  <th class="name">Define</th>
+  <th class="type">Type</th>
+  <th class="default">Default</th>
+  <th class="desc">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td class="name">-D<span class="highlight">USE_SVM_API</span>=&lt;<i>#</i>&gt;</td>
+  <td class="type">Optional</td>
+  <td class="default">0</td>
+  <td class="desc">
+          This option when set to 1 will use the OpenCL 2.0 shared virtual memory (SVM) API.
+        </td>
+</tr>
+</tbody>
+</table>
+<p>On Linux, custom values for preprocessor defines can be specified by setting 
+the value of <mono>CPPFLAGS</mono> when invoking the Makefile.</p>
 
 </section>
 
@@ -150,14 +180,21 @@ available boards:</p>
 <a id="Running_the_Host_Program"><h2>Running the Host Program</h2></a>
 <p>Before running the host program, you should have compiled the OpenCL kernel and the host program. Refer to the above sections if you have not completed those steps.</p>
 <p>To run the host program on hardware, execute:</p>
-<div class="command">bin/vector_add</div>
+<div class="command">bin/host</div>
 <p>The output will include a wall-clock time of the OpenCL execution time
         and the kernel time as reported by the OpenCL event profiling API. The host
         program includes verification against the host CPU, printing out "PASS"
         when the results match.</p><section>
+<h3>Running with the Emulator</h3>
+<p>Prior to running the emulation flow, ensure that you have compiled the kernel for emulation. 
+Refer to the above sections if you have not done so. Also, please set up your environment for
+emulation. Please see the <a href="http://www.altera.com/literature/hb/opencl-sdk/aocl_programming_guide.pdf">Intel(R) FPGA SDK for OpenCL(TM) Programming Guide</a> for more information.</p>
+<p>For this example design, the suggested emulation command is:</p>
+<div class="command">CL_CONTEXT_EMULATOR_DEVICE_INTELFPGA=1 bin/host <span class="nowrap">-n=10000</span></div>
+<section>
 <h3>Host Parameters</h3>
 <p>The general command-line for the host program is:</p>
-<div class="command">bin/vector_add <span class="nowrap">[-<span class="highlight">n</span>=&lt;<i>integer</i>&gt;]</span></div>
+<div class="command">bin/host <span class="nowrap">[-<span class="highlight">n</span>=&lt;<i>integer</i>&gt;]</span></div>
 <p>where the one parameter is:</p>
 <table class="host-params parameters">
 <thead>
@@ -187,7 +224,7 @@ available boards:</p>
 take priority):</p>
 <ol>
   <li>A file named <span class="mono">vector_add.aocx</span>.</li>
-  <li>A file named <span class="mono">vector_add_<span class="highlight">&lt;<i>board</i>&gt;</span>_150.aocx</span>, 
+  <li>A file named <span class="mono">vector_add_<span class="highlight">&lt;<i>board</i>&gt;</span>_161.aocx</span>, 
   where <span class="highlight mono">&lt;<i>board</i>&gt;</span> is the name of the board (as passed as the 
   <span class="mono">--board</span> argument to <span class="mono">aoc</span>).</li>
 </ol>
@@ -208,6 +245,18 @@ take priority):</p>
 </tr>
 </thead>
 <tbody>
+<tr>
+  <td class="version">1.5</td>
+  <td class="sdk-version">16.0</td>
+  <td class="date">November 2016</td>
+  <td class="changes"><ul><li>Add SVM API option.</li></ul></td>
+</tr>
+<tr>
+  <td class="version">1.4</td>
+  <td class="sdk-version">16.0</td>
+  <td class="date">June 2016</td>
+  <td class="changes"><ul><li>Fixed makefile.</li></ul></td>
+</tr>
 <tr>
   <td class="version">1.3</td>
   <td class="sdk-version">14.1</td>
@@ -239,7 +288,7 @@ take priority):</p>
 
 <section>
 <a id="Legal"><h2>Legal</h2></a>
-<pre class="license">Copyright (C) 2013-2015 Altera Corporation, San Jose, California, USA. All rights reserved.
+<pre class="license">Copyright (C) 2013-2018 Altera Corporation, San Jose, California, USA. All rights reserved.
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
 software and associated documentation files (the "Software"), to deal in the Software
 without restriction, including without limitation the rights to use, copy, modify, merge,
@@ -263,11 +312,11 @@ by the laws of the United States of America.
 </section>
 
 <section>
-<a id="Contacting_Altera"><h2>Contacting Altera</h2></a>
+<a id="Contacting_Intel"><h2>Contacting Intel</h2></a>
 <p>Although we have made every effort to ensure that this design example works
 correctly, there might be problems that we have not encountered. If you have
 a question or problem that is not answered by the information provided in 
-this readme file or the example's documentation, please contact Altera
+this readme file or the example's documentation, please contact Intel
 support (<a href="http://www.altera.com/myaltera">myAltera</a>).</p>
 
 </section>

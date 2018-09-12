@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2015 Altera Corporation, San Jose, California, USA. All rights reserved.
+# Copyright (C) 2013-2018 Altera Corporation, San Jose, California, USA. All rights reserved.
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this
 # software and associated documentation files (the "Software"), to deal in the Software
 # without restriction, including without limitation the rights to use, copy, modify, merge,
@@ -20,10 +20,10 @@
 # by the laws of the United States of America.
 # This is a GNU Makefile.
 
-# You must configure ALTERAOCLSDKROOT to point the root directory of the Altera SDK for OpenCL
+# You must configure INTELFPGAOCLSDKROOT to point the root directory of the Intel(R) FPGA SDK for OpenCL(TM)
 # software installation.
 # See http://www.altera.com/literature/hb/opencl-sdk/aocl_getting_started.pdf 
-# for more information on installing and configuring the Altera SDK for OpenCL.
+# for more information on installing and configuring the Intel(R) FPGA SDK for OpenCL(TM).
 
 ifeq ($(VERBOSE),1)
 ECHO := 
@@ -31,17 +31,17 @@ else
 ECHO := @
 endif
 
-# Where is the Altera SDK for OpenCL software?
-ifeq ($(wildcard $(ALTERAOCLSDKROOT)),)
-$(error Set ALTERAOCLSDKROOT to the root directory of the Altera SDK for OpenCL software installation)
+# Where is the Intel(R) FPGA SDK for OpenCL(TM) software?
+ifeq ($(wildcard $(INTELFPGAOCLSDKROOT)),)
+$(error Set INTELFPGAOCLSDKROOT to the root directory of the Intel(R) FPGA SDK for OpenCL(TM) software installation)
 endif
-ifeq ($(wildcard $(ALTERAOCLSDKROOT)/host/include/CL/opencl.h),)
-$(error Set ALTERAOCLSDKROOT to the root directory of the Altera SDK for OpenCL software installation.)
+ifeq ($(wildcard $(INTELFPGAOCLSDKROOT)/host/include/CL/opencl.h),)
+$(error Set INTELFPGAOCLSDKROOT to the root directory of the Intel(R) FPGA SDK for OpenCL(TM) software installation.)
 endif
 
 # OpenCL compile and link flags.
-AOCL_COMPILE_CONFIG := $(shell aocl compile-config)
-AOCL_LINK_CONFIG := $(shell aocl link-config)
+AOCL_COMPILE_CONFIG := $(shell aocl compile-config )
+AOCL_LINK_CONFIG := $(shell aocl link-config )
 
 # Compilation flags
 ifeq ($(DEBUG),1)
@@ -54,7 +54,7 @@ endif
 CXX := g++
 
 # Target
-TARGET := hello_world
+TARGET := host
 TARGET_DIR := bin
 
 # Directories
@@ -64,20 +64,22 @@ LIB_DIRS :=
 # Files
 INCS := $(wildcard )
 SRCS := $(wildcard host/src/*.cpp ../common/src/AOCLUtils/*.cpp)
-LIBS := 
+LIBS := rt pthread
 
 # Make it all!
 all : $(TARGET_DIR)/$(TARGET)
 
 # Host executable target.
-$(TARGET_DIR)/$(TARGET) : Makefile $(SRCS) $(INCS)
-	@[ -d $(TARGET_DIR) ] || mkdir $(TARGET_DIR)
+$(TARGET_DIR)/$(TARGET) : Makefile $(SRCS) $(INCS) $(TARGET_DIR)
 	$(ECHO)$(CXX) $(CPPFLAGS) $(CXXFLAGS) -fPIC $(foreach D,$(INC_DIRS),-I$D) \
 			$(AOCL_COMPILE_CONFIG) $(SRCS) $(AOCL_LINK_CONFIG) \
 			$(foreach D,$(LIB_DIRS),-L$D) \
 			$(foreach L,$(LIBS),-l$L) \
 			-o $(TARGET_DIR)/$(TARGET)
 
+$(TARGET_DIR) :
+	$(ECHO)mkdir $(TARGET_DIR)
+	
 # Standard make targets
 clean :
 	$(ECHO)rm -f $(TARGET_DIR)/$(TARGET)

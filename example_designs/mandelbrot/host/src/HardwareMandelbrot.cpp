@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2016 Altera Corporation, San Jose, California, USA. All rights reserved.
+// Copyright (C) 2013-2018 Altera Corporation, San Jose, California, USA. All rights reserved.
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the "Software"), to deal in the Software
 // without restriction, including without limitation the rights to use, copy, modify, merge,
@@ -92,7 +92,7 @@ int hardwareInitialize()
   }
 
   // Set up the platform
-  thePlatform = findPlatform("Intel(R) FPGA");
+  thePlatform = findPlatform("Intel(R) FPGA SDK for OpenCL(TM)");
   if(thePlatform == NULL)
   {
     printf("Found no platforms!\n");
@@ -128,6 +128,11 @@ int hardwareInitialize()
   std::string binary_file = getBoardBinaryFile("mandelbrot_kernel", theDevices[0]);
   printf("Using AOCX: %s\n", binary_file.c_str());
   theProgram = createProgramFromBinary(theContext, binary_file.c_str(), theDevices, numDevices);
+
+  // Build the program that was just created.
+  theStatus = clBuildProgram(theProgram, 0, NULL, "", NULL, NULL);
+  checkError(theStatus, "Failed to build program");
+
 
   // Create the kernels
   theKernels.reset(numDevices);

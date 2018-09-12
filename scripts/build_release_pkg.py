@@ -181,7 +181,7 @@ def build_release_pkg(platform, bsp_search_dirs, include_bsp, rename_bsp_arg,
                       default_bsp_arg=DEFAULT_BSP,
                       bsp_dir_name=DEFAULT_BSP_DIR_NAME,
                       verbose=False, debug=False, overlay=None):
-    setup_sw_packages(opae_branch=OPAE_GIT_BRANCH, sim_mode=False)
+    #setup_sw_packages(opae_branch=OPAE_GIT_BRANCH, sim_mode=False)
 
     bsp_info_map = get_filtered_bsp_list(bsp_search_dirs, include_bsp)
     if(debug):
@@ -251,7 +251,7 @@ def run_basic_sanity_test(release_build_dir, release_tar_path, bsp_dir_name):
 
     bsp_test_path = os.path.join(package_test_path, bsp_dir_name)
     run_bsp_cmd(bsp_test_path, 'aocl board-xml-test')
-    run_bsp_cmd(bsp_test_path, 'aoc --list-boards')
+    run_bsp_cmd(bsp_test_path, 'aoc -list-boards')
 
 
 # run bsp command by setting environment variable to bsp path before cmd

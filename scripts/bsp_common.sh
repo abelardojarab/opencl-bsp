@@ -9,7 +9,6 @@ export ROOT_PROJECT_PATH="$(dirname $COMMON_SCRIPT_DIR_PATH)"
 
 BUILD_DIR=$ROOT_PROJECT_PATH/build
 PACKAGE_DIR_PATH=$ROOT_PROJECT_PATH/packages
-
 OPAE_SRC_PATH=$BUILD_DIR/opae_src
 OPAE_LOCAL_INST_PATH=$BUILD_DIR/opae_inst
 OPAE_BUILD_PATH=$BUILD_DIR/opae_build
@@ -18,12 +17,16 @@ if [ "$OPAE_INSTALL_PATH" == "" ]; then
 	export OPAE_INSTALL_PATH=$OPAE_LOCAL_INST_PATH
 fi
 if [ "$OPAE_GIT_PATH" == "" ]; then
+    echo No OPAE_GIT_PATH defined, fetching from git...
 	if [ "$ARC_SITE" == "" ]; then
 		OPAE_GIT_PATH=/storage/shared/tools/git/opae-sdk-x.git
 	else
 		OPAE_GIT_PATH=/swip_apps/avl_vm/git_sync/git/opae-sdk-x.git
 	fi
+else
+    echo OPAE_GIT_PATH is $OPAE_GIT_PATH
 fi
+echo OPAE_GIT_PATH is $OPAE_GIT_PATH
 
 OPAE_USE_GIT_ARCHIVE="${OPAE_USE_GIT_ARCHIVE:-1}"
 if [ "$OPAE_GIT_BRANCH" == "" ]; then
@@ -43,7 +46,17 @@ export QUARTUS_HOME=$QUARTUS_ROOTDIR
 export ASE_WORKDIR=./temp_simulation/ase/work/
 export MPF_INSTALL_PATH=$BUILD_DIR/mpf
 export ASE_SRC_PATH=$OPAE_SRC_PATH/ase
-ACDS_ARC_RESOURCES="acl/17.1.1,acds/swip_apps/avl_vm/acds_patched/17.1.1/acds,qedition/pro,adapt"
+
+echo BSP target is $DCP_BSP_TARGET
+if [ "$DCP_BSP_TARGET" == "" ]
+then
+	ACDS_ARC_RESOURCES="acl/17.1.1,acds/swip_apps/avl_vm/acds_patched/17.1.1/acds,qedition/pro,adapt"
+elif [ "$DCP_BSP_TARGET" == "dcp_s10" ] || [ "$DCP_BSP_TARGET" == "pac_s10_dc" ]
+then
+	ACDS_ARC_RESOURCES="acl/18.0.1,acds/18.0.1/261,qedition/pro,adapt"
+else
+	ACDS_ARC_RESOURCES="acl/17.1.1,acds/swip_apps/avl_vm/acds_patched/17.1.1/acds,qedition/pro,adapt"
+fi
 SIM_ARC_RESOURCES="vcs,vcs-vcsmx-lic/vrtn-dev"
 SW_BUILD_ARC_RESOURCES="gcc/4.8.2,python,cmake/3.7.2,boost,doxygen/1.8.11"
 

@@ -4,7 +4,7 @@ release package
 HOW TO RUN SIM:
 cd git_repo_root
 
-#you can aslo run ./scripts/run_full_opencl_sim_test.sh
+#you can also run ./scripts/run_full_opencl_sim_test.sh
 export OPENCL_ASE_SIM=1
 ./scripts/sim_bsp_env_shell.sh
 ./scripts/setup_packages.sh
