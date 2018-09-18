@@ -22,7 +22,7 @@ python $SCRIPT_DIR_PATH/setup_bsp.py -v
 
 if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
 then
-	cd $ROOT_PROJECT_PATH/example_designs/mmd_copy_test
+	cd $ROOT_PROJECT_PATH/example_designs_s10/mmd_copy_test
 	
 	rm -fr bin/mmd_copy_test
 	if [ ! -f bin/mmd_copy_test.aocx ]; then
@@ -40,7 +40,7 @@ then
 	#16384 == buffer test size for dma
 	./mmd_copy_test 16384
 else
-	cd $ROOT_PROJECT_PATH/example_designs_a10/mmd_copy_test
+	cd $ROOT_PROJECT_PATH/example_designs/mmd_copy_test
 	
 	rm -fr bin/hello_world
 	if [ ! -f bin/hello_world.aocx ]; then

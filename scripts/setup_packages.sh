@@ -13,18 +13,18 @@ set -e
 if [ -z "$OPAE_GIT_BRANCH" ]; then
     OPAE_GIT_BRANCH="rewind/master-x/2018-08-27"
 fi
-echo "setup_packages.sh OPAE_GIT_BRANCH is $OPAE_GIT_BRANCH"
+echo "setup_packages.sh: OPAE_GIT_BRANCH is $OPAE_GIT_BRANCH"
 
 #check for OPAE
 if [ ! -d "$OPAE_INSTALL_PATH" ]; then
-  echo "OPAE_INSTALL_PATH does not exist.  need to build"
+  echo "setup_packages.sh: OPAE_INSTALL_PATH does not exist.  need to build"
   sh $SCRIPT_DIR_PATH/build_opae.sh
 fi
 
 #check for MMD
 if [ ! -f "$AOCL_BOARD_PACKAGE_ROOT/linux64/lib/libintel_opae_mmd.so" ]; then
-  echo "MMD does not exist.  need to build"
+  echo "setup_packages.sh: MMD does not exist.  need to build"
   sh $SCRIPT_DIR_PATH/build_mmd.sh
 fi
 
-echo "all packages are setup."
+echo "setup_packages.sh: all packages are setup"

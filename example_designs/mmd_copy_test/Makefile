@@ -54,7 +54,7 @@ endif
 CXX := g++
 
 # Target
-TARGET := mmd_copy_test
+TARGET := hello_world
 TARGET_DIR := bin
 
 # Directories

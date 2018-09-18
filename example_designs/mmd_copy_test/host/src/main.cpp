@@ -269,7 +269,7 @@ bool init() {
   checkError(status, "Failed to create command queue");
 
   // Create the program.
-  std::string binary_file = getBoardBinaryFile("mmd_copy_test", device);
+  std::string binary_file = getBoardBinaryFile("hello_world", device);
   printf("Using AOCX: %s\n", binary_file.c_str());
   program = createProgramFromBinary(context, binary_file.c_str(), &device, 1);
 
@@ -279,7 +279,7 @@ bool init() {
 
   // Create the kernel - name passed in here must match kernel name in the
   // original CL file, that was compiled into an AOCX file using the AOC tool
-  const char *kernel_name = "mmd_copy_test";  // Kernel name, as defined in the CL file
+  const char *kernel_name = "hello_world";  // Kernel name, as defined in the CL file
   kernel = clCreateKernel(program, kernel_name, &status);
   checkError(status, "Failed to create kernel");
 

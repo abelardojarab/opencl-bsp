@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2018 Altera Corporation, San Jose, California, USA. All rights reserved.
+// Copyright (C) 2013-2016 Altera Corporation, San Jose, California, USA. All rights reserved.
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the "Software"), to deal in the Software
 // without restriction, including without limitation the rights to use, copy, modify, merge,
@@ -297,7 +297,7 @@ cl_int clInit(void)
   cl_int status = CL_SUCCESS;
 
   // Get the OpenCL platform.
-  platform = findPlatform("Intel(R) FPGA SDK for OpenCL(TM)");
+  platform = findPlatform("Intel(R) FPGA");
   if(platform == NULL) {
     printf("ERROR: Unable to find Intel(R) FPGA OpenCL platform\n");
     return false;
@@ -357,11 +357,6 @@ void cleanup(void)
   for (int i = 0; i <= 2 * COPIES + 3; i++) {
     status = clReleaseCommandQueue(queue[i]);
   }
-  for (int i = 0; i < STREAMS; i++) {
-    status = clReleaseMemObject(d_inData[i]);
-    status = clReleaseMemObject(d_finalRGB[i]);
-  }
-  
   status = clReleaseKernel(kernel_dct);
   status = clReleaseKernel(kernel_arb);
   status = clReleaseContext(context);
@@ -692,9 +687,9 @@ int main(int argc, char* argv[]) {
   for (int i = 0; i < STREAMS; i++) {
 #if USE_SVM_API == 0
     if (myentropy[i])
-      alignedFree(myentropy[i]);
+      free(myentropy[i]);
     if (myrgb[i])
-      alignedFree(myrgb[i]);
+      free(myrgb[i]);
 #else
     if (myentropy[i])
       clSVMFree(context, myentropy[i]);

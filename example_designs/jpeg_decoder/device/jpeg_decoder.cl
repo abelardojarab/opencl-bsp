@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2018 Altera Corporation, San Jose, California, USA. All rights reserved.
+// Copyright (C) 2013-2016 Altera Corporation, San Jose, California, USA. All rights reserved.
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the "Software"), to deal in the Software
 // without restriction, including without limitation the rights to use, copy, modify, merge,
@@ -19,7 +19,9 @@
 // This agreement shall be governed in all respects by the laws of the State of California and
 // by the laws of the United States of America.
 
+//needed for acl/17.1 compatibility
 #pragma OPENCL EXTENSION cl_intel_channels : enable
+
 #include "../host/inc/jpeg.h"
 
 struct entropyData {

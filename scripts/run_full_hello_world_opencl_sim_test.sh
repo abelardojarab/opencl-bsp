@@ -22,9 +22,9 @@ python $SCRIPT_DIR_PATH/setup_bsp.py -v
 
 if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
 then
-	cd $ROOT_PROJECT_PATH/example_designs/hello_world
+	cd $ROOT_PROJECT_PATH/example_designs_s10/hello_world
 else
-	cd $ROOT_PROJECT_PATH/example_designs_a10/hello_world
+	cd $ROOT_PROJECT_PATH/example_designs/hello_world
 fi
 
 rm -fr bin/hello_world

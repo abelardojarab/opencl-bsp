@@ -22,9 +22,9 @@ python $SCRIPT_DIR_PATH/setup_bsp.py -v
 
 if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
 then
-	cd $ROOT_PROJECT_PATH/example_designs/mem_bandwidth
+	cd $ROOT_PROJECT_PATH/example_designs_s10/mem_bandwidth
 else
-	cd $ROOT_PROJECT_PATH/example_designs_a10/mem_bandwidth
+	cd $ROOT_PROJECT_PATH/example_designs/mem_bandwidth
 fi
 
 rm -fr bin/mem_bandwidth

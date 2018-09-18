@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2018 Altera Corporation, San Jose, California, USA. All rights reserved.
+// Copyright (C) 2013-2015 Altera Corporation, San Jose, California, USA. All rights reserved.
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the "Software"), to deal in the Software
 // without restriction, including without limitation the rights to use, copy, modify, merge,
@@ -110,9 +110,9 @@ bool init() {
   }
 
   // Get the OpenCL platform.
-  platform = findPlatform("Intel(R) FPGA SDK for OpenCL(TM)");
+  platform = findPlatform("fpga");
   if(platform == NULL) {
-    printf("ERROR: Unable to find Intel(R) FPGA OpenCL platform.\n");
+    printf("ERROR: Unable to find Altera OpenCL platform.\n");
     return false;
   }
 
@@ -204,6 +204,16 @@ static void device_info_string( cl_device_id device, cl_device_info param, const
    clGetDeviceInfo(device, param, STRING_BUFFER_LEN, &a, NULL);
    printf("%-40s = %s\n", name, a);
 }
+static void device_info_svm( cl_device_id device, cl_device_info param, const char* name) {
+   cl_device_svm_capabilities a;
+   clGetDeviceInfo(device, param, sizeof(cl_uint), &a, NULL);
+   printf("%-40s = %u ", name, (cl_uint)a);
+   
+   if( a & CL_DEVICE_SVM_COARSE_GRAIN_BUFFER)
+   	   printf("CL_DEVICE_SVM_COARSE_GRAIN_BUFFER", name, (cl_uint)a);
+   
+   printf("\n");
+}
 
 // Query and display OpenCL information on device and runtime environment
 static void display_device_info( cl_device_id device ) {
@@ -228,7 +238,7 @@ static void display_device_info( cl_device_id device ) {
    device_info_ulong(device, CL_DEVICE_MAX_CONSTANT_ARGS, "CL_DEVICE_MAX_CONSTANT_ARGS");
    device_info_ulong(device, CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE, "CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE");
    device_info_uint(device, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, "CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS");
-   device_info_uint(device, CL_DEVICE_MEM_BASE_ADDR_ALIGN, "CL_DEVICE_MEM_BASE_ADDR_ALIGN");
+   device_info_uint(device, CL_DEVICE_MEM_BASE_ADDR_ALIGN, "CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS");
    device_info_uint(device, CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE, "CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE");
    device_info_uint(device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR, "CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR");
    device_info_uint(device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT, "CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT");
@@ -236,6 +246,8 @@ static void display_device_info( cl_device_id device ) {
    device_info_uint(device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG, "CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG");
    device_info_uint(device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT, "CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT");
    device_info_uint(device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE, "CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE");
+   device_info_svm(device, CL_DEVICE_SVM_CAPABILITIES, "CL_DEVICE_SVM_CAPABILITIES");
+   
 
    {
       cl_command_queue_properties ccp;

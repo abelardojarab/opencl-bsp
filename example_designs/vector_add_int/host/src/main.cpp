@@ -99,8 +99,8 @@ int main(int argc, char **argv) {
 	//	if (!std::string("-d").compare(argv[i]))
 	//		device = devices[atoi(argv[++i])];
 #if defined(_DEBUG) | defined(SHOW_PLATFORM)
-	//std::cout << "Device vendor: " << device.getInfo<CL_DEVICE_VENDOR>(&status) << std::endl;
-	//std::cout << "Device name: " << device.getInfo<CL_DEVICE_NAME>(&status) << std::endl;
+	std::cout << "Device vendor: " << device.getInfo<CL_DEVICE_VENDOR>(&status) << std::endl;
+	std::cout << "Device name: " << device.getInfo<CL_DEVICE_NAME>(&status) << std::endl;
 	std::cout << std::endl;
 #endif
 
