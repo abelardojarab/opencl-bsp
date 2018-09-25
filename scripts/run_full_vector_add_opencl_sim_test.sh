@@ -31,7 +31,6 @@ rm -fr bin/vector_add_int
 if [ ! -f bin/vector_add_int.aocx ]; then
 	echo "Running AOC..."
 	aoc vector_add_int.cl -board=$TARGET_BSP -o bin/vector_add_int.aocx
-	#aoc vector_add_int.cl --board skx_fpga_dcp_svm -o bin/vector_add_int.aocx
 	rm -fr vector_add_int_comp
 	mv bin/vector_add_int vector_add_int_comp
 fi

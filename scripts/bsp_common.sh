@@ -50,11 +50,14 @@ export ASE_SRC_PATH=$OPAE_SRC_PATH/ase
 echo BSP target is $DCP_BSP_TARGET
 if [ "$DCP_BSP_TARGET" == "" ]
 then
+	unset ACL_ACDS_VERSION_OVERRIDE
 	ACDS_ARC_RESOURCES="acl/17.1.1,acds/swip_apps/avl_vm/acds_patched/17.1.1/acds,qedition/pro,adapt"
 elif [ "$DCP_BSP_TARGET" == "dcp_s10" ] || [ "$DCP_BSP_TARGET" == "pac_s10_dc" ]
 then
-	ACDS_ARC_RESOURCES="acl/18.0.1,acds/18.0.1/261,qedition/pro,adapt"
+	export ACL_ACDS_VERSION_OVERRIDE=18.1.0
+	ACDS_ARC_RESOURCES="acl/18.0.1,acds/18.1/220,qedition/pro,adapt"
 else
+	unset ACL_ACDS_VERSION_OVERRIDE
 	ACDS_ARC_RESOURCES="acl/17.1.1,acds/swip_apps/avl_vm/acds_patched/17.1.1/acds,qedition/pro,adapt"
 fi
 SIM_ARC_RESOURCES="vcs,vcs-vcsmx-lic/vrtn-dev"

@@ -27,7 +27,7 @@ echo "Submitting each kernel to compile separately on arc..."
 
 for i in $KERNEL_LIST; do
 	echo $i
-	arc submit node/"[memory>=32000]" priority=61 -- "export DCP_BSP_TARGET=dcp_s10; $AOC_CMD $i"
+	arc submit node/"[memory>=32000]" priority=61 -- "export ACL_ACDS_VERSION_OVERRIDE=18.1.0; export DCP_BSP_TARGET=dcp_s10; $AOC_CMD $i"
 done
 exit 0
 
