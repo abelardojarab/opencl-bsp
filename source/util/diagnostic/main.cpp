@@ -58,9 +58,9 @@
 #include "aocl_mmd.h"
 
 
-#define ACL_BOARD_PKG_NAME                          "a10_dcp"
+#define ACL_BOARD_PKG_NAME                          "pac"
 #define ACL_VENDOR_NAME                             "Intel(R) Corporation"
-#define ACL_BOARD_NAME                              "Arria 10 DCP Platform"
+#define ACL_BOARD_NAME                              "Intel PAC Platform"
 
 
 // WARNING: host runs out of events if MAXNUMBYTES is much greater than

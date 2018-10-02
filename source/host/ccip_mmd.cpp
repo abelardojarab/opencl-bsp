@@ -377,7 +377,7 @@ int aocl_mmd_get_info(
 		case AOCL_MMD_BOARD_NAME:            
 		{
 			std::ostringstream board_name;
-			board_name << "PAC Arria 10 Platform" << " (" << dev->get_dev_name() << ")";
+			board_name << "Intel PAC Platform" << " (" << dev->get_dev_name() << ")";
 			RESULT_STR(board_name.str().c_str()); 
 			break;
 		}

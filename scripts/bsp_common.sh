@@ -23,10 +23,8 @@ if [ "$OPAE_GIT_PATH" == "" ]; then
 	else
 		OPAE_GIT_PATH=/swip_apps/avl_vm/git_sync/git/opae-sdk-x.git
 	fi
-else
-    echo OPAE_GIT_PATH is $OPAE_GIT_PATH
 fi
-echo OPAE_GIT_PATH is $OPAE_GIT_PATH
+echo "bsp_common.sh OPAE_GIT_PATH is $OPAE_GIT_PATH"
 
 OPAE_USE_GIT_ARCHIVE="${OPAE_USE_GIT_ARCHIVE:-1}"
 if [ "$OPAE_GIT_BRANCH" == "" ]; then
@@ -47,7 +45,6 @@ export ASE_WORKDIR=./temp_simulation/ase/work/
 export MPF_INSTALL_PATH=$BUILD_DIR/mpf
 export ASE_SRC_PATH=$OPAE_SRC_PATH/ase
 
-echo BSP target is $DCP_BSP_TARGET
 if [ "$DCP_BSP_TARGET" == "" ]
 then
 	unset ACL_ACDS_VERSION_OVERRIDE
