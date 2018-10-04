@@ -34,6 +34,8 @@ fi
 echo "bsp_common.sh OPAE_GIT_BRANCH is $OPAE_GIT_BRANCH"
 
 export AOCL_BOARD_PACKAGE_ROOT=$ROOT_PROJECT_PATH
+echo AOCL_BOARD_PACKAGE_ROOT is $AOCL_BOARD_PACKAGE_ROOT
+echo ROOT_PROJECT_PATH is $ROOT_PROJECT_PATH
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ALTERAOCLSDKROOT/host/linux64/lib
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$AOCL_BOARD_PACKAGE_ROOT/linux64/lib
 
@@ -52,7 +54,7 @@ then
 elif [ "$DCP_BSP_TARGET" == "dcp_s10" ] || [ "$DCP_BSP_TARGET" == "pac_s10_dc" ]
 then
 	export ACL_ACDS_VERSION_OVERRIDE=18.1.0
-	ACDS_ARC_RESOURCES="acl/18.0.1,acds/18.1/220,qedition/pro,adapt"
+	ACDS_ARC_RESOURCES="acl/18.0.1,acds/18.1/222,qedition/pro,adapt"
 else
 	unset ACL_ACDS_VERSION_OVERRIDE
 	ACDS_ARC_RESOURCES="acl/17.1.1,acds/swip_apps/avl_vm/acds_patched/17.1.1/acds,qedition/pro,adapt"

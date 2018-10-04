@@ -90,6 +90,7 @@ FLOW_SUCCESS=$?
 # Report Timing
 # =============
 quartus_sh -t scripts/adjust_plls_mcp.tcl
+
 if [ $FLOW_SUCCESS -eq 1 ]
 then
     echo "ERROR: pll timing script failed."

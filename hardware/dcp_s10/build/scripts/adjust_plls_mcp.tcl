@@ -19,11 +19,8 @@ package require ::quartus::flow
 
 # Definitions
 
-#DG ToDo: hack work-around to use fixed clocks from top-level IOPLL (rather than programmable user-PLL)
-#set k_clk_name "fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk[0]"
-set k_clk_name "u0|dcp_iopll|dcp_iopll_clk100"
-#set k_clk2x_name "fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk[1]"
-set k_clk2x_name "u0|dcp_iopll|dcp_iopll_clk1x"
+set k_clk_name "fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_iopll_u0|iopll_0_outclk0"
+set k_clk2x_name "fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_iopll_u0|iopll_0_outclk1"
 set k_fmax -1
 set jitter_compensation 0.01
 
@@ -59,7 +56,6 @@ proc find_kernel_pll_in_design {pll_search_string} {
 #   -3: no rows found in panel
 #   -4: multiple matches found
 proc find_report_panel_row { panel_name col_index string_op string_pattern } {
-    puts "find-report-panel-row: $panel_name $col_index $string_op $string_pattern"
     if {[catch {get_report_panel_id $panel_name} panel_id] || $panel_id == -1} {
         return -2;
     }
@@ -71,12 +67,9 @@ proc find_report_panel_row { panel_name col_index string_op string_pattern } {
     # Search for row match.
     set found 0
     set row_index -1;
-    puts "string_pattern is $string_pattern"
-    puts "Look for match in the following list of clock names..."
 
     for {set r 1} {$r < $num_rows} {incr r} {
         if {[catch {get_report_panel_data -id $panel_id -row $r -col $col_index} value] == 0} {
-            puts "clock name is $value"
             if {[string $string_op $string_pattern $value]} {
                 if {$found == 0} {
                     # If multiple rows match, return the first
@@ -87,8 +80,12 @@ proc find_report_panel_row { panel_name col_index string_op string_pattern } {
         }
     }
 
-    if {$found > 1} {return [list -4 $panel_id $row_index]}
-    if {$row_index == -1} {return -1}
+    if {$found > 1} {
+        return [list -4 $panel_id $row_index]
+    }
+    if {$row_index == -1} {
+        return -1
+    }
 
     return [list 0 $panel_id $row_index]
 }
@@ -101,7 +98,9 @@ proc find_report_panel_row { panel_name col_index string_op string_pattern } {
 proc get_fmax_from_report { clkname required jitter_compensation} {
     # Find the clock period.
     set result [find_report_panel_row "Timing Analyzer||Clocks" 0 match $clkname]
+    puts "get_fmax_from_report: result is $result"
     set retval [lindex $result 0]
+    puts "get_fmax_from_report: retval is: $retval"
    
     if {$retval == -1} { 
         if {$required == 1} {
@@ -246,26 +245,6 @@ post_message "Running adjust PLLs script"
 set project_name "dcp"
 set revision_name "afu_default"
 
-
-
-# if { [llength $quartus(args) ] == 0 } {
-  # # If this script is run manually, just compile the default revision
-  # set qpf_files [glob -nocomplain *.qpf]
-
-  # if {[llength $qpf_files] == 0} {
-    # error "No QSF detected"
-  # } elseif {[llength $qpf_files] > 1} {
-    # post_message "Warning: More than one QSF detected. Picking the first one."
-  # }
-  # set qpf_file [lindex $qpf_files 0]
-  # set project_name [string range $qpf_file 0 [expr [string first . $qpf_file] - 1]]
-  # set revision_name [get_current_revision $project_name]
-# } else {
-  # set project_name [lindex $quartus(args) 1]
-  # set revision_name [lindex $quartus(args) 2]
-# }
-
-
 post_message "Project name: $project_name"
 post_message "Revision name: $revision_name"
 
@@ -275,12 +254,6 @@ design::load_design -writeable -snapshot final
 load_report $revision_name
 
 set panel_names [get_report_panel_names]
-
-puts "panel-names are:"
-foreach panel_name [get_report_panel_names] {
-    puts "panel-name is $panel_name"
-}
-puts "end of panel-names"
 
 # adjust PLL settings
 set k_clk_name_full   $k_clk_name
@@ -363,13 +336,26 @@ puts $outfile "Actual clock freq: $pll_1x_setting"
 puts $outfile "Kernel fmax: $k_fmax"
 puts $outfile "1x clock fmax: $fmax1"
 puts $outfile "2x clock fmax: $fmax2"
+puts "ALUTs: $aluts"
+puts "Registers: $registers"
+puts "Logic utilization: $logicutil"
+puts "I/O pins: $io_pin"
+puts "DSP blocks: $dsp"
+puts "Memory bits: $mem_bit"
+puts "RAM blocks: $m9k"
+puts "Actual clock freq: $pll_1x_setting"
+puts "Kernel fmax: $k_fmax"
+puts "1x clock fmax: $fmax1"
+puts "2x clock fmax: $fmax2"
 
 # Highest non-global fanout signal
 set result [find_report_panel_row "Fitter||Place Stage||Fitter Resource Usage Summary" 0 equal "Highest non-global fan-out"]
 if {[lindex $result 0] < 0} {error "Error: Could not find highest non-global fan-out (error $retval)"}
+puts "found highest non-global fan-out information: $result"
 set high_fanout_signal_fanout_count [get_report_panel_data -id [lindex $result 1] -row [lindex $result 2] -col 1]
 
 puts $outfile "Highest non-global fanout: $high_fanout_signal_fanout_count"
+puts "end of writing to acl_quartus_report.txt"
 
 close $outfile
 # End little report
@@ -379,6 +365,7 @@ close $outfile
 
 # write  file for kernel freq metadata
 set clockfile   [open "pll_metadata.txt" w]
+puts "create pll_metadata.txt file and write the low and high clock frequency values"
 puts $clockfile "clock-frequency-low:$pll_1x_setting clock-frequency-high:$pll_2x_setting"
 close $clockfile
 
@@ -390,32 +377,32 @@ set period2 [expr {double(round(100*$period2))/100}]
 #kernel clk 1x / uClk_usrDiv2
 set period [expr 2.0 * $period2]
 
-file rename -force user_clock.sdc user_clock_orig.sdc	
+puts "force the rename of user_clock.sdc to user_clock_orig.sdc"
+file rename -force user_clock.sdc user_clock_orig.sdc
 
 set sdcfile   [open "user_clock.sdc" w]
-puts $sdcfile "create_clock -name {fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|outclk0} -period $period \[get_pins {fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk\[0\]}\]"
-puts $sdcfile "create_clock -name {fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|outclk1} -period $period2 \[get_pins {fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_fpll_u0|xcvr_fpll_a10_0|fpll_inst|outclk\[1\]}\]"
+puts "update user_clock.sdc with the new clk and clk2x constraints"
+puts $sdcfile "create_clock -name {fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_iopll_u0|iopll_0_outclk0} -period $period \[get_pins {fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_iopll_u0|iopll_0|stratix10_altera_iopll_i|s10_iopll.fourteennm_pll|outclk\[0\]}\]"
+puts $sdcfile "create_clock -name {fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_iopll_u0|iopll_0_outclk1} -period $period2 \[get_pins {fpga_top|inst_fiu_top|inst_ccip_fabric_top|inst_cvl_top|inst_user_clk|qph_user_clk_iopll_u0|iopll_0|stratix10_altera_iopll_i|s10_iopll.fourteennm_pll|outclk\[1\]}\]"
 close $sdcfile
 
-
+puts "done updating user_clock.sdc constraints"
 
 # Force sta timing netlist to be rebuilt
+puts "clean up previous timing netlists before re-running STA"
 file delete [glob -nocomplain db/$revision_name.sta_cmp.*.tdb]
 file delete [glob -nocomplain qdb/_compiler/$revision_name/root_partition/*/final/1/*cache*]
 file delete [glob -nocomplain qdb/_compiler/$revision_name/root_partition/*/final/1/timing_netlist*]
 
 # Re-run STA
-set sdk_root [string map {"\\" "/"} $::env(ALTERAOCLSDKROOT)]
+set sdk_root [string map {"\\" "/"} $::env(INTELFPGAOCLSDKROOT)]
 post_message "Launching STA with report script $sdk_root/ip/board/bsp/failing_clocks.tcl"
+puts "Launching STA with report script $sdk_root/ip/board/bsp/failing_clocks.tcl"
 if {[catch {execute_module -tool sta -args "--report_script=$sdk_root/ip/board/bsp/failing_clocks.tcl"} result]} {
   post_message -type error "Error! Timing failed $result"
   #TODO: this needs to return error in the future
   #exit 2
 }
-
-#the following line is in the A10 BSP - but at this point in time there is no loaded design!? It was
-#unloaded after finding the kernel fmax.
-#design::unload_design
 
 project_close
 
