@@ -20,12 +20,12 @@ setup_arc_for_script $@
 $SCRIPT_DIR_PATH/setup_packages.sh
 python $SCRIPT_DIR_PATH/setup_bsp.py -v
 
-if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
-then
-	cd $ROOT_PROJECT_PATH/example_designs_s10/hello_world
-else
+#if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
+#then
+#	cd $ROOT_PROJECT_PATH/example_designs_s10/hello_world
+#else
 	cd $ROOT_PROJECT_PATH/example_designs/hello_world
-fi
+#fi
 
 rm -fr bin/hello_world
 if [ ! -f bin/hello_world.aocx ]; then

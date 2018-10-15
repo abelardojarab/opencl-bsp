@@ -20,12 +20,12 @@ setup_arc_for_script $@
 $SCRIPT_DIR_PATH/setup_packages.sh
 python $SCRIPT_DIR_PATH/setup_bsp.py -v
 
-if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
-then
-	cd $ROOT_PROJECT_PATH/example_designs_s10/mem_bandwidth
-else
+#if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
+#then
+#	cd $ROOT_PROJECT_PATH/example_designs_s10/mem_bandwidth
+#else
 	cd $ROOT_PROJECT_PATH/example_designs/mem_bandwidth
-fi
+#fi
 
 rm -fr bin/mem_bandwidth
 if [ ! -f bin/mem_bandwidth.aocx ]; then

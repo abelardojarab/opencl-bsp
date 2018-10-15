@@ -12,6 +12,9 @@ mv qsys_files/*.vhd ./qsys_files_vhd
 echo > ./vhdl_files.list
 if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
 then
+    #hack to work around compilation errors
+    cp -rf $AOCL_BOARD_PACKAGE_ROOT/ase/bsp/extra_sim_files/hld_fifo.sv qsys_files/hld_fifo.sv
+    cp -rf $AOCL_BOARD_PACKAGE_ROOT/ase/bsp/extra_sim_files/platform_afu_top_config.vh rtl/platform_afu_top_config.vh
     #dspba_library must be first!
     (find ./qsys_files_vhd | grep -v mpf | grep dspba_library) >> ./vhdl_files.list
     (find ./qsys_files_vhd | grep -v mpf | grep -v dspba_library) >> ./vhdl_files.list

@@ -14,11 +14,14 @@ AOC_CMD="sh $MAIN_SCRIPTS_DIR_PATH/aoc_for_bsp.sh -v -board=dcp_s10"
 #KERNEL_LIST=`find $SCRIPT_DIR_PATH -name "*.cl"`
 KERNEL_LIST=`find $SCRIPT_DIR_PATH/vector_add -name "vector_add.cl"`
 
-#check if kernel_comp exists; rename if it does
+#check if kernel_comp_s10/vector_add exists; rename if it does
 if [ -d kernel_comp_s10 ]; then
-    mv kernel_comp_s10 kernel_comp_s10_$(date +%Y%m%d%H%M%S)
+    if [ -d kernel_comp_s10/vector_add ]; then
+        mv kernel_comp_s10/vector_add kernel_comp_s10/vector_add_$(date +%Y%m%d%H%M%S)
+    fi
+else
+    mkdir kernel_comp_s10
 fi
-mkdir kernel_comp_s10
 cd kernel_comp_s10
 
 #printenv

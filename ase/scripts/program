@@ -10,57 +10,85 @@ extension="${filename##*.}"
 fpga_bin_path=$2
 
 if [ "$extension" == "aocx" ]; then
-	fpga_bin_path="fpga.bin"
-	aocl binedit $2 get .acl.fpga.bin $fpga_bin_path
+    fpga_bin_path="fpga.bin"
+    aocl binedit $2 get .acl.fpga.bin $fpga_bin_path
 fi
 
-echo $fpga_bin_path
+echo "fpga-bin-path is $fpga_bin_path"
 
 if [ "$OPENCL_ASE_SIM" == "1" ]; then
-	#simulation programming flow(start VCS)
-	if [[ "$1" != "acl0" ]] ; then
-		echo "Not acl0, exiting without launching vcs"
-		exit 0
-	fi                                                                                     
-	
-	#uncompress and prepare modelsim files
-	mkdir -p temp_simulation
-	cd temp_simulation
-	tar zxvf ../$fpga_bin_path
-	export KDIR=$PWD
-	
-	rm -fr ./ase
-	cp -r $ASE_SRC_PATH ./ase
-	cp -rf $AOCL_BOARD_PACKAGE_ROOT/ase/patch/* ./ase
-	cd ase
-	
-	mkdir dummy_rtl_dir
-	touch dummy_rtl_dir/dummy_rtl_file.sv
-	mkdir dummy_vhd_dir
-	touch dummy_vhd_dir/dummy_vhd_file.vhd
-	
-	set -e
-	#needed because ase now requires afu_platform_config script in the exe
-	#search path
-	export PATH=${OPAE_INSTALL_PATH}/bin:${PATH}
-	python ./scripts/generate_ase_environment.py -p discrete dummy_rtl_dir dummy_vhd_dir
-	
-	echo >> ase_sources.mk
-	echo "ASE_DISCRETE_EMIF_MODEL=EMIF_MODEL_BASIC" >> ase_sources.mk
-	#echo "ASE_DISCRETE_EMIF_MODEL=EMIF_MODEL_ADVANCED" >> ase_sources.mk
-	echo >> ase_sources.mk
-	
-	if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
-	then
-		echo 'SNPS_VLOGAN_OPT?=' >> ase_sources.mk
-		echo 'SNPS_VLOGAN_OPT+= -assert svaext +incdir+./qsys_files' >> ase_sources.mk
-		echo >> ase_sources.mk
-	fi
-	
-	bash run_sim.sh
+    echo "program: starting ASE simulation because OPENCL_ASE_SIM is 1..."
+    #simulation programming flow(start VCS)
+    if [[ "$1" != "acl0" ]] ; then
+        echo "Not acl0, exiting without launching vcs"
+        exit 0
+    fi
+
+    #uncompress and prepare modelsim files
+    mkdir -p temp_simulation
+    cd temp_simulation
+    tar zxf ../$fpga_bin_path
+    export KDIR=$PWD
+
+    rm -fr ./ase
+    cp -r $ASE_SRC_PATH ./ase
+    cp -rf $AOCL_BOARD_PACKAGE_ROOT/ase/patch/* ./ase
+    cd ase
+
+    mkdir dummy_rtl_dir
+    touch dummy_rtl_dir/dummy_rtl_file.sv
+    mkdir dummy_vhd_dir
+    touch dummy_vhd_dir/dummy_vhd_file.vhd
+
+    set -e
+    #needed because ase now requires afu_platform_config script in the exe
+    #search path
+    if [ "$DCP_OPENCL_ASE_TOOL" == "QUESTA" ]
+    then
+        echo "program: simulation tool is QUESTA"
+        TOOL_ARG="-t QUESTA"
+        if [ -z "$MTI_HOME" ]
+        then
+            if [ -z "$ACDS_DEST_ROOT" ]
+            then
+                ACDS_DEST_ROOT=/tools/acds/18.1/222/linux64
+            fi
+            export MTI_HOME=$ACDS_DEST_ROOT/modelsim_ae/
+        fi
+    else
+        echo "program: simulation tool is VCS"
+        TOOL_ARG="-t VCS"
+    fi
+
+    export PATH=${OPAE_INSTALL_PATH}/bin:${PATH}
+    if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
+    then
+        echo "program: bsp-target is dcp_s10; about to generate ase environment"
+        mkdir s10_json
+        cp -rf $AOCL_BOARD_PACKAGE_ROOT/hardware/dcp_s10/build/opencl_afu.json s10_json/
+        python ./scripts/generate_ase_environment.py -p discrete $TOOL_ARG dummy_rtl_dir dummy_vhd_dir s10_json
+    else
+        echo "program: bsp-target is dcp_a10; about to generate ase environment"
+        python ./scripts/generate_ase_environment.py -p discrete $TOOL_ARG dummy_rtl_dir dummy_vhd_dir
+    fi
+
+    echo >> ase_sources.mk
+    echo "ASE_DISCRETE_EMIF_MODEL=EMIF_MODEL_BASIC" >> ase_sources.mk
+    #echo "ASE_DISCRETE_EMIF_MODEL=EMIF_MODEL_ADVANCED" >> ase_sources.mk
+    echo >> ase_sources.mk
+
+    if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
+    then
+        echo 'SNPS_VLOGAN_OPT?=' >> ase_sources.mk
+        echo 'SNPS_VLOGAN_OPT+= -assert svaext +incdir+./qsys_files' >> ase_sources.mk
+        echo >> ase_sources.mk
+    fi
+
+    echo "program: about to execute run_sim.sh..."
+    bash run_sim.sh
 
 else
-	echo "ERROR: HW configuration is not supported with this script"
-	exit 1
+    echo "ERROR: HW configuration is not supported with this script"
+    exit 1
 fi
 

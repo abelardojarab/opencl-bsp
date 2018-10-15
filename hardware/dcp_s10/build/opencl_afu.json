@@ -7,6 +7,10 @@
       "magic-no": 488605312,
       "interface-uuid": "01234567-89AB-CDEF-0123-456789ABCDEF",
       "power": 0,
+      "afu-top-interface":
+         {
+            "class": "ccip_std_afu_avalon_mm"
+         },
       "accelerator-clusters":
          [
             {

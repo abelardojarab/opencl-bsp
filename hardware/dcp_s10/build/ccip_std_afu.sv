@@ -55,46 +55,6 @@ module ccip_std_afu
   pck_cp2af_error,           // CCI-P Protocol Error Detected
   
   local_mem,
-  //DDR4a_USERCLK,
-  //DDR4a_waitrequest,
-  //DDR4a_readdata,
-  //DDR4a_readdatavalid,
-  //DDR4a_burstcount,
-  //DDR4a_writedata,
-  //DDR4a_address,
-  //DDR4a_write,
-  //DDR4a_read,
-  //DDR4a_byteenable,
-  //DDR4b_USERCLK,
-  //DDR4b_waitrequest,
-  //DDR4b_readdata,
-  //DDR4b_readdatavalid,
-  //DDR4b_burstcount,
-  //DDR4b_writedata,
-  //DDR4b_address,
-  //DDR4b_write,
-  //DDR4b_read,
-  //DDR4b_byteenable,
-  //DDR4c_USERCLK,
-  //DDR4c_waitrequest,
-  //DDR4c_readdata,
-  //DDR4c_readdatavalid,
-  //DDR4c_burstcount,
-  //DDR4c_writedata,
-  //DDR4c_address,
-  //DDR4c_write,
-  //DDR4c_read,
-  //DDR4c_byteenable,
-  //DDR4d_USERCLK,
-  //DDR4d_waitrequest,
-  //DDR4d_readdata,
-  //DDR4d_readdatavalid,
-  //DDR4d_burstcount,
-  //DDR4d_writedata,
-  //DDR4d_address,
-  //DDR4d_write,
-  //DDR4d_read,
-  //DDR4d_byteenable,
 
   // Interface structures
   pck_cp2af_sRx,             // CCI-P Rx Port
@@ -119,49 +79,6 @@ module ccip_std_afu
     end
     
     avalon_mem_if.to_fiu local_mem[NUM_LOCAL_MEM_BANKS];
-    //input   wire                          DDR4a_USERCLK;
-    //input   wire                          DDR4a_waitrequest;
-    //input   wire [511:0]                  DDR4a_readdata;
-    //input   wire                          DDR4a_readdatavalid;
-    //output  wire [6:0]                    DDR4a_burstcount;
-    //output  wire [511:0]                  DDR4a_writedata;
-    //output  wire [`OPENCL_MEMORY_ADDR_WIDTH-1:0]                   DDR4a_address;
-    //output  wire                          DDR4a_write;
-    //output  wire                          DDR4a_read;
-    //output  wire [63:0]                   DDR4a_byteenable;
-    //
-    //input   wire                          DDR4b_USERCLK;
-    //input   wire                          DDR4b_waitrequest;
-    //input   wire [511:0]                  DDR4b_readdata;
-    //input   wire                          DDR4b_readdatavalid;
-    //output  wire [6:0]                    DDR4b_burstcount;
-    //output  wire [511:0]                  DDR4b_writedata;
-    //output  wire [`OPENCL_MEMORY_ADDR_WIDTH-1:0]                   DDR4b_address;
-    //output  wire                          DDR4b_write;
-    //output  wire                          DDR4b_read;
-    //output  wire [63:0]                   DDR4b_byteenable;
-    //
-    //input   wire                          DDR4c_USERCLK;
-    //input   wire                          DDR4c_waitrequest;
-    //input   wire [511:0]                  DDR4c_readdata;
-    //input   wire                          DDR4c_readdatavalid;
-    //output  wire [6:0]                    DDR4c_burstcount;
-    //output  wire [511:0]                  DDR4c_writedata;
-    //output  wire [`OPENCL_MEMORY_ADDR_WIDTH-1:0]                   DDR4c_address;
-    //output  wire                          DDR4c_write;
-    //output  wire                          DDR4c_read;
-    //output  wire [63:0]                   DDR4c_byteenable;
-    //
-    //input   wire                          DDR4d_USERCLK;
-    //input   wire                          DDR4d_waitrequest;
-    //input   wire [511:0]                  DDR4d_readdata;
-    //input   wire                          DDR4d_readdatavalid;
-    //output  wire [6:0]                    DDR4d_burstcount;
-    //output  wire [511:0]                  DDR4d_writedata;
-    //output  wire [`OPENCL_MEMORY_ADDR_WIDTH-1:0]                   DDR4d_address;
-    //output  wire                          DDR4d_write;
-    //output  wire                          DDR4d_read;
-    //output  wire [63:0]                   DDR4d_byteenable;
 
     // Interface structures
     input           t_if_ccip_Rx     pck_cp2af_sRx;           // CCI-P Rx Port
