@@ -11,6 +11,7 @@ else
 	TARGET_BSP="dcp_a10"
 	export DCP_BSP_TARGET="dcp_a10"
 fi
+echo "run_full_vector_add_opencl_sim_test.sh: TARGET_BSP is $TARGET_BSP"
 
 . $SCRIPT_DIR_PATH/bsp_common.sh
 
@@ -20,6 +21,8 @@ setup_arc_for_script $@
 $SCRIPT_DIR_PATH/setup_packages.sh
 python $SCRIPT_DIR_PATH/setup_bsp.py -v
 
+#for now, use the 'example_designs' folder since the 
+#application needs to match the rest of this script
 #if [ "$DCP_BSP_TARGET" == "dcp_s10" ]
 #then
 #	cd $ROOT_PROJECT_PATH/example_designs_s10/vector_add_int
@@ -40,5 +43,5 @@ $SCRIPT_DIR_PATH/../linux64/libexec/program acl0 bin/vector_add_int.aocx
 make
 cp ./bin/vector_add_int .
 cp bin/vector_add_int.aocx .
-./vector_add_int 16
+./vector_add_int 1024
 #ENABLE_DCP_OPENCL_SVM=1 ./bin/vector_add_int 16

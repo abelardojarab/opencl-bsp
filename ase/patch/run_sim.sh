@@ -15,7 +15,9 @@ then
     #hack to work around compilation errors
     cp -rf $AOCL_BOARD_PACKAGE_ROOT/ase/bsp/extra_sim_files/hld_fifo.sv qsys_files/hld_fifo.sv
     cp -rf $AOCL_BOARD_PACKAGE_ROOT/ase/bsp/extra_sim_files/platform_afu_top_config.vh rtl/platform_afu_top_config.vh
-    #dspba_library must be first!
+    cp -rf $AOCL_BOARD_PACKAGE_ROOT/ase/bsp/extra_sim_files/acl_sync.sv qsys_files/acl_sync.sv
+    #dspba_library_package and dspba_library must be first and second, respectively!
+    (find ./qsys_files_vhd | grep -v mpf | grep dspba_library_package) >> ./vhdl_files.list
     (find ./qsys_files_vhd | grep -v mpf | grep dspba_library) >> ./vhdl_files.list
     (find ./qsys_files_vhd | grep -v mpf | grep -v dspba_library) >> ./vhdl_files.list
 else
