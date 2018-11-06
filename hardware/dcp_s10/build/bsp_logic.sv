@@ -352,7 +352,7 @@ module bsp_logic #(
 		.avmm_burstcount(requestor_avmm_wr_burstcount),
 		
 		.c1TxAlmFull(pck_cp2af_sRx.c1TxAlmFull),
-		//.c1rx(pck_cp2af_sRx.c1),	//write response
+		.c1rx(pck_cp2af_sRx.c1),    //write response
 		.c1tx(pck_af2cp_sTx.c1)
 	);
 	
