@@ -82,6 +82,10 @@ echo "kernel_system_qsf_append.txt is cat'd below:"
 cat kernel_system_qsf_append.txt
 echo "end of kernel_system_qsf_append.txt"
 
+#Increase the Fitter's placement effort. Since we copy the qsf file from ADAPT and append to it, we
+#need to search-and-replace the default setting.
+sed -i 's/HIGH PERFORMANCE EFFORT/SUPERIOR PERFORMANCE WITH MAXIMUM PLACEMENT EFFORT/' afu_default.qsf
+
 # compile project
 # =====================
 quartus_sh -t s10_partial_reconfig/flow.tcl -nobasecheck -setup_script s10_partial_reconfig/setup.tcl -impl afu_default
