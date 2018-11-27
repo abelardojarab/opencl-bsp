@@ -64,7 +64,7 @@ LIB_DIRS :=
 # Files
 INCS := $(wildcard )
 SRCS := $(wildcard host/src/*.cpp ../common/src/AOCLUtils/*.cpp)
-LIBS := 
+LIBS := pthread
 
 # Make it all!
 all : $(TARGET_DIR)/$(TARGET)
