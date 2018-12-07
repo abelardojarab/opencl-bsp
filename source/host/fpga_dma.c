@@ -1096,13 +1096,15 @@ static fpga_result _issue_magic(fpga_dma_handle dma_h)
 	res =
 		_do_dma(dma_h, dma_h->magic_iova | FPGA_DMA_WF_HOST_MASK,
 			FPGA_DMA_WF_ROM_MAGIC_NO_MASK, 64, 1, FPGA_TO_HOST_MM,
-			true /*intr_en */);
+			FPGA2HOST_IRQ_REQ /*intr_en */);
 	return res;
 }
 
 static void _wait_magic(fpga_dma_handle dma_h)
 {
-	poll_interrupt(dma_h);
+	#ifndef SKIP_FPGA2HOST_IRQ
+		poll_interrupt(dma_h);
+	#endif
 	while (*(dma_h->magic_buf) != FPGA_DMA_WF_MAGIC_NO);
 	*(dma_h->magic_buf) = 0x0ULL;
 }

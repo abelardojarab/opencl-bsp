@@ -466,23 +466,23 @@ int main(int argc, char *argv[]) {
 
 	}
 
-	if ( test_to_run == 0 || test_to_run == 5) {
-		printf("\n");
-		printf("*****************************************************************\n");
-		printf("*************  Kernel-to-Memory Read Write Test   ***************\n");
-		printf("*****************************************************************\n");
-		printf("\n");
-
-		int r = memRW(platform,devices[d],context,queue[d],program);
-		clFinish(queue[d]);
-		if(r!=0)
-		{
-			printf("Error: kernel-memory read write test failed. \n");
-			freeResources();
-			return 1;
-		}
-		ret |= r;
-	}
+	//if ( test_to_run == 0 || test_to_run == 5) {
+	//	printf("\n");
+	//	printf("*****************************************************************\n");
+	//	printf("*************  Kernel-to-Memory Read Write Test   ***************\n");
+	//	printf("*****************************************************************\n");
+	//	printf("\n");
+    //
+	//	int r = memRW(platform,devices[d],context,queue[d],program);
+	//	clFinish(queue[d]);
+	//	if(r!=0)
+	//	{
+	//		printf("Error: kernel-memory read write test failed. \n");
+	//		freeResources();
+	//		return 1;
+	//	}
+	//	ret |= r;
+	//}
 
 	if ( test_to_run == 0 || test_to_run == 6) {
 		printf("\n");

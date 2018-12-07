@@ -59,6 +59,31 @@ python $SCRIPT_DIR_PATH/setup_bsp.py -v
 	cp ./bin/hello_world .
 	cp bin/hello_world.aocx .
 	#16384 == buffer test size for dma
-	./hello_world 16384
+    # 1  = buffer size
+    BUF_SZ=16384
+    # 2  = num test loops
+    NUM_TEST_LOOPS=1
+    # 3  = do_test_1 (data is all 0x0)
+    DO_TEST_1=1
+    # 4  = do_test_2 (data is incrementing pattern)
+    DO_TEST_2=1
+    # 5  = do_test_3 (data is random)
+    DO_TEST_3=1
+    # 6  = do writes (clEnqueueWriteBuffer)
+    DO_WRITES=1
+    # 7  = do copies (clEnqueueCopyBuffer)
+    DO_COPIES=1
+    # 8  = do reads (clEnqueueReadBuffer)
+    DO_READS=1
+    # 9  = do read-back data compare
+    DO_READ_COMPARE=1
+    # 10 = do small reads
+    DO_SMALL_READS=0
+    # 11 = if small reads, use this size
+    SMALL_RD_SZ=1024
+    # 12 = how many reads to attempt (during wr-only test with read-compare)
+    RD_TST_CNT=5
+
+    ./hello_world $BUF_SZ $NUM_TEST_LOOPS $DO_TEST_1 $DO_TEST_2 $DO_TEST_3 $DO_WRITES $DO_COPIES $DO_READS $DO_READ_COMPARE $DO_SMALL_READS $SMALL_RD_SZ $RD_TST_CNT
 #fi
 

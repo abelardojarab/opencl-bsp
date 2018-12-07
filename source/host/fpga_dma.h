@@ -37,6 +37,15 @@
 
 #include <opae/fpga.h>
 
+//#define DEBUG_MEM 1
+//#define FPGA_DMA_DEBUG 1
+#define SKIP_FPGA2HOST_IRQ 1
+#ifdef SKIP_FPGA2HOST_IRQ
+    #define FPGA2HOST_IRQ_REQ false
+#else
+    #define FPGA2HOST_IRQ_REQ true
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
