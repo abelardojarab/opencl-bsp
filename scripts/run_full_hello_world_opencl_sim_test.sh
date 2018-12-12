@@ -11,12 +11,19 @@ else
 	TARGET_BSP="dcp_a10"
 	export DCP_BSP_TARGET="dcp_a10"
 fi
-echo "run_full_hello_world_opencl_sim_test.sh: TARGET_BSP is $TARGET_BSP"
+
+export OPENCL_ASE_SIM=1
 
 . $SCRIPT_DIR_PATH/bsp_common.sh
 
-export OPENCL_ASE_SIM=1
 setup_arc_for_script $@
+
+echo "For simulations, we are still going to use acl17.1.1 until ASE issues are resolved."
+export ALTERAOCLSDKROOT=/tools/acl/17.1.1/273/linux64
+export INTELFPGAOCLSDKROOT=$ALTERAOCLSDKROOT
+PATH=$PATH:/tools/acl/17.1.1/273/linux64/bin
+
+echo "run_full_hello_world_opencl_sim_test.sh: TARGET_BSP is $TARGET_BSP"
 
 $SCRIPT_DIR_PATH/setup_packages.sh
 python $SCRIPT_DIR_PATH/setup_bsp.py -v

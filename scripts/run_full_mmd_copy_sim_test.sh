@@ -11,12 +11,19 @@ else
 	TARGET_BSP="dcp_a10"
 	export DCP_BSP_TARGET="dcp_a10"
 fi
-echo "run_full_mmd_copy_sim_test.sh: TARGET_BSP is $TARGET_BSP"
+
+export OPENCL_ASE_SIM=1
 
 . $SCRIPT_DIR_PATH/bsp_common.sh
 
-export OPENCL_ASE_SIM=1
 setup_arc_for_script $@
+
+echo "For simulations, we are still going to use acl17.1.1 until ASE issues are resolved."
+export ALTERAOCLSDKROOT=/tools/acl/17.1.1/273/linux64
+export INTELFPGAOCLSDKROOT=$ALTERAOCLSDKROOT
+PATH=$PATH:/tools/acl/17.1.1/273/linux64/bin
+
+echo "run_full_mmd_copy_sim_test.sh: TARGET_BSP is $TARGET_BSP"
 
 $SCRIPT_DIR_PATH/setup_packages.sh
 python $SCRIPT_DIR_PATH/setup_bsp.py -v
@@ -83,7 +90,11 @@ python $SCRIPT_DIR_PATH/setup_bsp.py -v
     SMALL_RD_SZ=1024
     # 12 = how many reads to attempt (during wr-only test with read-compare)
     RD_TST_CNT=5
+    # 13 = debug msg frequency
+    DBG_MSG_FREQ=50
+    # 14 = number of master loop iterations
+    NUM_MASTER_LOOPS=2
 
-    ./hello_world $BUF_SZ $NUM_TEST_LOOPS $DO_TEST_1 $DO_TEST_2 $DO_TEST_3 $DO_WRITES $DO_COPIES $DO_READS $DO_READ_COMPARE $DO_SMALL_READS $SMALL_RD_SZ $RD_TST_CNT
+    ./hello_world $BUF_SZ $NUM_TEST_LOOPS $DO_TEST_1 $DO_TEST_2 $DO_TEST_3 $DO_WRITES $DO_COPIES $DO_READS $DO_READ_COMPARE $DO_SMALL_READS $SMALL_RD_SZ $RD_TST_CNT $DBG_MSG_FREQ $NUM_MASTER_LOOPS
 #fi
 

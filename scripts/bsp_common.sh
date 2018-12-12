@@ -17,7 +17,7 @@ if [ "$OPAE_INSTALL_PATH" == "" ]; then
 	export OPAE_INSTALL_PATH=$OPAE_LOCAL_INST_PATH
 fi
 if [ "$OPAE_GIT_PATH" == "" ]; then
-    echo No OPAE_GIT_PATH defined, fetching from git...
+	echo No OPAE_GIT_PATH defined, fetching from git...
 	if [ "$ARC_SITE" == "" ]; then
 		OPAE_GIT_PATH=/storage/shared/tools/git/opae-sdk-x.git
 	else
@@ -53,8 +53,10 @@ then
 	ACDS_ARC_RESOURCES="acl/17.1.1,acds/swip_apps/avl_vm/acds_patched/17.1.1/acds,qedition/pro,adapt"
 elif [ "$DCP_BSP_TARGET" == "dcp_s10" ] || [ "$DCP_BSP_TARGET" == "pac_s10_dc" ]
 then
-	export ACL_ACDS_VERSION_OVERRIDE=18.1.0
-	ACDS_ARC_RESOURCES="acl/17.1.1,acds/18.1/222,qedition/pro,adapt"
+	ACDS_ARC_RESOURCES="acds/18.1/222,qedition/pro,adapt"
+	if [ "$OPENCL_ASE_SIM" == "0" ]; then
+		echo "For S10, we are using locally-patched version of acl in /data/dgroen/aocl_181_patch until we get a global resource of ACL 18.1 with the 0.16cl"
+	fi
 else
 	unset ACL_ACDS_VERSION_OVERRIDE
 	ACDS_ARC_RESOURCES="acl/17.1.1,acds/swip_apps/avl_vm/acds_patched/17.1.1/acds,qedition/pro,adapt"

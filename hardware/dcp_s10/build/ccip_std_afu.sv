@@ -169,14 +169,13 @@ module ccip_std_afu
         pck_cp2af_sRx_q <= pck_cp2af_sRx;
     end
 
-    wire   pck_cp2af_softReset_q2;   
-    wire   afu_clk;   
-    
+    wire   afu_clk;
+
     //split c0rx into host and mmio
     assign afu_clk = pClk ;
     t_if_ccip_Rx pck_cp2af_mmio_sRx;
     t_if_ccip_Rx pck_cp2af_host_sRx;
-    
+
     always_comb
     begin
         pck_cp2af_mmio_sRx = pck_cp2af_sRx_q;

@@ -33,7 +33,7 @@ using namespace aocl_utils;
 static const size_t V = 16;
 static size_t vectorSize = 1024*1024*4*16;
 
-static int num_master_loops = 100;
+static int num_master_loops = 1;
 
 static bool use_svm = false;
 
@@ -224,11 +224,12 @@ int main(int argc, char *argv[]) {
   for(int i=1;i<argc;i++) {
           printf("mem_bandwidth|main: argv[%d] is %s\n",i,argv[i]);
   }
-  if ( argc >= 2 ) /* argc should be  >2 for correct execution */
+  if ( argc >= 3 ) /* argc should be  >= 3 for correct execution */
   {
       vectorSize = atoi(argv[1])*V;
       lines = atoi(argv[1]);
-  }    
+      num_master_loops = atoi(argv[2]);
+  }
     
   if(lines == 0 || lines > 8000000) {
     fprintf(stderr, "Invalid Number of cachelines.\n");
